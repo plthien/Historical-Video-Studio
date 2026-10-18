@@ -111,6 +111,11 @@ def validate_timeline(data: dict[str, Any], word_map: dict[str, Any], approved_a
             if lay.get("asset_id") and lay["asset_id"] not in scene["asset_ids"]:
                 raise ContractError("ASSET_BINDING_STALE", lay["layer_id"], "Layer source not in scene asset bindings.")
         for e in scene["events"]:
+            if e["preset_id"] == "route-line-draw" and not any(lay["layer_id"] == e["layer_id"] and lay["layer_kind"] == "route" for lay in scene["layers"]):
+                raise ContractError("INVALID_PRESET", e["event_id"], "Route line draw requires a route layer.")
+            if ("scale" in e.get("params", {}) and
+                    (not isinstance(e["params"]["scale"], (float, int)) or not 0.75 <= e["params"]["scale"] <= 1.3)):
+                raise ContractError("INVALID_PRESET", e["event_id"], "Scale parameter exceeds conservative document bounds.")
             if e["layer_id"] not in layers:
                 raise ContractError("LAYER_REF_MISSING", e["event_id"], "Refer to an existing scene layer.")
             if e.get("cue_word_id") and e["cue_word_id"] not in word_ids:
@@ -127,6 +132,21 @@ def validate_gate_approval(gate_id: str, state: str, reviewed_sha: str, candidat
     if reviewed_sha != candidate_sha or expected_revision != actual_revision:
         raise ContractError("APPROVAL_REVISION_CONFLICT", gate_id, "Refresh exact candidate before approval.")
 
+
+
+def validate_archival_candidate_for_g3(asset: dict[str, Any]) -> None:
+    """G3 checks additional to shape validation; no automated legal certification."""
+    validate_schema("HistoricalAsset.v1", asset)
+    if asset["origin"] == "glabs_webhook" and asset["asset_class"] != "AI_ILLUSTRATION":
+        raise ContractError("ASSET_CLASS_MISREPRESENTED", asset["asset_id"], "G-Labs output must remain AI_ILLUSTRATION.")
+    if not asset["user_approved"]:
+        raise ContractError("ASSET_UNAPPROVED", asset["asset_id"], "Human candidate review required.")
+    if asset["rights_status"] != "ELIGIBLE" or asset["provenance_status"] != "REVIEWED":
+        raise ContractError("RIGHTS_REVIEW_REQUIRED", asset["asset_id"], "Review rights and provenance before G3.")
+    if asset["asset_class"] == "HISTORICAL_MAP":
+        a, b = asset.get("period_start_year"), asset.get("period_end_year")
+        if a is None or b is None or a > b:
+            raise ContractError("MAP_PERIOD_MISMATCH", asset["asset_id"], "Provide supported, reviewed date span for this map.")
 
 def check_all() -> list[str]:
     completed = []

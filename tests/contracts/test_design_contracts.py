@@ -95,5 +95,34 @@ class DesignContractTests(unittest.TestCase):
         validate_gate_approval("G1", "READY_FOR_REVIEW", "abc", "abc", 4, 4, True)
 
 
+    def test_glabs_ai_must_not_be_labeled_archival(self):
+        from check_design_contracts import validate_archival_candidate_for_g3
+        asset = load_example("HistoricalAsset.v1")
+        asset.update(origin="glabs_webhook", asset_class="ARCHIVAL_PHOTO", user_approved=True, rights_status="ELIGIBLE")
+        with self.assertRaisesRegex(ContractError, "ASSET_CLASS_MISREPRESENTED"):
+            validate_archival_candidate_for_g3(asset)
+
+    def test_archival_candidate_cannot_approve_without_rights(self):
+        from check_design_contracts import validate_archival_candidate_for_g3
+        asset = load_example("HistoricalAsset.v1")
+        asset["user_approved"] = True
+        with self.assertRaisesRegex(ContractError, "RIGHTS_REVIEW_REQUIRED"):
+            validate_archival_candidate_for_g3(asset)
+
+    def test_approved_historical_map_needs_period(self):
+        from check_design_contracts import validate_archival_candidate_for_g3
+        asset = load_example("HistoricalAsset.v1")
+        asset.update(user_approved=True, rights_status="ELIGIBLE", provenance_status="REVIEWED")
+        del asset["period_start_year"]
+        with self.assertRaisesRegex(ContractError, "MAP_PERIOD_MISMATCH"):
+            validate_archival_candidate_for_g3(asset)
+
+    def test_motion_preset_layer_compatibility(self):
+        timeline, words = load_example("CompiledTimeline.v1"), load_example("WordTimingMap.v1")
+        timeline["scenes"][0]["events"][0]["preset_id"] = "route-line-draw"
+        with self.assertRaisesRegex(ContractError, "INVALID_PRESET"):
+            validate_timeline(timeline, words, {"asset_001"})
+
+
 if __name__ == "__main__":
     unittest.main()

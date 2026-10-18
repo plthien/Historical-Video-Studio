@@ -112,7 +112,7 @@ Compiler emits validated CompiledTimeline with canonical order, fps 30, 1920x108
 ## 10. Service API outline and error taxonomy
 All paths are **proposed V1 local API**, not already implemented. Root /api/v1, defined in 04_DATA_CONTRACTS_AND_GATES and contracts/openapi.yaml.
 - POST /projects; POST /projects/{id}/story/import; GET /projects/{id}/gates; POST /projects/{id}/gates/{gate}/decision.
-- POST /projects/{id}/voice/generate; POST /projects/{id}/voice/approve; GET /projects/{id}/voice/attempts.
+- POST /projects/{id}/voice/generate; GET /projects/{id}/voice/attempts; G2 approval uses only POST /projects/{id}/gates/G2/decision (auto assembly+alignment).
 - POST /projects/{id}/assets/discover; POST /projects/{id}/assets/{req}/resolve; POST /projects/{id}/assets/{req}/upload; POST /projects/{id}/assets/{req}/approve.
 - POST /projects/{id}/storyboard/compile; POST /projects/{id}/storyboard/revisions; POST /projects/{id}/render-jobs; GET /jobs/{job}; POST /jobs/{job}/cancel.
 Use a shared problem response: error_code, message, entity_id, blocking_gate, remediation, retryable. Distinguish HTTP 409 revision conflict / gate illegal transition, 422 schema+cross-ref invalid, 424 upstream dependency stale, 429 provider quota, 503 provider unavailable; never return success when result is not persisted.

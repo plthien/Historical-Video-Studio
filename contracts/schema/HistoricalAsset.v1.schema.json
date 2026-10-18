@@ -106,6 +106,29 @@
         "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
       },
       "minItems": 0
+    },
+    "period_start_year": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": -10000,
+      "maximum": 3000
+    },
+    "period_end_year": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": -10000,
+      "maximum": 3000
+    },
+    "map_geometry_source_url": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "uri"
     }
   },
   "required": [

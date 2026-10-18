@@ -91,7 +91,7 @@ components:
         rights_reviewed: {type: boolean}
         note: {type: string}
     StoryPackage:
-      $ref: ../contracts/schema/StoryPackage.v1.schema.json
+      $ref: ./schema/StoryPackage.v1.schema.json
   parameters:
     ProjectId:
       name: project_id

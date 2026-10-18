@@ -15,5 +15,8 @@
   "provenance_status": "REVIEWED",
   "rights_status": "REVIEW_REQUIRED",
   "user_approved": false,
-  "variant_ids": []
+  "variant_ids": [],
+  "period_start_year": 1871,
+  "period_end_year": 1871,
+  "map_geometry_source_url": "https://example.org/fixture-map"
 }
