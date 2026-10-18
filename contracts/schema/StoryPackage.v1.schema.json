@@ -1,0 +1,297 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://historical-video-studio.local/contracts/StoryPackage.v1.schema.json",
+  "title": "StoryPackage.v1",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "StoryPackage.v1"
+    },
+    "project": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "project_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1
+        },
+        "language": {
+          "const": "en"
+        },
+        "style_id": {
+          "const": "HistoryEditorialPaper.v1"
+        }
+      },
+      "required": [
+        "project_id",
+        "title",
+        "language",
+        "style_id"
+      ]
+    },
+    "sections": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "section_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+          },
+          "narration": {
+            "type": "string",
+            "minLength": 10
+          },
+          "claim_refs": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+            },
+            "minItems": 0
+          },
+          "asset_requirement_refs": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+            },
+            "minItems": 0
+          }
+        },
+        "required": [
+          "section_id",
+          "narration",
+          "claim_refs",
+          "asset_requirement_refs"
+        ]
+      },
+      "minItems": 1
+    },
+    "claims": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "claim_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+          },
+          "text": {
+            "type": "string",
+            "minLength": 1
+          },
+          "source_leads": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "url": {
+                  "type": "string",
+                  "format": "uri",
+                  "pattern": "^https?://"
+                },
+                "title": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "url"
+              ]
+            },
+            "minItems": 0
+          },
+          "critical": {
+            "type": "boolean"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "UNVERIFIED",
+              "REVIEWED",
+              "VERIFIED"
+            ]
+          }
+        },
+        "required": [
+          "claim_id",
+          "text",
+          "source_leads",
+          "critical",
+          "status"
+        ]
+      },
+      "minItems": 0
+    },
+    "asset_requirements": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "requirement_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+          },
+          "subject": {
+            "type": "string",
+            "minLength": 1
+          },
+          "asset_class": {
+            "type": "string",
+            "enum": [
+              "ARCHIVAL_PHOTO",
+              "HISTORICAL_DOCUMENT",
+              "HISTORICAL_ARTWORK",
+              "HISTORICAL_MAP",
+              "MODERN_RECONSTRUCTION",
+              "AI_ILLUSTRATION"
+            ]
+          },
+          "exactness": {
+            "type": "string",
+            "enum": [
+              "event_exact",
+              "subject_exact",
+              "context_related",
+              "illustrative"
+            ]
+          },
+          "required": {
+            "type": "boolean"
+          },
+          "start_year": {
+            "type": "integer"
+          },
+          "end_year": {
+            "type": "integer"
+          },
+          "source_leads": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "url": {
+                  "type": "string",
+                  "format": "uri",
+                  "pattern": "^https?://"
+                },
+                "title": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "url"
+              ]
+            },
+            "minItems": 0
+          }
+        },
+        "required": [
+          "requirement_id",
+          "subject",
+          "asset_class",
+          "exactness",
+          "required",
+          "start_year",
+          "end_year"
+        ]
+      },
+      "minItems": 0
+    },
+    "visual_setups": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "setup_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+          },
+          "section_refs": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+            },
+            "minItems": 1
+          },
+          "intent": {
+            "type": "string",
+            "enum": [
+              "geography",
+              "person",
+              "evidence",
+              "route",
+              "chronology",
+              "number",
+              "quote",
+              "consequence"
+            ]
+          },
+          "preferred_template": {
+            "type": "string",
+            "enum": [
+              "T01",
+              "T02",
+              "T03",
+              "T04",
+              "T05",
+              "T06",
+              "T07",
+              "T08",
+              "T09",
+              "T10"
+            ]
+          },
+          "requirement_refs": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+            },
+            "minItems": 0
+          },
+          "claim_refs": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+            },
+            "minItems": 0
+          }
+        },
+        "required": [
+          "setup_id",
+          "section_refs",
+          "intent",
+          "requirement_refs",
+          "claim_refs"
+        ]
+      },
+      "minItems": 1
+    },
+    "authoring_source": {
+      "const": "external_chatgpt"
+    }
+  },
+  "required": [
+    "schema_version",
+    "project",
+    "sections",
+    "claims",
+    "asset_requirements",
+    "visual_setups",
+    "authoring_source"
+  ]
+}

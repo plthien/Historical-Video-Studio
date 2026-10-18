@@ -1,0 +1,116 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://historical-video-studio.local/contracts/VisualBlueprint.v1.schema.json",
+  "title": "VisualBlueprint.v1",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "VisualBlueprint.v1"
+    },
+    "project_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+    },
+    "story_revision_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "setup_plans": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "setup_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+          },
+          "template_id": {
+            "type": "string",
+            "enum": [
+              "T01",
+              "T02",
+              "T03",
+              "T04",
+              "T05",
+              "T06",
+              "T07",
+              "T08",
+              "T09",
+              "T10"
+            ]
+          },
+          "variant_id": {
+            "type": "string",
+            "enum": [
+              "A",
+              "B",
+              "C"
+            ]
+          },
+          "section_refs": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+            },
+            "minItems": 1
+          },
+          "claim_refs": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+            },
+            "minItems": 0
+          },
+          "requirement_refs": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+            },
+            "minItems": 0
+          },
+          "layer_roles": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "map",
+                "territory",
+                "route",
+                "portrait",
+                "archival_photo",
+                "document",
+                "headline",
+                "date",
+                "text",
+                "callout",
+                "camera",
+                "decorative_paper"
+              ]
+            },
+            "minItems": 1
+          }
+        },
+        "required": [
+          "setup_id",
+          "template_id",
+          "variant_id",
+          "section_refs",
+          "requirement_refs",
+          "layer_roles"
+        ]
+      },
+      "minItems": 1
+    }
+  },
+  "required": [
+    "schema_version",
+    "project_id",
+    "story_revision_sha256",
+    "setup_plans"
+  ]
+}

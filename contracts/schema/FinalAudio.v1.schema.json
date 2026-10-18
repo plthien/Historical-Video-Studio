@@ -1,0 +1,94 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://historical-video-studio.local/contracts/FinalAudio.v1.schema.json",
+  "title": "FinalAudio.v1",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "FinalAudio.v1"
+    },
+    "project_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+    },
+    "story_revision_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "selected_attempt_ids": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+      },
+      "minItems": 1
+    },
+    "audio_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "transcript_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "sample_rate": {
+      "type": "integer",
+      "enum": [
+        24000,
+        44100,
+        48000
+      ]
+    },
+    "channels": {
+      "type": "integer",
+      "enum": [
+        1,
+        2
+      ]
+    },
+    "duration_samples": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "section_offsets": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "section_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+          },
+          "start_sample": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "end_sample": {
+            "type": "integer",
+            "minimum": 1
+          }
+        },
+        "required": [
+          "section_id",
+          "start_sample",
+          "end_sample"
+        ]
+      },
+      "minItems": 1
+    }
+  },
+  "required": [
+    "schema_version",
+    "project_id",
+    "story_revision_sha256",
+    "selected_attempt_ids",
+    "audio_sha256",
+    "transcript_sha256",
+    "sample_rate",
+    "channels",
+    "duration_samples",
+    "section_offsets"
+  ]
+}
