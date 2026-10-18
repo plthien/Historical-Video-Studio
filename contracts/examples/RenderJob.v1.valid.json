@@ -1,0 +1,14 @@
+{
+  "schema_version": "RenderJob.v1",
+  "render_job_id": "render_001",
+  "project_id": "proj_001",
+  "timeline_sha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+  "audio_sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+  "renderer_version": "remotion-pinned-version",
+  "state": "QUEUED",
+  "output_sha256": null,
+  "qc_status": "NOT_RUN",
+  "attribution_manifest_sha256": null,
+  "retry_count": 0,
+  "error_code": null
+}

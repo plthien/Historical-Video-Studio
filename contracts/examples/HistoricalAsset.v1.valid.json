@@ -1,0 +1,19 @@
+{
+  "schema_version": "HistoricalAsset.v1",
+  "asset_id": "asset_001",
+  "asset_class": "HISTORICAL_MAP",
+  "original_sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+  "origin": "wikimedia_commons",
+  "source_item_url": "https://example.org/fixture-map",
+  "title": "Fixture image (not an actual sourced map)",
+  "creator": null,
+  "creation_date": null,
+  "rights_statement": "TEST FIXTURE — NOT LICENSE EVIDENCE",
+  "license_url": null,
+  "rights_evidence_note": "This object is only used to test schema parsing.",
+  "historical_context_note": "Historical accuracy not established by fixture.",
+  "provenance_status": "REVIEWED",
+  "rights_status": "REVIEW_REQUIRED",
+  "user_approved": false,
+  "variant_ids": []
+}

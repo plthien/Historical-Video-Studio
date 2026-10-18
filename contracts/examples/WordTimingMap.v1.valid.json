@@ -1,0 +1,27 @@
+{
+  "schema_version": "WordTimingMap.v1",
+  "project_id": "proj_001",
+  "provider_id": "elevenlabs_forced_alignment",
+  "audio_sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+  "transcript_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+  "sample_rate": 48000,
+  "words": [
+    {
+      "word_id": "word_001",
+      "section_id": "sec_001",
+      "text": "In",
+      "start_sample": 0,
+      "end_sample": 14400,
+      "loss": 0.1
+    },
+    {
+      "word_id": "word_002",
+      "section_id": "sec_001",
+      "text": "1871,",
+      "start_sample": 16800,
+      "end_sample": 46080,
+      "loss": 0.1
+    }
+  ],
+  "anomalies": []
+}

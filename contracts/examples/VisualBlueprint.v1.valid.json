@@ -1,0 +1,25 @@
+{
+  "schema_version": "VisualBlueprint.v1",
+  "project_id": "proj_001",
+  "story_revision_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "setup_plans": [
+    {
+      "setup_id": "setup_001",
+      "template_id": "T01",
+      "variant_id": "A",
+      "section_refs": [
+        "sec_001"
+      ],
+      "claim_refs": [
+        "claim_001"
+      ],
+      "requirement_refs": [
+        "req_001"
+      ],
+      "layer_roles": [
+        "map",
+        "headline"
+      ]
+    }
+  ]
+}

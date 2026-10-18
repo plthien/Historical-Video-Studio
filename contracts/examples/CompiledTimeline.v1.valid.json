@@ -1,0 +1,59 @@
+{
+  "schema_version": "CompiledTimeline.v1",
+  "project_id": "proj_001",
+  "fps": 30,
+  "width": 1920,
+  "height": 1080,
+  "total_frames": 150,
+  "style_version": "HistoryEditorialPaper.v1",
+  "template_registry_version": "templates.v1",
+  "motion_registry_version": "presets.v1",
+  "story_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "audio_sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+  "word_map_sha256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+  "asset_snapshot_sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+  "dependency_fingerprint": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+  "scenes": [
+    {
+      "scene_id": "scene_001",
+      "setup_id": "setup_001",
+      "template_id": "T01",
+      "variant_id": "A",
+      "start_frame": 0,
+      "duration_frames": 150,
+      "asset_ids": [
+        "asset_001"
+      ],
+      "layers": [
+        {
+          "layer_id": "layer_001",
+          "layer_kind": "map",
+          "asset_id": "asset_001",
+          "text": null,
+          "source_claim_id": null
+        },
+        {
+          "layer_id": "layer_002",
+          "layer_kind": "headline",
+          "asset_id": null,
+          "text": "1871",
+          "source_claim_id": "claim_001"
+        }
+      ],
+      "events": [
+        {
+          "event_id": "evt_001",
+          "layer_id": "layer_002",
+          "preset_id": "title-mask-reveal",
+          "start_frame": 15,
+          "duration_frames": 18,
+          "cue_word_id": "word_002",
+          "params": {
+            "direction": "up",
+            "distance_px": 30
+          }
+        }
+      ]
+    }
+  ]
+}

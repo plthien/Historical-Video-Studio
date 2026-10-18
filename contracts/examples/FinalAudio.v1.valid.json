@@ -1,0 +1,20 @@
+{
+  "schema_version": "FinalAudio.v1",
+  "project_id": "proj_001",
+  "story_revision_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "selected_attempt_ids": [
+    "attempt_001"
+  ],
+  "audio_sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+  "transcript_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+  "sample_rate": 48000,
+  "channels": 1,
+  "duration_samples": 240000,
+  "section_offsets": [
+    {
+      "section_id": "sec_001",
+      "start_sample": 0,
+      "end_sample": 240000
+    }
+  ]
+}

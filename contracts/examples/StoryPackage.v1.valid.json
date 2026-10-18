@@ -1,0 +1,64 @@
+{
+  "schema_version": "StoryPackage.v1",
+  "project": {
+    "project_id": "proj_001",
+    "title": "Fixture: German history",
+    "language": "en",
+    "style_id": "HistoryEditorialPaper.v1"
+  },
+  "sections": [
+    {
+      "section_id": "sec_001",
+      "narration": "In 1871, the German Empire was proclaimed.",
+      "claim_refs": [
+        "claim_001"
+      ],
+      "asset_requirement_refs": [
+        "req_001"
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_id": "claim_001",
+      "text": "Fixture claim. Source verification is pending.",
+      "source_leads": [
+        {
+          "url": "https://example.org/fixture-record",
+          "title": "Non-authoritative fixture URL"
+        }
+      ],
+      "critical": false,
+      "status": "UNVERIFIED"
+    }
+  ],
+  "asset_requirements": [
+    {
+      "requirement_id": "req_001",
+      "subject": "Period map for 1871 Germany",
+      "asset_class": "HISTORICAL_MAP",
+      "exactness": "subject_exact",
+      "required": true,
+      "start_year": 1871,
+      "end_year": 1871,
+      "source_leads": []
+    }
+  ],
+  "visual_setups": [
+    {
+      "setup_id": "setup_001",
+      "section_refs": [
+        "sec_001"
+      ],
+      "intent": "geography",
+      "preferred_template": "T01",
+      "requirement_refs": [
+        "req_001"
+      ],
+      "claim_refs": [
+        "claim_001"
+      ]
+    }
+  ],
+  "authoring_source": "external_chatgpt"
+}

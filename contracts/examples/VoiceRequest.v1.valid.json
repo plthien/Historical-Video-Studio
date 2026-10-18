@@ -1,0 +1,16 @@
+{
+  "schema_version": "VoiceRequest.v1",
+  "project_id": "proj_001",
+  "story_revision_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "provider_id": "kokoro_local",
+  "language": "en",
+  "voice_id": "af_sky",
+  "sections": [
+    {
+      "section_id": "sec_001",
+      "text_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "text": "In 1871, the German Empire was proclaimed.",
+      "speed": 1
+    }
+  ]
+}

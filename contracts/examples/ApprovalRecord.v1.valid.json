@@ -1,0 +1,16 @@
+{
+  "schema_version": "ApprovalRecord.v1",
+  "approval_id": "approval_001",
+  "project_id": "proj_001",
+  "gate_id": "G1",
+  "decision": "APPROVED",
+  "candidate_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "dependency_fingerprint": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+  "expected_revision": 1,
+  "approved_by": "local_operator",
+  "approved_at": "2026-10-19T00:00:00+07:00",
+  "comment": "Schema fixture only; not a real human decision",
+  "affected_ids": [
+    "sec_001"
+  ]
+}

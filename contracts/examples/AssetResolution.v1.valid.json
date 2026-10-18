@@ -1,0 +1,13 @@
+{
+  "schema_version": "AssetResolution.v1",
+  "project_id": "proj_001",
+  "requirement_id": "req_001",
+  "status": "ARCHIVE_ASSET_UNRESOLVED",
+  "resolution_mode": "NONE",
+  "operator_authorized": false,
+  "candidate_asset_ids": [],
+  "approved_asset_id": null,
+  "approved_candidate_sha256": null,
+  "approval_record_id": null,
+  "reason": "No exact archival asset available"
+}
