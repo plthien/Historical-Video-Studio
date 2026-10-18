@@ -70,7 +70,7 @@ class DesignIntegrityTests(unittest.TestCase):
         for gate in ("G1", "G2", "G3", "G4", "G5"):
             self.assertIn(gate, a)
         self.assertIn("alignment", a.lower())
-        self.assertIn("G2 and G3", (DOCUMENTS / "02_SYSTEM_ARCHITECTURE.md").read_text(encoding="utf-8"))
+        self.assertIn("G2-aligned + G3-approved", (DOCUMENTS / "02_SYSTEM_ARCHITECTURE.md").read_text(encoding="utf-8"))
 
 
 if __name__ == "__main__":
