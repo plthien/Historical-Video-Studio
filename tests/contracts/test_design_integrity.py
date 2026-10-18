@@ -59,11 +59,18 @@ class DesignIntegrityTests(unittest.TestCase):
         self.assertIn("/projects/{project_id}/gates/{gate_id}/decision", data["paths"])
         self.assertIn("/projects/{project_id}/assets/{requirement_id}/resolve", data["paths"])
         self.assertIn("/jobs/{job_id}/cancel", data["paths"])
-        ref_matches = re.findall(r"\$ref:\s*([^\n]+)", api.read_text(encoding="utf-8"))
-        for ref in ref_matches:
-            ref = ref.strip().strip("'").strip('"')
-            if not ref.startswith("#/"):
-                self.assertTrue((api.parent / ref).resolve().exists(), ref)
+        def walk(value):
+            if isinstance(value, dict):
+                if "$ref" in value:
+                    ref = value["$ref"]
+                    if not ref.startswith("#/"):
+                        self.assertTrue((api.parent / ref).resolve().exists(), ref)
+                for child in value.values():
+                    walk(child)
+            elif isinstance(value, list):
+                for child in value:
+                    walk(child)
+        walk(data)
 
     def test_no_extra_human_gate_in_spec(self):
         a = (DOCUMENTS / "01_PRODUCT_SPEC.md").read_text(encoding="utf-8")
