@@ -71,12 +71,12 @@ def validate_word_map(data: dict[str, Any], final_audio: dict[str, Any]) -> None
             data["transcript_sha256"] != final_audio["transcript_sha256"] or
             data["sample_rate"] != final_audio["sample_rate"]):
         raise ContractError("WORD_MAP_STALE", "audio_sha256", "Re-run ElevenLabs alignment on approved final WAV.")
-    last_start = -1
+    last_end = -1
     for word in data["words"]:
         begin, end = word["start_sample"], word["end_sample"]
-        if begin < last_start or not (0 <= begin < end <= final_audio["duration_samples"]):
+        if begin < last_end or not (0 <= begin < end <= final_audio["duration_samples"]):
             raise ContractError("WORD_RANGE_INVALID", word["word_id"], "Correct alignment / re-align exact audio.")
-        last_start = begin
+        last_end = end
 
 
 def validate_asset_resolution(data: dict[str, Any]) -> None:
