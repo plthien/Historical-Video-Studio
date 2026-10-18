@@ -1,0 +1,271 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://historical-video-studio.local/contracts/CompiledTimeline.v1.schema.json",
+  "title": "CompiledTimeline.v1",
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "const": "CompiledTimeline.v1"
+    },
+    "project_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+    },
+    "fps": {
+      "const": 30
+    },
+    "width": {
+      "const": 1920
+    },
+    "height": {
+      "const": 1080
+    },
+    "total_frames": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "style_version": {
+      "const": "HistoryEditorialPaper.v1"
+    },
+    "template_registry_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "motion_registry_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "story_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "audio_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "word_map_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "asset_snapshot_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "dependency_fingerprint": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "scenes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "scene_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+          },
+          "setup_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+          },
+          "template_id": {
+            "type": "string",
+            "enum": [
+              "T01",
+              "T02",
+              "T03",
+              "T04",
+              "T05",
+              "T06",
+              "T07",
+              "T08",
+              "T09",
+              "T10"
+            ]
+          },
+          "variant_id": {
+            "type": "string",
+            "enum": [
+              "A",
+              "B",
+              "C"
+            ]
+          },
+          "start_frame": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "duration_frames": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "asset_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+            },
+            "minItems": 0
+          },
+          "layers": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "layer_id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+                },
+                "layer_kind": {
+                  "type": "string",
+                  "enum": [
+                    "map",
+                    "territory",
+                    "route",
+                    "portrait",
+                    "archival_photo",
+                    "document",
+                    "headline",
+                    "date",
+                    "text",
+                    "callout",
+                    "camera",
+                    "decorative_paper"
+                  ]
+                },
+                "asset_id": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "text": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "source_claim_id": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
+              },
+              "required": [
+                "layer_id",
+                "layer_kind"
+              ],
+              "additionalProperties": false
+            },
+            "minItems": 1
+          },
+          "events": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "event_id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+                },
+                "layer_id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+                },
+                "preset_id": {
+                  "type": "string",
+                  "enum": [
+                    "pop-in",
+                    "stagger-reveal",
+                    "route-line-draw",
+                    "title-mask-reveal",
+                    "typewriter",
+                    "number-count",
+                    "kinetic-type",
+                    "parallax-layers",
+                    "mask-transition",
+                    "camera-pan",
+                    "camera-push",
+                    "freeze-hold",
+                    "whip-pan",
+                    "cross-dissolve",
+                    "hard-cut",
+                    "text-highlight",
+                    "map-region-wipe",
+                    "photo-card-enter"
+                  ]
+                },
+                "start_frame": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "duration_frames": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "cue_word_id": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "params": {
+                  "type": "object",
+                  "maxProperties": 12,
+                  "additionalProperties": {
+                    "type": [
+                      "string",
+                      "number",
+                      "boolean"
+                    ]
+                  }
+                }
+              },
+              "required": [
+                "event_id",
+                "layer_id",
+                "preset_id",
+                "start_frame",
+                "duration_frames"
+              ],
+              "additionalProperties": false
+            },
+            "minItems": 0
+          }
+        },
+        "required": [
+          "scene_id",
+          "setup_id",
+          "template_id",
+          "variant_id",
+          "start_frame",
+          "duration_frames",
+          "asset_ids",
+          "layers",
+          "events"
+        ],
+        "additionalProperties": false
+      },
+      "minItems": 1
+    }
+  },
+  "required": [
+    "schema_version",
+    "project_id",
+    "fps",
+    "width",
+    "height",
+    "total_frames",
+    "style_version",
+    "template_registry_version",
+    "motion_registry_version",
+    "story_sha256",
+    "audio_sha256",
+    "word_map_sha256",
+    "asset_snapshot_sha256",
+    "dependency_fingerprint",
+    "scenes"
+  ],
+  "additionalProperties": false
+}

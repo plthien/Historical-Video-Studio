@@ -1,0 +1,88 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://historical-video-studio.local/contracts/AssetResolution.v1.schema.json",
+  "title": "AssetResolution.v1",
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "const": "AssetResolution.v1"
+    },
+    "project_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+    },
+    "requirement_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "ARCHIVE_ASSET_UNRESOLVED",
+        "MANUAL_SELECTED",
+        "MANAGED_FALLBACK_AUTHORIZED",
+        "CANDIDATES_READY",
+        "APPROVED",
+        "REJECTED"
+      ]
+    },
+    "resolution_mode": {
+      "type": "string",
+      "enum": [
+        "NONE",
+        "MANUAL_UPLOAD",
+        "MANAGED_FALLBACK"
+      ]
+    },
+    "operator_authorized": {
+      "type": "boolean"
+    },
+    "candidate_asset_ids": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+      },
+      "minItems": 0
+    },
+    "approved_asset_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "approved_candidate_sha256": {
+      "anyOf": [
+        {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "approval_record_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "reason": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "schema_version",
+    "project_id",
+    "requirement_id",
+    "status",
+    "resolution_mode",
+    "operator_authorized",
+    "candidate_asset_ids",
+    "approved_asset_id",
+    "approved_candidate_sha256",
+    "approval_record_id"
+  ],
+  "additionalProperties": false
+}

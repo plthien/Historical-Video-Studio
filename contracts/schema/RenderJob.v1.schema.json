@@ -1,0 +1,98 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://historical-video-studio.local/contracts/RenderJob.v1.schema.json",
+  "title": "RenderJob.v1",
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "const": "RenderJob.v1"
+    },
+    "render_job_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+    },
+    "project_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+    },
+    "timeline_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "audio_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "renderer_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "state": {
+      "type": "string",
+      "enum": [
+        "QUEUED",
+        "RUNNING",
+        "SUCCEEDED",
+        "FAILED_RETRYABLE",
+        "FAILED_TERMINAL",
+        "CANCELLED",
+        "BLOCKED_REVIEW"
+      ]
+    },
+    "output_sha256": {
+      "anyOf": [
+        {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "qc_status": {
+      "type": "string",
+      "enum": [
+        "NOT_RUN",
+        "PASS",
+        "WARN",
+        "FAIL"
+      ]
+    },
+    "attribution_manifest_sha256": {
+      "anyOf": [
+        {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "retry_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "error_code": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  },
+  "required": [
+    "schema_version",
+    "render_job_id",
+    "project_id",
+    "timeline_sha256",
+    "audio_sha256",
+    "renderer_version",
+    "state",
+    "output_sha256",
+    "qc_status",
+    "attribution_manifest_sha256",
+    "retry_count"
+  ],
+  "additionalProperties": false
+}

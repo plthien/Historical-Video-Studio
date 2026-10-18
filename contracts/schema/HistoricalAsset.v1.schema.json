@@ -1,0 +1,128 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://historical-video-studio.local/contracts/HistoricalAsset.v1.schema.json",
+  "title": "HistoricalAsset.v1",
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "const": "HistoricalAsset.v1"
+    },
+    "asset_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+    },
+    "asset_class": {
+      "type": "string",
+      "enum": [
+        "ARCHIVAL_PHOTO",
+        "HISTORICAL_DOCUMENT",
+        "HISTORICAL_ARTWORK",
+        "HISTORICAL_MAP",
+        "MODERN_RECONSTRUCTION",
+        "AI_ILLUSTRATION",
+        "USER_SUPPLIED"
+      ]
+    },
+    "original_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "origin": {
+      "type": "string",
+      "enum": [
+        "wikimedia_commons",
+        "loc",
+        "europeana",
+        "manual_upload",
+        "glabs_webhook"
+      ]
+    },
+    "source_item_url": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "uri"
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1
+    },
+    "creator": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "creation_date": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "rights_statement": {
+      "type": "string",
+      "minLength": 1
+    },
+    "license_url": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "uri"
+    },
+    "rights_evidence_note": {
+      "type": "string",
+      "minLength": 1
+    },
+    "historical_context_note": {
+      "type": "string",
+      "minLength": 1
+    },
+    "provenance_status": {
+      "type": "string",
+      "enum": [
+        "INCOMPLETE",
+        "CANDIDATE",
+        "REVIEWED"
+      ]
+    },
+    "rights_status": {
+      "type": "string",
+      "enum": [
+        "UNKNOWN",
+        "RESTRICTED",
+        "ELIGIBLE",
+        "REVIEW_REQUIRED"
+      ]
+    },
+    "user_approved": {
+      "type": "boolean"
+    },
+    "variant_ids": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+      },
+      "minItems": 0
+    }
+  },
+  "required": [
+    "schema_version",
+    "asset_id",
+    "asset_class",
+    "original_sha256",
+    "origin",
+    "source_item_url",
+    "title",
+    "rights_statement",
+    "rights_evidence_note",
+    "historical_context_note",
+    "provenance_status",
+    "rights_status",
+    "user_approved",
+    "variant_ids"
+  ],
+  "additionalProperties": false
+}
