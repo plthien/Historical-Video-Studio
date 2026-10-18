@@ -4,6 +4,8 @@ on:
     branches: [main]
     paths:
       - "contracts/**"
+      - "docs/step01-02/**"
+      - "ui/mockups/**"
       - "scripts/check_design_contracts.py"
       - "tests/contracts/**"
       - "requirements-design.txt"
