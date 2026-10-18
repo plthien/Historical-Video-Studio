@@ -1,0 +1,360 @@
+openapi: 3.1.0
+info:
+  title: Historical Video Studio Local API (DESIGN ONLY)
+  version: 1.0.0-design
+  description: >
+    Contract proposed for Step 03/04. No endpoint is deployed in Step 01/02.
+    API keys for ElevenLabs/G-Labs are server-side, never returned to the browser.
+servers:
+  - url: http://127.0.0.1:8000/api/v1
+tags:
+  - name: project
+  - name: gate
+  - name: voice
+  - name: asset
+  - name: storyboard
+  - name: render
+  - name: jobs
+components:
+  schemas:
+    ApiProblem:
+      type: object
+      additionalProperties: false
+      required: [code, message, remediation, retryable]
+      properties:
+        code: {type: string}
+        message: {type: string}
+        remediation: {type: string}
+        retryable: {type: boolean}
+        entity_id: {type: [string, 'null']}
+        blocking_gate: {type: [string, 'null'], enum: [G1, G2, G3, G4, G5, null]}
+    ProjectInput:
+      type: object
+      additionalProperties: false
+      required: [title, language, style_id]
+      properties:
+        title: {type: string, minLength: 4}
+        language: {type: string, const: en}
+        style_id: {type: string, const: HistoryEditorialPaper.v1}
+    ProjectResponse:
+      type: object
+      required: [project_id, project_revision, next_action]
+      properties:
+        project_id: {type: string}
+        project_revision: {type: integer, minimum: 0}
+        next_action: {type: string}
+    JobResponse:
+      type: object
+      required: [job_id, state, project_revision]
+      properties:
+        job_id: {type: string}
+        state: {type: string, enum: [QUEUED, RUNNING, SUCCEEDED, FAILED_RETRYABLE, FAILED_TERMINAL, CANCELLED, BLOCKED_REVIEW]}
+        project_revision: {type: integer}
+        progress: {type: number, minimum: 0, maximum: 1}
+        error: {$ref: '#/components/schemas/ApiProblem'}
+    Gate:
+      type: object
+      required: [gate_id, state, candidate_sha256]
+      properties:
+        gate_id: {type: string, enum: [G1, G2, G3, G4, G5]}
+        state: {type: string, enum: [DRAFT, PREPARING, READY_FOR_REVIEW, APPROVED, CHANGES_REQUESTED, BLOCKED, REJECTED, STALE]}
+        candidate_sha256: {type: [string, 'null']}
+        blockers: {type: array, items: {type: string}}
+        revision: {type: integer}
+    GateDecision:
+      type: object
+      additionalProperties: false
+      required: [decision, candidate_sha256, dependency_fingerprint, expected_revision]
+      properties:
+        decision: {type: string, enum: [APPROVED, CHANGES_REQUESTED, REJECTED]}
+        candidate_sha256: {type: string, pattern: '^[0-9a-f]{64}$'}
+        dependency_fingerprint: {type: string, pattern: '^[0-9a-f]{64}$'}
+        expected_revision: {type: integer, minimum: 0}
+        comment: {type: string}
+        affected_ids: {type: array, items: {type: string}}
+    AssetResolutionChoice:
+      type: object
+      additionalProperties: false
+      required: [resolution_mode, expected_revision]
+      properties:
+        resolution_mode: {type: string, enum: [MANUAL_UPLOAD, MANAGED_FALLBACK]}
+        expected_revision: {type: integer}
+        authorization_note: {type: string}
+    AssetApproval:
+      type: object
+      additionalProperties: false
+      required: [asset_id, asset_sha256, expected_revision, rights_reviewed]
+      properties:
+        asset_id: {type: string}
+        asset_sha256: {type: string, pattern: '^[0-9a-f]{64}$'}
+        expected_revision: {type: integer}
+        rights_reviewed: {type: boolean}
+        note: {type: string}
+    StoryPackage:
+      $ref: ../contracts/schema/StoryPackage.v1.schema.json
+  parameters:
+    ProjectId:
+      name: project_id
+      in: path
+      required: true
+      schema: {type: string}
+    RequirementId:
+      name: requirement_id
+      in: path
+      required: true
+      schema: {type: string}
+    GateId:
+      name: gate_id
+      in: path
+      required: true
+      schema: {type: string, enum: [G1, G2, G3, G4, G5]}
+    Idempotency:
+      name: Idempotency-Key
+      in: header
+      required: true
+      schema: {type: string, minLength: 12}
+  responses:
+    Validation:
+      description: Invalid JSON Schema or semantic cross reference
+      content:
+        application/json:
+          schema: {$ref: '#/components/schemas/ApiProblem'}
+    Conflict:
+      description: Approval revision conflict or illegal gate transition
+      content:
+        application/json:
+          schema: {$ref: '#/components/schemas/ApiProblem'}
+paths:
+  /health:
+    get:
+      tags: [project]
+      summary: Local backend readiness (never conflated with provider health)
+      responses:
+        '200':
+          description: Local service status
+  /projects:
+    post:
+      tags: [project]
+      summary: Create local project
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/ProjectInput'}
+      responses:
+        '201':
+          description: Project created
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ProjectResponse'}
+        '422': {$ref: '#/components/responses/Validation'}
+  /projects/{project_id}/story/import:
+    post:
+      tags: [project]
+      summary: Import one external ChatGPT StoryPackage and validate strict version
+      parameters:
+        - {$ref: '#/components/parameters/ProjectId'}
+        - {$ref: '#/components/parameters/Idempotency'}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: ./schema/StoryPackage.v1.schema.json
+      responses:
+        '200': {description: Imported candidate, never auto-approved}
+        '409': {$ref: '#/components/responses/Conflict'}
+        '422': {$ref: '#/components/responses/Validation'}
+  /projects/{project_id}/gates:
+    get:
+      tags: [gate]
+      summary: Gate board with current exact candidate revision and blockers
+      parameters:
+        - {$ref: '#/components/parameters/ProjectId'}
+      responses:
+        '200':
+          description: Current five gates
+          content:
+            application/json:
+              schema:
+                type: array
+                minItems: 5
+                maxItems: 5
+                items: {$ref: '#/components/schemas/Gate'}
+  /projects/{project_id}/gates/{gate_id}/decision:
+    post:
+      tags: [gate]
+      summary: Sole human decision endpoint; G2 APPROVED also triggers final WAV assemble + alignment job
+      parameters:
+        - {$ref: '#/components/parameters/ProjectId'}
+        - {$ref: '#/components/parameters/GateId'}
+        - {$ref: '#/components/parameters/Idempotency'}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/GateDecision'}
+      responses:
+        '200': {description: Recorded exact-revision approval/changes request/reject and scheduled eligible dependent jobs}
+        '409': {$ref: '#/components/responses/Conflict'}
+        '422': {$ref: '#/components/responses/Validation'}
+        '424': {description: Required upstream gate or asset incomplete}
+  /projects/{project_id}/voice/generate:
+    post:
+      tags: [voice]
+      summary: Queue per-section TTS generation using Kokoro or ElevenLabs adapter
+      parameters:
+        - {$ref: '#/components/parameters/ProjectId'}
+        - {$ref: '#/components/parameters/Idempotency'}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: ./schema/VoiceRequest.v1.schema.json}
+      responses:
+        '202':
+          description: Durable voice job queued
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/JobResponse'}
+        '422': {$ref: '#/components/responses/Validation'}
+  /projects/{project_id}/voice/attempts:
+    get:
+      tags: [voice]
+      summary: Current and historical section attempts with hash and QC
+      parameters:
+        - {$ref: '#/components/parameters/ProjectId'}
+      responses:
+        '200': {description: Section attempts and playable artifact references}
+  /projects/{project_id}/assets/discover:
+    post:
+      tags: [asset]
+      summary: Discover archival candidates; does not approve rights or fallback
+      parameters:
+        - {$ref: '#/components/parameters/ProjectId'}
+        - {$ref: '#/components/parameters/Idempotency'}
+      responses:
+        '202':
+          description: Discovery queued
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/JobResponse'}
+  /projects/{project_id}/assets/{requirement_id}/resolve:
+    post:
+      tags: [asset]
+      summary: Select manual upload OR authorize managed fallback; no candidate approval implied
+      parameters:
+        - {$ref: '#/components/parameters/ProjectId'}
+        - {$ref: '#/components/parameters/RequirementId'}
+        - {$ref: '#/components/parameters/Idempotency'}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/AssetResolutionChoice'}
+      responses:
+        '200': {description: Resolution branch recorded}
+        '409': {$ref: '#/components/responses/Conflict'}
+  /projects/{project_id}/assets/{requirement_id}/upload:
+    post:
+      tags: [asset]
+      summary: Operator upload of candidate archival file with source and rights metadata
+      parameters:
+        - {$ref: '#/components/parameters/ProjectId'}
+        - {$ref: '#/components/parameters/RequirementId'}
+        - {$ref: '#/components/parameters/Idempotency'}
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [file, source_item_url, rights_statement]
+              properties:
+                file: {type: string, format: binary}
+                source_item_url: {type: string, format: uri}
+                rights_statement: {type: string}
+                creator: {type: string}
+                historical_context_note: {type: string}
+      responses:
+        '202':
+          description: Candidate processing queued; not approved
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/JobResponse'}
+        '422': {$ref: '#/components/responses/Validation'}
+  /projects/{project_id}/assets/{requirement_id}/approve:
+    post:
+      tags: [asset]
+      summary: Explicit approval of one exact asset candidate; G3 gate remains a separate collective approval
+      parameters:
+        - {$ref: '#/components/parameters/ProjectId'}
+        - {$ref: '#/components/parameters/RequirementId'}
+        - {$ref: '#/components/parameters/Idempotency'}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/AssetApproval'}
+      responses:
+        '200': {description: Candidate approved and linked to requirement}
+        '409': {$ref: '#/components/responses/Conflict'}
+  /projects/{project_id}/storyboard/compile:
+    post:
+      tags: [storyboard]
+      summary: Compile deterministic timeline from G2 aligned and G3 approved sources
+      parameters:
+        - {$ref: '#/components/parameters/ProjectId'}
+        - {$ref: '#/components/parameters/Idempotency'}
+      responses:
+        '202':
+          description: Compilation queued
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/JobResponse'}
+        '424': {description: G2 alignment or G3 asset snapshot incomplete}
+  /projects/{project_id}/storyboard/revisions:
+    post:
+      tags: [storyboard]
+      summary: Create local editable draft (never edit approved timeline in place)
+      parameters:
+        - {$ref: '#/components/parameters/ProjectId'}
+        - {$ref: '#/components/parameters/Idempotency'}
+      responses:
+        '201': {description: Draft revision created}
+  /projects/{project_id}/render-jobs:
+    post:
+      tags: [render]
+      summary: Render exactly approved G4 timeline via Remotion
+      parameters:
+        - {$ref: '#/components/parameters/ProjectId'}
+        - {$ref: '#/components/parameters/Idempotency'}
+      responses:
+        '202':
+          description: Render queued
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/JobResponse'}
+        '424': {description: G4 missing or stale}
+  /jobs/{job_id}:
+    get:
+      tags: [jobs]
+      summary: Durable status of one operation
+      parameters:
+        - {name: job_id, in: path, required: true, schema: {type: string}}
+      responses:
+        '200':
+          description: Job snapshot
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/JobResponse'}
+  /jobs/{job_id}/cancel:
+    post:
+      tags: [jobs]
+      summary: Cancel one job, and one provider task_id if present
+      parameters:
+        - {name: job_id, in: path, required: true, schema: {type: string}}
+        - {$ref: '#/components/parameters/Idempotency'}
+      responses:
+        '200': {description: Cancellation recorded; does not cancel other jobs}
+        '409': {$ref: '#/components/responses/Conflict'}
