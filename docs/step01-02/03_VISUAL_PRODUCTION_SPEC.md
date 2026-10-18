@@ -12,7 +12,7 @@ Reference **1015.mp4**, sampled/inspected as the basis for design: 298.284 s, 19
 - 04:15–04:58: archival/referential end montage.
 Observation caveat: sparse sampling does **not** measure exact easing curves, cuts, source accuracy, user rights, or quality of actual audio narration. Video aesthetic is an editorial **reference**, not template-for-template duplication.
 
-## 2. HistoricalEditorialPaper.v1 style tokens
+## 2. HistoryEditorialPaper.v1 style tokens
 Design defaults for prototype; must be adjusted in visual review and frozen by style version.
 - Canvas 1920×1080, 30fps 16:9, safe outer 96 px horizontal / 60 px vertical for vital labels. Title region min 14% margin from edge when overlays are present.
 - Paper light background #ECE8DB / ink #202020 / dark map #252A2E / warm gold #D7B652 / territory red #A3443D / restrained slate #6D8A91. These are proposed palette tokens, not measurements of input video.
