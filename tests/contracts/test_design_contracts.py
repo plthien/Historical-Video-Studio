@@ -12,7 +12,7 @@ from check_design_contracts import (ContractError, check_all, load_example,
 
 class DesignContractTests(unittest.TestCase):
     def test_all_valid_fixtures_and_schemas(self):
-        self.assertEqual(len(check_all()), 10)
+        self.assertEqual(len(check_all()), 12)
 
     def test_duplicate_section(self):
         s = load_example("StoryPackage.v1")
@@ -122,6 +122,52 @@ class DesignContractTests(unittest.TestCase):
         timeline["scenes"][0]["events"][0]["preset_id"] = "route-line-draw"
         with self.assertRaisesRegex(ContractError, "INVALID_PRESET"):
             validate_timeline(timeline, words, {"asset_001"})
+
+
+    def test_longform_fixture_realistic_scale_and_directions(self):
+        import json
+        from check_design_contracts import ROOT
+        root = ROOT / "contracts" / "examples" / "longform"
+        story = json.loads((root / "StoryPackage.longform.synthetic.json").read_text(encoding="utf-8"))
+        visual = json.loads((root / "VisualBlueprint.longform.synthetic.json").read_text(encoding="utf-8"))
+        timeline = json.loads((root / "CompiledTimeline.longform.synthetic.json").read_text(encoding="utf-8"))
+        validate_story(story)
+        from check_design_contracts import validate_schema
+        validate_schema("VisualBlueprint.v1", visual)
+        validate_schema("CompiledTimeline.v1", timeline)
+        self.assertGreaterEqual(len(story["sections"]), 20)
+        self.assertGreaterEqual(len(story["visual_setups"]), 40)
+        self.assertEqual(len(visual["setup_plans"]),len(story["visual_setups"]))
+        self.assertEqual(len(timeline["scenes"]),len(story["visual_setups"]))
+        self.assertGreaterEqual(timeline["total_frames"], 9000)
+        self.assertEqual(sum(s["duration_frames"] for s in timeline["scenes"]),timeline["total_frames"])
+        self.assertEqual(story["claims"][0]["status"],"UNVERIFIED")
+
+    def test_historical_map_wrong_era_blocked(self):
+        from check_design_contracts import validate_historical_map,load_example
+        data=load_example("HistoricalMap.v1")
+        data["user_approved"]=True
+        with self.assertRaisesRegex(ContractError, "MAP_PERIOD_MISMATCH"):
+            validate_historical_map(data,1914)
+
+    def test_template_layout_out_of_bounds_blocked(self):
+        from check_design_contracts import validate_template_layout,load_example
+        data=load_example("TemplateLayout.v1")
+        data["slots"][0]["rect_normalized"]["x"]=0.9
+        with self.assertRaisesRegex(ContractError, "LAYOUT_INVALID"):
+            validate_template_layout(data)
+
+    def test_camera_keyframe_overrun_blocked(self):
+        timeline,words=load_example("CompiledTimeline.v1"),load_example("WordTimingMap.v1")
+        timeline["scenes"][0]["camera"]["keyframes"][1]["at_frame"]=999
+        with self.assertRaisesRegex(ContractError,"CAMERA_RANGE_INVALID"):
+            validate_timeline(timeline, words, {"asset_001"})
+
+    def test_missing_visual_direction_asset_slot_blocks(self):
+        story=load_example("StoryPackage.v1")
+        story["visual_setups"][0]["direction"]["asset_slots"][0]["requirement_id"]="req_missing"
+        with self.assertRaisesRegex(ContractError,"CROSS_REFERENCE_MISSING"):
+            validate_story(story)
 
 
 if __name__ == "__main__":

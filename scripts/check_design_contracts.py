@@ -33,6 +33,21 @@ def _unique(values: list[str], code: str, path: str) -> None:
         raise ContractError(code, path, "Duplicate IDs must be replaced.")
 
 
+def _validate_editorial_direction(setup: dict[str, Any], section_ids: set[str], reqs: set[str], claims: set[str]) -> None:
+    d = setup["direction"]
+    for role in d["asset_slots"]:
+        if role["requirement_id"] not in reqs:
+            raise ContractError("CROSS_REFERENCE_MISSING", setup["setup_id"], "Editorial asset slot references unknown requirement.")
+    for item in d["on_screen_text"]:
+        if item["claim_ref"] is not None and item["claim_ref"] not in claims:
+            raise ContractError("CROSS_REFERENCE_MISSING", setup["setup_id"], "On-screen claim reference missing.")
+    for beat in d["reveal_plan"]:
+        if beat["cue"]["section_id"] not in section_ids:
+            raise ContractError("CROSS_REFERENCE_MISSING", beat["beat_id"], "Reveal cue references unknown section.")
+    if d["historical_map_requirement_id"] is not None and d["historical_map_requirement_id"] not in reqs:
+        raise ContractError("CROSS_REFERENCE_MISSING", setup["setup_id"], "Historical map requirement missing.")
+
+
 def validate_story(data: dict[str, Any]) -> None:
     validate_schema("StoryPackage.v1", data)
     sections = {s["section_id"] for s in data["sections"]}
@@ -52,6 +67,7 @@ def validate_story(data: dict[str, Any]) -> None:
     for v in data["visual_setups"]:
         if not set(v["section_refs"]) <= sections or not set(v["claim_refs"]) <= claims or not set(v["requirement_refs"]) <= reqs:
             raise ContractError("CROSS_REFERENCE_MISSING", v["setup_id"], "Use existing approved IDs.")
+        _validate_editorial_direction(v, sections, reqs, claims)
     for r in data["asset_requirements"]:
         if r["start_year"] > r["end_year"]:
             raise ContractError("PERIOD_INVALID", r["requirement_id"], "End year must not precede start year.")
@@ -99,6 +115,13 @@ def validate_timeline(data: dict[str, Any], word_map: dict[str, Any], approved_a
     seen_scene_ids = set()
     for scene in data["scenes"]:
         sid = scene["scene_id"]
+        if scene["transition_out"]["duration_frames"] > scene["duration_frames"]:
+            raise ContractError("SCENE_RANGE_INVALID", sid, "Transition must fit scene duration.")
+        previous_camera=-1
+        for key in scene["camera"]["keyframes"]:
+            if key["at_frame"] <= previous_camera or key["at_frame"] >= scene["duration_frames"]:
+                raise ContractError("CAMERA_RANGE_INVALID", sid, "Camera keyframes must be strictly ordered inside scene.")
+            previous_camera=key["at_frame"]
         if sid in seen_scene_ids:
             raise ContractError("DUPLICATE_ID", sid, "Use a unique scene ID.")
         seen_scene_ids.add(sid)
@@ -108,6 +131,12 @@ def validate_timeline(data: dict[str, Any], word_map: dict[str, Any], approved_a
             raise ContractError("ASSET_BINDING_STALE", sid, "Only approved asset versions may render.")
         layers = {lay["layer_id"] for lay in scene["layers"]}
         for lay in scene["layers"]:
+            box = lay["rect_px"]
+            if box["w"] <= 0 or box["h"] <= 0:
+                raise ContractError("LAYOUT_INVALID", lay["layer_id"], "Layer rect must be nonempty.")
+            if lay["map_binding"] is not None and lay["layer_kind"] not in {"map","route","territory","callout"}:
+                raise ContractError("MAP_BINDING_INVALID", lay["layer_id"], "Only map-related layers may bind geographic coordinates.")
+        for lay in scene["layers"]:
             if lay.get("asset_id") and lay["asset_id"] not in scene["asset_ids"]:
                 raise ContractError("ASSET_BINDING_STALE", lay["layer_id"], "Layer source not in scene asset bindings.")
         for e in scene["events"]:
@@ -116,6 +145,11 @@ def validate_timeline(data: dict[str, Any], word_map: dict[str, Any], approved_a
             if ("scale" in e.get("params", {}) and
                     (not isinstance(e["params"]["scale"], (float, int)) or not 0.75 <= e["params"]["scale"] <= 1.3)):
                 raise ContractError("INVALID_PRESET", e["event_id"], "Scale parameter exceeds conservative document bounds.")
+            previous_keyframe=-1
+            for key in e["keyframes"]:
+                if key["frame"] < previous_keyframe or key["frame"] > e["duration_frames"]:
+                    raise ContractError("MOTION_RANGE_INVALID", e["event_id"], "Motion keyframes must be ordered and fit event duration.")
+                previous_keyframe=key["frame"]
             if e["layer_id"] not in layers:
                 raise ContractError("LAYER_REF_MISSING", e["event_id"], "Refer to an existing scene layer.")
             if e.get("cue_word_id") and e["cue_word_id"] not in word_ids:
@@ -147,6 +181,40 @@ def validate_archival_candidate_for_g3(asset: dict[str, Any]) -> None:
         a, b = asset.get("period_start_year"), asset.get("period_end_year")
         if a is None or b is None or a > b:
             raise ContractError("MAP_PERIOD_MISMATCH", asset["asset_id"], "Provide supported, reviewed date span for this map.")
+
+
+def validate_historical_map(data: dict[str, Any], event_year: int, feature_id: str | None = None) -> None:
+    validate_schema("HistoricalMap.v1", data)
+    bbox=data["geography_bbox"]
+    if bbox["min_lon"] >= bbox["max_lon"] or bbox["min_lat"] >= bbox["max_lat"]:
+        raise ContractError("MAP_GEOMETRY_INVALID", data["historical_map_id"], "BBox must use ordered longitude/latitude.")
+    if data["valid_year_from"] > data["valid_year_to"] or not data["valid_year_from"] <= event_year <= data["valid_year_to"]:
+        raise ContractError("MAP_PERIOD_MISMATCH", data["historical_map_id"], "Use a source supported at requested event year.")
+    if not data["user_approved"]:
+        raise ContractError("MAP_UNAPPROVED", data["historical_map_id"], "G3 review required for map geometry.")
+    if data["geography_mode"]=="vector_period" and data["geometry_object_sha256"] is None:
+        raise ContractError("MAP_GEOMETRY_INVALID", data["historical_map_id"], "Period vector data requires verified immutable geometry.")
+    if data["geography_mode"]=="schematic_approved" and not data["schematic_disclosure"]:
+        raise ContractError("MAP_DISCLOSURE_REQUIRED", data["historical_map_id"], "Label schema as reconstruction.")
+    if feature_id and feature_id not in data["approved_feature_ids"]:
+        raise ContractError("MAP_FEATURE_UNKNOWN", feature_id, "Feature reference not in reviewed source data.")
+
+
+def validate_template_layout(data: dict[str, Any]) -> None:
+    validate_schema("TemplateLayout.v1", data)
+    slots=data["slots"]
+    _unique([s["slot_id"] for s in slots],"DUPLICATE_ID",data["template_id"])
+    lim=data["camera_limits"]
+    if lim["min_scale"] > lim["max_scale"]:
+        raise ContractError("LAYOUT_INVALID", data["template_id"], "Camera min_scale cannot exceed max_scale.")
+    safe=data["safe_area_px"]
+    if safe["left"]+safe["right"] >= data["canvas"]["width"] or safe["top"]+safe["bottom"] >= data["canvas"]["height"]:
+        raise ContractError("LAYOUT_INVALID", data["template_id"], "Safe area leaves no visible canvas.")
+    for slot in slots:
+        rect=slot["rect_normalized"]
+        if rect["x"]+rect["w"] > 1.0 or rect["y"]+rect["h"] > 1.0:
+            raise ContractError("LAYOUT_INVALID", slot["slot_id"], "Normalized slot must fit canvas.")
+
 
 def check_all() -> list[str]:
     completed = []

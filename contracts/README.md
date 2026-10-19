@@ -2,8 +2,8 @@
 
 **Version:** V1.0 design freeze. These files are authoritative *proposed interfaces*, not implemented application code or evidence of a working provider.
 
-- schema/: ten strict JSON Schema Draft 2020–12 contracts, filename matches each schema_version.
-- examples/: one synthetic shape-valid fixture per schema. **They do not establish historical truth, production rights or a working provider.** Cross-object fixtures require explicit binding and semantics checks.
+- schema/: twelve strict JSON Schema Draft 2020–12 contracts, filename matches each schema_version.
+- examples/: one synthetic shape-valid fixture per schema; plus a 360-second/48-scene long-form synthetic contract set. **They do not establish historical truth, production rights or a working provider.** Cross-object fixtures require explicit binding and semantics checks.
 - openapi.yaml: proposed local FastAPI endpoints for six UI workspaces, review gates and jobs.
 - providers/: boundary-specific adapter behavior from official docs / user-supplied contract.
 - ../scripts/check_design_contracts.py and ../tests/contracts/: Python validation, ten positive fixtures and negative semantic cases.
