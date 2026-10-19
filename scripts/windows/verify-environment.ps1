@@ -6,9 +6,9 @@ Set-StrictMode -Version Latest
 $repo = (Resolve-Path (Join-Path $PSScriptRoot "../..")).Path
 Push-Location $repo
 try {
-    function Run-Checked([string]$Name, [string]$Exe, [string[]]$Args) {
+    function Run-Checked([string]$Name, [string]$Exe, [string[]]$Arguments) {
         Write-Host "==> $Name"
-        & $Exe @Args
+        & $Exe @Arguments
         if ($LASTEXITCODE -ne 0) { throw "$Name failed with exit code $LASTEXITCODE" }
     }
     $python = (& py -3.12 -c "import sys; print(sys.version_info.major, sys.version_info.minor)").Trim()
