@@ -1641,6 +1641,56 @@
                 ]
               }
             ]
+          },
+          "direction_revision": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "kind",
+              "source_story_revision_sha256",
+              "edited_paths",
+              "operator_confirmed",
+              "edit_reason"
+            ],
+            "properties": {
+              "kind": {
+                "type": "string",
+                "enum": [
+                  "inherited",
+                  "operator_visual_edit"
+                ]
+              },
+              "source_story_revision_sha256": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              },
+              "edited_paths": {
+                "type": "array",
+                "uniqueItems": true,
+                "maxItems": 12,
+                "items": {
+                  "type": "string",
+                  "enum": [
+                    "visual_beats",
+                    "camera_intent",
+                    "composition_intent",
+                    "layout_variant_hint",
+                    "transition_intent",
+                    "reuse_setup_id"
+                  ]
+                }
+              },
+              "operator_confirmed": {
+                "type": "boolean"
+              },
+              "edit_reason": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "maxLength": 400
+              }
+            }
           }
         },
         "required": [

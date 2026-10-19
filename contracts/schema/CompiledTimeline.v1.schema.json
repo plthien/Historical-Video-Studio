@@ -537,6 +537,21 @@
                       "type": "null"
                     }
                   ]
+                },
+                "template_slot_id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+                },
+                "source_asset_slot_id": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
                 }
               },
               "required": [
@@ -556,7 +571,9 @@
                 "depth_order",
                 "treatment",
                 "path_geometry_ref",
-                "text_layout"
+                "text_layout",
+                "template_slot_id",
+                "source_asset_slot_id"
               ],
               "additionalProperties": false
             },
