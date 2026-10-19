@@ -40,7 +40,7 @@ class FullFlowDesignTests(unittest.TestCase):
     def test_eighteen_motion_presets_valid_and_unique(self):
         reg=json.loads((ROOT/"contracts"/"registries"/"motion-presets.v1.json").read_text(encoding="utf-8"))
         presets=reg["presets"]
-        self.assertEqual(len(presets),18)
+        self.assertEqual(len(presets),19)
         self.assertEqual(len({p["preset_id"] for p in presets}),18)
         for p in presets:
             self.assertLessEqual(p["min_duration_frames"],p["default_duration_frames"])

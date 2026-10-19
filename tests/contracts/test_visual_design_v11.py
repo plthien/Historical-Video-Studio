@@ -38,13 +38,15 @@ class VisualDesignV11Tests(unittest.TestCase):
     def test_each_preset_has_distinct_schema_and_phase(self):
         from jsonschema import Draft202012Validator
         p={x["preset_id"]:x for x in self.motions["presets"]}
-        self.assertEqual(len(p),18)
+        self.assertEqual(len(p),19)
         for x in p.values():
             Draft202012Validator.check_schema(x["parameter_schema"])
             Draft202012Validator(x["parameter_schema"]).validate(x["default_params"])
         self.assertIn("route_geometry_ref",p["route-line-draw"]["parameter_schema"]["required"])
         self.assertIn("near_layer_ids",p["parallax-layers"]["parameter_schema"]["required"])
         self.assertIn("approved_feature_ids",p["map-region-wipe"]["parameter_schema"]["required"])
+        self.assertIn("connector_geometry_ref",p["editorial-connector-draw"]["parameter_schema"]["required"])
+        self.assertEqual(p["editorial-connector-draw"]["render_recipe"]["transform_space"],"group_local")
 
     def test_bad_visual_focus_reference_is_blocker(self):
         x=copy.deepcopy(self.story)
@@ -169,6 +171,23 @@ class VisualDesignV11Tests(unittest.TestCase):
         with self.assertRaisesRegex(ContractError,"BLUEPRINT_DIRECTION_DRIFT"):
             validate_blueprint(self.story,x)
 
+
+
+    def test_editorial_connector_is_not_historical_route(self):
+        from check_design_contracts import ContractError
+        x=copy.deepcopy(self.timeline)
+        scene=x["scenes"][4]
+        ev=next(e for e in scene["events"] if e["preset_id"]=="editorial-connector-draw")
+        ev["preset_id"]="route-line-draw"
+        with self.assertRaisesRegex(ContractError,"MOTION_PRESET_UNSUPPORTED|MOTION_TARGET_INVALID"):
+            validate_visual_timeline(self.blue,x,self.layouts,self.motions)
+
+    def test_causes_link_connector_must_match_layer_geometry(self):
+        x=copy.deepcopy(self.timeline)
+        ev=next(e for e in x["scenes"][9]["events"] if e["preset_id"]=="editorial-connector-draw")
+        ev["params"]["connector_geometry_ref"]="connector_unrelated"
+        with self.assertRaisesRegex(ContractError,"EDITORIAL_CONNECTOR_UNBOUND"):
+            validate_visual_timeline(self.blue,x,self.layouts,self.motions)
 
 
 if __name__ == "__main__":

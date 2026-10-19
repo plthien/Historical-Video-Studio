@@ -255,8 +255,8 @@ def validate_blueprint(story: dict, blueprint: dict) -> None:
 
 def validate_visual_registry(layouts: dict, motions: dict) -> None:
     variants = layouts["layouts"]
-    if len(variants) != 30 or len(motions["presets"]) != 18:
-        _fail("REGISTRY_INCOMPLETE", "registries", "Exactly 10 templates × 3 and 18 motion grammars.")
+    if len(variants) != 30 or len(motions["presets"]) != 19:
+        _fail("REGISTRY_INCOMPLETE", "registries", "Exactly 10 templates × 3 and 19 motion grammars.")
     signatures = set()
     geometry_signatures = set()
     for l in variants:
@@ -331,7 +331,7 @@ def validate_visual_timeline(blueprint: dict, timeline: dict, layouts: dict, mot
             if l["parent_layer_id"] is not None:
                 if l["parent_layer_id"] not in layers or l["parent_layer_id"] == l["layer_id"]:
                     _fail("RENDER_PARENT_INVALID", l["layer_id"], "Parent must be another layer in scene.")
-            if l["path_geometry_ref"] and l["layer_kind"] not in {"route", "map", "territory"}:
+            if l["path_geometry_ref"] and l["layer_kind"] not in {"route", "map", "territory", "annotation"}:
                 _fail("GEOMETRY_ROLE_INVALID", l["layer_id"], "Path requires geographic or route layer.")
             if l["text"] and l["text_layout"] is None:
                 _fail("TEXT_LAYOUT_MISSING", l["layer_id"], "Text requires measured typography.")
@@ -383,6 +383,10 @@ def validate_visual_timeline(blueprint: dict, timeline: dict, layouts: dict, mot
             if p["geometry_requirement"] == "approved_ordered_linestring":
                 if layers[event["layer_id"]]["path_geometry_ref"] != event["params"]["route_geometry_ref"]:
                     _fail("MOTION_ROUTE_UNBOUND", event["event_id"], "Draw the G3-reviewed route geometry bound to target layer.")
+            if p["geometry_requirement"] == "editorial_canvas_path":
+                if (layers[event["layer_id"]]["layer_kind"] != "annotation"
+                        or layers[event["layer_id"]]["path_geometry_ref"] != event["params"]["connector_geometry_ref"]):
+                    _fail("EDITORIAL_CONNECTOR_UNBOUND", event["event_id"], "Connector path must be a declared scene annotation, never a geographic route.")
             if event["preset_id"] == "parallax-layers":
                 if event["depth_parallax"] is None:
                     _fail("PARALLAX_DEPTH_MISSING", event["event_id"], "Depth-separated layers required.")
