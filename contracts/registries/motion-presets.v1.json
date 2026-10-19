@@ -1,5 +1,5 @@
 {
-  "registry_version": "1.1.0",
+  "registry_version": "1.2.0",
   "design_status": "preset_specific_motion_grammar",
   "presets": [
     {
@@ -1914,6 +1914,104 @@
       ],
       "preview_fallback": "reduced_motion_fade_or_hold",
       "geometry_requirement": "none"
+    },
+    {
+      "preset_id": "editorial-connector-draw",
+      "version": "1.1.0",
+      "compatible_layer_kinds": [
+        "annotation"
+      ],
+      "default_duration_frames": 18,
+      "min_duration_frames": 4,
+      "max_duration_frames": 90,
+      "allowed_easing": [
+        "linear",
+        "ease_in",
+        "ease_out",
+        "ease_in_out",
+        "cubic_soft"
+      ],
+      "parameters": {
+        "progress": {
+          "min": 0,
+          "max": 1
+        }
+      },
+      "reduced_motion": "fade_or_hold",
+      "source_notice": "In-house editorial annotation path; distinct from period-verified geographical route",
+      "parameter_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "connector_geometry_ref",
+          "source_claim_id",
+          "progress_start",
+          "progress_end",
+          "arrowhead"
+        ],
+        "properties": {
+          "connector_geometry_ref": {
+            "type": "string",
+            "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+          },
+          "source_claim_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "progress_start": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "progress_end": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "arrowhead": {
+            "type": "boolean"
+          }
+        }
+      },
+      "default_params": {
+        "connector_geometry_ref": "connector_001",
+        "source_claim_id": null,
+        "progress_start": 0,
+        "progress_end": 1,
+        "arrowhead": true
+      },
+      "render_recipe": {
+        "primitive": "editorial_bezier_or_line_draw",
+        "transform_space": "group_local",
+        "deterministic_by_frame": true,
+        "reads_external_state": false
+      },
+      "phase_recipe": [
+        {
+          "phase": "enter",
+          "start_fraction": 0,
+          "end_fraction": 0.15
+        },
+        {
+          "phase": "track",
+          "start_fraction": 0.15,
+          "end_fraction": 0.8
+        },
+        {
+          "phase": "hold",
+          "start_fraction": 0.8,
+          "end_fraction": 1
+        }
+      ],
+      "preview_fallback": "reduced_motion_fade_or_hold",
+      "geometry_requirement": "editorial_canvas_path"
     }
   ]
 }

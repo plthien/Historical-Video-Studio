@@ -1485,7 +1485,7 @@
         },
         {
           "slot_id": "event_rail",
-          "role": "route",
+          "role": "annotation",
           "required": false,
           "rect_normalized": {
             "x": 0.16,
@@ -1514,7 +1514,7 @@
       ],
       "allowed_presets": [
         "stagger-reveal",
-        "route-line-draw",
+        "editorial-connector-draw",
         "title-mask-reveal",
         "freeze-hold"
       ],
@@ -1541,7 +1541,7 @@
             "max_count": 2
           },
           {
-            "role": "route",
+            "role": "annotation",
             "min_count": 0,
             "max_count": 1
           },
@@ -1617,7 +1617,7 @@
         },
         {
           "slot_id": "event_rail",
-          "role": "route",
+          "role": "annotation",
           "required": false,
           "rect_normalized": {
             "x": 0.22,
@@ -1632,7 +1632,7 @@
       ],
       "allowed_presets": [
         "stagger-reveal",
-        "route-line-draw",
+        "editorial-connector-draw",
         "title-mask-reveal",
         "freeze-hold"
       ],
@@ -1664,7 +1664,7 @@
             "max_count": 1
           },
           {
-            "role": "route",
+            "role": "annotation",
             "min_count": 0,
             "max_count": 1
           }
@@ -1750,7 +1750,7 @@
       ],
       "allowed_presets": [
         "stagger-reveal",
-        "route-line-draw",
+        "editorial-connector-draw",
         "title-mask-reveal",
         "freeze-hold"
       ],
@@ -3233,7 +3233,7 @@
         },
         {
           "slot_id": "causal_path",
-          "role": "route",
+          "role": "annotation",
           "required": false,
           "rect_normalized": {
             "x": 0.38,
@@ -3248,7 +3248,7 @@
       ],
       "allowed_presets": [
         "stagger-reveal",
-        "route-line-draw",
+        "editorial-connector-draw",
         "camera-push",
         "text-highlight",
         "freeze-hold"
@@ -3281,7 +3281,7 @@
             "max_count": 2
           },
           {
-            "role": "route",
+            "role": "annotation",
             "min_count": 0,
             "max_count": 1
           }
@@ -3338,7 +3338,7 @@
         },
         {
           "slot_id": "causal_path",
-          "role": "route",
+          "role": "annotation",
           "required": false,
           "rect_normalized": {
             "x": 0.37,
@@ -3367,7 +3367,7 @@
       ],
       "allowed_presets": [
         "stagger-reveal",
-        "route-line-draw",
+        "editorial-connector-draw",
         "camera-push",
         "text-highlight",
         "freeze-hold"
@@ -3395,7 +3395,7 @@
             "max_count": 2
           },
           {
-            "role": "route",
+            "role": "annotation",
             "min_count": 0,
             "max_count": 1
           },
@@ -3471,7 +3471,7 @@
         },
         {
           "slot_id": "causal_path",
-          "role": "route",
+          "role": "annotation",
           "required": false,
           "rect_normalized": {
             "x": 0.66,
@@ -3486,7 +3486,7 @@
       ],
       "allowed_presets": [
         "stagger-reveal",
-        "route-line-draw",
+        "editorial-connector-draw",
         "camera-push",
         "text-highlight",
         "freeze-hold"
@@ -3519,7 +3519,7 @@
             "max_count": 2
           },
           {
-            "role": "route",
+            "role": "annotation",
             "min_count": 0,
             "max_count": 1
           }

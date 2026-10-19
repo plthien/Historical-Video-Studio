@@ -135,7 +135,8 @@
               "text",
               "callout",
               "camera",
-              "decorative_paper"
+              "decorative_paper",
+              "annotation"
             ]
           },
           "required": {
@@ -218,7 +219,8 @@
           "hard-cut",
           "text-highlight",
           "map-region-wipe",
-          "photo-card-enter"
+          "photo-card-enter",
+          "editorial-connector-draw"
         ]
       }
     },
@@ -325,7 +327,8 @@
                   "text",
                   "callout",
                   "camera",
-                  "decorative_paper"
+                  "decorative_paper",
+                  "annotation"
                 ]
               },
               "min_count": {

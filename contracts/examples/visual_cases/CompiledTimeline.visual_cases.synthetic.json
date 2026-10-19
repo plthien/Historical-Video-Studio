@@ -1992,7 +1992,7 @@
         },
         {
           "layer_id": "layer_05_event_rail",
-          "layer_kind": "route",
+          "layer_kind": "annotation",
           "asset_id": null,
           "text": null,
           "source_claim_id": "claim_05",
@@ -2035,7 +2035,7 @@
             "source_preserving": true,
             "evidence_badge": "none"
           },
-          "path_geometry_ref": "geometry_route_001",
+          "path_geometry_ref": "connector_scene_05",
           "text_layout": null,
           "template_slot_id": "event_rail",
           "source_asset_slot_id": null
@@ -2167,15 +2167,16 @@
         {
           "event_id": "event_05_1",
           "layer_id": "layer_05_event_rail",
-          "preset_id": "route-line-draw",
+          "preset_id": "editorial-connector-draw",
           "start_frame": 48,
           "duration_frames": 30,
           "cue_word_id": "word_001",
           "params": {
-            "route_geometry_ref": "geometry_route_001",
-            "start_progress": 0,
-            "end_progress": 1,
-            "follow_marker_layer_id": null
+            "connector_geometry_ref": "connector_scene_05",
+            "source_claim_id": "claim_05",
+            "progress_start": 0,
+            "progress_end": 1,
+            "arrowhead": true
           },
           "keyframes": [
             {
@@ -2199,14 +2200,14 @@
               "phase_id": "phase_event_05_1_0",
               "kind": "enter",
               "start_offset_frames": 0,
-              "duration_frames": 6,
+              "duration_frames": 4,
               "depends_on_phase_ids": []
             },
             {
               "phase_id": "phase_event_05_1_1",
               "kind": "track",
-              "start_offset_frames": 6,
-              "duration_frames": 17,
+              "start_offset_frames": 4,
+              "duration_frames": 20,
               "depends_on_phase_ids": [
                 "phase_event_05_1_0"
               ]
@@ -2214,14 +2215,14 @@
             {
               "phase_id": "phase_event_05_1_2",
               "kind": "hold",
-              "start_offset_frames": 23,
-              "duration_frames": 7,
+              "start_offset_frames": 24,
+              "duration_frames": 6,
               "depends_on_phase_ids": [
                 "phase_event_05_1_1"
               ]
             }
           ],
-          "motion_space": "map_world",
+          "motion_space": "group_local",
           "affected_layer_ids": [
             "layer_05_event_rail"
           ],
@@ -4221,7 +4222,7 @@
         },
         {
           "layer_id": "layer_10_causal_path",
-          "layer_kind": "route",
+          "layer_kind": "annotation",
           "asset_id": null,
           "text": null,
           "source_claim_id": "claim_10",
@@ -4264,7 +4265,7 @@
             "source_preserving": true,
             "evidence_badge": "none"
           },
-          "path_geometry_ref": "geometry_route_001",
+          "path_geometry_ref": "connector_scene_10",
           "text_layout": null,
           "template_slot_id": "causal_path",
           "source_asset_slot_id": null
@@ -4337,15 +4338,16 @@
         {
           "event_id": "event_10_1",
           "layer_id": "layer_10_causal_path",
-          "preset_id": "route-line-draw",
+          "preset_id": "editorial-connector-draw",
           "start_frame": 48,
           "duration_frames": 30,
           "cue_word_id": "word_001",
           "params": {
-            "route_geometry_ref": "geometry_route_001",
-            "start_progress": 0,
-            "end_progress": 1,
-            "follow_marker_layer_id": null
+            "connector_geometry_ref": "connector_scene_10",
+            "source_claim_id": "claim_10",
+            "progress_start": 0,
+            "progress_end": 1,
+            "arrowhead": true
           },
           "keyframes": [
             {
@@ -4369,14 +4371,14 @@
               "phase_id": "phase_event_10_1_0",
               "kind": "enter",
               "start_offset_frames": 0,
-              "duration_frames": 6,
+              "duration_frames": 4,
               "depends_on_phase_ids": []
             },
             {
               "phase_id": "phase_event_10_1_1",
               "kind": "track",
-              "start_offset_frames": 6,
-              "duration_frames": 17,
+              "start_offset_frames": 4,
+              "duration_frames": 20,
               "depends_on_phase_ids": [
                 "phase_event_10_1_0"
               ]
@@ -4384,14 +4386,14 @@
             {
               "phase_id": "phase_event_10_1_2",
               "kind": "hold",
-              "start_offset_frames": 23,
-              "duration_frames": 7,
+              "start_offset_frames": 24,
+              "duration_frames": 6,
               "depends_on_phase_ids": [
                 "phase_event_10_1_1"
               ]
             }
           ],
-          "motion_space": "map_world",
+          "motion_space": "group_local",
           "affected_layer_ids": [
             "layer_10_causal_path"
           ],

@@ -130,7 +130,8 @@
                     "text",
                     "callout",
                     "camera",
-                    "decorative_paper"
+                    "decorative_paper",
+                    "annotation"
                   ]
                 },
                 "asset_id": {
@@ -612,7 +613,8 @@
                     "hard-cut",
                     "text-highlight",
                     "map-region-wipe",
-                    "photo-card-enter"
+                    "photo-card-enter",
+                    "editorial-connector-draw"
                   ]
                 },
                 "start_frame": {
