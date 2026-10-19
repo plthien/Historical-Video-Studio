@@ -11,6 +11,8 @@ jobs:
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
@@ -24,6 +26,11 @@ jobs:
             choco install ffmpeg --yes --no-progress
             if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           }
+      - name: Check branch diff whitespace against main
+        shell: pwsh
+        run: |
+          git diff --check origin/main...HEAD
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: A1 environment, schema and SQLite behavioral tests
         shell: powershell
         run: powershell -NoProfile -ExecutionPolicy Bypass -File scripts/windows/verify-environment.ps1
