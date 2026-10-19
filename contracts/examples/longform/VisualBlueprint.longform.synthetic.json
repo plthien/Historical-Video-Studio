@@ -139,6 +139,13 @@
           }
         ],
         "highlight_feature_ids": []
+      },
+      "direction_revision": {
+        "kind": "inherited",
+        "source_story_revision_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "edited_paths": [],
+        "operator_confirmed": false,
+        "edit_reason": null
       }
     },
     {
@@ -277,6 +284,13 @@
           }
         ],
         "highlight_feature_ids": []
+      },
+      "direction_revision": {
+        "kind": "inherited",
+        "source_story_revision_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "edited_paths": [],
+        "operator_confirmed": false,
+        "edit_reason": null
       }
     },
     {
@@ -415,6 +429,13 @@
         ],
         "focus_card_id": "card_setup_003",
         "occlusion_policy": "never_hide_hero"
+      },
+      "direction_revision": {
+        "kind": "inherited",
+        "source_story_revision_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "edited_paths": [],
+        "operator_confirmed": false,
+        "edit_reason": null
       }
     },
     {
@@ -553,6 +574,13 @@
         ],
         "focus_card_id": "card_setup_004",
         "occlusion_policy": "never_hide_hero"
+      },
+      "direction_revision": {
+        "kind": "inherited",
+        "source_story_revision_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "edited_paths": [],
+        "operator_confirmed": false,
+        "edit_reason": null
       }
     },
     {
@@ -688,6 +716,13 @@
         },
         "annotation_beat_id": "beat_setup_005",
         "attribution_text_id": "text_setup_005"
+      },
+      "direction_revision": {
+        "kind": "inherited",
+        "source_story_revision_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "edited_paths": [],
+        "operator_confirmed": false,
+        "edit_reason": null
       }
     },
     {
@@ -823,6 +858,13 @@
         },
         "annotation_beat_id": "beat_setup_006",
         "attribution_text_id": "text_setup_006"
+      },
+      "direction_revision": {
+        "kind": "inherited",
+        "source_story_revision_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "edited_paths": [],
+        "operator_confirmed": false,
+        "edit_reason": null
       }
     },
     {
@@ -951,6 +993,13 @@
         "unit_text_id": null,
         "animation_rule": "reveal_exact",
         "source_text_id": null
+      },
+      "direction_revision": {
+        "kind": "inherited",
+        "source_story_revision_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "edited_paths": [],
+        "operator_confirmed": false,
+        "edit_reason": null
       }
     },
     {
@@ -1079,6 +1128,13 @@
         "unit_text_id": null,
         "animation_rule": "reveal_exact",
         "source_text_id": null
+      },
+      "direction_revision": {
+        "kind": "inherited",
+        "source_story_revision_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "edited_paths": [],
+        "operator_confirmed": false,
+        "edit_reason": null
       }
     },
     {
@@ -1217,6 +1273,13 @@
           }
         ],
         "highlight_feature_ids": []
+      },
+      "direction_revision": {
+        "kind": "inherited",
+        "source_story_revision_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "edited_paths": [],
+        "operator_confirmed": false,
+        "edit_reason": null
       }
     },
     {
@@ -1355,6 +1418,13 @@
           }
         ],
         "highlight_feature_ids": []
+      },
+      "direction_revision": {
+        "kind": "inherited",
+        "source_story_revision_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "edited_paths": [],
+        "operator_confirmed": false,
+        "edit_reason": null
       }
     },
     {
@@ -1493,6 +1563,13 @@
         ],
         "focus_card_id": "card_setup_011",
         "occlusion_policy": "never_hide_hero"
+      },
+      "direction_revision": {
+        "kind": "inherited",
+        "source_story_revision_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "edited_paths": [],
+        "operator_confirmed": false,
+        "edit_reason": null
       }
     },
     {
@@ -1631,6 +1708,13 @@
         ],
         "focus_card_id": "card_setup_012",
         "occlusion_policy": "never_hide_hero"
+      },
+      "direction_revision": {
+        "kind": "inherited",
+        "source_story_revision_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "edited_paths": [],
+        "operator_confirmed": false,
+        "edit_reason": null
       }
     },
     {
@@ -1766,6 +1850,13 @@
         },
         "annotation_beat_id": "beat_setup_013",
         "attribution_text_id": "text_setup_013"
+      },
+      "direction_revision": {
+        "kind": "inherited",
+        "source_story_revision_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "edited_paths": [],
+        "operator_confirmed": false,
+        "edit_reason": null
       }
     },
     {
@@ -1901,6 +1992,13 @@
         },
         "annotation_beat_id": "beat_setup_014",
         "attribution_text_id": "text_setup_014"
+      },
+      "direction_revision": {
+        "kind": "inherited",
+        "source_story_revision_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "edited_paths": [],
+        "operator_confirmed": false,
+        "edit_reason": null
       }
     },
     {
@@ -2029,6 +2127,13 @@
         "unit_text_id": null,
         "animation_rule": "reveal_exact",
         "source_text_id": null
+      },
+      "direction_revision": {
+        "kind": "inherited",
+        "source_story_revision_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "edited_paths": [],
+        "operator_confirmed": false,
+        "edit_reason": null
       }
     },
     {
@@ -2157,6 +2262,13 @@
         "unit_text_id": null,
         "animation_rule": "reveal_exact",
         "source_text_id": null
+      },
+      "direction_revision": {
+        "kind": "inherited",
+        "source_story_revision_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "edited_paths": [],
+        "operator_confirmed": false,
+        "edit_reason": null
       }
     },
     {
@@ -2295,6 +2407,13 @@
           }
         ],
         "highlight_feature_ids": []
+      },
+      "direction_revision": {
+        "kind": "inherited",
+        "source_story_revision_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "edited_paths": [],
+        "operator_confirmed": false,
+        "edit_reason": null
       }
     },
     {
@@ -2433,6 +2552,13 @@
           }
         ],
         "highlight_feature_ids": []
+      },
+      "direction_revision": {
+        "kind": "inherited",
+        "source_story_revision_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "edited_paths": [],
+        "operator_confirmed": false,
+        "edit_reason": null
       }
     },
     {
@@ -2571,6 +2697,13 @@
         ],
         "focus_card_id": "card_setup_019",
         "occlusion_policy": "never_hide_hero"
+      },
+      "direction_revision": {
+        "kind": "inherited",
+        "source_story_revision_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "edited_paths": [],
+        "operator_confirmed": false,
+        "edit_reason": null
       }
     },
     {
@@ -2709,6 +2842,13 @@
         ],
         "focus_card_id": "card_setup_020",
         "occlusion_policy": "never_hide_hero"
+      },
+      "direction_revision": {
+        "kind": "inherited",
+        "source_story_revision_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "edited_paths": [],
+        "operator_confirmed": false,
+        "edit_reason": null
       }
     },
     {
@@ -2844,6 +2984,13 @@
         },
         "annotation_beat_id": "beat_setup_021",
         "attribution_text_id": "text_setup_021"
+      },
+      "direction_revision": {
+        "kind": "inherited",
+        "source_story_revision_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "edited_paths": [],
+        "operator_confirmed": false,
+        "edit_reason": null
       }
     },
     {
@@ -2979,6 +3126,13 @@
         },
         "annotation_beat_id": "beat_setup_022",
         "attribution_text_id": "text_setup_022"
+      },
+      "direction_revision": {
+        "kind": "inherited",
+        "source_story_revision_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "edited_paths": [],
+        "operator_confirmed": false,
+        "edit_reason": null
       }
     },
     {
@@ -3107,6 +3261,13 @@
         "unit_text_id": null,
         "animation_rule": "reveal_exact",
         "source_text_id": null
+      },
+      "direction_revision": {
+        "kind": "inherited",
+        "source_story_revision_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "edited_paths": [],
+        "operator_confirmed": false,
+        "edit_reason": null
       }
     },
     {
@@ -3235,6 +3396,13 @@
         "unit_text_id": null,
         "animation_rule": "reveal_exact",
         "source_text_id": null
+      },
+      "direction_revision": {
+        "kind": "inherited",
+        "source_story_revision_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "edited_paths": [],
+        "operator_confirmed": false,
+        "edit_reason": null
       }
     },
     {
@@ -3373,6 +3541,13 @@
           }
         ],
         "highlight_feature_ids": []
+      },
+      "direction_revision": {
+        "kind": "inherited",
+        "source_story_revision_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "edited_paths": [],
+        "operator_confirmed": false,
+        "edit_reason": null
       }
     },
     {
@@ -3511,6 +3686,13 @@
           }
         ],
         "highlight_feature_ids": []
+      },
+      "direction_revision": {
+        "kind": "inherited",
+        "source_story_revision_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "edited_paths": [],
+        "operator_confirmed": false,
+        "edit_reason": null
       }
     },
     {
@@ -3649,6 +3831,13 @@
         ],
         "focus_card_id": "card_setup_027",
         "occlusion_policy": "never_hide_hero"
+      },
+      "direction_revision": {
+        "kind": "inherited",
+        "source_story_revision_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "edited_paths": [],
+        "operator_confirmed": false,
+        "edit_reason": null
       }
     },
     {
@@ -3787,6 +3976,13 @@
         ],
         "focus_card_id": "card_setup_028",
         "occlusion_policy": "never_hide_hero"
+      },
+      "direction_revision": {
+        "kind": "inherited",
+        "source_story_revision_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "edited_paths": [],
+        "operator_confirmed": false,
+        "edit_reason": null
       }
     },
     {
@@ -3922,6 +4118,13 @@
         },
         "annotation_beat_id": "beat_setup_029",
         "attribution_text_id": "text_setup_029"
+      },
+      "direction_revision": {
+        "kind": "inherited",
+        "source_story_revision_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "edited_paths": [],
+        "operator_confirmed": false,
+        "edit_reason": null
       }
     },
     {
@@ -4057,6 +4260,13 @@
         },
         "annotation_beat_id": "beat_setup_030",
         "attribution_text_id": "text_setup_030"
+      },
+      "direction_revision": {
+        "kind": "inherited",
+        "source_story_revision_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "edited_paths": [],
+        "operator_confirmed": false,
+        "edit_reason": null
       }
     },
     {
@@ -4185,6 +4395,13 @@
         "unit_text_id": null,
         "animation_rule": "reveal_exact",
         "source_text_id": null
+      },
+      "direction_revision": {
+        "kind": "inherited",
+        "source_story_revision_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "edited_paths": [],
+        "operator_confirmed": false,
+        "edit_reason": null
       }
     },
     {
@@ -4313,6 +4530,13 @@
         "unit_text_id": null,
         "animation_rule": "reveal_exact",
         "source_text_id": null
+      },
+      "direction_revision": {
+        "kind": "inherited",
+        "source_story_revision_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "edited_paths": [],
+        "operator_confirmed": false,
+        "edit_reason": null
       }
     },
     {
@@ -4451,6 +4675,13 @@
           }
         ],
         "highlight_feature_ids": []
+      },
+      "direction_revision": {
+        "kind": "inherited",
+        "source_story_revision_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "edited_paths": [],
+        "operator_confirmed": false,
+        "edit_reason": null
       }
     },
     {
@@ -4589,6 +4820,13 @@
           }
         ],
         "highlight_feature_ids": []
+      },
+      "direction_revision": {
+        "kind": "inherited",
+        "source_story_revision_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "edited_paths": [],
+        "operator_confirmed": false,
+        "edit_reason": null
       }
     },
     {
@@ -4727,6 +4965,13 @@
         ],
         "focus_card_id": "card_setup_035",
         "occlusion_policy": "never_hide_hero"
+      },
+      "direction_revision": {
+        "kind": "inherited",
+        "source_story_revision_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "edited_paths": [],
+        "operator_confirmed": false,
+        "edit_reason": null
       }
     },
     {
@@ -4865,6 +5110,13 @@
         ],
         "focus_card_id": "card_setup_036",
         "occlusion_policy": "never_hide_hero"
+      },
+      "direction_revision": {
+        "kind": "inherited",
+        "source_story_revision_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "edited_paths": [],
+        "operator_confirmed": false,
+        "edit_reason": null
       }
     },
     {
@@ -5000,6 +5252,13 @@
         },
         "annotation_beat_id": "beat_setup_037",
         "attribution_text_id": "text_setup_037"
+      },
+      "direction_revision": {
+        "kind": "inherited",
+        "source_story_revision_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "edited_paths": [],
+        "operator_confirmed": false,
+        "edit_reason": null
       }
     },
     {
@@ -5135,6 +5394,13 @@
         },
         "annotation_beat_id": "beat_setup_038",
         "attribution_text_id": "text_setup_038"
+      },
+      "direction_revision": {
+        "kind": "inherited",
+        "source_story_revision_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "edited_paths": [],
+        "operator_confirmed": false,
+        "edit_reason": null
       }
     },
     {
@@ -5263,6 +5529,13 @@
         "unit_text_id": null,
         "animation_rule": "reveal_exact",
         "source_text_id": null
+      },
+      "direction_revision": {
+        "kind": "inherited",
+        "source_story_revision_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "edited_paths": [],
+        "operator_confirmed": false,
+        "edit_reason": null
       }
     },
     {
@@ -5391,6 +5664,13 @@
         "unit_text_id": null,
         "animation_rule": "reveal_exact",
         "source_text_id": null
+      },
+      "direction_revision": {
+        "kind": "inherited",
+        "source_story_revision_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "edited_paths": [],
+        "operator_confirmed": false,
+        "edit_reason": null
       }
     },
     {
@@ -5529,6 +5809,13 @@
           }
         ],
         "highlight_feature_ids": []
+      },
+      "direction_revision": {
+        "kind": "inherited",
+        "source_story_revision_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "edited_paths": [],
+        "operator_confirmed": false,
+        "edit_reason": null
       }
     },
     {
@@ -5667,6 +5954,13 @@
           }
         ],
         "highlight_feature_ids": []
+      },
+      "direction_revision": {
+        "kind": "inherited",
+        "source_story_revision_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "edited_paths": [],
+        "operator_confirmed": false,
+        "edit_reason": null
       }
     },
     {
@@ -5805,6 +6099,13 @@
         ],
         "focus_card_id": "card_setup_043",
         "occlusion_policy": "never_hide_hero"
+      },
+      "direction_revision": {
+        "kind": "inherited",
+        "source_story_revision_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "edited_paths": [],
+        "operator_confirmed": false,
+        "edit_reason": null
       }
     },
     {
@@ -5943,6 +6244,13 @@
         ],
         "focus_card_id": "card_setup_044",
         "occlusion_policy": "never_hide_hero"
+      },
+      "direction_revision": {
+        "kind": "inherited",
+        "source_story_revision_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "edited_paths": [],
+        "operator_confirmed": false,
+        "edit_reason": null
       }
     },
     {
@@ -6078,6 +6386,13 @@
         },
         "annotation_beat_id": "beat_setup_045",
         "attribution_text_id": "text_setup_045"
+      },
+      "direction_revision": {
+        "kind": "inherited",
+        "source_story_revision_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "edited_paths": [],
+        "operator_confirmed": false,
+        "edit_reason": null
       }
     },
     {
@@ -6213,6 +6528,13 @@
         },
         "annotation_beat_id": "beat_setup_046",
         "attribution_text_id": "text_setup_046"
+      },
+      "direction_revision": {
+        "kind": "inherited",
+        "source_story_revision_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "edited_paths": [],
+        "operator_confirmed": false,
+        "edit_reason": null
       }
     },
     {
@@ -6341,6 +6663,13 @@
         "unit_text_id": null,
         "animation_rule": "reveal_exact",
         "source_text_id": null
+      },
+      "direction_revision": {
+        "kind": "inherited",
+        "source_story_revision_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "edited_paths": [],
+        "operator_confirmed": false,
+        "edit_reason": null
       }
     },
     {
@@ -6469,6 +6798,13 @@
         "unit_text_id": null,
         "animation_rule": "reveal_exact",
         "source_text_id": null
+      },
+      "direction_revision": {
+        "kind": "inherited",
+        "source_story_revision_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "edited_paths": [],
+        "operator_confirmed": false,
+        "edit_reason": null
       }
     }
   ]

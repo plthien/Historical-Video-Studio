@@ -76,7 +76,9 @@
             "evidence_badge": "archival"
           },
           "path_geometry_ref": null,
-          "text_layout": null
+          "text_layout": null,
+          "template_slot_id": "map_main",
+          "source_asset_slot_id": "slot_01_map_main"
         },
         {
           "layer_id": "layer_01_place_head",
@@ -133,7 +135,9 @@
             "vertical_align": "center",
             "max_lines": 3,
             "overflow": "block"
-          }
+          },
+          "template_slot_id": "place_head",
+          "source_asset_slot_id": null
         },
         {
           "layer_id": "layer_01_feature_note",
@@ -190,7 +194,9 @@
             "vertical_align": "center",
             "max_lines": 3,
             "overflow": "block"
-          }
+          },
+          "template_slot_id": "feature_note",
+          "source_asset_slot_id": null
         }
       ],
       "events": [
@@ -468,7 +474,9 @@
             "evidence_badge": "archival"
           },
           "path_geometry_ref": null,
-          "text_layout": null
+          "text_layout": null,
+          "template_slot_id": "portrait_main",
+          "source_asset_slot_id": "slot_02_portrait_main"
         },
         {
           "layer_id": "layer_02_person_name",
@@ -525,7 +533,9 @@
             "vertical_align": "center",
             "max_lines": 3,
             "overflow": "block"
-          }
+          },
+          "template_slot_id": "person_name",
+          "source_asset_slot_id": null
         },
         {
           "layer_id": "layer_02_person_role",
@@ -582,7 +592,9 @@
             "vertical_align": "center",
             "max_lines": 3,
             "overflow": "block"
-          }
+          },
+          "template_slot_id": "person_role",
+          "source_asset_slot_id": null
         },
         {
           "layer_id": "layer_02_date_badge",
@@ -639,7 +651,9 @@
             "vertical_align": "center",
             "max_lines": 1,
             "overflow": "block"
-          }
+          },
+          "template_slot_id": "date_badge",
+          "source_asset_slot_id": null
         }
       ],
       "events": [
@@ -912,7 +926,9 @@
             "evidence_badge": "archival"
           },
           "path_geometry_ref": null,
-          "text_layout": null
+          "text_layout": null,
+          "template_slot_id": "hero_card",
+          "source_asset_slot_id": "slot_03_hero_card"
         },
         {
           "layer_id": "layer_03_support_card",
@@ -960,7 +976,9 @@
             "evidence_badge": "archival"
           },
           "path_geometry_ref": null,
-          "text_layout": null
+          "text_layout": null,
+          "template_slot_id": "support_card",
+          "source_asset_slot_id": "slot_03_support_card"
         },
         {
           "layer_id": "layer_03_detail_card",
@@ -1008,7 +1026,9 @@
             "evidence_badge": "archival"
           },
           "path_geometry_ref": null,
-          "text_layout": null
+          "text_layout": null,
+          "template_slot_id": "detail_card",
+          "source_asset_slot_id": "slot_03_detail_card"
         },
         {
           "layer_id": "layer_03_caption",
@@ -1065,7 +1085,9 @@
             "vertical_align": "center",
             "max_lines": 3,
             "overflow": "block"
-          }
+          },
+          "template_slot_id": "caption",
+          "source_asset_slot_id": null
         }
       ],
       "events": [
@@ -1433,7 +1455,9 @@
             "evidence_badge": "archival"
           },
           "path_geometry_ref": null,
-          "text_layout": null
+          "text_layout": null,
+          "template_slot_id": "map_backdrop",
+          "source_asset_slot_id": "slot_04_map_backdrop"
         },
         {
           "layer_id": "layer_04_route_overlay",
@@ -1481,7 +1505,9 @@
             "evidence_badge": "none"
           },
           "path_geometry_ref": "geometry_route_001",
-          "text_layout": null
+          "text_layout": null,
+          "template_slot_id": "route_overlay",
+          "source_asset_slot_id": null
         },
         {
           "layer_id": "layer_04_waypoint_callout",
@@ -1538,7 +1564,9 @@
             "vertical_align": "center",
             "max_lines": 3,
             "overflow": "block"
-          }
+          },
+          "template_slot_id": "waypoint_callout",
+          "source_asset_slot_id": null
         },
         {
           "layer_id": "layer_04_route_title",
@@ -1595,7 +1623,9 @@
             "vertical_align": "center",
             "max_lines": 3,
             "overflow": "block"
-          }
+          },
+          "template_slot_id": "route_title",
+          "source_asset_slot_id": null
         }
       ],
       "events": [
@@ -1897,7 +1927,9 @@
             "vertical_align": "center",
             "max_lines": 1,
             "overflow": "block"
-          }
+          },
+          "template_slot_id": "date_early",
+          "source_asset_slot_id": null
         },
         {
           "layer_id": "layer_05_date_late",
@@ -1954,7 +1986,9 @@
             "vertical_align": "center",
             "max_lines": 1,
             "overflow": "block"
-          }
+          },
+          "template_slot_id": "date_late",
+          "source_asset_slot_id": null
         },
         {
           "layer_id": "layer_05_event_rail",
@@ -2002,7 +2036,9 @@
             "evidence_badge": "none"
           },
           "path_geometry_ref": "geometry_route_001",
-          "text_layout": null
+          "text_layout": null,
+          "template_slot_id": "event_rail",
+          "source_asset_slot_id": null
         },
         {
           "layer_id": "layer_05_event_title",
@@ -2059,7 +2095,9 @@
             "vertical_align": "center",
             "max_lines": 3,
             "overflow": "block"
-          }
+          },
+          "template_slot_id": "event_title",
+          "source_asset_slot_id": null
         }
       ],
       "events": [
@@ -2347,7 +2385,9 @@
             "evidence_badge": "archival"
           },
           "path_geometry_ref": null,
-          "text_layout": null
+          "text_layout": null,
+          "template_slot_id": "document_main",
+          "source_asset_slot_id": "slot_06_document_main"
         },
         {
           "layer_id": "layer_06_verified_excerpt",
@@ -2404,7 +2444,9 @@
             "vertical_align": "center",
             "max_lines": 3,
             "overflow": "block"
-          }
+          },
+          "template_slot_id": "verified_excerpt",
+          "source_asset_slot_id": null
         },
         {
           "layer_id": "layer_06_citation",
@@ -2461,7 +2503,9 @@
             "vertical_align": "center",
             "max_lines": 3,
             "overflow": "block"
-          }
+          },
+          "template_slot_id": "citation",
+          "source_asset_slot_id": null
         }
       ],
       "events": [
@@ -2747,7 +2791,9 @@
             "evidence_badge": "archival"
           },
           "path_geometry_ref": null,
-          "text_layout": null
+          "text_layout": null,
+          "template_slot_id": "map_before",
+          "source_asset_slot_id": "slot_07_map_before"
         },
         {
           "layer_id": "layer_07_map_after",
@@ -2800,7 +2846,9 @@
             "evidence_badge": "archival"
           },
           "path_geometry_ref": null,
-          "text_layout": null
+          "text_layout": null,
+          "template_slot_id": "map_after",
+          "source_asset_slot_id": "slot_07_map_after"
         },
         {
           "layer_id": "layer_07_date_before",
@@ -2857,7 +2905,9 @@
             "vertical_align": "center",
             "max_lines": 1,
             "overflow": "block"
-          }
+          },
+          "template_slot_id": "date_before",
+          "source_asset_slot_id": null
         },
         {
           "layer_id": "layer_07_date_after",
@@ -2914,7 +2964,9 @@
             "vertical_align": "center",
             "max_lines": 1,
             "overflow": "block"
-          }
+          },
+          "template_slot_id": "date_after",
+          "source_asset_slot_id": null
         },
         {
           "layer_id": "layer_07_delta_note",
@@ -2971,7 +3023,9 @@
             "vertical_align": "center",
             "max_lines": 3,
             "overflow": "block"
-          }
+          },
+          "template_slot_id": "delta_note",
+          "source_asset_slot_id": null
         }
       ],
       "events": [
@@ -3258,7 +3312,9 @@
             "vertical_align": "center",
             "max_lines": 1,
             "overflow": "block"
-          }
+          },
+          "template_slot_id": "fact_value",
+          "source_asset_slot_id": null
         },
         {
           "layer_id": "layer_08_fact_label",
@@ -3315,7 +3371,9 @@
             "vertical_align": "center",
             "max_lines": 3,
             "overflow": "block"
-          }
+          },
+          "template_slot_id": "fact_label",
+          "source_asset_slot_id": null
         },
         {
           "layer_id": "layer_08_source_note",
@@ -3372,7 +3430,9 @@
             "vertical_align": "center",
             "max_lines": 3,
             "overflow": "block"
-          }
+          },
+          "template_slot_id": "source_note",
+          "source_asset_slot_id": null
         }
       ],
       "events": [
@@ -3651,7 +3711,9 @@
             "vertical_align": "center",
             "max_lines": 3,
             "overflow": "block"
-          }
+          },
+          "template_slot_id": "quote_text",
+          "source_asset_slot_id": null
         },
         {
           "layer_id": "layer_09_attribution",
@@ -3708,7 +3770,9 @@
             "vertical_align": "center",
             "max_lines": 3,
             "overflow": "block"
-          }
+          },
+          "template_slot_id": "attribution",
+          "source_asset_slot_id": null
         },
         {
           "layer_id": "layer_09_source_page",
@@ -3756,7 +3820,9 @@
             "evidence_badge": "archival"
           },
           "path_geometry_ref": null,
-          "text_layout": null
+          "text_layout": null,
+          "template_slot_id": "source_page",
+          "source_asset_slot_id": "slot_09_source_page"
         }
       ],
       "events": [
@@ -4031,7 +4097,9 @@
             "evidence_badge": "archival"
           },
           "path_geometry_ref": null,
-          "text_layout": null
+          "text_layout": null,
+          "template_slot_id": "region_overview",
+          "source_asset_slot_id": "slot_10_region_overview"
         },
         {
           "layer_id": "layer_10_entity_a",
@@ -4088,7 +4156,9 @@
             "vertical_align": "center",
             "max_lines": 3,
             "overflow": "block"
-          }
+          },
+          "template_slot_id": "entity_a",
+          "source_asset_slot_id": null
         },
         {
           "layer_id": "layer_10_entity_b",
@@ -4145,7 +4215,9 @@
             "vertical_align": "center",
             "max_lines": 3,
             "overflow": "block"
-          }
+          },
+          "template_slot_id": "entity_b",
+          "source_asset_slot_id": null
         },
         {
           "layer_id": "layer_10_causal_path",
@@ -4193,7 +4265,9 @@
             "evidence_badge": "none"
           },
           "path_geometry_ref": "geometry_route_001",
-          "text_layout": null
+          "text_layout": null,
+          "template_slot_id": "causal_path",
+          "source_asset_slot_id": null
         }
       ],
       "events": [

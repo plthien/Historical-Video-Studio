@@ -231,6 +231,13 @@
           }
         ],
         "highlight_feature_ids": []
+      },
+      "direction_revision": {
+        "kind": "inherited",
+        "source_story_revision_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "edited_paths": [],
+        "operator_confirmed": false,
+        "edit_reason": null
       }
     },
     {
@@ -460,6 +467,13 @@
         "role_text_id": "text_02_person_role",
         "secondary_evidence_slot_id": null,
         "cutout_policy": "frame_original_if_mask_bad"
+      },
+      "direction_revision": {
+        "kind": "inherited",
+        "source_story_revision_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "edited_paths": [],
+        "operator_confirmed": false,
+        "edit_reason": null
       }
     },
     {
@@ -732,6 +746,13 @@
         ],
         "focus_card_id": "card_03_0",
         "occlusion_policy": "never_hide_hero"
+      },
+      "direction_revision": {
+        "kind": "inherited",
+        "source_story_revision_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "edited_paths": [],
+        "operator_confirmed": false,
+        "edit_reason": null
       }
     },
     {
@@ -982,6 +1003,13 @@
         ],
         "moving_marker_slot_id": null,
         "route_truthfulness": "approved_schematic_disclosed"
+      },
+      "direction_revision": {
+        "kind": "inherited",
+        "source_story_revision_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "edited_paths": [],
+        "operator_confirmed": false,
+        "edit_reason": null
       }
     },
     {
@@ -1209,6 +1237,13 @@
         ],
         "orientation": "horizontal",
         "active_event_id": "milestone_05_1"
+      },
+      "direction_revision": {
+        "kind": "inherited",
+        "source_story_revision_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "edited_paths": [],
+        "operator_confirmed": false,
+        "edit_reason": null
       }
     },
     {
@@ -1436,6 +1471,13 @@
         },
         "annotation_beat_id": "beat_06_1",
         "attribution_text_id": "text_06_citation"
+      },
+      "direction_revision": {
+        "kind": "inherited",
+        "source_story_revision_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "edited_paths": [],
+        "operator_confirmed": false,
+        "edit_reason": null
       }
     },
     {
@@ -1694,6 +1736,13 @@
         "date_before_text_id": "text_07_date_before",
         "date_after_text_id": "text_07_date_after",
         "comparison_mode": "side_by_side"
+      },
+      "direction_revision": {
+        "kind": "inherited",
+        "source_story_revision_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "edited_paths": [],
+        "operator_confirmed": false,
+        "edit_reason": null
       }
     },
     {
@@ -1904,6 +1953,13 @@
         "unit_text_id": null,
         "animation_rule": "reveal_exact",
         "source_text_id": null
+      },
+      "direction_revision": {
+        "kind": "inherited",
+        "source_story_revision_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "edited_paths": [],
+        "operator_confirmed": false,
+        "edit_reason": null
       }
     },
     {
@@ -2126,6 +2182,13 @@
         "emphasis_text_ids": [
           "text_09_quote_text"
         ]
+      },
+      "direction_revision": {
+        "kind": "inherited",
+        "source_story_revision_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "edited_paths": [],
+        "operator_confirmed": false,
+        "edit_reason": null
       }
     },
     {
@@ -2367,6 +2430,13 @@
         ],
         "scope_change": "local_to_regional",
         "map_requirement_id": "req_10_region_overview"
+      },
+      "direction_revision": {
+        "kind": "inherited",
+        "source_story_revision_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "edited_paths": [],
+        "operator_confirmed": false,
+        "edit_reason": null
       }
     }
   ]

@@ -139,6 +139,13 @@
           }
         ],
         "highlight_feature_ids": []
+      },
+      "direction_revision": {
+        "kind": "inherited",
+        "source_story_revision_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "edited_paths": [],
+        "operator_confirmed": false,
+        "edit_reason": null
       }
     }
   ]

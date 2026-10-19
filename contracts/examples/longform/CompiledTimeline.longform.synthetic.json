@@ -71,7 +71,9 @@
             "evidence_badge": "archival"
           },
           "path_geometry_ref": null,
-          "text_layout": null
+          "text_layout": null,
+          "template_slot_id": "map_main",
+          "source_asset_slot_id": "slot_001"
         },
         {
           "layer_id": "title_001",
@@ -128,7 +130,9 @@
             "vertical_align": "center",
             "max_lines": 3,
             "overflow": "block"
-          }
+          },
+          "template_slot_id": "place_head",
+          "source_asset_slot_id": null
         }
       ],
       "events": [
@@ -318,7 +322,9 @@
             "evidence_badge": "archival"
           },
           "path_geometry_ref": null,
-          "text_layout": null
+          "text_layout": null,
+          "template_slot_id": "map_main",
+          "source_asset_slot_id": "slot_002"
         },
         {
           "layer_id": "title_002",
@@ -375,7 +381,9 @@
             "vertical_align": "center",
             "max_lines": 3,
             "overflow": "block"
-          }
+          },
+          "template_slot_id": "place_head",
+          "source_asset_slot_id": null
         }
       ],
       "events": [
@@ -565,7 +573,9 @@
             "evidence_badge": "archival"
           },
           "path_geometry_ref": null,
-          "text_layout": null
+          "text_layout": null,
+          "template_slot_id": "hero_card",
+          "source_asset_slot_id": "slot_003"
         },
         {
           "layer_id": "title_003",
@@ -622,7 +632,9 @@
             "vertical_align": "center",
             "max_lines": 3,
             "overflow": "block"
-          }
+          },
+          "template_slot_id": "caption",
+          "source_asset_slot_id": null
         }
       ],
       "events": [
@@ -812,7 +824,9 @@
             "evidence_badge": "archival"
           },
           "path_geometry_ref": null,
-          "text_layout": null
+          "text_layout": null,
+          "template_slot_id": "support_card",
+          "source_asset_slot_id": "slot_004"
         },
         {
           "layer_id": "title_004",
@@ -869,7 +883,9 @@
             "vertical_align": "center",
             "max_lines": 3,
             "overflow": "block"
-          }
+          },
+          "template_slot_id": "caption",
+          "source_asset_slot_id": null
         }
       ],
       "events": [
@@ -1059,7 +1075,9 @@
             "evidence_badge": "archival"
           },
           "path_geometry_ref": null,
-          "text_layout": null
+          "text_layout": null,
+          "template_slot_id": "document_main",
+          "source_asset_slot_id": "slot_005"
         },
         {
           "layer_id": "title_005",
@@ -1116,7 +1134,9 @@
             "vertical_align": "center",
             "max_lines": 3,
             "overflow": "block"
-          }
+          },
+          "template_slot_id": "verified_excerpt",
+          "source_asset_slot_id": null
         }
       ],
       "events": [
@@ -1306,7 +1326,9 @@
             "evidence_badge": "archival"
           },
           "path_geometry_ref": null,
-          "text_layout": null
+          "text_layout": null,
+          "template_slot_id": "document_main",
+          "source_asset_slot_id": "slot_006"
         },
         {
           "layer_id": "title_006",
@@ -1363,7 +1385,9 @@
             "vertical_align": "center",
             "max_lines": 3,
             "overflow": "block"
-          }
+          },
+          "template_slot_id": "verified_excerpt",
+          "source_asset_slot_id": null
         }
       ],
       "events": [
@@ -1553,7 +1577,9 @@
             "evidence_badge": "archival"
           },
           "path_geometry_ref": null,
-          "text_layout": null
+          "text_layout": null,
+          "template_slot_id": "fact_value",
+          "source_asset_slot_id": "slot_007"
         },
         {
           "layer_id": "title_007",
@@ -1610,7 +1636,9 @@
             "vertical_align": "center",
             "max_lines": 3,
             "overflow": "block"
-          }
+          },
+          "template_slot_id": "fact_label",
+          "source_asset_slot_id": null
         }
       ],
       "events": [
@@ -1800,7 +1828,9 @@
             "evidence_badge": "archival"
           },
           "path_geometry_ref": null,
-          "text_layout": null
+          "text_layout": null,
+          "template_slot_id": "fact_value",
+          "source_asset_slot_id": "slot_008"
         },
         {
           "layer_id": "title_008",
@@ -1857,7 +1887,9 @@
             "vertical_align": "center",
             "max_lines": 3,
             "overflow": "block"
-          }
+          },
+          "template_slot_id": "fact_label",
+          "source_asset_slot_id": null
         }
       ],
       "events": [
@@ -2047,7 +2079,9 @@
             "evidence_badge": "archival"
           },
           "path_geometry_ref": null,
-          "text_layout": null
+          "text_layout": null,
+          "template_slot_id": "map_main",
+          "source_asset_slot_id": "slot_009"
         },
         {
           "layer_id": "title_009",
@@ -2104,7 +2138,9 @@
             "vertical_align": "center",
             "max_lines": 3,
             "overflow": "block"
-          }
+          },
+          "template_slot_id": "place_head",
+          "source_asset_slot_id": null
         }
       ],
       "events": [
@@ -2294,7 +2330,9 @@
             "evidence_badge": "archival"
           },
           "path_geometry_ref": null,
-          "text_layout": null
+          "text_layout": null,
+          "template_slot_id": "map_main",
+          "source_asset_slot_id": "slot_010"
         },
         {
           "layer_id": "title_010",
@@ -2351,7 +2389,9 @@
             "vertical_align": "center",
             "max_lines": 3,
             "overflow": "block"
-          }
+          },
+          "template_slot_id": "place_head",
+          "source_asset_slot_id": null
         }
       ],
       "events": [
@@ -2541,7 +2581,9 @@
             "evidence_badge": "archival"
           },
           "path_geometry_ref": null,
-          "text_layout": null
+          "text_layout": null,
+          "template_slot_id": "hero_card",
+          "source_asset_slot_id": "slot_011"
         },
         {
           "layer_id": "title_011",
@@ -2598,7 +2640,9 @@
             "vertical_align": "center",
             "max_lines": 3,
             "overflow": "block"
-          }
+          },
+          "template_slot_id": "caption",
+          "source_asset_slot_id": null
         }
       ],
       "events": [
@@ -2788,7 +2832,9 @@
             "evidence_badge": "archival"
           },
           "path_geometry_ref": null,
-          "text_layout": null
+          "text_layout": null,
+          "template_slot_id": "support_card",
+          "source_asset_slot_id": "slot_012"
         },
         {
           "layer_id": "title_012",
@@ -2845,7 +2891,9 @@
             "vertical_align": "center",
             "max_lines": 3,
             "overflow": "block"
-          }
+          },
+          "template_slot_id": "caption",
+          "source_asset_slot_id": null
         }
       ],
       "events": [
@@ -3035,7 +3083,9 @@
             "evidence_badge": "archival"
           },
           "path_geometry_ref": null,
-          "text_layout": null
+          "text_layout": null,
+          "template_slot_id": "document_main",
+          "source_asset_slot_id": "slot_013"
         },
         {
           "layer_id": "title_013",
@@ -3092,7 +3142,9 @@
             "vertical_align": "center",
             "max_lines": 3,
             "overflow": "block"
-          }
+          },
+          "template_slot_id": "verified_excerpt",
+          "source_asset_slot_id": null
         }
       ],
       "events": [
@@ -3282,7 +3334,9 @@
             "evidence_badge": "archival"
           },
           "path_geometry_ref": null,
-          "text_layout": null
+          "text_layout": null,
+          "template_slot_id": "document_main",
+          "source_asset_slot_id": "slot_014"
         },
         {
           "layer_id": "title_014",
@@ -3339,7 +3393,9 @@
             "vertical_align": "center",
             "max_lines": 3,
             "overflow": "block"
-          }
+          },
+          "template_slot_id": "verified_excerpt",
+          "source_asset_slot_id": null
         }
       ],
       "events": [
@@ -3529,7 +3585,9 @@
             "evidence_badge": "archival"
           },
           "path_geometry_ref": null,
-          "text_layout": null
+          "text_layout": null,
+          "template_slot_id": "fact_value",
+          "source_asset_slot_id": "slot_015"
         },
         {
           "layer_id": "title_015",
@@ -3586,7 +3644,9 @@
             "vertical_align": "center",
             "max_lines": 3,
             "overflow": "block"
-          }
+          },
+          "template_slot_id": "fact_label",
+          "source_asset_slot_id": null
         }
       ],
       "events": [
@@ -3776,7 +3836,9 @@
             "evidence_badge": "archival"
           },
           "path_geometry_ref": null,
-          "text_layout": null
+          "text_layout": null,
+          "template_slot_id": "fact_value",
+          "source_asset_slot_id": "slot_016"
         },
         {
           "layer_id": "title_016",
@@ -3833,7 +3895,9 @@
             "vertical_align": "center",
             "max_lines": 3,
             "overflow": "block"
-          }
+          },
+          "template_slot_id": "fact_label",
+          "source_asset_slot_id": null
         }
       ],
       "events": [
@@ -4023,7 +4087,9 @@
             "evidence_badge": "archival"
           },
           "path_geometry_ref": null,
-          "text_layout": null
+          "text_layout": null,
+          "template_slot_id": "map_main",
+          "source_asset_slot_id": "slot_017"
         },
         {
           "layer_id": "title_017",
@@ -4080,7 +4146,9 @@
             "vertical_align": "center",
             "max_lines": 3,
             "overflow": "block"
-          }
+          },
+          "template_slot_id": "place_head",
+          "source_asset_slot_id": null
         }
       ],
       "events": [
@@ -4270,7 +4338,9 @@
             "evidence_badge": "archival"
           },
           "path_geometry_ref": null,
-          "text_layout": null
+          "text_layout": null,
+          "template_slot_id": "map_main",
+          "source_asset_slot_id": "slot_018"
         },
         {
           "layer_id": "title_018",
@@ -4327,7 +4397,9 @@
             "vertical_align": "center",
             "max_lines": 3,
             "overflow": "block"
-          }
+          },
+          "template_slot_id": "place_head",
+          "source_asset_slot_id": null
         }
       ],
       "events": [
@@ -4517,7 +4589,9 @@
             "evidence_badge": "archival"
           },
           "path_geometry_ref": null,
-          "text_layout": null
+          "text_layout": null,
+          "template_slot_id": "hero_card",
+          "source_asset_slot_id": "slot_019"
         },
         {
           "layer_id": "title_019",
@@ -4574,7 +4648,9 @@
             "vertical_align": "center",
             "max_lines": 3,
             "overflow": "block"
-          }
+          },
+          "template_slot_id": "caption",
+          "source_asset_slot_id": null
         }
       ],
       "events": [
@@ -4764,7 +4840,9 @@
             "evidence_badge": "archival"
           },
           "path_geometry_ref": null,
-          "text_layout": null
+          "text_layout": null,
+          "template_slot_id": "support_card",
+          "source_asset_slot_id": "slot_020"
         },
         {
           "layer_id": "title_020",
@@ -4821,7 +4899,9 @@
             "vertical_align": "center",
             "max_lines": 3,
             "overflow": "block"
-          }
+          },
+          "template_slot_id": "caption",
+          "source_asset_slot_id": null
         }
       ],
       "events": [
@@ -5011,7 +5091,9 @@
             "evidence_badge": "archival"
           },
           "path_geometry_ref": null,
-          "text_layout": null
+          "text_layout": null,
+          "template_slot_id": "document_main",
+          "source_asset_slot_id": "slot_021"
         },
         {
           "layer_id": "title_021",
@@ -5068,7 +5150,9 @@
             "vertical_align": "center",
             "max_lines": 3,
             "overflow": "block"
-          }
+          },
+          "template_slot_id": "verified_excerpt",
+          "source_asset_slot_id": null
         }
       ],
       "events": [
@@ -5258,7 +5342,9 @@
             "evidence_badge": "archival"
           },
           "path_geometry_ref": null,
-          "text_layout": null
+          "text_layout": null,
+          "template_slot_id": "document_main",
+          "source_asset_slot_id": "slot_022"
         },
         {
           "layer_id": "title_022",
@@ -5315,7 +5401,9 @@
             "vertical_align": "center",
             "max_lines": 3,
             "overflow": "block"
-          }
+          },
+          "template_slot_id": "verified_excerpt",
+          "source_asset_slot_id": null
         }
       ],
       "events": [
@@ -5505,7 +5593,9 @@
             "evidence_badge": "archival"
           },
           "path_geometry_ref": null,
-          "text_layout": null
+          "text_layout": null,
+          "template_slot_id": "fact_value",
+          "source_asset_slot_id": "slot_023"
         },
         {
           "layer_id": "title_023",
@@ -5562,7 +5652,9 @@
             "vertical_align": "center",
             "max_lines": 3,
             "overflow": "block"
-          }
+          },
+          "template_slot_id": "fact_label",
+          "source_asset_slot_id": null
         }
       ],
       "events": [
@@ -5752,7 +5844,9 @@
             "evidence_badge": "archival"
           },
           "path_geometry_ref": null,
-          "text_layout": null
+          "text_layout": null,
+          "template_slot_id": "fact_value",
+          "source_asset_slot_id": "slot_024"
         },
         {
           "layer_id": "title_024",
@@ -5809,7 +5903,9 @@
             "vertical_align": "center",
             "max_lines": 3,
             "overflow": "block"
-          }
+          },
+          "template_slot_id": "fact_label",
+          "source_asset_slot_id": null
         }
       ],
       "events": [
@@ -5999,7 +6095,9 @@
             "evidence_badge": "archival"
           },
           "path_geometry_ref": null,
-          "text_layout": null
+          "text_layout": null,
+          "template_slot_id": "map_main",
+          "source_asset_slot_id": "slot_025"
         },
         {
           "layer_id": "title_025",
@@ -6056,7 +6154,9 @@
             "vertical_align": "center",
             "max_lines": 3,
             "overflow": "block"
-          }
+          },
+          "template_slot_id": "place_head",
+          "source_asset_slot_id": null
         }
       ],
       "events": [
@@ -6246,7 +6346,9 @@
             "evidence_badge": "archival"
           },
           "path_geometry_ref": null,
-          "text_layout": null
+          "text_layout": null,
+          "template_slot_id": "map_main",
+          "source_asset_slot_id": "slot_026"
         },
         {
           "layer_id": "title_026",
@@ -6303,7 +6405,9 @@
             "vertical_align": "center",
             "max_lines": 3,
             "overflow": "block"
-          }
+          },
+          "template_slot_id": "place_head",
+          "source_asset_slot_id": null
         }
       ],
       "events": [
@@ -6493,7 +6597,9 @@
             "evidence_badge": "archival"
           },
           "path_geometry_ref": null,
-          "text_layout": null
+          "text_layout": null,
+          "template_slot_id": "hero_card",
+          "source_asset_slot_id": "slot_027"
         },
         {
           "layer_id": "title_027",
@@ -6550,7 +6656,9 @@
             "vertical_align": "center",
             "max_lines": 3,
             "overflow": "block"
-          }
+          },
+          "template_slot_id": "caption",
+          "source_asset_slot_id": null
         }
       ],
       "events": [
@@ -6740,7 +6848,9 @@
             "evidence_badge": "archival"
           },
           "path_geometry_ref": null,
-          "text_layout": null
+          "text_layout": null,
+          "template_slot_id": "support_card",
+          "source_asset_slot_id": "slot_028"
         },
         {
           "layer_id": "title_028",
@@ -6797,7 +6907,9 @@
             "vertical_align": "center",
             "max_lines": 3,
             "overflow": "block"
-          }
+          },
+          "template_slot_id": "caption",
+          "source_asset_slot_id": null
         }
       ],
       "events": [
@@ -6987,7 +7099,9 @@
             "evidence_badge": "archival"
           },
           "path_geometry_ref": null,
-          "text_layout": null
+          "text_layout": null,
+          "template_slot_id": "document_main",
+          "source_asset_slot_id": "slot_029"
         },
         {
           "layer_id": "title_029",
@@ -7044,7 +7158,9 @@
             "vertical_align": "center",
             "max_lines": 3,
             "overflow": "block"
-          }
+          },
+          "template_slot_id": "verified_excerpt",
+          "source_asset_slot_id": null
         }
       ],
       "events": [
@@ -7234,7 +7350,9 @@
             "evidence_badge": "archival"
           },
           "path_geometry_ref": null,
-          "text_layout": null
+          "text_layout": null,
+          "template_slot_id": "document_main",
+          "source_asset_slot_id": "slot_030"
         },
         {
           "layer_id": "title_030",
@@ -7291,7 +7409,9 @@
             "vertical_align": "center",
             "max_lines": 3,
             "overflow": "block"
-          }
+          },
+          "template_slot_id": "verified_excerpt",
+          "source_asset_slot_id": null
         }
       ],
       "events": [
@@ -7481,7 +7601,9 @@
             "evidence_badge": "archival"
           },
           "path_geometry_ref": null,
-          "text_layout": null
+          "text_layout": null,
+          "template_slot_id": "fact_value",
+          "source_asset_slot_id": "slot_031"
         },
         {
           "layer_id": "title_031",
@@ -7538,7 +7660,9 @@
             "vertical_align": "center",
             "max_lines": 3,
             "overflow": "block"
-          }
+          },
+          "template_slot_id": "fact_label",
+          "source_asset_slot_id": null
         }
       ],
       "events": [
@@ -7728,7 +7852,9 @@
             "evidence_badge": "archival"
           },
           "path_geometry_ref": null,
-          "text_layout": null
+          "text_layout": null,
+          "template_slot_id": "fact_value",
+          "source_asset_slot_id": "slot_032"
         },
         {
           "layer_id": "title_032",
@@ -7785,7 +7911,9 @@
             "vertical_align": "center",
             "max_lines": 3,
             "overflow": "block"
-          }
+          },
+          "template_slot_id": "fact_label",
+          "source_asset_slot_id": null
         }
       ],
       "events": [
@@ -7975,7 +8103,9 @@
             "evidence_badge": "archival"
           },
           "path_geometry_ref": null,
-          "text_layout": null
+          "text_layout": null,
+          "template_slot_id": "map_main",
+          "source_asset_slot_id": "slot_033"
         },
         {
           "layer_id": "title_033",
@@ -8032,7 +8162,9 @@
             "vertical_align": "center",
             "max_lines": 3,
             "overflow": "block"
-          }
+          },
+          "template_slot_id": "place_head",
+          "source_asset_slot_id": null
         }
       ],
       "events": [
@@ -8222,7 +8354,9 @@
             "evidence_badge": "archival"
           },
           "path_geometry_ref": null,
-          "text_layout": null
+          "text_layout": null,
+          "template_slot_id": "map_main",
+          "source_asset_slot_id": "slot_034"
         },
         {
           "layer_id": "title_034",
@@ -8279,7 +8413,9 @@
             "vertical_align": "center",
             "max_lines": 3,
             "overflow": "block"
-          }
+          },
+          "template_slot_id": "place_head",
+          "source_asset_slot_id": null
         }
       ],
       "events": [
@@ -8469,7 +8605,9 @@
             "evidence_badge": "archival"
           },
           "path_geometry_ref": null,
-          "text_layout": null
+          "text_layout": null,
+          "template_slot_id": "hero_card",
+          "source_asset_slot_id": "slot_035"
         },
         {
           "layer_id": "title_035",
@@ -8526,7 +8664,9 @@
             "vertical_align": "center",
             "max_lines": 3,
             "overflow": "block"
-          }
+          },
+          "template_slot_id": "caption",
+          "source_asset_slot_id": null
         }
       ],
       "events": [
@@ -8716,7 +8856,9 @@
             "evidence_badge": "archival"
           },
           "path_geometry_ref": null,
-          "text_layout": null
+          "text_layout": null,
+          "template_slot_id": "support_card",
+          "source_asset_slot_id": "slot_036"
         },
         {
           "layer_id": "title_036",
@@ -8773,7 +8915,9 @@
             "vertical_align": "center",
             "max_lines": 3,
             "overflow": "block"
-          }
+          },
+          "template_slot_id": "caption",
+          "source_asset_slot_id": null
         }
       ],
       "events": [
@@ -8963,7 +9107,9 @@
             "evidence_badge": "archival"
           },
           "path_geometry_ref": null,
-          "text_layout": null
+          "text_layout": null,
+          "template_slot_id": "document_main",
+          "source_asset_slot_id": "slot_037"
         },
         {
           "layer_id": "title_037",
@@ -9020,7 +9166,9 @@
             "vertical_align": "center",
             "max_lines": 3,
             "overflow": "block"
-          }
+          },
+          "template_slot_id": "verified_excerpt",
+          "source_asset_slot_id": null
         }
       ],
       "events": [
@@ -9210,7 +9358,9 @@
             "evidence_badge": "archival"
           },
           "path_geometry_ref": null,
-          "text_layout": null
+          "text_layout": null,
+          "template_slot_id": "document_main",
+          "source_asset_slot_id": "slot_038"
         },
         {
           "layer_id": "title_038",
@@ -9267,7 +9417,9 @@
             "vertical_align": "center",
             "max_lines": 3,
             "overflow": "block"
-          }
+          },
+          "template_slot_id": "verified_excerpt",
+          "source_asset_slot_id": null
         }
       ],
       "events": [
@@ -9457,7 +9609,9 @@
             "evidence_badge": "archival"
           },
           "path_geometry_ref": null,
-          "text_layout": null
+          "text_layout": null,
+          "template_slot_id": "fact_value",
+          "source_asset_slot_id": "slot_039"
         },
         {
           "layer_id": "title_039",
@@ -9514,7 +9668,9 @@
             "vertical_align": "center",
             "max_lines": 3,
             "overflow": "block"
-          }
+          },
+          "template_slot_id": "fact_label",
+          "source_asset_slot_id": null
         }
       ],
       "events": [
@@ -9704,7 +9860,9 @@
             "evidence_badge": "archival"
           },
           "path_geometry_ref": null,
-          "text_layout": null
+          "text_layout": null,
+          "template_slot_id": "fact_value",
+          "source_asset_slot_id": "slot_040"
         },
         {
           "layer_id": "title_040",
@@ -9761,7 +9919,9 @@
             "vertical_align": "center",
             "max_lines": 3,
             "overflow": "block"
-          }
+          },
+          "template_slot_id": "fact_label",
+          "source_asset_slot_id": null
         }
       ],
       "events": [
@@ -9951,7 +10111,9 @@
             "evidence_badge": "archival"
           },
           "path_geometry_ref": null,
-          "text_layout": null
+          "text_layout": null,
+          "template_slot_id": "map_main",
+          "source_asset_slot_id": "slot_041"
         },
         {
           "layer_id": "title_041",
@@ -10008,7 +10170,9 @@
             "vertical_align": "center",
             "max_lines": 3,
             "overflow": "block"
-          }
+          },
+          "template_slot_id": "place_head",
+          "source_asset_slot_id": null
         }
       ],
       "events": [
@@ -10198,7 +10362,9 @@
             "evidence_badge": "archival"
           },
           "path_geometry_ref": null,
-          "text_layout": null
+          "text_layout": null,
+          "template_slot_id": "map_main",
+          "source_asset_slot_id": "slot_042"
         },
         {
           "layer_id": "title_042",
@@ -10255,7 +10421,9 @@
             "vertical_align": "center",
             "max_lines": 3,
             "overflow": "block"
-          }
+          },
+          "template_slot_id": "place_head",
+          "source_asset_slot_id": null
         }
       ],
       "events": [
@@ -10445,7 +10613,9 @@
             "evidence_badge": "archival"
           },
           "path_geometry_ref": null,
-          "text_layout": null
+          "text_layout": null,
+          "template_slot_id": "hero_card",
+          "source_asset_slot_id": "slot_043"
         },
         {
           "layer_id": "title_043",
@@ -10502,7 +10672,9 @@
             "vertical_align": "center",
             "max_lines": 3,
             "overflow": "block"
-          }
+          },
+          "template_slot_id": "caption",
+          "source_asset_slot_id": null
         }
       ],
       "events": [
@@ -10692,7 +10864,9 @@
             "evidence_badge": "archival"
           },
           "path_geometry_ref": null,
-          "text_layout": null
+          "text_layout": null,
+          "template_slot_id": "support_card",
+          "source_asset_slot_id": "slot_044"
         },
         {
           "layer_id": "title_044",
@@ -10749,7 +10923,9 @@
             "vertical_align": "center",
             "max_lines": 3,
             "overflow": "block"
-          }
+          },
+          "template_slot_id": "caption",
+          "source_asset_slot_id": null
         }
       ],
       "events": [
@@ -10939,7 +11115,9 @@
             "evidence_badge": "archival"
           },
           "path_geometry_ref": null,
-          "text_layout": null
+          "text_layout": null,
+          "template_slot_id": "document_main",
+          "source_asset_slot_id": "slot_045"
         },
         {
           "layer_id": "title_045",
@@ -10996,7 +11174,9 @@
             "vertical_align": "center",
             "max_lines": 3,
             "overflow": "block"
-          }
+          },
+          "template_slot_id": "verified_excerpt",
+          "source_asset_slot_id": null
         }
       ],
       "events": [
@@ -11186,7 +11366,9 @@
             "evidence_badge": "archival"
           },
           "path_geometry_ref": null,
-          "text_layout": null
+          "text_layout": null,
+          "template_slot_id": "document_main",
+          "source_asset_slot_id": "slot_046"
         },
         {
           "layer_id": "title_046",
@@ -11243,7 +11425,9 @@
             "vertical_align": "center",
             "max_lines": 3,
             "overflow": "block"
-          }
+          },
+          "template_slot_id": "verified_excerpt",
+          "source_asset_slot_id": null
         }
       ],
       "events": [
@@ -11433,7 +11617,9 @@
             "evidence_badge": "archival"
           },
           "path_geometry_ref": null,
-          "text_layout": null
+          "text_layout": null,
+          "template_slot_id": "fact_value",
+          "source_asset_slot_id": "slot_047"
         },
         {
           "layer_id": "title_047",
@@ -11490,7 +11676,9 @@
             "vertical_align": "center",
             "max_lines": 3,
             "overflow": "block"
-          }
+          },
+          "template_slot_id": "fact_label",
+          "source_asset_slot_id": null
         }
       ],
       "events": [
@@ -11680,7 +11868,9 @@
             "evidence_badge": "archival"
           },
           "path_geometry_ref": null,
-          "text_layout": null
+          "text_layout": null,
+          "template_slot_id": "fact_value",
+          "source_asset_slot_id": "slot_048"
         },
         {
           "layer_id": "title_048",
@@ -11737,7 +11927,9 @@
             "vertical_align": "center",
             "max_lines": 3,
             "overflow": "block"
-          }
+          },
+          "template_slot_id": "fact_label",
+          "source_asset_slot_id": null
         }
       ],
       "events": [

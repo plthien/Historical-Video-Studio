@@ -71,7 +71,9 @@
             "evidence_badge": "archival"
           },
           "path_geometry_ref": null,
-          "text_layout": null
+          "text_layout": null,
+          "template_slot_id": "map_main",
+          "source_asset_slot_id": "slot_001"
         },
         {
           "layer_id": "layer_002",
@@ -128,7 +130,9 @@
             "vertical_align": "center",
             "max_lines": 3,
             "overflow": "block"
-          }
+          },
+          "template_slot_id": "place_head",
+          "source_asset_slot_id": null
         }
       ],
       "events": [
