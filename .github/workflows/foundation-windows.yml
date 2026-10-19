@@ -34,3 +34,6 @@ jobs:
       - name: A1 environment, schema and SQLite behavioral tests
         shell: powershell
         run: powershell -NoProfile -ExecutionPolicy Bypass -File scripts/windows/verify-environment.ps1
+      - name: Repeat bootstrap in the same isolated environment
+        shell: powershell
+        run: powershell -NoProfile -ExecutionPolicy Bypass -File scripts/windows/verify-environment.ps1

@@ -109,3 +109,64 @@ def test_storage_partial_sqlite_revision_rollback(story, store):
     assert store.revision(project_id) == 0
     with sqlite3.connect(store.database) as db:
         assert db.execute("SELECT COUNT(*) FROM story_candidates").fetchone()[0] == 0
+
+
+def test_storage_rejects_conflicting_kind_without_touching_original(store):
+    digest = store.put_artifact(b"same-bytes", "original")
+    assert store.put_artifact(b"same-bytes", "original") == digest
+    with pytest.raises(ContractViolation, match="ARTIFACT_METADATA_CONFLICT"):
+        store.put_artifact(b"same-bytes", "generated")
+    reopened = ProjectStore(store.database, store.artifacts.root)
+    assert reopened.get_artifact(digest) == b"same-bytes"
+    with sqlite3.connect(store.database) as db:
+        assert db.execute("SELECT kind FROM artifacts WHERE sha256=?", (digest,)).fetchone() == ("original",)
+
+
+def test_contract_problem_gate_is_contextual(story):
+    from backend.app.contracts import validate_document, validate_story_package
+    with pytest.raises(ContractViolation) as generic:
+        validate_document("StoryPackage.v1", {})
+    assert generic.value.as_problem()["blocking_gate"] is None
+    with pytest.raises(ContractViolation) as imported:
+        validate_story_package({})
+    assert imported.value.as_problem()["blocking_gate"] == "G1"
+    with pytest.raises(ContractViolation) as visual:
+        validate_visual_blueprint(story, {})
+    assert visual.value.as_problem()["blocking_gate"] is None
+
+
+def test_schema_generator_detects_stale_or_missing_outputs(tmp_path):
+    """A1-02: --check is read-only and rejects changed or absent generated models."""
+    import subprocess
+    import sys
+    from scripts.generate_contract_types import generate
+    py_path, ts_path = tmp_path / "types.py", tmp_path / "types.ts"
+    expected_py, expected_ts = generate()
+    py_path.write_text(expected_py, encoding="utf-8")
+    ts_path.write_text(expected_ts, encoding="utf-8")
+    cmd = [sys.executable, "scripts/generate_contract_types.py",
+           "--check", "--out-py", str(py_path), "--out-ts", str(ts_path)]
+    assert subprocess.run(cmd, cwd=ROOT, capture_output=True).returncode == 0
+    py_path.write_text("corrupted", encoding="utf-8")
+    assert subprocess.run(cmd, cwd=ROOT, capture_output=True).returncode != 0
+    assert py_path.read_text(encoding="utf-8") == "corrupted"
+    py_path.write_text(expected_py, encoding="utf-8")
+    ts_path.unlink()
+    assert subprocess.run(cmd, cwd=ROOT, capture_output=True).returncode != 0
+    assert not ts_path.exists()
+
+
+def test_schema_generated_python_import_preserves_tuple(tmp_path):
+    """A1-02: emitted Python annotation must retain exactly two typed points."""
+    import importlib.util
+    from typing import get_args, get_type_hints
+    from scripts.generate_contract_types import generate
+    output = tmp_path / "generated.py"
+    output.write_text(generate()[0], encoding="utf-8")
+    spec = importlib.util.spec_from_file_location("temporary_contract_models", output)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    model = module.VisualBlueprint_v1Setup_PlansItemLayout_Control
+    annotated = get_type_hints(model)["focal_point"]
+    assert get_args(get_args(annotated)[0]) == (float, float)
+    assert module.API_REQUEST_MODELS["post__projects_project_id_voice_sections_section_id_regenerate"]

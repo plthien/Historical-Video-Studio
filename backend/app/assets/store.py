@@ -34,12 +34,14 @@ class ArtifactStore:
                 handle.write(data)
                 handle.flush()
                 os.fsync(handle.fileno())
-            # Never overwrite existing content if another writer won the race.
-            if path.exists():
+            # Atomic no-replace publish: hard-link within the same NTFS directory.
+            # os.replace() would overwrite bytes if another writer won the race.
+            try:
+                os.link(temp_path, path)
+                return digest, True
+            except FileExistsError:
                 self.read(digest)
                 return digest, False
-            os.replace(temp_path, path)
-            return digest, True
         finally:
             if os.path.exists(temp_path):
                 os.unlink(temp_path)

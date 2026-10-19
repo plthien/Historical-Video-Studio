@@ -9,6 +9,10 @@
   },
   "packageManager": "npm@10.9.2",
   "scripts": {
-    "verify:toolchain": "node -e \"if(process.versions.node.split('.')[0]!=='22') process.exit(2)\""
+    "verify:toolchain": "node -e \"if(process.versions.node.split('.')[0]!=='22') process.exit(2)\"",
+    "typecheck": "tsc --project tsconfig.json --noEmit"
+  },
+  "devDependencies": {
+    "typescript": "5.9.3"
   }
 }

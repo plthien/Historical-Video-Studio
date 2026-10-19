@@ -118,9 +118,9 @@ class ProjectStore:
                 relative = str(path.relative_to(self.artifacts.root)).replace("\\", "/")
                 db.execute("INSERT OR IGNORE INTO artifacts(sha256, byte_count, kind, relative_path)"
                            " VALUES (?, ?, ?, ?)", (digest, len(data), kind, relative))
-                row = db.execute("SELECT byte_count, relative_path FROM artifacts WHERE sha256=?",
+                row = db.execute("SELECT byte_count, kind, relative_path FROM artifacts WHERE sha256=?",
                                  (digest,)).fetchone()
-                if row != (len(data), relative):
+                if row != (len(data), kind, relative):
                     raise ContractViolation("ARTIFACT_METADATA_CONFLICT", digest, "Restore correct artifact metadata.")
             except BaseException:
                 if newly_created:
@@ -134,7 +134,7 @@ class ProjectStore:
                              (sha256,)).fetchone()
         if row is None:
             raise ContractViolation("ARTIFACT_NOT_FOUND", sha256, "Register the original artifact first.")
-        if row[1] != str(self.artifacts.path(sha256).relative_to(self.artifacts.root)).replace("\\", "/"):
+        if row[2] != str(self.artifacts.path(sha256).relative_to(self.artifacts.root)).replace("\\", "/"):
             raise ContractViolation("ARTIFACT_METADATA_CONFLICT", sha256, "Repair immutable storage metadata.")
         data = self.artifacts.read(sha256)
         if len(data) != row[0]:

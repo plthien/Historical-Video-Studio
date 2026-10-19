@@ -1,0 +1,6 @@
+.venv/
+frontend/node_modules/
+renderer/node_modules/
+# A1 build-generated contract types (never trusted unless generated+compiled).
+backend/app/contracts/generated.py
+frontend/src/api/generated/contracts.ts

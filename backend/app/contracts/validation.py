@@ -18,17 +18,18 @@ from validate_visual_design import validate_blueprint, validate_directed_story  
 
 
 class ContractViolation(ValueError):
-    def __init__(self, code: str, path: str, remediation: str, *, message: str | None = None):
+    def __init__(self, code: str, path: str, remediation: str, *, message: str | None = None, blocking_gate: str | None = None):
         self.code = code
         self.path = path
         self.remediation = remediation
         self.message = message or remediation
+        self.blocking_gate = blocking_gate
         super().__init__(f"{code} at {path}: {self.message}")
 
     def as_problem(self) -> dict[str, Any]:
         return {"code": self.code, "message": self.message,
                 "remediation": self.remediation, "retryable": False,
-                "entity_id": self.path, "blocking_gate": "G1"}
+                "entity_id": self.path, "blocking_gate": self.blocking_gate}
 
 
 @lru_cache(maxsize=12)
@@ -67,8 +68,12 @@ def _semantic(call, *args) -> None:
 
 
 def validate_story_package(payload: dict[str, Any]) -> None:
-    validate_document("StoryPackage.v1", payload)
-    _semantic(validate_directed_story, payload)
+    try:
+        validate_document("StoryPackage.v1", payload)
+        _semantic(validate_directed_story, payload)
+    except ContractViolation as error:
+        error.blocking_gate = "G1"  # G1 is supplied by the StoryPackage import context only.
+        raise
 
 
 def validate_visual_blueprint(story: dict[str, Any], blueprint: dict[str, Any]) -> None:
