@@ -1607,7 +1607,7 @@
           "duration_frames": 30,
           "cue_word_id": "word_001",
           "params": {
-            "route_geometry_ref": "geometry_001",
+            "route_geometry_ref": "geometry_route_001",
             "start_progress": 0,
             "end_progress": 1,
             "follow_marker_layer_id": null
@@ -2134,7 +2134,7 @@
           "duration_frames": 30,
           "cue_word_id": "word_001",
           "params": {
-            "route_geometry_ref": "geometry_001",
+            "route_geometry_ref": "geometry_route_001",
             "start_progress": 0,
             "end_progress": 1,
             "follow_marker_layer_id": null
@@ -4268,7 +4268,7 @@
           "duration_frames": 30,
           "cue_word_id": "word_001",
           "params": {
-            "route_geometry_ref": "geometry_001",
+            "route_geometry_ref": "geometry_route_001",
             "start_progress": 0,
             "end_progress": 1,
             "follow_marker_layer_id": null
