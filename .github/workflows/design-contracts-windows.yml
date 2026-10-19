@@ -10,6 +10,9 @@ on:
       - "scripts/validate_visual_design.py"
       - "tests/contracts/**"
       - "requirements-design.txt"
+      - "AGENTS.md"
+      - ".agents/**"
+      - "docs/engineering/**"
       - ".github/workflows/design-contracts-windows.yml"
   workflow_dispatch:
 jobs:
