@@ -164,4 +164,3 @@ class JobQueue:
             db.row_factory = sqlite3.Row
             return [dict(x) for x in db.execute("SELECT * FROM jobs WHERE project_id=? ORDER BY rowid DESC",
                                                 (project_id,))]
-
