@@ -171,7 +171,7 @@ def test_schema_generated_python_import_preserves_tuple(tmp_path):
         spec.loader.exec_module(module)
         model = module.VisualBlueprint_v1Setup_PlansItemLayout_Control
         annotated = get_type_hints(model)["focal_point"]
-        assert get_args(get_args(annotated)[0]) == (float, float)
+        assert get_args(annotated) == (float, float)
         assert module.API_REQUEST_MODELS["post__projects_project_id_voice_sections_section_id_regenerate"]
     finally:
         sys.modules.pop(spec.name, None)
