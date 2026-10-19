@@ -3,7 +3,7 @@
   "info": {
     "title": "Historical Video Studio Full-Flow API Extension",
     "version": "1.0.0-design",
-    "description": "Design-time additive endpoints to contracts/openapi.yaml. Merge both paths/components by unique operationId when generating implementation. No deployed app claimed."
+    "description": "Design-time additive endpoints to contracts/openapi.yaml. Merge both paths/components by unique operationId when generating implementation. No deployed app claimed. Includes operator-only G4 visual direction revisions with protected G1 claim/cue identities."
   },
   "servers": [
     {
@@ -1201,6 +1201,58 @@
           }
         }
       }
+    },
+    "/projects/{project_id}/storyboard/direction-revisions": {
+      "post": {
+        "operationId": "post_project_storyboard_direction_revisions",
+        "tags": [
+          "storyboard"
+        ],
+        "summary": "Edit G4 visual beat staging and focus only; source narration/cue/claim/asset slots remain G1/G3 immutable",
+        "parameters": [
+          {
+            "name": "project_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 12
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VisualDirectionEdit"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "New VisualBlueprint operator_visual_edit revision and selective G4/G5 staleness"
+          },
+          "409": {
+            "description": "Wrong StoryPackage SHA or project revision"
+          },
+          "422": {
+            "description": "Unknown beat/object, attempted narrative/claim mutation"
+          },
+          "424": {
+            "description": "G1 source not approved"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -1682,6 +1734,130 @@
               "null"
             ],
             "description": "write-only, never returned/exported"
+          }
+        }
+      },
+      "VisualDirectionEdit": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "expected_revision",
+          "story_revision_sha256",
+          "setup_id",
+          "edit_reason",
+          "edits"
+        ],
+        "properties": {
+          "expected_revision": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "story_revision_sha256": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "setup_id": {
+            "type": "string",
+            "minLength": 3
+          },
+          "edit_reason": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 400
+          },
+          "edits": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "beat_id",
+                "shot_goal",
+                "focus_move",
+                "staging"
+              ],
+              "properties": {
+                "beat_id": {
+                  "type": "string",
+                  "minLength": 3
+                },
+                "shot_goal": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 350
+                },
+                "focus_move": {
+                  "type": "string",
+                  "enum": [
+                    "none",
+                    "subject_to_subject",
+                    "detail_to_overview",
+                    "overview_to_detail",
+                    "follow_path",
+                    "static"
+                  ]
+                },
+                "staging": {
+                  "type": "array",
+                  "minItems": 1,
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "ref",
+                      "operation",
+                      "after_ref",
+                      "motion_hint",
+                      "priority"
+                    ],
+                    "properties": {
+                      "ref": {
+                        "type": "string"
+                      },
+                      "operation": {
+                        "type": "string",
+                        "enum": [
+                          "enter",
+                          "hold",
+                          "highlight",
+                          "exit",
+                          "reposition",
+                          "focus",
+                          "draw_path",
+                          "reveal_mask"
+                        ]
+                      },
+                      "after_ref": {
+                        "type": [
+                          "string",
+                          "null"
+                        ]
+                      },
+                      "motion_hint": {
+                        "type": "string",
+                        "enum": [
+                          "none",
+                          "subtle_push",
+                          "parallax",
+                          "stagger",
+                          "line_draw",
+                          "wipe",
+                          "cut",
+                          "track",
+                          "zoom"
+                        ]
+                      },
+                      "priority": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 20
+                      }
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }
