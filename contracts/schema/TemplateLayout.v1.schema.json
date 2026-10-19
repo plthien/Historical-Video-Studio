@@ -1,0 +1,286 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://historical-video-studio.local/contracts/TemplateLayout.v1.schema.json",
+  "title": "TemplateLayout.v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "template_id",
+    "template_version",
+    "variant_id",
+    "canvas",
+    "safe_area_px",
+    "slots",
+    "allowed_presets",
+    "camera_limits",
+    "transition_limits",
+    "overflow_policy",
+    "fallback_policy"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "TemplateLayout.v1"
+    },
+    "template_id": {
+      "type": "string",
+      "enum": [
+        "T01",
+        "T02",
+        "T03",
+        "T04",
+        "T05",
+        "T06",
+        "T07",
+        "T08",
+        "T09",
+        "T10"
+      ]
+    },
+    "template_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "variant_id": {
+      "type": "string",
+      "enum": [
+        "A",
+        "B",
+        "C"
+      ]
+    },
+    "canvas": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "width",
+        "height",
+        "fps"
+      ],
+      "properties": {
+        "width": {
+          "const": 1920
+        },
+        "height": {
+          "const": 1080
+        },
+        "fps": {
+          "const": 30
+        }
+      }
+    },
+    "safe_area_px": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "left",
+        "right",
+        "top",
+        "bottom"
+      ],
+      "properties": {
+        "left": {
+          "type": "integer",
+          "minimum": 60
+        },
+        "right": {
+          "type": "integer",
+          "minimum": 60
+        },
+        "top": {
+          "type": "integer",
+          "minimum": 30
+        },
+        "bottom": {
+          "type": "integer",
+          "minimum": 30
+        }
+      }
+    },
+    "slots": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "slot_id",
+          "role",
+          "required",
+          "rect_normalized",
+          "z_index",
+          "fit",
+          "max_lines"
+        ],
+        "properties": {
+          "slot_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "map",
+              "territory",
+              "route",
+              "portrait",
+              "archival_photo",
+              "document",
+              "headline",
+              "date",
+              "text",
+              "callout",
+              "camera",
+              "decorative_paper"
+            ]
+          },
+          "required": {
+            "type": "boolean"
+          },
+          "rect_normalized": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "x",
+              "y",
+              "w",
+              "h"
+            ],
+            "properties": {
+              "x": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "y": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "w": {
+                "type": "number",
+                "minimum": 0.01,
+                "maximum": 1
+              },
+              "h": {
+                "type": "number",
+                "minimum": 0.01,
+                "maximum": 1
+              }
+            }
+          },
+          "z_index": {
+            "type": "integer",
+            "minimum": -30,
+            "maximum": 100
+          },
+          "fit": {
+            "type": "string",
+            "enum": [
+              "cover",
+              "contain",
+              "fill",
+              "none"
+            ]
+          },
+          "max_lines": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 8
+          }
+        }
+      }
+    },
+    "allowed_presets": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "enum": [
+          "pop-in",
+          "stagger-reveal",
+          "route-line-draw",
+          "title-mask-reveal",
+          "typewriter",
+          "number-count",
+          "kinetic-type",
+          "parallax-layers",
+          "mask-transition",
+          "camera-pan",
+          "camera-push",
+          "freeze-hold",
+          "whip-pan",
+          "cross-dissolve",
+          "hard-cut",
+          "text-highlight",
+          "map-region-wipe",
+          "photo-card-enter"
+        ]
+      }
+    },
+    "camera_limits": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "min_scale",
+        "max_scale",
+        "max_rotation_deg",
+        "max_translation_px"
+      ],
+      "properties": {
+        "min_scale": {
+          "type": "number",
+          "minimum": 0.25,
+          "maximum": 4
+        },
+        "max_scale": {
+          "type": "number",
+          "minimum": 0.5,
+          "maximum": 4
+        },
+        "max_rotation_deg": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 15
+        },
+        "max_translation_px": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4000
+        }
+      }
+    },
+    "transition_limits": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "min_frames",
+        "max_frames"
+      ],
+      "properties": {
+        "min_frames": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 60
+        },
+        "max_frames": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 120
+        }
+      }
+    },
+    "overflow_policy": {
+      "type": "string",
+      "enum": [
+        "try_variant_then_block",
+        "split_setup_review",
+        "block"
+      ]
+    },
+    "fallback_policy": {
+      "const": "SAME_APPROVED_ASSET_ONLY"
+    }
+  },
+  "description": "Machine-readable per-template variant layout; deterministic pixels resolved in CompiledTimeline. No historical asset substitution."
+}

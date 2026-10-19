@@ -1,0 +1,219 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://historical-video-studio.local/contracts/HistoricalMap.v1.schema.json",
+  "title": "HistoricalMap.v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "historical_map_id",
+    "source_asset_id",
+    "source_original_sha256",
+    "valid_year_from",
+    "valid_year_to",
+    "geography_mode",
+    "geometry_format",
+    "source_crs",
+    "normalized_crs",
+    "map_projection",
+    "geography_bbox",
+    "geometry_object_sha256",
+    "raster_asset_sha256",
+    "approved_feature_ids",
+    "labels",
+    "geometry_evidence_url",
+    "rights_review_record_id",
+    "user_approved",
+    "schematic_disclosure"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "HistoricalMap.v1"
+    },
+    "historical_map_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+    },
+    "source_asset_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+    },
+    "source_original_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "valid_year_from": {
+      "type": "integer",
+      "minimum": -10000,
+      "maximum": 3000
+    },
+    "valid_year_to": {
+      "type": "integer",
+      "minimum": -10000,
+      "maximum": 3000
+    },
+    "geography_mode": {
+      "type": "string",
+      "enum": [
+        "vector_period",
+        "raster_georeferenced",
+        "schematic_approved"
+      ]
+    },
+    "geometry_format": {
+      "type": "string",
+      "enum": [
+        "GeoJSON",
+        "GPKG_DERIVED_GEOJSON",
+        "RASTER"
+      ]
+    },
+    "source_crs": {
+      "type": "string",
+      "minLength": 1
+    },
+    "normalized_crs": {
+      "const": "EPSG:4326"
+    },
+    "map_projection": {
+      "type": "string",
+      "enum": [
+        "mercator",
+        "equal_earth",
+        "equirectangular"
+      ]
+    },
+    "geography_bbox": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "min_lon",
+        "min_lat",
+        "max_lon",
+        "max_lat"
+      ],
+      "properties": {
+        "min_lon": {
+          "type": "number",
+          "minimum": -180,
+          "maximum": 180
+        },
+        "min_lat": {
+          "type": "number",
+          "minimum": -90,
+          "maximum": 90
+        },
+        "max_lon": {
+          "type": "number",
+          "minimum": -180,
+          "maximum": 180
+        },
+        "max_lat": {
+          "type": "number",
+          "minimum": -90,
+          "maximum": 90
+        }
+      }
+    },
+    "geometry_object_sha256": {
+      "anyOf": [
+        {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "raster_asset_sha256": {
+      "anyOf": [
+        {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "approved_feature_ids": {
+      "type": "array",
+      "minItems": 0,
+      "items": {
+        "type": "string",
+        "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+      }
+    },
+    "labels": {
+      "type": "array",
+      "minItems": 0,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "label_id",
+          "text",
+          "feature_id",
+          "lon",
+          "lat"
+        ],
+        "properties": {
+          "label_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+          },
+          "text": {
+            "type": "string",
+            "minLength": 1
+          },
+          "feature_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "lon": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "minimum": -180,
+            "maximum": 180
+          },
+          "lat": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "minimum": -90,
+            "maximum": 90
+          }
+        }
+      }
+    },
+    "geometry_evidence_url": {
+      "type": "string",
+      "format": "uri"
+    },
+    "rights_review_record_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+    },
+    "user_approved": {
+      "type": "boolean"
+    },
+    "schematic_disclosure": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  },
+  "description": "Approved period-aware cartography. Vector input reprojected to WGS84 with evidence; raster overlays use reviewed UV tie-points, never assumed geocoordinates. Geometry in immutable local content store keyed by hash."
+}
