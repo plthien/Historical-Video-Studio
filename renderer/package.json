@@ -1,0 +1,14 @@
+{
+  "name": "historical-video-studio-renderer",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22.0.0 <23",
+    "npm": ">=10 <12"
+  },
+  "packageManager": "npm@10.9.2",
+  "scripts": {
+    "verify:toolchain": "node -e \"if(process.versions.node.split('.')[0]!=='22') process.exit(2)\""
+  }
+}
