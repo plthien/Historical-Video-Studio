@@ -38,6 +38,7 @@ try {
     Run-Checked "Isolated pip dependency consistency" $venvPython @("-m", "pip", "check")
     Run-Checked "Design schemas" $venvPython @("scripts/check_design_contracts.py")
     Run-Checked "Visual contract" $venvPython @("scripts/validate_visual_design.py")
+    Run-Checked "Frozen design-contract unittest regressions" $venvPython @("-m", "unittest", "discover", "-s", "tests/contracts", "-p", "test_*.py", "-v")
     Run-Checked "Generate Python/TypeScript types" $venvPython @("scripts/generate_contract_types.py")
     Run-Checked "Check Python/TypeScript types" $venvPython @("scripts/generate_contract_types.py", "--check")
     Run-Checked "Import generated Python types" $venvPython @("-c", "from backend.app.contracts.generated import VisualBlueprint_v1, API_REQUEST_MODELS; assert API_REQUEST_MODELS; print('PYTHON_TYPES_IMPORT_PASS')")

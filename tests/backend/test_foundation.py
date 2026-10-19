@@ -175,3 +175,22 @@ def test_schema_generated_python_import_preserves_tuple(tmp_path):
         assert module.API_REQUEST_MODELS["post__projects_project_id_voice_sections_section_id_regenerate"]
     finally:
         sys.modules.pop(spec.name, None)
+
+
+def test_artifact_race_cannot_overwrite_sha_path(tmp_path, monkeypatch):
+    """A1-03: another writer winning between existence check and publication is never overwritten."""
+    import hashlib
+    from backend.app.assets import store as asset_module
+    from backend.app.assets.store import ArtifactStore
+    originals = ArtifactStore(tmp_path / "media")
+    data = b"frozen original"
+    digest = hashlib.sha256(data).hexdigest()
+
+    def competing_publication(temp_path, target):
+        Path(target).write_bytes(b"competing corrupt bytes")
+        raise FileExistsError(str(target))
+
+    monkeypatch.setattr(asset_module.os, "link", competing_publication)
+    with pytest.raises(ContractViolation, match="ARTIFACT_CORRUPT"):
+        originals.put(data)
+    assert originals.path(digest).read_bytes() == b"competing corrupt bytes"
