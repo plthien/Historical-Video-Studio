@@ -29,3 +29,6 @@ Unknown cue, duplicated section/setup, wrong-era map, unapproved fallback/rights
 
 ## 6. No isolated pilot phase
 Implementation plan is full application; incremental integration tests within same app do not create temporary prototype architecture or postpone core asset/G-Labs branch to a later product.
+
+## 7. P0 Visual quality repair authority v1.1
+The ten VisualBlueprint template_payload variants must be decoded by exact template ID and cannot silently downgrade to an unrelated scene. The external ChatGPT package now requires visual_beats with relationship/reveal/focus continuity; each compiled scene now pins a composition graph, staging beat windows, per-layer source_asset_slot_id/template_slot_id, text metrics, source treatment, camera focus path and preset-specific phase recipe. 30 layout variants are truly template-specific, NOT cloned generic positions. Motion registry has 19 typed presets; **route-line-draw is geographic with evidence-bound geometry**, while **editorial-connector-draw uses annotation canvas paths for chronology/causal graphs**. UI G4 may change staging/layout with recorded direction_revision/operator permission, but cannot silently change G1 claims or selected G3 source identity. Full details: VISUAL_QUALITY_CONTRACT_REPAIR_V1_1.md.

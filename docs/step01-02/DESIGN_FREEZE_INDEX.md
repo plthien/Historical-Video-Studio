@@ -12,7 +12,7 @@
 ## Mandatory complete-machine-readable extensions
 - [StoryPackage → VisualBlueprint → CompiledTimeline](FULL_FLOW_VISUAL_COMPILER_CONTRACT.md): source precedence, cue-to-frame binding, absolute layer/crop/mask/camera/keyframe output and dependency hashes.
 - [Historical map engine](HISTORICAL_MAP_ENGINE.md): historical year-aware geometry, projection, routes and source review.
-- [Template T05–T10 sheets](TEMPLATE_DESIGN_SHEETS_T05_T10.md) and [all 30 versioned layout variants](../../contracts/registries/layouts.v1.json); [18 motion presets](../../contracts/registries/motion-presets.v1.json).
+- [Template T05–T10 sheets](TEMPLATE_DESIGN_SHEETS_T05_T10.md) and [all 30 versioned layout variants](../../contracts/registries/layouts.v1.json); [19 motion presets](../../contracts/registries/motion-presets.v1.json).
 - [12 JSON Schemas](../../contracts/schema), 12 strict fixtures and [24-section/48-scene/360s long-form synthetic fixtures](../../contracts/examples/longform).
 - [Base OpenAPI](../../contracts/openapi.yaml) plus [25 full-flow extension operations](../../contracts/openapi-fullflow-extension.json) (zero overlapping method/path; implementation combines).
 - [Original verbatim G-Labs webhook](../../contracts/providers/reference/WEBHOOK_INTEGRATION.vi(1).md) and [three archival-source adapters](../../contracts/providers/ARCHIVE_ADAPTER_MATRIX.v1.md).
@@ -27,3 +27,7 @@
 
 ## Validation and truth-in-status
 Windows-only .github/workflows/design-contracts-windows.yml checks JSON schemas/fixtures, semantic negatives, long-form shape, OpenAPI and registry coherence. This is contract CI, **not** a video quality or provider-runtime test. The long-form fixture contains unverified claims and synthetic timestamps; it cannot receive G1/G3 approval. Production acceptance requires full 5–10min MP4 and G1–G5 real human review.
+
+
+## Latest Visual Quality Repair v1.1
+See [repaired visual director + ten-template contract](VISUAL_QUALITY_CONTRACT_REPAIR_V1_1.md) and [eight-role final self-audit](VISUAL_QUALITY_EIGHT_ROLE_AUDIT.md). The authorities are strict StoryPackage.visual_beats, VisualBlueprint ten template_payload variants, CompiledTimeline staging+source slot+camera/motion phases, 30 unique template compositions and 19 specialized presets. Adversarial ten-scene package: [visual_cases](../../contracts/examples/visual_cases). Historical fake claims, audio SHA and imagery are synthetic and cannot pass human gates.

@@ -36,7 +36,7 @@ User review ordering: G1 → [G2 voice, G3 assets parallel] → G2 approval trig
 **Phase A exit:** all real screens/actions and provider connectors are implemented to the agreed contract; Windows mock/contract tests green. No claim of whole production PASS yet.
 
 ### Phase B — Complete full visual production and shipping
-**B1 Storyboard compiler:** one imported StoryPackage with full semantic direction; normalized VisualBlueprint; pinned 30 template layouts, 18 presets, validated historical maps/GeoJSON, exact asset/cue binding, all layer pixel rectangles/crops/masks/fonts/z-order, deterministic motion and camera keyframes, scene transitions and SHA-based revision; no historical data invented by renderer.
+**B1 Storyboard compiler:** one imported StoryPackage with full semantic direction; normalized VisualBlueprint; pinned 30 template layouts, 19 presets, validated historical maps/GeoJSON, exact asset/cue binding, all layer pixel rectangles/crops/masks/fonts/z-order, deterministic motion and camera keyframes, scene transitions and SHA-based revision; no historical data invented by renderer.
 **B2 Full renderer/editor:** all 10 T01–T10 React templates, A/B/C variants, map routes/territory overlays, archival document zoom/cutout/typography, composited motion, reading time and overflow diagnostics. Real @remotion/player G4 editor supports editable scene layout, crop, asset switching to approved only, cue retiming, compare attempts and selective recompute. Node Remotion render uses same HistoryComposition, frozen fonts and media bytes.
 **B3 QC/delivery:** MP4 H.264/AAC 1920×1080 30fps, audio waveform continuity, timestamps from alignment, frame parity, visual collision/black-frame checks, attribution manifest, source/AI disclosure, render attempts, G5 operator preview/sign-off and export bundle. UI job queue, bulk asset review, crash resume, Windows one-click start, docs and backup.
 **Phase B exit:** fully integrated 5–10min real English historical documentary and second different-topic package through same engine+template code, with actual approved media, source provenance, complete gate history, restart and negative regression tests, Windows packaged launcher. No separate 60–90s pilot phase; small engineering render smoke tests are allowed and do not count as product milestone.
@@ -65,9 +65,14 @@ No staging a demo as full app, no additional pilot PR, no elaborate multi-tenant
 ## 8. Handoff reference order
 1. docs/design/DESIGN_DECISIONS_2026-10-19.md for user overrides (English-first, G-Labs contract-first, five gates).
 2. docs/step01-02/FULL_FLOW_VISUAL_COMPILER_CONTRACT.md + HISTORICAL_MAP_ENGINE.md + 01–04 independent docs.
-3. contracts/schema/ twelve schema files; contracts/registries/ 30 layouts and 18 presets; contracts/openapi.yaml.
+3. contracts/schema/ twelve schema files; contracts/registries/ 30 layouts and 19 presets; contracts/openapi.yaml.
 4. contracts/providers/reference/WEBHOOK_INTEGRATION.vi(1).md verbatim; three archive adapters and ElevenLabs alignment docs.
 5. ui/mockups/index.html as interaction UX design reference only, not real frontend.
 6. This implementation plan as **sole current execution roadmap**. Earlier Master Spec M0–M4 and pilot descriptions are historical, not implementation milestones.
 
 **Final acceptance:** Full V1 flow delivered on Windows; no plan to require a sacrificial pilot first.
+
+
+## 9. Mandatory repaired visual contracts — Implementation Acceptance
+**Do not implement generic placeholder composition per template.** Use VISUAL_QUALITY_CONTRACT_REPAIR_V1_1.md, layouts.v1.json (30 real template-specific A/B/C variants), motion-presets.v1.json (**19** grammars including editorial-connector-draw), and scripts/validate_visual_design.py as art-direction contract. VisualBlueprint must decode ten discriminated template_payload choices and preserve G1 factual refs; CompiledTimeline must materialize real layers, template slot identity, continuity/staging graph, phase-timed events, camera focus paths, text layout and geo projections. Timeline rail and causal connector are *canvas annotation*, never historical routes. G4 user visual edits carry G1 revision fingerprint and editable-field lineage.
+**Windows acceptance:** run dedicated visual design validator + all negative regressions; then in actual app render representative multi-layer T01–T10 scenes, show screenshot at enter/mid/hold/exit, compare Remotion Player with rendered stills, confirm typography and map source accuracy, and verify no scene falls back to a single archival photo + perpetual zoom. These are full-flow implementation tests, not a disposable pilot.

@@ -154,3 +154,7 @@ Each T01–T10 has purpose, slots, variants, motion, timing rules, editor contro
 
 ## Full-flow design authority update (2026-10-19)
 This document describes editorial grammar. Explicit frame-ready geometry, crop, source-backed historical maps, mask, camera keyframes and 18 bounded motion presets are frozen in FULL_FLOW_VISUAL_COMPILER_CONTRACT.md, HISTORICAL_MAP_ENGINE.md, contracts/registries/layouts.v1.json and contracts/registries/motion-presets.v1.json. All 10 templates x A/B/C variants belong to full V1; no disposable pilot runtime/PoC requirement.
+
+
+## P0 Art-direction repair for FULL application (2026-10-19)
+See VISUAL_QUALITY_CONTRACT_REPAIR_V1_1.md (latest authority) for the repaired beat-level visual grammar, schema oneOf payloads per template, actual 30 distinct geometries, per-layer source/template slot links, G4 local visual revisions, and specialized motion phases. T05 chronology lines and T10 causal arrows use *editorial annotation* geometry + editorial-connector-draw; T04 historical routes use reviewed map-world geometry + route-line-draw. These are NOT interchangeable.

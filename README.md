@@ -10,7 +10,7 @@ Goal: build the entire 5–10 minute historical motion graphics production flow 
 - [Design freeze and handoff index](docs/step01-02/DESIGN_FREEZE_INDEX.md)
 - [01 Product Spec](docs/step01-02/01_PRODUCT_SPEC.md) • [02 Architecture](docs/step01-02/02_SYSTEM_ARCHITECTURE.md) • [03 Visual Production](docs/step01-02/03_VISUAL_PRODUCTION_SPEC.md) • [04 Data Contracts & Gates](docs/step01-02/04_DATA_CONTRACTS_AND_GATES.md) • [05 Full-Flow Implementation Plan](docs/step01-02/05_IMPLEMENTATION_PLAN.md).
 - [Complete StoryPackage→VisualBlueprint→CompiledTimeline Contract](docs/step01-02/FULL_FLOW_VISUAL_COMPILER_CONTRACT.md) and [historical map projection rules](docs/step01-02/HISTORICAL_MAP_ENGINE.md).
-- [Contracts](contracts/README.md): 12 JSON Schema shapes, full-length 24-section/48-scene synthetic fixtures, 30 layout variants, 18 motion presets, base OpenAPI and 25-operation full-flow extension.
+- [Contracts](contracts/README.md): 12 JSON Schema shapes, full-length 24-section/48-scene synthetic fixtures, 30 layout variants, 19 motion presets, base OpenAPI and 25-operation full-flow extension.
 - [Original G-Labs webhook — verbatim](contracts/providers/reference/WEBHOOK_INTEGRATION.vi(1).md), [archival adapter matrix](contracts/providers/ARCHIVE_ADAPTER_MATRIX.v1.md).
 - [UI design mockup](ui/mockups/index.html): static interactive mock ONLY; not running real providers or Remotion.
 
@@ -23,3 +23,6 @@ python scripts/check_design_contracts.py
 python -m unittest discover -s tests/contracts -p "test_*.py" -v
 
 **A green design CI validates contracts only. No real TTS, forced alignment, archive/G-Labs account action, renderer, video or G5 approval is claimed.**
+
+## Visual production contract repair V1.1
+The early design permitted a generic photo+headline slideshow despite named template counts. It is repaired in [Visual Quality Contract Repair V1.1](docs/step01-02/VISUAL_QUALITY_CONTRACT_REPAIR_V1_1.md): ten typed template payloads, beat choreography, render composition graph with actual slot provenance, 30 individually designed variants and 19 motion grammars. Read the [eight-role audit](docs/step01-02/VISUAL_QUALITY_EIGHT_ROLE_AUDIT.md) before Codex implements renderer. **Design CI does not prove real video quality.**

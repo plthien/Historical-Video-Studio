@@ -53,12 +53,13 @@ contracts/registries/layouts.v1.json defines ten distinct layout families, each 
 
 Each layout binds required_role_counts, layer_relations, max_simultaneous_labels, source caption policy and overflow rule. Some intended spatial overlap is allowed (map + reviewed route, cards, two comparison maps in wipe variant). Unintended text/camera collision is still blocking at G4. Exact fonts/resize measured by renderer, not inferred from rough rectangles.
 
-## 6. Motion registry — 18 preset-specific contracts
+## 6. Motion registry — 19 preset-specific contracts
 Each motion preset now includes strict parameter_schema, valid default_params, render_recipe primitive and transform_space, ordered phase_recipe, compatible layer kinds and geometry prerequisites. The shared scene schema allows bounded layer ID arrays but does NOT replace preset-specific validation.
 - route-line-draw requires reviewed geometry and optional following marker.
 - parallax-layers requires separated near/far IDs, relative drift strengths and reviewed separable source treatment.
 - stagger-reveal requires explicit layer order/gap and semantic evidence order.
 - map-region-wipe requires historical map ID, approved features and era-year.
+- **editorial-connector-draw** is separate from route-line-draw: timeline/causal arrows use an annotation layer with canvas-space connector geometry. Never demand geographic route provenance for timeline rails, and never use editorial links as a substitute for historically reviewed route geometry.
 - camera-pan and camera-push require actual focus layer IDs and bounded travel.
 - text-highlight and typewriter require source word/quote linkage.
 - count-up requires truthful intermediate values; no fabricated facts.
@@ -82,3 +83,6 @@ BA traceability from user outcome → authored visual goal/beat → approved sou
 
 ## 9. Verification limit
 Schema/fixtures/Windows CI can prove the data model can REPRESENT the target visual primitives and reject defined bad inputs. They cannot guarantee attractive staging, no slideshow monotony in generated editorial choices, exact similarity to the competitor or accurate history. This still requires actual full-flow implementation, rendered frames, editorial self-review and user G4/G5 approval.
+
+## 10. G4 visual-edit lineage and exact slot mapping
+VisualBlueprint plan.direction_revision is an optional typed record for an inherited plan or a local operator_visual_edit (G4 draft), carrying source Story SHA, approved presentation-only change paths and operator reason. The validator forbids changing narrated section/cue/claim references, text statements and source slots without G1 or G3. Every CompiledTimeline layer requires template_slot_id and source_asset_slot_id (null for pure editorial text/annotation); semantic validation rejects unknown/mismatched template slot and untraceable imported asset.
