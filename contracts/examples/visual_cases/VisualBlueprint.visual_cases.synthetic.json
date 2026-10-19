@@ -1675,7 +1675,7 @@
         "template_id": "T07",
         "before_map": {
           "map_requirement_id": "req_07_map_before",
-          "year": 1914,
+          "year": 1913,
           "approved_feature_refs": [],
           "label_source_claim_refs": [
             "claim_07"

@@ -163,11 +163,20 @@
           },
           "phases": [
             {
-              "phase_id": "phase_evt_001",
+              "phase_id": "phase_evt_001_0",
               "kind": "enter",
               "start_offset_frames": 0,
-              "duration_frames": 18,
+              "duration_frames": 12,
               "depends_on_phase_ids": []
+            },
+            {
+              "phase_id": "phase_evt_001_1",
+              "kind": "hold",
+              "start_offset_frames": 12,
+              "duration_frames": 6,
+              "depends_on_phase_ids": [
+                "phase_evt_001_0"
+              ]
             }
           ],
           "motion_space": "layer_local",

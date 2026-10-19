@@ -163,11 +163,20 @@
           },
           "phases": [
             {
-              "phase_id": "phase_event_001",
+              "phase_id": "phase_event_001_0",
               "kind": "enter",
               "start_offset_frames": 0,
-              "duration_frames": 18,
+              "duration_frames": 12,
               "depends_on_phase_ids": []
+            },
+            {
+              "phase_id": "phase_event_001_1",
+              "kind": "hold",
+              "start_offset_frames": 12,
+              "duration_frames": 6,
+              "depends_on_phase_ids": [
+                "phase_event_001_0"
+              ]
             }
           ],
           "motion_space": "layer_local",
@@ -401,11 +410,20 @@
           },
           "phases": [
             {
-              "phase_id": "phase_event_002",
+              "phase_id": "phase_event_002_0",
               "kind": "enter",
               "start_offset_frames": 0,
-              "duration_frames": 18,
+              "duration_frames": 12,
               "depends_on_phase_ids": []
+            },
+            {
+              "phase_id": "phase_event_002_1",
+              "kind": "hold",
+              "start_offset_frames": 12,
+              "duration_frames": 6,
+              "depends_on_phase_ids": [
+                "phase_event_002_0"
+              ]
             }
           ],
           "motion_space": "layer_local",
@@ -639,11 +657,20 @@
           },
           "phases": [
             {
-              "phase_id": "phase_event_003",
+              "phase_id": "phase_event_003_0",
               "kind": "enter",
               "start_offset_frames": 0,
-              "duration_frames": 18,
+              "duration_frames": 12,
               "depends_on_phase_ids": []
+            },
+            {
+              "phase_id": "phase_event_003_1",
+              "kind": "hold",
+              "start_offset_frames": 12,
+              "duration_frames": 6,
+              "depends_on_phase_ids": [
+                "phase_event_003_0"
+              ]
             }
           ],
           "motion_space": "layer_local",
@@ -877,11 +904,20 @@
           },
           "phases": [
             {
-              "phase_id": "phase_event_004",
+              "phase_id": "phase_event_004_0",
               "kind": "enter",
               "start_offset_frames": 0,
-              "duration_frames": 18,
+              "duration_frames": 12,
               "depends_on_phase_ids": []
+            },
+            {
+              "phase_id": "phase_event_004_1",
+              "kind": "hold",
+              "start_offset_frames": 12,
+              "duration_frames": 6,
+              "depends_on_phase_ids": [
+                "phase_event_004_0"
+              ]
             }
           ],
           "motion_space": "layer_local",
@@ -1115,11 +1151,20 @@
           },
           "phases": [
             {
-              "phase_id": "phase_event_005",
+              "phase_id": "phase_event_005_0",
               "kind": "enter",
               "start_offset_frames": 0,
-              "duration_frames": 18,
+              "duration_frames": 12,
               "depends_on_phase_ids": []
+            },
+            {
+              "phase_id": "phase_event_005_1",
+              "kind": "hold",
+              "start_offset_frames": 12,
+              "duration_frames": 6,
+              "depends_on_phase_ids": [
+                "phase_event_005_0"
+              ]
             }
           ],
           "motion_space": "layer_local",
@@ -1353,11 +1398,20 @@
           },
           "phases": [
             {
-              "phase_id": "phase_event_006",
+              "phase_id": "phase_event_006_0",
               "kind": "enter",
               "start_offset_frames": 0,
-              "duration_frames": 18,
+              "duration_frames": 12,
               "depends_on_phase_ids": []
+            },
+            {
+              "phase_id": "phase_event_006_1",
+              "kind": "hold",
+              "start_offset_frames": 12,
+              "duration_frames": 6,
+              "depends_on_phase_ids": [
+                "phase_event_006_0"
+              ]
             }
           ],
           "motion_space": "layer_local",
@@ -1591,11 +1645,20 @@
           },
           "phases": [
             {
-              "phase_id": "phase_event_007",
+              "phase_id": "phase_event_007_0",
               "kind": "enter",
               "start_offset_frames": 0,
-              "duration_frames": 18,
+              "duration_frames": 12,
               "depends_on_phase_ids": []
+            },
+            {
+              "phase_id": "phase_event_007_1",
+              "kind": "hold",
+              "start_offset_frames": 12,
+              "duration_frames": 6,
+              "depends_on_phase_ids": [
+                "phase_event_007_0"
+              ]
             }
           ],
           "motion_space": "layer_local",
@@ -1829,11 +1892,20 @@
           },
           "phases": [
             {
-              "phase_id": "phase_event_008",
+              "phase_id": "phase_event_008_0",
               "kind": "enter",
               "start_offset_frames": 0,
-              "duration_frames": 18,
+              "duration_frames": 12,
               "depends_on_phase_ids": []
+            },
+            {
+              "phase_id": "phase_event_008_1",
+              "kind": "hold",
+              "start_offset_frames": 12,
+              "duration_frames": 6,
+              "depends_on_phase_ids": [
+                "phase_event_008_0"
+              ]
             }
           ],
           "motion_space": "layer_local",
@@ -2067,11 +2139,20 @@
           },
           "phases": [
             {
-              "phase_id": "phase_event_009",
+              "phase_id": "phase_event_009_0",
               "kind": "enter",
               "start_offset_frames": 0,
-              "duration_frames": 18,
+              "duration_frames": 12,
               "depends_on_phase_ids": []
+            },
+            {
+              "phase_id": "phase_event_009_1",
+              "kind": "hold",
+              "start_offset_frames": 12,
+              "duration_frames": 6,
+              "depends_on_phase_ids": [
+                "phase_event_009_0"
+              ]
             }
           ],
           "motion_space": "layer_local",
@@ -2305,11 +2386,20 @@
           },
           "phases": [
             {
-              "phase_id": "phase_event_010",
+              "phase_id": "phase_event_010_0",
               "kind": "enter",
               "start_offset_frames": 0,
-              "duration_frames": 18,
+              "duration_frames": 12,
               "depends_on_phase_ids": []
+            },
+            {
+              "phase_id": "phase_event_010_1",
+              "kind": "hold",
+              "start_offset_frames": 12,
+              "duration_frames": 6,
+              "depends_on_phase_ids": [
+                "phase_event_010_0"
+              ]
             }
           ],
           "motion_space": "layer_local",
@@ -2543,11 +2633,20 @@
           },
           "phases": [
             {
-              "phase_id": "phase_event_011",
+              "phase_id": "phase_event_011_0",
               "kind": "enter",
               "start_offset_frames": 0,
-              "duration_frames": 18,
+              "duration_frames": 12,
               "depends_on_phase_ids": []
+            },
+            {
+              "phase_id": "phase_event_011_1",
+              "kind": "hold",
+              "start_offset_frames": 12,
+              "duration_frames": 6,
+              "depends_on_phase_ids": [
+                "phase_event_011_0"
+              ]
             }
           ],
           "motion_space": "layer_local",
@@ -2781,11 +2880,20 @@
           },
           "phases": [
             {
-              "phase_id": "phase_event_012",
+              "phase_id": "phase_event_012_0",
               "kind": "enter",
               "start_offset_frames": 0,
-              "duration_frames": 18,
+              "duration_frames": 12,
               "depends_on_phase_ids": []
+            },
+            {
+              "phase_id": "phase_event_012_1",
+              "kind": "hold",
+              "start_offset_frames": 12,
+              "duration_frames": 6,
+              "depends_on_phase_ids": [
+                "phase_event_012_0"
+              ]
             }
           ],
           "motion_space": "layer_local",
@@ -3019,11 +3127,20 @@
           },
           "phases": [
             {
-              "phase_id": "phase_event_013",
+              "phase_id": "phase_event_013_0",
               "kind": "enter",
               "start_offset_frames": 0,
-              "duration_frames": 18,
+              "duration_frames": 12,
               "depends_on_phase_ids": []
+            },
+            {
+              "phase_id": "phase_event_013_1",
+              "kind": "hold",
+              "start_offset_frames": 12,
+              "duration_frames": 6,
+              "depends_on_phase_ids": [
+                "phase_event_013_0"
+              ]
             }
           ],
           "motion_space": "layer_local",
@@ -3257,11 +3374,20 @@
           },
           "phases": [
             {
-              "phase_id": "phase_event_014",
+              "phase_id": "phase_event_014_0",
               "kind": "enter",
               "start_offset_frames": 0,
-              "duration_frames": 18,
+              "duration_frames": 12,
               "depends_on_phase_ids": []
+            },
+            {
+              "phase_id": "phase_event_014_1",
+              "kind": "hold",
+              "start_offset_frames": 12,
+              "duration_frames": 6,
+              "depends_on_phase_ids": [
+                "phase_event_014_0"
+              ]
             }
           ],
           "motion_space": "layer_local",
@@ -3495,11 +3621,20 @@
           },
           "phases": [
             {
-              "phase_id": "phase_event_015",
+              "phase_id": "phase_event_015_0",
               "kind": "enter",
               "start_offset_frames": 0,
-              "duration_frames": 18,
+              "duration_frames": 12,
               "depends_on_phase_ids": []
+            },
+            {
+              "phase_id": "phase_event_015_1",
+              "kind": "hold",
+              "start_offset_frames": 12,
+              "duration_frames": 6,
+              "depends_on_phase_ids": [
+                "phase_event_015_0"
+              ]
             }
           ],
           "motion_space": "layer_local",
@@ -3733,11 +3868,20 @@
           },
           "phases": [
             {
-              "phase_id": "phase_event_016",
+              "phase_id": "phase_event_016_0",
               "kind": "enter",
               "start_offset_frames": 0,
-              "duration_frames": 18,
+              "duration_frames": 12,
               "depends_on_phase_ids": []
+            },
+            {
+              "phase_id": "phase_event_016_1",
+              "kind": "hold",
+              "start_offset_frames": 12,
+              "duration_frames": 6,
+              "depends_on_phase_ids": [
+                "phase_event_016_0"
+              ]
             }
           ],
           "motion_space": "layer_local",
@@ -3971,11 +4115,20 @@
           },
           "phases": [
             {
-              "phase_id": "phase_event_017",
+              "phase_id": "phase_event_017_0",
               "kind": "enter",
               "start_offset_frames": 0,
-              "duration_frames": 18,
+              "duration_frames": 12,
               "depends_on_phase_ids": []
+            },
+            {
+              "phase_id": "phase_event_017_1",
+              "kind": "hold",
+              "start_offset_frames": 12,
+              "duration_frames": 6,
+              "depends_on_phase_ids": [
+                "phase_event_017_0"
+              ]
             }
           ],
           "motion_space": "layer_local",
@@ -4209,11 +4362,20 @@
           },
           "phases": [
             {
-              "phase_id": "phase_event_018",
+              "phase_id": "phase_event_018_0",
               "kind": "enter",
               "start_offset_frames": 0,
-              "duration_frames": 18,
+              "duration_frames": 12,
               "depends_on_phase_ids": []
+            },
+            {
+              "phase_id": "phase_event_018_1",
+              "kind": "hold",
+              "start_offset_frames": 12,
+              "duration_frames": 6,
+              "depends_on_phase_ids": [
+                "phase_event_018_0"
+              ]
             }
           ],
           "motion_space": "layer_local",
@@ -4447,11 +4609,20 @@
           },
           "phases": [
             {
-              "phase_id": "phase_event_019",
+              "phase_id": "phase_event_019_0",
               "kind": "enter",
               "start_offset_frames": 0,
-              "duration_frames": 18,
+              "duration_frames": 12,
               "depends_on_phase_ids": []
+            },
+            {
+              "phase_id": "phase_event_019_1",
+              "kind": "hold",
+              "start_offset_frames": 12,
+              "duration_frames": 6,
+              "depends_on_phase_ids": [
+                "phase_event_019_0"
+              ]
             }
           ],
           "motion_space": "layer_local",
@@ -4685,11 +4856,20 @@
           },
           "phases": [
             {
-              "phase_id": "phase_event_020",
+              "phase_id": "phase_event_020_0",
               "kind": "enter",
               "start_offset_frames": 0,
-              "duration_frames": 18,
+              "duration_frames": 12,
               "depends_on_phase_ids": []
+            },
+            {
+              "phase_id": "phase_event_020_1",
+              "kind": "hold",
+              "start_offset_frames": 12,
+              "duration_frames": 6,
+              "depends_on_phase_ids": [
+                "phase_event_020_0"
+              ]
             }
           ],
           "motion_space": "layer_local",
@@ -4923,11 +5103,20 @@
           },
           "phases": [
             {
-              "phase_id": "phase_event_021",
+              "phase_id": "phase_event_021_0",
               "kind": "enter",
               "start_offset_frames": 0,
-              "duration_frames": 18,
+              "duration_frames": 12,
               "depends_on_phase_ids": []
+            },
+            {
+              "phase_id": "phase_event_021_1",
+              "kind": "hold",
+              "start_offset_frames": 12,
+              "duration_frames": 6,
+              "depends_on_phase_ids": [
+                "phase_event_021_0"
+              ]
             }
           ],
           "motion_space": "layer_local",
@@ -5161,11 +5350,20 @@
           },
           "phases": [
             {
-              "phase_id": "phase_event_022",
+              "phase_id": "phase_event_022_0",
               "kind": "enter",
               "start_offset_frames": 0,
-              "duration_frames": 18,
+              "duration_frames": 12,
               "depends_on_phase_ids": []
+            },
+            {
+              "phase_id": "phase_event_022_1",
+              "kind": "hold",
+              "start_offset_frames": 12,
+              "duration_frames": 6,
+              "depends_on_phase_ids": [
+                "phase_event_022_0"
+              ]
             }
           ],
           "motion_space": "layer_local",
@@ -5399,11 +5597,20 @@
           },
           "phases": [
             {
-              "phase_id": "phase_event_023",
+              "phase_id": "phase_event_023_0",
               "kind": "enter",
               "start_offset_frames": 0,
-              "duration_frames": 18,
+              "duration_frames": 12,
               "depends_on_phase_ids": []
+            },
+            {
+              "phase_id": "phase_event_023_1",
+              "kind": "hold",
+              "start_offset_frames": 12,
+              "duration_frames": 6,
+              "depends_on_phase_ids": [
+                "phase_event_023_0"
+              ]
             }
           ],
           "motion_space": "layer_local",
@@ -5637,11 +5844,20 @@
           },
           "phases": [
             {
-              "phase_id": "phase_event_024",
+              "phase_id": "phase_event_024_0",
               "kind": "enter",
               "start_offset_frames": 0,
-              "duration_frames": 18,
+              "duration_frames": 12,
               "depends_on_phase_ids": []
+            },
+            {
+              "phase_id": "phase_event_024_1",
+              "kind": "hold",
+              "start_offset_frames": 12,
+              "duration_frames": 6,
+              "depends_on_phase_ids": [
+                "phase_event_024_0"
+              ]
             }
           ],
           "motion_space": "layer_local",
@@ -5875,11 +6091,20 @@
           },
           "phases": [
             {
-              "phase_id": "phase_event_025",
+              "phase_id": "phase_event_025_0",
               "kind": "enter",
               "start_offset_frames": 0,
-              "duration_frames": 18,
+              "duration_frames": 12,
               "depends_on_phase_ids": []
+            },
+            {
+              "phase_id": "phase_event_025_1",
+              "kind": "hold",
+              "start_offset_frames": 12,
+              "duration_frames": 6,
+              "depends_on_phase_ids": [
+                "phase_event_025_0"
+              ]
             }
           ],
           "motion_space": "layer_local",
@@ -6113,11 +6338,20 @@
           },
           "phases": [
             {
-              "phase_id": "phase_event_026",
+              "phase_id": "phase_event_026_0",
               "kind": "enter",
               "start_offset_frames": 0,
-              "duration_frames": 18,
+              "duration_frames": 12,
               "depends_on_phase_ids": []
+            },
+            {
+              "phase_id": "phase_event_026_1",
+              "kind": "hold",
+              "start_offset_frames": 12,
+              "duration_frames": 6,
+              "depends_on_phase_ids": [
+                "phase_event_026_0"
+              ]
             }
           ],
           "motion_space": "layer_local",
@@ -6351,11 +6585,20 @@
           },
           "phases": [
             {
-              "phase_id": "phase_event_027",
+              "phase_id": "phase_event_027_0",
               "kind": "enter",
               "start_offset_frames": 0,
-              "duration_frames": 18,
+              "duration_frames": 12,
               "depends_on_phase_ids": []
+            },
+            {
+              "phase_id": "phase_event_027_1",
+              "kind": "hold",
+              "start_offset_frames": 12,
+              "duration_frames": 6,
+              "depends_on_phase_ids": [
+                "phase_event_027_0"
+              ]
             }
           ],
           "motion_space": "layer_local",
@@ -6589,11 +6832,20 @@
           },
           "phases": [
             {
-              "phase_id": "phase_event_028",
+              "phase_id": "phase_event_028_0",
               "kind": "enter",
               "start_offset_frames": 0,
-              "duration_frames": 18,
+              "duration_frames": 12,
               "depends_on_phase_ids": []
+            },
+            {
+              "phase_id": "phase_event_028_1",
+              "kind": "hold",
+              "start_offset_frames": 12,
+              "duration_frames": 6,
+              "depends_on_phase_ids": [
+                "phase_event_028_0"
+              ]
             }
           ],
           "motion_space": "layer_local",
@@ -6827,11 +7079,20 @@
           },
           "phases": [
             {
-              "phase_id": "phase_event_029",
+              "phase_id": "phase_event_029_0",
               "kind": "enter",
               "start_offset_frames": 0,
-              "duration_frames": 18,
+              "duration_frames": 12,
               "depends_on_phase_ids": []
+            },
+            {
+              "phase_id": "phase_event_029_1",
+              "kind": "hold",
+              "start_offset_frames": 12,
+              "duration_frames": 6,
+              "depends_on_phase_ids": [
+                "phase_event_029_0"
+              ]
             }
           ],
           "motion_space": "layer_local",
@@ -7065,11 +7326,20 @@
           },
           "phases": [
             {
-              "phase_id": "phase_event_030",
+              "phase_id": "phase_event_030_0",
               "kind": "enter",
               "start_offset_frames": 0,
-              "duration_frames": 18,
+              "duration_frames": 12,
               "depends_on_phase_ids": []
+            },
+            {
+              "phase_id": "phase_event_030_1",
+              "kind": "hold",
+              "start_offset_frames": 12,
+              "duration_frames": 6,
+              "depends_on_phase_ids": [
+                "phase_event_030_0"
+              ]
             }
           ],
           "motion_space": "layer_local",
@@ -7303,11 +7573,20 @@
           },
           "phases": [
             {
-              "phase_id": "phase_event_031",
+              "phase_id": "phase_event_031_0",
               "kind": "enter",
               "start_offset_frames": 0,
-              "duration_frames": 18,
+              "duration_frames": 12,
               "depends_on_phase_ids": []
+            },
+            {
+              "phase_id": "phase_event_031_1",
+              "kind": "hold",
+              "start_offset_frames": 12,
+              "duration_frames": 6,
+              "depends_on_phase_ids": [
+                "phase_event_031_0"
+              ]
             }
           ],
           "motion_space": "layer_local",
@@ -7541,11 +7820,20 @@
           },
           "phases": [
             {
-              "phase_id": "phase_event_032",
+              "phase_id": "phase_event_032_0",
               "kind": "enter",
               "start_offset_frames": 0,
-              "duration_frames": 18,
+              "duration_frames": 12,
               "depends_on_phase_ids": []
+            },
+            {
+              "phase_id": "phase_event_032_1",
+              "kind": "hold",
+              "start_offset_frames": 12,
+              "duration_frames": 6,
+              "depends_on_phase_ids": [
+                "phase_event_032_0"
+              ]
             }
           ],
           "motion_space": "layer_local",
@@ -7779,11 +8067,20 @@
           },
           "phases": [
             {
-              "phase_id": "phase_event_033",
+              "phase_id": "phase_event_033_0",
               "kind": "enter",
               "start_offset_frames": 0,
-              "duration_frames": 18,
+              "duration_frames": 12,
               "depends_on_phase_ids": []
+            },
+            {
+              "phase_id": "phase_event_033_1",
+              "kind": "hold",
+              "start_offset_frames": 12,
+              "duration_frames": 6,
+              "depends_on_phase_ids": [
+                "phase_event_033_0"
+              ]
             }
           ],
           "motion_space": "layer_local",
@@ -8017,11 +8314,20 @@
           },
           "phases": [
             {
-              "phase_id": "phase_event_034",
+              "phase_id": "phase_event_034_0",
               "kind": "enter",
               "start_offset_frames": 0,
-              "duration_frames": 18,
+              "duration_frames": 12,
               "depends_on_phase_ids": []
+            },
+            {
+              "phase_id": "phase_event_034_1",
+              "kind": "hold",
+              "start_offset_frames": 12,
+              "duration_frames": 6,
+              "depends_on_phase_ids": [
+                "phase_event_034_0"
+              ]
             }
           ],
           "motion_space": "layer_local",
@@ -8255,11 +8561,20 @@
           },
           "phases": [
             {
-              "phase_id": "phase_event_035",
+              "phase_id": "phase_event_035_0",
               "kind": "enter",
               "start_offset_frames": 0,
-              "duration_frames": 18,
+              "duration_frames": 12,
               "depends_on_phase_ids": []
+            },
+            {
+              "phase_id": "phase_event_035_1",
+              "kind": "hold",
+              "start_offset_frames": 12,
+              "duration_frames": 6,
+              "depends_on_phase_ids": [
+                "phase_event_035_0"
+              ]
             }
           ],
           "motion_space": "layer_local",
@@ -8493,11 +8808,20 @@
           },
           "phases": [
             {
-              "phase_id": "phase_event_036",
+              "phase_id": "phase_event_036_0",
               "kind": "enter",
               "start_offset_frames": 0,
-              "duration_frames": 18,
+              "duration_frames": 12,
               "depends_on_phase_ids": []
+            },
+            {
+              "phase_id": "phase_event_036_1",
+              "kind": "hold",
+              "start_offset_frames": 12,
+              "duration_frames": 6,
+              "depends_on_phase_ids": [
+                "phase_event_036_0"
+              ]
             }
           ],
           "motion_space": "layer_local",
@@ -8731,11 +9055,20 @@
           },
           "phases": [
             {
-              "phase_id": "phase_event_037",
+              "phase_id": "phase_event_037_0",
               "kind": "enter",
               "start_offset_frames": 0,
-              "duration_frames": 18,
+              "duration_frames": 12,
               "depends_on_phase_ids": []
+            },
+            {
+              "phase_id": "phase_event_037_1",
+              "kind": "hold",
+              "start_offset_frames": 12,
+              "duration_frames": 6,
+              "depends_on_phase_ids": [
+                "phase_event_037_0"
+              ]
             }
           ],
           "motion_space": "layer_local",
@@ -8969,11 +9302,20 @@
           },
           "phases": [
             {
-              "phase_id": "phase_event_038",
+              "phase_id": "phase_event_038_0",
               "kind": "enter",
               "start_offset_frames": 0,
-              "duration_frames": 18,
+              "duration_frames": 12,
               "depends_on_phase_ids": []
+            },
+            {
+              "phase_id": "phase_event_038_1",
+              "kind": "hold",
+              "start_offset_frames": 12,
+              "duration_frames": 6,
+              "depends_on_phase_ids": [
+                "phase_event_038_0"
+              ]
             }
           ],
           "motion_space": "layer_local",
@@ -9207,11 +9549,20 @@
           },
           "phases": [
             {
-              "phase_id": "phase_event_039",
+              "phase_id": "phase_event_039_0",
               "kind": "enter",
               "start_offset_frames": 0,
-              "duration_frames": 18,
+              "duration_frames": 12,
               "depends_on_phase_ids": []
+            },
+            {
+              "phase_id": "phase_event_039_1",
+              "kind": "hold",
+              "start_offset_frames": 12,
+              "duration_frames": 6,
+              "depends_on_phase_ids": [
+                "phase_event_039_0"
+              ]
             }
           ],
           "motion_space": "layer_local",
@@ -9445,11 +9796,20 @@
           },
           "phases": [
             {
-              "phase_id": "phase_event_040",
+              "phase_id": "phase_event_040_0",
               "kind": "enter",
               "start_offset_frames": 0,
-              "duration_frames": 18,
+              "duration_frames": 12,
               "depends_on_phase_ids": []
+            },
+            {
+              "phase_id": "phase_event_040_1",
+              "kind": "hold",
+              "start_offset_frames": 12,
+              "duration_frames": 6,
+              "depends_on_phase_ids": [
+                "phase_event_040_0"
+              ]
             }
           ],
           "motion_space": "layer_local",
@@ -9683,11 +10043,20 @@
           },
           "phases": [
             {
-              "phase_id": "phase_event_041",
+              "phase_id": "phase_event_041_0",
               "kind": "enter",
               "start_offset_frames": 0,
-              "duration_frames": 18,
+              "duration_frames": 12,
               "depends_on_phase_ids": []
+            },
+            {
+              "phase_id": "phase_event_041_1",
+              "kind": "hold",
+              "start_offset_frames": 12,
+              "duration_frames": 6,
+              "depends_on_phase_ids": [
+                "phase_event_041_0"
+              ]
             }
           ],
           "motion_space": "layer_local",
@@ -9921,11 +10290,20 @@
           },
           "phases": [
             {
-              "phase_id": "phase_event_042",
+              "phase_id": "phase_event_042_0",
               "kind": "enter",
               "start_offset_frames": 0,
-              "duration_frames": 18,
+              "duration_frames": 12,
               "depends_on_phase_ids": []
+            },
+            {
+              "phase_id": "phase_event_042_1",
+              "kind": "hold",
+              "start_offset_frames": 12,
+              "duration_frames": 6,
+              "depends_on_phase_ids": [
+                "phase_event_042_0"
+              ]
             }
           ],
           "motion_space": "layer_local",
@@ -10159,11 +10537,20 @@
           },
           "phases": [
             {
-              "phase_id": "phase_event_043",
+              "phase_id": "phase_event_043_0",
               "kind": "enter",
               "start_offset_frames": 0,
-              "duration_frames": 18,
+              "duration_frames": 12,
               "depends_on_phase_ids": []
+            },
+            {
+              "phase_id": "phase_event_043_1",
+              "kind": "hold",
+              "start_offset_frames": 12,
+              "duration_frames": 6,
+              "depends_on_phase_ids": [
+                "phase_event_043_0"
+              ]
             }
           ],
           "motion_space": "layer_local",
@@ -10397,11 +10784,20 @@
           },
           "phases": [
             {
-              "phase_id": "phase_event_044",
+              "phase_id": "phase_event_044_0",
               "kind": "enter",
               "start_offset_frames": 0,
-              "duration_frames": 18,
+              "duration_frames": 12,
               "depends_on_phase_ids": []
+            },
+            {
+              "phase_id": "phase_event_044_1",
+              "kind": "hold",
+              "start_offset_frames": 12,
+              "duration_frames": 6,
+              "depends_on_phase_ids": [
+                "phase_event_044_0"
+              ]
             }
           ],
           "motion_space": "layer_local",
@@ -10635,11 +11031,20 @@
           },
           "phases": [
             {
-              "phase_id": "phase_event_045",
+              "phase_id": "phase_event_045_0",
               "kind": "enter",
               "start_offset_frames": 0,
-              "duration_frames": 18,
+              "duration_frames": 12,
               "depends_on_phase_ids": []
+            },
+            {
+              "phase_id": "phase_event_045_1",
+              "kind": "hold",
+              "start_offset_frames": 12,
+              "duration_frames": 6,
+              "depends_on_phase_ids": [
+                "phase_event_045_0"
+              ]
             }
           ],
           "motion_space": "layer_local",
@@ -10873,11 +11278,20 @@
           },
           "phases": [
             {
-              "phase_id": "phase_event_046",
+              "phase_id": "phase_event_046_0",
               "kind": "enter",
               "start_offset_frames": 0,
-              "duration_frames": 18,
+              "duration_frames": 12,
               "depends_on_phase_ids": []
+            },
+            {
+              "phase_id": "phase_event_046_1",
+              "kind": "hold",
+              "start_offset_frames": 12,
+              "duration_frames": 6,
+              "depends_on_phase_ids": [
+                "phase_event_046_0"
+              ]
             }
           ],
           "motion_space": "layer_local",
@@ -11111,11 +11525,20 @@
           },
           "phases": [
             {
-              "phase_id": "phase_event_047",
+              "phase_id": "phase_event_047_0",
               "kind": "enter",
               "start_offset_frames": 0,
-              "duration_frames": 18,
+              "duration_frames": 12,
               "depends_on_phase_ids": []
+            },
+            {
+              "phase_id": "phase_event_047_1",
+              "kind": "hold",
+              "start_offset_frames": 12,
+              "duration_frames": 6,
+              "depends_on_phase_ids": [
+                "phase_event_047_0"
+              ]
             }
           ],
           "motion_space": "layer_local",
@@ -11349,11 +11772,20 @@
           },
           "phases": [
             {
-              "phase_id": "phase_event_048",
+              "phase_id": "phase_event_048_0",
               "kind": "enter",
               "start_offset_frames": 0,
-              "duration_frames": 18,
+              "duration_frames": 12,
               "depends_on_phase_ids": []
+            },
+            {
+              "phase_id": "phase_event_048_1",
+              "kind": "hold",
+              "start_offset_frames": 12,
+              "duration_frames": 6,
+              "depends_on_phase_ids": [
+                "phase_event_048_0"
+              ]
             }
           ],
           "motion_space": "layer_local",

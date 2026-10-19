@@ -263,8 +263,8 @@
       "asset_class": "HISTORICAL_MAP",
       "exactness": "context_related",
       "required": true,
-      "start_year": 1914,
-      "end_year": 1914,
+      "start_year": 1913,
+      "end_year": 1913,
       "source_leads": [],
       "map_reconstruction_policy": "exact_period_map"
     },
