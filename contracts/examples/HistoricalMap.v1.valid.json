@@ -1,0 +1,37 @@
+{
+  "schema_version": "HistoricalMap.v1",
+  "historical_map_id": "map_1871",
+  "source_asset_id": "asset_001",
+  "source_original_sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+  "valid_year_from": 1871,
+  "valid_year_to": 1871,
+  "geography_mode": "vector_period",
+  "geometry_format": "GeoJSON",
+  "source_crs": "EPSG:4326",
+  "normalized_crs": "EPSG:4326",
+  "map_projection": "mercator",
+  "geography_bbox": {
+    "min_lon": 5,
+    "min_lat": 47,
+    "max_lon": 16,
+    "max_lat": 56
+  },
+  "geometry_object_sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+  "raster_asset_sha256": null,
+  "approved_feature_ids": [
+    "feature_001"
+  ],
+  "labels": [
+    {
+      "label_id": "label_001",
+      "text": "Germany, 1871",
+      "feature_id": "feature_001",
+      "lon": 11,
+      "lat": 51
+    }
+  ],
+  "geometry_evidence_url": "https://example.org/fixture-geometry",
+  "rights_review_record_id": "rights_001",
+  "user_approved": false,
+  "schematic_disclosure": null
+}

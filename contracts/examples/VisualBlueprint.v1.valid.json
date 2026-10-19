@@ -19,7 +19,70 @@
       "layer_roles": [
         "map",
         "headline"
-      ]
+      ],
+      "editorial_direction": {
+        "visual_purpose": "Establish the historical geography context with precise visual hierarchy",
+        "viewer_takeaway": "Understand who, where and why this context matters",
+        "on_screen_text": [
+          {
+            "text": "GERMANY 1871",
+            "role": "headline",
+            "claim_ref": null,
+            "max_lines": 2
+          }
+        ],
+        "reveal_plan": [
+          {
+            "beat_id": "beat_sec_001",
+            "action": "establish",
+            "target_role": "map",
+            "cue": {
+              "section_id": "sec_001",
+              "phrase": "In",
+              "occurrence": 0
+            },
+            "priority": 1
+          }
+        ],
+        "asset_slots": [
+          {
+            "slot_id": "slot_sec_001",
+            "requirement_id": "req_001",
+            "semantic_role": "reviewed primary contextual evidence",
+            "usage": "background",
+            "mandatory": true
+          }
+        ],
+        "camera_intent": "push_in",
+        "composition_intent": "map_full",
+        "emotional_tone": "neutral",
+        "layout_variant_hint": "A",
+        "duration_policy": "voice_locked",
+        "transition_intent": "hard_cut",
+        "historical_map_requirement_id": "req_001"
+      },
+      "asset_slot_bindings": [
+        {
+          "slot_id": "slot_sec_001",
+          "requirement_id": "req_001",
+          "approved_asset_id": null,
+          "selection_reason": "Await G3 approval"
+        }
+      ],
+      "layout_control": {
+        "layout_id": "T01.A.v1",
+        "safe_area_pct": {
+          "left": 0.05,
+          "top": 0.06,
+          "right": 0.05,
+          "bottom": 0.06
+        },
+        "text_density": "minimal",
+        "focal_point": [
+          0.5,
+          0.5
+        ]
+      }
     }
   ]
 }

@@ -18,5 +18,6 @@
   "variant_ids": [],
   "period_start_year": 1871,
   "period_end_year": 1871,
-  "map_geometry_source_url": "https://example.org/fixture-map"
+  "map_geometry_source_url": "https://example.org/fixture-map",
+  "historical_map_record_id": null
 }

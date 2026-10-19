@@ -1,0 +1,6978 @@
+{
+  "schema_version": "CompiledTimeline.v1",
+  "project_id": "proj_longform",
+  "fps": 30,
+  "width": 1920,
+  "height": 1080,
+  "total_frames": 10800,
+  "style_version": "HistoryEditorialPaper.v1",
+  "template_registry_version": "templates.v1",
+  "motion_registry_version": "presets.v1",
+  "story_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "audio_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+  "word_map_sha256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+  "asset_snapshot_sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+  "dependency_fingerprint": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+  "scenes": [
+    {
+      "scene_id": "scene_001",
+      "setup_id": "setup_001",
+      "template_id": "T01",
+      "variant_id": "A",
+      "start_frame": 0,
+      "duration_frames": 225,
+      "asset_ids": [
+        "asset_001"
+      ],
+      "layers": [
+        {
+          "layer_id": "layer_001",
+          "layer_kind": "map",
+          "asset_id": "asset_001",
+          "text": null,
+          "source_claim_id": null,
+          "z_index": 0,
+          "rect_px": {
+            "x": 100,
+            "y": 80,
+            "w": 1720,
+            "h": 900
+          },
+          "anchor": "center",
+          "crop_normalized": {
+            "x": 0.08,
+            "y": 0.08,
+            "w": 0.84,
+            "h": 0.84
+          },
+          "object_fit": "cover",
+          "mask": {
+            "kind": "none",
+            "asset_id": null,
+            "feather_px": 0
+          },
+          "style": {
+            "font_token": null,
+            "color_token": null,
+            "stroke_token": null,
+            "max_lines": 3
+          },
+          "map_binding": null
+        },
+        {
+          "layer_id": "title_001",
+          "layer_kind": "headline",
+          "asset_id": null,
+          "text": "The fragile map of Europe",
+          "source_claim_id": null,
+          "z_index": 5,
+          "rect_px": {
+            "x": 100,
+            "y": 80,
+            "w": 1720,
+            "h": 900
+          },
+          "anchor": "center",
+          "crop_normalized": {
+            "x": 0.08,
+            "y": 0.08,
+            "w": 0.84,
+            "h": 0.84
+          },
+          "object_fit": "cover",
+          "mask": {
+            "kind": "none",
+            "asset_id": null,
+            "feather_px": 0
+          },
+          "style": {
+            "font_token": null,
+            "color_token": null,
+            "stroke_token": null,
+            "max_lines": 3
+          },
+          "map_binding": null
+        }
+      ],
+      "events": [
+        {
+          "event_id": "event_001",
+          "layer_id": "title_001",
+          "preset_id": "title-mask-reveal",
+          "start_frame": 15,
+          "duration_frames": 18,
+          "cue_word_id": "word_001",
+          "params": {
+            "direction": "up",
+            "distance_px": 30
+          },
+          "animated_property": "opacity",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 0,
+              "easing": "ease_out"
+            },
+            {
+              "frame": 18,
+              "value": 1,
+              "easing": "ease_out"
+            }
+          ],
+          "cue_binding": {
+            "word_id": "word_001",
+            "offset_frames": 0
+          }
+        }
+      ],
+      "camera": {
+        "mode": "push_in",
+        "keyframes": [
+          {
+            "at_frame": 0,
+            "x_px": 0,
+            "y_px": 0,
+            "scale": 1,
+            "rotation_deg": 0,
+            "opacity": 1,
+            "easing": "linear"
+          },
+          {
+            "at_frame": 224,
+            "x_px": -8,
+            "y_px": -3,
+            "scale": 1.05,
+            "rotation_deg": 0,
+            "opacity": 1,
+            "easing": "ease_in_out"
+          }
+        ],
+        "focus_entity_id": null,
+        "clamp_to_content": true
+      },
+      "transition_out": {
+        "type": "hard_cut",
+        "duration_frames": 0
+      },
+      "story_cue_span": {
+        "first_word_id": "word_001",
+        "last_word_id": "word_001"
+      }
+    },
+    {
+      "scene_id": "scene_002",
+      "setup_id": "setup_002",
+      "template_id": "T01",
+      "variant_id": "B",
+      "start_frame": 225,
+      "duration_frames": 225,
+      "asset_ids": [
+        "asset_001"
+      ],
+      "layers": [
+        {
+          "layer_id": "layer_002",
+          "layer_kind": "map",
+          "asset_id": "asset_001",
+          "text": null,
+          "source_claim_id": null,
+          "z_index": 0,
+          "rect_px": {
+            "x": 100,
+            "y": 80,
+            "w": 1720,
+            "h": 900
+          },
+          "anchor": "center",
+          "crop_normalized": {
+            "x": 0.08,
+            "y": 0.08,
+            "w": 0.84,
+            "h": 0.84
+          },
+          "object_fit": "cover",
+          "mask": {
+            "kind": "none",
+            "asset_id": null,
+            "feather_px": 0
+          },
+          "style": {
+            "font_token": null,
+            "color_token": null,
+            "stroke_token": null,
+            "max_lines": 3
+          },
+          "map_binding": null
+        },
+        {
+          "layer_id": "title_002",
+          "layer_kind": "headline",
+          "asset_id": null,
+          "text": "The fragile map of Europe",
+          "source_claim_id": null,
+          "z_index": 5,
+          "rect_px": {
+            "x": 100,
+            "y": 80,
+            "w": 1720,
+            "h": 900
+          },
+          "anchor": "center",
+          "crop_normalized": {
+            "x": 0.08,
+            "y": 0.08,
+            "w": 0.84,
+            "h": 0.84
+          },
+          "object_fit": "cover",
+          "mask": {
+            "kind": "none",
+            "asset_id": null,
+            "feather_px": 0
+          },
+          "style": {
+            "font_token": null,
+            "color_token": null,
+            "stroke_token": null,
+            "max_lines": 3
+          },
+          "map_binding": null
+        }
+      ],
+      "events": [
+        {
+          "event_id": "event_002",
+          "layer_id": "title_002",
+          "preset_id": "title-mask-reveal",
+          "start_frame": 15,
+          "duration_frames": 18,
+          "cue_word_id": "word_002",
+          "params": {
+            "direction": "up",
+            "distance_px": 30
+          },
+          "animated_property": "opacity",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 0,
+              "easing": "ease_out"
+            },
+            {
+              "frame": 18,
+              "value": 1,
+              "easing": "ease_out"
+            }
+          ],
+          "cue_binding": {
+            "word_id": "word_002",
+            "offset_frames": 0
+          }
+        }
+      ],
+      "camera": {
+        "mode": "push_in",
+        "keyframes": [
+          {
+            "at_frame": 0,
+            "x_px": 0,
+            "y_px": 0,
+            "scale": 1,
+            "rotation_deg": 0,
+            "opacity": 1,
+            "easing": "linear"
+          },
+          {
+            "at_frame": 224,
+            "x_px": -8,
+            "y_px": -3,
+            "scale": 1.05,
+            "rotation_deg": 0,
+            "opacity": 1,
+            "easing": "ease_in_out"
+          }
+        ],
+        "focus_entity_id": null,
+        "clamp_to_content": true
+      },
+      "transition_out": {
+        "type": "hard_cut",
+        "duration_frames": 0
+      },
+      "story_cue_span": {
+        "first_word_id": "word_002",
+        "last_word_id": "word_002"
+      }
+    },
+    {
+      "scene_id": "scene_003",
+      "setup_id": "setup_003",
+      "template_id": "T03",
+      "variant_id": "A",
+      "start_frame": 450,
+      "duration_frames": 225,
+      "asset_ids": [
+        "asset_002"
+      ],
+      "layers": [
+        {
+          "layer_id": "layer_003",
+          "layer_kind": "archival_photo",
+          "asset_id": "asset_002",
+          "text": null,
+          "source_claim_id": null,
+          "z_index": 0,
+          "rect_px": {
+            "x": 100,
+            "y": 80,
+            "w": 1720,
+            "h": 900
+          },
+          "anchor": "center",
+          "crop_normalized": {
+            "x": 0.08,
+            "y": 0.08,
+            "w": 0.84,
+            "h": 0.84
+          },
+          "object_fit": "cover",
+          "mask": {
+            "kind": "none",
+            "asset_id": null,
+            "feather_px": 0
+          },
+          "style": {
+            "font_token": null,
+            "color_token": null,
+            "stroke_token": null,
+            "max_lines": 3
+          },
+          "map_binding": null
+        },
+        {
+          "layer_id": "title_003",
+          "layer_kind": "headline",
+          "asset_id": null,
+          "text": "A continent of empires",
+          "source_claim_id": null,
+          "z_index": 5,
+          "rect_px": {
+            "x": 100,
+            "y": 80,
+            "w": 1720,
+            "h": 900
+          },
+          "anchor": "center",
+          "crop_normalized": {
+            "x": 0.08,
+            "y": 0.08,
+            "w": 0.84,
+            "h": 0.84
+          },
+          "object_fit": "cover",
+          "mask": {
+            "kind": "none",
+            "asset_id": null,
+            "feather_px": 0
+          },
+          "style": {
+            "font_token": null,
+            "color_token": null,
+            "stroke_token": null,
+            "max_lines": 3
+          },
+          "map_binding": null
+        }
+      ],
+      "events": [
+        {
+          "event_id": "event_003",
+          "layer_id": "title_003",
+          "preset_id": "title-mask-reveal",
+          "start_frame": 15,
+          "duration_frames": 18,
+          "cue_word_id": "word_003",
+          "params": {
+            "direction": "up",
+            "distance_px": 30
+          },
+          "animated_property": "opacity",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 0,
+              "easing": "ease_out"
+            },
+            {
+              "frame": 18,
+              "value": 1,
+              "easing": "ease_out"
+            }
+          ],
+          "cue_binding": {
+            "word_id": "word_003",
+            "offset_frames": 0
+          }
+        }
+      ],
+      "camera": {
+        "mode": "push_in",
+        "keyframes": [
+          {
+            "at_frame": 0,
+            "x_px": 0,
+            "y_px": 0,
+            "scale": 1,
+            "rotation_deg": 0,
+            "opacity": 1,
+            "easing": "linear"
+          },
+          {
+            "at_frame": 224,
+            "x_px": -8,
+            "y_px": -3,
+            "scale": 1.05,
+            "rotation_deg": 0,
+            "opacity": 1,
+            "easing": "ease_in_out"
+          }
+        ],
+        "focus_entity_id": null,
+        "clamp_to_content": true
+      },
+      "transition_out": {
+        "type": "hard_cut",
+        "duration_frames": 0
+      },
+      "story_cue_span": {
+        "first_word_id": "word_003",
+        "last_word_id": "word_003"
+      }
+    },
+    {
+      "scene_id": "scene_004",
+      "setup_id": "setup_004",
+      "template_id": "T03",
+      "variant_id": "B",
+      "start_frame": 675,
+      "duration_frames": 225,
+      "asset_ids": [
+        "asset_002"
+      ],
+      "layers": [
+        {
+          "layer_id": "layer_004",
+          "layer_kind": "archival_photo",
+          "asset_id": "asset_002",
+          "text": null,
+          "source_claim_id": null,
+          "z_index": 0,
+          "rect_px": {
+            "x": 100,
+            "y": 80,
+            "w": 1720,
+            "h": 900
+          },
+          "anchor": "center",
+          "crop_normalized": {
+            "x": 0.08,
+            "y": 0.08,
+            "w": 0.84,
+            "h": 0.84
+          },
+          "object_fit": "cover",
+          "mask": {
+            "kind": "none",
+            "asset_id": null,
+            "feather_px": 0
+          },
+          "style": {
+            "font_token": null,
+            "color_token": null,
+            "stroke_token": null,
+            "max_lines": 3
+          },
+          "map_binding": null
+        },
+        {
+          "layer_id": "title_004",
+          "layer_kind": "headline",
+          "asset_id": null,
+          "text": "A continent of empires",
+          "source_claim_id": null,
+          "z_index": 5,
+          "rect_px": {
+            "x": 100,
+            "y": 80,
+            "w": 1720,
+            "h": 900
+          },
+          "anchor": "center",
+          "crop_normalized": {
+            "x": 0.08,
+            "y": 0.08,
+            "w": 0.84,
+            "h": 0.84
+          },
+          "object_fit": "cover",
+          "mask": {
+            "kind": "none",
+            "asset_id": null,
+            "feather_px": 0
+          },
+          "style": {
+            "font_token": null,
+            "color_token": null,
+            "stroke_token": null,
+            "max_lines": 3
+          },
+          "map_binding": null
+        }
+      ],
+      "events": [
+        {
+          "event_id": "event_004",
+          "layer_id": "title_004",
+          "preset_id": "title-mask-reveal",
+          "start_frame": 15,
+          "duration_frames": 18,
+          "cue_word_id": "word_004",
+          "params": {
+            "direction": "up",
+            "distance_px": 30
+          },
+          "animated_property": "opacity",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 0,
+              "easing": "ease_out"
+            },
+            {
+              "frame": 18,
+              "value": 1,
+              "easing": "ease_out"
+            }
+          ],
+          "cue_binding": {
+            "word_id": "word_004",
+            "offset_frames": 0
+          }
+        }
+      ],
+      "camera": {
+        "mode": "push_in",
+        "keyframes": [
+          {
+            "at_frame": 0,
+            "x_px": 0,
+            "y_px": 0,
+            "scale": 1,
+            "rotation_deg": 0,
+            "opacity": 1,
+            "easing": "linear"
+          },
+          {
+            "at_frame": 224,
+            "x_px": -8,
+            "y_px": -3,
+            "scale": 1.05,
+            "rotation_deg": 0,
+            "opacity": 1,
+            "easing": "ease_in_out"
+          }
+        ],
+        "focus_entity_id": null,
+        "clamp_to_content": true
+      },
+      "transition_out": {
+        "type": "hard_cut",
+        "duration_frames": 0
+      },
+      "story_cue_span": {
+        "first_word_id": "word_004",
+        "last_word_id": "word_004"
+      }
+    },
+    {
+      "scene_id": "scene_005",
+      "setup_id": "setup_005",
+      "template_id": "T06",
+      "variant_id": "A",
+      "start_frame": 900,
+      "duration_frames": 225,
+      "asset_ids": [
+        "asset_003"
+      ],
+      "layers": [
+        {
+          "layer_id": "layer_005",
+          "layer_kind": "archival_photo",
+          "asset_id": "asset_003",
+          "text": null,
+          "source_claim_id": null,
+          "z_index": 0,
+          "rect_px": {
+            "x": 100,
+            "y": 80,
+            "w": 1720,
+            "h": 900
+          },
+          "anchor": "center",
+          "crop_normalized": {
+            "x": 0.08,
+            "y": 0.08,
+            "w": 0.84,
+            "h": 0.84
+          },
+          "object_fit": "cover",
+          "mask": {
+            "kind": "none",
+            "asset_id": null,
+            "feather_px": 0
+          },
+          "style": {
+            "font_token": null,
+            "color_token": null,
+            "stroke_token": null,
+            "max_lines": 3
+          },
+          "map_binding": null
+        },
+        {
+          "layer_id": "title_005",
+          "layer_kind": "headline",
+          "asset_id": null,
+          "text": "Bosnia and political tensions",
+          "source_claim_id": null,
+          "z_index": 5,
+          "rect_px": {
+            "x": 100,
+            "y": 80,
+            "w": 1720,
+            "h": 900
+          },
+          "anchor": "center",
+          "crop_normalized": {
+            "x": 0.08,
+            "y": 0.08,
+            "w": 0.84,
+            "h": 0.84
+          },
+          "object_fit": "cover",
+          "mask": {
+            "kind": "none",
+            "asset_id": null,
+            "feather_px": 0
+          },
+          "style": {
+            "font_token": null,
+            "color_token": null,
+            "stroke_token": null,
+            "max_lines": 3
+          },
+          "map_binding": null
+        }
+      ],
+      "events": [
+        {
+          "event_id": "event_005",
+          "layer_id": "title_005",
+          "preset_id": "title-mask-reveal",
+          "start_frame": 15,
+          "duration_frames": 18,
+          "cue_word_id": "word_005",
+          "params": {
+            "direction": "up",
+            "distance_px": 30
+          },
+          "animated_property": "opacity",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 0,
+              "easing": "ease_out"
+            },
+            {
+              "frame": 18,
+              "value": 1,
+              "easing": "ease_out"
+            }
+          ],
+          "cue_binding": {
+            "word_id": "word_005",
+            "offset_frames": 0
+          }
+        }
+      ],
+      "camera": {
+        "mode": "push_in",
+        "keyframes": [
+          {
+            "at_frame": 0,
+            "x_px": 0,
+            "y_px": 0,
+            "scale": 1,
+            "rotation_deg": 0,
+            "opacity": 1,
+            "easing": "linear"
+          },
+          {
+            "at_frame": 224,
+            "x_px": -8,
+            "y_px": -3,
+            "scale": 1.05,
+            "rotation_deg": 0,
+            "opacity": 1,
+            "easing": "ease_in_out"
+          }
+        ],
+        "focus_entity_id": null,
+        "clamp_to_content": true
+      },
+      "transition_out": {
+        "type": "hard_cut",
+        "duration_frames": 0
+      },
+      "story_cue_span": {
+        "first_word_id": "word_005",
+        "last_word_id": "word_005"
+      }
+    },
+    {
+      "scene_id": "scene_006",
+      "setup_id": "setup_006",
+      "template_id": "T06",
+      "variant_id": "B",
+      "start_frame": 1125,
+      "duration_frames": 225,
+      "asset_ids": [
+        "asset_003"
+      ],
+      "layers": [
+        {
+          "layer_id": "layer_006",
+          "layer_kind": "archival_photo",
+          "asset_id": "asset_003",
+          "text": null,
+          "source_claim_id": null,
+          "z_index": 0,
+          "rect_px": {
+            "x": 100,
+            "y": 80,
+            "w": 1720,
+            "h": 900
+          },
+          "anchor": "center",
+          "crop_normalized": {
+            "x": 0.08,
+            "y": 0.08,
+            "w": 0.84,
+            "h": 0.84
+          },
+          "object_fit": "cover",
+          "mask": {
+            "kind": "none",
+            "asset_id": null,
+            "feather_px": 0
+          },
+          "style": {
+            "font_token": null,
+            "color_token": null,
+            "stroke_token": null,
+            "max_lines": 3
+          },
+          "map_binding": null
+        },
+        {
+          "layer_id": "title_006",
+          "layer_kind": "headline",
+          "asset_id": null,
+          "text": "Bosnia and political tensions",
+          "source_claim_id": null,
+          "z_index": 5,
+          "rect_px": {
+            "x": 100,
+            "y": 80,
+            "w": 1720,
+            "h": 900
+          },
+          "anchor": "center",
+          "crop_normalized": {
+            "x": 0.08,
+            "y": 0.08,
+            "w": 0.84,
+            "h": 0.84
+          },
+          "object_fit": "cover",
+          "mask": {
+            "kind": "none",
+            "asset_id": null,
+            "feather_px": 0
+          },
+          "style": {
+            "font_token": null,
+            "color_token": null,
+            "stroke_token": null,
+            "max_lines": 3
+          },
+          "map_binding": null
+        }
+      ],
+      "events": [
+        {
+          "event_id": "event_006",
+          "layer_id": "title_006",
+          "preset_id": "title-mask-reveal",
+          "start_frame": 15,
+          "duration_frames": 18,
+          "cue_word_id": "word_006",
+          "params": {
+            "direction": "up",
+            "distance_px": 30
+          },
+          "animated_property": "opacity",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 0,
+              "easing": "ease_out"
+            },
+            {
+              "frame": 18,
+              "value": 1,
+              "easing": "ease_out"
+            }
+          ],
+          "cue_binding": {
+            "word_id": "word_006",
+            "offset_frames": 0
+          }
+        }
+      ],
+      "camera": {
+        "mode": "push_in",
+        "keyframes": [
+          {
+            "at_frame": 0,
+            "x_px": 0,
+            "y_px": 0,
+            "scale": 1,
+            "rotation_deg": 0,
+            "opacity": 1,
+            "easing": "linear"
+          },
+          {
+            "at_frame": 224,
+            "x_px": -8,
+            "y_px": -3,
+            "scale": 1.05,
+            "rotation_deg": 0,
+            "opacity": 1,
+            "easing": "ease_in_out"
+          }
+        ],
+        "focus_entity_id": null,
+        "clamp_to_content": true
+      },
+      "transition_out": {
+        "type": "hard_cut",
+        "duration_frames": 0
+      },
+      "story_cue_span": {
+        "first_word_id": "word_006",
+        "last_word_id": "word_006"
+      }
+    },
+    {
+      "scene_id": "scene_007",
+      "setup_id": "setup_007",
+      "template_id": "T08",
+      "variant_id": "A",
+      "start_frame": 1350,
+      "duration_frames": 225,
+      "asset_ids": [
+        "asset_004"
+      ],
+      "layers": [
+        {
+          "layer_id": "layer_007",
+          "layer_kind": "archival_photo",
+          "asset_id": "asset_004",
+          "text": null,
+          "source_claim_id": null,
+          "z_index": 0,
+          "rect_px": {
+            "x": 100,
+            "y": 80,
+            "w": 1720,
+            "h": 900
+          },
+          "anchor": "center",
+          "crop_normalized": {
+            "x": 0.08,
+            "y": 0.08,
+            "w": 0.84,
+            "h": 0.84
+          },
+          "object_fit": "cover",
+          "mask": {
+            "kind": "none",
+            "asset_id": null,
+            "feather_px": 0
+          },
+          "style": {
+            "font_token": null,
+            "color_token": null,
+            "stroke_token": null,
+            "max_lines": 3
+          },
+          "map_binding": null
+        },
+        {
+          "layer_id": "title_007",
+          "layer_kind": "headline",
+          "asset_id": null,
+          "text": "The Sarajevo visit",
+          "source_claim_id": null,
+          "z_index": 5,
+          "rect_px": {
+            "x": 100,
+            "y": 80,
+            "w": 1720,
+            "h": 900
+          },
+          "anchor": "center",
+          "crop_normalized": {
+            "x": 0.08,
+            "y": 0.08,
+            "w": 0.84,
+            "h": 0.84
+          },
+          "object_fit": "cover",
+          "mask": {
+            "kind": "none",
+            "asset_id": null,
+            "feather_px": 0
+          },
+          "style": {
+            "font_token": null,
+            "color_token": null,
+            "stroke_token": null,
+            "max_lines": 3
+          },
+          "map_binding": null
+        }
+      ],
+      "events": [
+        {
+          "event_id": "event_007",
+          "layer_id": "title_007",
+          "preset_id": "title-mask-reveal",
+          "start_frame": 15,
+          "duration_frames": 18,
+          "cue_word_id": "word_007",
+          "params": {
+            "direction": "up",
+            "distance_px": 30
+          },
+          "animated_property": "opacity",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 0,
+              "easing": "ease_out"
+            },
+            {
+              "frame": 18,
+              "value": 1,
+              "easing": "ease_out"
+            }
+          ],
+          "cue_binding": {
+            "word_id": "word_007",
+            "offset_frames": 0
+          }
+        }
+      ],
+      "camera": {
+        "mode": "push_in",
+        "keyframes": [
+          {
+            "at_frame": 0,
+            "x_px": 0,
+            "y_px": 0,
+            "scale": 1,
+            "rotation_deg": 0,
+            "opacity": 1,
+            "easing": "linear"
+          },
+          {
+            "at_frame": 224,
+            "x_px": -8,
+            "y_px": -3,
+            "scale": 1.05,
+            "rotation_deg": 0,
+            "opacity": 1,
+            "easing": "ease_in_out"
+          }
+        ],
+        "focus_entity_id": null,
+        "clamp_to_content": true
+      },
+      "transition_out": {
+        "type": "hard_cut",
+        "duration_frames": 0
+      },
+      "story_cue_span": {
+        "first_word_id": "word_007",
+        "last_word_id": "word_007"
+      }
+    },
+    {
+      "scene_id": "scene_008",
+      "setup_id": "setup_008",
+      "template_id": "T08",
+      "variant_id": "B",
+      "start_frame": 1575,
+      "duration_frames": 225,
+      "asset_ids": [
+        "asset_004"
+      ],
+      "layers": [
+        {
+          "layer_id": "layer_008",
+          "layer_kind": "archival_photo",
+          "asset_id": "asset_004",
+          "text": null,
+          "source_claim_id": null,
+          "z_index": 0,
+          "rect_px": {
+            "x": 100,
+            "y": 80,
+            "w": 1720,
+            "h": 900
+          },
+          "anchor": "center",
+          "crop_normalized": {
+            "x": 0.08,
+            "y": 0.08,
+            "w": 0.84,
+            "h": 0.84
+          },
+          "object_fit": "cover",
+          "mask": {
+            "kind": "none",
+            "asset_id": null,
+            "feather_px": 0
+          },
+          "style": {
+            "font_token": null,
+            "color_token": null,
+            "stroke_token": null,
+            "max_lines": 3
+          },
+          "map_binding": null
+        },
+        {
+          "layer_id": "title_008",
+          "layer_kind": "headline",
+          "asset_id": null,
+          "text": "The Sarajevo visit",
+          "source_claim_id": null,
+          "z_index": 5,
+          "rect_px": {
+            "x": 100,
+            "y": 80,
+            "w": 1720,
+            "h": 900
+          },
+          "anchor": "center",
+          "crop_normalized": {
+            "x": 0.08,
+            "y": 0.08,
+            "w": 0.84,
+            "h": 0.84
+          },
+          "object_fit": "cover",
+          "mask": {
+            "kind": "none",
+            "asset_id": null,
+            "feather_px": 0
+          },
+          "style": {
+            "font_token": null,
+            "color_token": null,
+            "stroke_token": null,
+            "max_lines": 3
+          },
+          "map_binding": null
+        }
+      ],
+      "events": [
+        {
+          "event_id": "event_008",
+          "layer_id": "title_008",
+          "preset_id": "title-mask-reveal",
+          "start_frame": 15,
+          "duration_frames": 18,
+          "cue_word_id": "word_008",
+          "params": {
+            "direction": "up",
+            "distance_px": 30
+          },
+          "animated_property": "opacity",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 0,
+              "easing": "ease_out"
+            },
+            {
+              "frame": 18,
+              "value": 1,
+              "easing": "ease_out"
+            }
+          ],
+          "cue_binding": {
+            "word_id": "word_008",
+            "offset_frames": 0
+          }
+        }
+      ],
+      "camera": {
+        "mode": "push_in",
+        "keyframes": [
+          {
+            "at_frame": 0,
+            "x_px": 0,
+            "y_px": 0,
+            "scale": 1,
+            "rotation_deg": 0,
+            "opacity": 1,
+            "easing": "linear"
+          },
+          {
+            "at_frame": 224,
+            "x_px": -8,
+            "y_px": -3,
+            "scale": 1.05,
+            "rotation_deg": 0,
+            "opacity": 1,
+            "easing": "ease_in_out"
+          }
+        ],
+        "focus_entity_id": null,
+        "clamp_to_content": true
+      },
+      "transition_out": {
+        "type": "hard_cut",
+        "duration_frames": 0
+      },
+      "story_cue_span": {
+        "first_word_id": "word_008",
+        "last_word_id": "word_008"
+      }
+    },
+    {
+      "scene_id": "scene_009",
+      "setup_id": "setup_009",
+      "template_id": "T01",
+      "variant_id": "A",
+      "start_frame": 1800,
+      "duration_frames": 225,
+      "asset_ids": [
+        "asset_005"
+      ],
+      "layers": [
+        {
+          "layer_id": "layer_009",
+          "layer_kind": "map",
+          "asset_id": "asset_005",
+          "text": null,
+          "source_claim_id": null,
+          "z_index": 0,
+          "rect_px": {
+            "x": 100,
+            "y": 80,
+            "w": 1720,
+            "h": 900
+          },
+          "anchor": "center",
+          "crop_normalized": {
+            "x": 0.08,
+            "y": 0.08,
+            "w": 0.84,
+            "h": 0.84
+          },
+          "object_fit": "cover",
+          "mask": {
+            "kind": "none",
+            "asset_id": null,
+            "feather_px": 0
+          },
+          "style": {
+            "font_token": null,
+            "color_token": null,
+            "stroke_token": null,
+            "max_lines": 3
+          },
+          "map_binding": null
+        },
+        {
+          "layer_id": "title_009",
+          "layer_kind": "headline",
+          "asset_id": null,
+          "text": "The city and its streets",
+          "source_claim_id": null,
+          "z_index": 5,
+          "rect_px": {
+            "x": 100,
+            "y": 80,
+            "w": 1720,
+            "h": 900
+          },
+          "anchor": "center",
+          "crop_normalized": {
+            "x": 0.08,
+            "y": 0.08,
+            "w": 0.84,
+            "h": 0.84
+          },
+          "object_fit": "cover",
+          "mask": {
+            "kind": "none",
+            "asset_id": null,
+            "feather_px": 0
+          },
+          "style": {
+            "font_token": null,
+            "color_token": null,
+            "stroke_token": null,
+            "max_lines": 3
+          },
+          "map_binding": null
+        }
+      ],
+      "events": [
+        {
+          "event_id": "event_009",
+          "layer_id": "title_009",
+          "preset_id": "title-mask-reveal",
+          "start_frame": 15,
+          "duration_frames": 18,
+          "cue_word_id": "word_009",
+          "params": {
+            "direction": "up",
+            "distance_px": 30
+          },
+          "animated_property": "opacity",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 0,
+              "easing": "ease_out"
+            },
+            {
+              "frame": 18,
+              "value": 1,
+              "easing": "ease_out"
+            }
+          ],
+          "cue_binding": {
+            "word_id": "word_009",
+            "offset_frames": 0
+          }
+        }
+      ],
+      "camera": {
+        "mode": "push_in",
+        "keyframes": [
+          {
+            "at_frame": 0,
+            "x_px": 0,
+            "y_px": 0,
+            "scale": 1,
+            "rotation_deg": 0,
+            "opacity": 1,
+            "easing": "linear"
+          },
+          {
+            "at_frame": 224,
+            "x_px": -8,
+            "y_px": -3,
+            "scale": 1.05,
+            "rotation_deg": 0,
+            "opacity": 1,
+            "easing": "ease_in_out"
+          }
+        ],
+        "focus_entity_id": null,
+        "clamp_to_content": true
+      },
+      "transition_out": {
+        "type": "hard_cut",
+        "duration_frames": 0
+      },
+      "story_cue_span": {
+        "first_word_id": "word_009",
+        "last_word_id": "word_009"
+      }
+    },
+    {
+      "scene_id": "scene_010",
+      "setup_id": "setup_010",
+      "template_id": "T01",
+      "variant_id": "B",
+      "start_frame": 2025,
+      "duration_frames": 225,
+      "asset_ids": [
+        "asset_005"
+      ],
+      "layers": [
+        {
+          "layer_id": "layer_010",
+          "layer_kind": "map",
+          "asset_id": "asset_005",
+          "text": null,
+          "source_claim_id": null,
+          "z_index": 0,
+          "rect_px": {
+            "x": 100,
+            "y": 80,
+            "w": 1720,
+            "h": 900
+          },
+          "anchor": "center",
+          "crop_normalized": {
+            "x": 0.08,
+            "y": 0.08,
+            "w": 0.84,
+            "h": 0.84
+          },
+          "object_fit": "cover",
+          "mask": {
+            "kind": "none",
+            "asset_id": null,
+            "feather_px": 0
+          },
+          "style": {
+            "font_token": null,
+            "color_token": null,
+            "stroke_token": null,
+            "max_lines": 3
+          },
+          "map_binding": null
+        },
+        {
+          "layer_id": "title_010",
+          "layer_kind": "headline",
+          "asset_id": null,
+          "text": "The city and its streets",
+          "source_claim_id": null,
+          "z_index": 5,
+          "rect_px": {
+            "x": 100,
+            "y": 80,
+            "w": 1720,
+            "h": 900
+          },
+          "anchor": "center",
+          "crop_normalized": {
+            "x": 0.08,
+            "y": 0.08,
+            "w": 0.84,
+            "h": 0.84
+          },
+          "object_fit": "cover",
+          "mask": {
+            "kind": "none",
+            "asset_id": null,
+            "feather_px": 0
+          },
+          "style": {
+            "font_token": null,
+            "color_token": null,
+            "stroke_token": null,
+            "max_lines": 3
+          },
+          "map_binding": null
+        }
+      ],
+      "events": [
+        {
+          "event_id": "event_010",
+          "layer_id": "title_010",
+          "preset_id": "title-mask-reveal",
+          "start_frame": 15,
+          "duration_frames": 18,
+          "cue_word_id": "word_010",
+          "params": {
+            "direction": "up",
+            "distance_px": 30
+          },
+          "animated_property": "opacity",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 0,
+              "easing": "ease_out"
+            },
+            {
+              "frame": 18,
+              "value": 1,
+              "easing": "ease_out"
+            }
+          ],
+          "cue_binding": {
+            "word_id": "word_010",
+            "offset_frames": 0
+          }
+        }
+      ],
+      "camera": {
+        "mode": "push_in",
+        "keyframes": [
+          {
+            "at_frame": 0,
+            "x_px": 0,
+            "y_px": 0,
+            "scale": 1,
+            "rotation_deg": 0,
+            "opacity": 1,
+            "easing": "linear"
+          },
+          {
+            "at_frame": 224,
+            "x_px": -8,
+            "y_px": -3,
+            "scale": 1.05,
+            "rotation_deg": 0,
+            "opacity": 1,
+            "easing": "ease_in_out"
+          }
+        ],
+        "focus_entity_id": null,
+        "clamp_to_content": true
+      },
+      "transition_out": {
+        "type": "hard_cut",
+        "duration_frames": 0
+      },
+      "story_cue_span": {
+        "first_word_id": "word_010",
+        "last_word_id": "word_010"
+      }
+    },
+    {
+      "scene_id": "scene_011",
+      "setup_id": "setup_011",
+      "template_id": "T03",
+      "variant_id": "A",
+      "start_frame": 2250,
+      "duration_frames": 225,
+      "asset_ids": [
+        "asset_006"
+      ],
+      "layers": [
+        {
+          "layer_id": "layer_011",
+          "layer_kind": "archival_photo",
+          "asset_id": "asset_006",
+          "text": null,
+          "source_claim_id": null,
+          "z_index": 0,
+          "rect_px": {
+            "x": 100,
+            "y": 80,
+            "w": 1720,
+            "h": 900
+          },
+          "anchor": "center",
+          "crop_normalized": {
+            "x": 0.08,
+            "y": 0.08,
+            "w": 0.84,
+            "h": 0.84
+          },
+          "object_fit": "cover",
+          "mask": {
+            "kind": "none",
+            "asset_id": null,
+            "feather_px": 0
+          },
+          "style": {
+            "font_token": null,
+            "color_token": null,
+            "stroke_token": null,
+            "max_lines": 3
+          },
+          "map_binding": null
+        },
+        {
+          "layer_id": "title_011",
+          "layer_kind": "headline",
+          "asset_id": null,
+          "text": "A procession on the move",
+          "source_claim_id": null,
+          "z_index": 5,
+          "rect_px": {
+            "x": 100,
+            "y": 80,
+            "w": 1720,
+            "h": 900
+          },
+          "anchor": "center",
+          "crop_normalized": {
+            "x": 0.08,
+            "y": 0.08,
+            "w": 0.84,
+            "h": 0.84
+          },
+          "object_fit": "cover",
+          "mask": {
+            "kind": "none",
+            "asset_id": null,
+            "feather_px": 0
+          },
+          "style": {
+            "font_token": null,
+            "color_token": null,
+            "stroke_token": null,
+            "max_lines": 3
+          },
+          "map_binding": null
+        }
+      ],
+      "events": [
+        {
+          "event_id": "event_011",
+          "layer_id": "title_011",
+          "preset_id": "title-mask-reveal",
+          "start_frame": 15,
+          "duration_frames": 18,
+          "cue_word_id": "word_011",
+          "params": {
+            "direction": "up",
+            "distance_px": 30
+          },
+          "animated_property": "opacity",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 0,
+              "easing": "ease_out"
+            },
+            {
+              "frame": 18,
+              "value": 1,
+              "easing": "ease_out"
+            }
+          ],
+          "cue_binding": {
+            "word_id": "word_011",
+            "offset_frames": 0
+          }
+        }
+      ],
+      "camera": {
+        "mode": "push_in",
+        "keyframes": [
+          {
+            "at_frame": 0,
+            "x_px": 0,
+            "y_px": 0,
+            "scale": 1,
+            "rotation_deg": 0,
+            "opacity": 1,
+            "easing": "linear"
+          },
+          {
+            "at_frame": 224,
+            "x_px": -8,
+            "y_px": -3,
+            "scale": 1.05,
+            "rotation_deg": 0,
+            "opacity": 1,
+            "easing": "ease_in_out"
+          }
+        ],
+        "focus_entity_id": null,
+        "clamp_to_content": true
+      },
+      "transition_out": {
+        "type": "hard_cut",
+        "duration_frames": 0
+      },
+      "story_cue_span": {
+        "first_word_id": "word_011",
+        "last_word_id": "word_011"
+      }
+    },
+    {
+      "scene_id": "scene_012",
+      "setup_id": "setup_012",
+      "template_id": "T03",
+      "variant_id": "B",
+      "start_frame": 2475,
+      "duration_frames": 225,
+      "asset_ids": [
+        "asset_006"
+      ],
+      "layers": [
+        {
+          "layer_id": "layer_012",
+          "layer_kind": "archival_photo",
+          "asset_id": "asset_006",
+          "text": null,
+          "source_claim_id": null,
+          "z_index": 0,
+          "rect_px": {
+            "x": 100,
+            "y": 80,
+            "w": 1720,
+            "h": 900
+          },
+          "anchor": "center",
+          "crop_normalized": {
+            "x": 0.08,
+            "y": 0.08,
+            "w": 0.84,
+            "h": 0.84
+          },
+          "object_fit": "cover",
+          "mask": {
+            "kind": "none",
+            "asset_id": null,
+            "feather_px": 0
+          },
+          "style": {
+            "font_token": null,
+            "color_token": null,
+            "stroke_token": null,
+            "max_lines": 3
+          },
+          "map_binding": null
+        },
+        {
+          "layer_id": "title_012",
+          "layer_kind": "headline",
+          "asset_id": null,
+          "text": "A procession on the move",
+          "source_claim_id": null,
+          "z_index": 5,
+          "rect_px": {
+            "x": 100,
+            "y": 80,
+            "w": 1720,
+            "h": 900
+          },
+          "anchor": "center",
+          "crop_normalized": {
+            "x": 0.08,
+            "y": 0.08,
+            "w": 0.84,
+            "h": 0.84
+          },
+          "object_fit": "cover",
+          "mask": {
+            "kind": "none",
+            "asset_id": null,
+            "feather_px": 0
+          },
+          "style": {
+            "font_token": null,
+            "color_token": null,
+            "stroke_token": null,
+            "max_lines": 3
+          },
+          "map_binding": null
+        }
+      ],
+      "events": [
+        {
+          "event_id": "event_012",
+          "layer_id": "title_012",
+          "preset_id": "title-mask-reveal",
+          "start_frame": 15,
+          "duration_frames": 18,
+          "cue_word_id": "word_012",
+          "params": {
+            "direction": "up",
+            "distance_px": 30
+          },
+          "animated_property": "opacity",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 0,
+              "easing": "ease_out"
+            },
+            {
+              "frame": 18,
+              "value": 1,
+              "easing": "ease_out"
+            }
+          ],
+          "cue_binding": {
+            "word_id": "word_012",
+            "offset_frames": 0
+          }
+        }
+      ],
+      "camera": {
+        "mode": "push_in",
+        "keyframes": [
+          {
+            "at_frame": 0,
+            "x_px": 0,
+            "y_px": 0,
+            "scale": 1,
+            "rotation_deg": 0,
+            "opacity": 1,
+            "easing": "linear"
+          },
+          {
+            "at_frame": 224,
+            "x_px": -8,
+            "y_px": -3,
+            "scale": 1.05,
+            "rotation_deg": 0,
+            "opacity": 1,
+            "easing": "ease_in_out"
+          }
+        ],
+        "focus_entity_id": null,
+        "clamp_to_content": true
+      },
+      "transition_out": {
+        "type": "hard_cut",
+        "duration_frames": 0
+      },
+      "story_cue_span": {
+        "first_word_id": "word_012",
+        "last_word_id": "word_012"
+      }
+    },
+    {
+      "scene_id": "scene_013",
+      "setup_id": "setup_013",
+      "template_id": "T06",
+      "variant_id": "A",
+      "start_frame": 2700,
+      "duration_frames": 225,
+      "asset_ids": [
+        "asset_007"
+      ],
+      "layers": [
+        {
+          "layer_id": "layer_013",
+          "layer_kind": "archival_photo",
+          "asset_id": "asset_007",
+          "text": null,
+          "source_claim_id": null,
+          "z_index": 0,
+          "rect_px": {
+            "x": 100,
+            "y": 80,
+            "w": 1720,
+            "h": 900
+          },
+          "anchor": "center",
+          "crop_normalized": {
+            "x": 0.08,
+            "y": 0.08,
+            "w": 0.84,
+            "h": 0.84
+          },
+          "object_fit": "cover",
+          "mask": {
+            "kind": "none",
+            "asset_id": null,
+            "feather_px": 0
+          },
+          "style": {
+            "font_token": null,
+            "color_token": null,
+            "stroke_token": null,
+            "max_lines": 3
+          },
+          "map_binding": null
+        },
+        {
+          "layer_id": "title_013",
+          "layer_kind": "headline",
+          "asset_id": null,
+          "text": "The first turning point",
+          "source_claim_id": null,
+          "z_index": 5,
+          "rect_px": {
+            "x": 100,
+            "y": 80,
+            "w": 1720,
+            "h": 900
+          },
+          "anchor": "center",
+          "crop_normalized": {
+            "x": 0.08,
+            "y": 0.08,
+            "w": 0.84,
+            "h": 0.84
+          },
+          "object_fit": "cover",
+          "mask": {
+            "kind": "none",
+            "asset_id": null,
+            "feather_px": 0
+          },
+          "style": {
+            "font_token": null,
+            "color_token": null,
+            "stroke_token": null,
+            "max_lines": 3
+          },
+          "map_binding": null
+        }
+      ],
+      "events": [
+        {
+          "event_id": "event_013",
+          "layer_id": "title_013",
+          "preset_id": "title-mask-reveal",
+          "start_frame": 15,
+          "duration_frames": 18,
+          "cue_word_id": "word_013",
+          "params": {
+            "direction": "up",
+            "distance_px": 30
+          },
+          "animated_property": "opacity",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 0,
+              "easing": "ease_out"
+            },
+            {
+              "frame": 18,
+              "value": 1,
+              "easing": "ease_out"
+            }
+          ],
+          "cue_binding": {
+            "word_id": "word_013",
+            "offset_frames": 0
+          }
+        }
+      ],
+      "camera": {
+        "mode": "push_in",
+        "keyframes": [
+          {
+            "at_frame": 0,
+            "x_px": 0,
+            "y_px": 0,
+            "scale": 1,
+            "rotation_deg": 0,
+            "opacity": 1,
+            "easing": "linear"
+          },
+          {
+            "at_frame": 224,
+            "x_px": -8,
+            "y_px": -3,
+            "scale": 1.05,
+            "rotation_deg": 0,
+            "opacity": 1,
+            "easing": "ease_in_out"
+          }
+        ],
+        "focus_entity_id": null,
+        "clamp_to_content": true
+      },
+      "transition_out": {
+        "type": "hard_cut",
+        "duration_frames": 0
+      },
+      "story_cue_span": {
+        "first_word_id": "word_013",
+        "last_word_id": "word_013"
+      }
+    },
+    {
+      "scene_id": "scene_014",
+      "setup_id": "setup_014",
+      "template_id": "T06",
+      "variant_id": "B",
+      "start_frame": 2925,
+      "duration_frames": 225,
+      "asset_ids": [
+        "asset_007"
+      ],
+      "layers": [
+        {
+          "layer_id": "layer_014",
+          "layer_kind": "archival_photo",
+          "asset_id": "asset_007",
+          "text": null,
+          "source_claim_id": null,
+          "z_index": 0,
+          "rect_px": {
+            "x": 100,
+            "y": 80,
+            "w": 1720,
+            "h": 900
+          },
+          "anchor": "center",
+          "crop_normalized": {
+            "x": 0.08,
+            "y": 0.08,
+            "w": 0.84,
+            "h": 0.84
+          },
+          "object_fit": "cover",
+          "mask": {
+            "kind": "none",
+            "asset_id": null,
+            "feather_px": 0
+          },
+          "style": {
+            "font_token": null,
+            "color_token": null,
+            "stroke_token": null,
+            "max_lines": 3
+          },
+          "map_binding": null
+        },
+        {
+          "layer_id": "title_014",
+          "layer_kind": "headline",
+          "asset_id": null,
+          "text": "The first turning point",
+          "source_claim_id": null,
+          "z_index": 5,
+          "rect_px": {
+            "x": 100,
+            "y": 80,
+            "w": 1720,
+            "h": 900
+          },
+          "anchor": "center",
+          "crop_normalized": {
+            "x": 0.08,
+            "y": 0.08,
+            "w": 0.84,
+            "h": 0.84
+          },
+          "object_fit": "cover",
+          "mask": {
+            "kind": "none",
+            "asset_id": null,
+            "feather_px": 0
+          },
+          "style": {
+            "font_token": null,
+            "color_token": null,
+            "stroke_token": null,
+            "max_lines": 3
+          },
+          "map_binding": null
+        }
+      ],
+      "events": [
+        {
+          "event_id": "event_014",
+          "layer_id": "title_014",
+          "preset_id": "title-mask-reveal",
+          "start_frame": 15,
+          "duration_frames": 18,
+          "cue_word_id": "word_014",
+          "params": {
+            "direction": "up",
+            "distance_px": 30
+          },
+          "animated_property": "opacity",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 0,
+              "easing": "ease_out"
+            },
+            {
+              "frame": 18,
+              "value": 1,
+              "easing": "ease_out"
+            }
+          ],
+          "cue_binding": {
+            "word_id": "word_014",
+            "offset_frames": 0
+          }
+        }
+      ],
+      "camera": {
+        "mode": "push_in",
+        "keyframes": [
+          {
+            "at_frame": 0,
+            "x_px": 0,
+            "y_px": 0,
+            "scale": 1,
+            "rotation_deg": 0,
+            "opacity": 1,
+            "easing": "linear"
+          },
+          {
+            "at_frame": 224,
+            "x_px": -8,
+            "y_px": -3,
+            "scale": 1.05,
+            "rotation_deg": 0,
+            "opacity": 1,
+            "easing": "ease_in_out"
+          }
+        ],
+        "focus_entity_id": null,
+        "clamp_to_content": true
+      },
+      "transition_out": {
+        "type": "hard_cut",
+        "duration_frames": 0
+      },
+      "story_cue_span": {
+        "first_word_id": "word_014",
+        "last_word_id": "word_014"
+      }
+    },
+    {
+      "scene_id": "scene_015",
+      "setup_id": "setup_015",
+      "template_id": "T08",
+      "variant_id": "A",
+      "start_frame": 3150,
+      "duration_frames": 225,
+      "asset_ids": [
+        "asset_008"
+      ],
+      "layers": [
+        {
+          "layer_id": "layer_015",
+          "layer_kind": "archival_photo",
+          "asset_id": "asset_008",
+          "text": null,
+          "source_claim_id": null,
+          "z_index": 0,
+          "rect_px": {
+            "x": 100,
+            "y": 80,
+            "w": 1720,
+            "h": 900
+          },
+          "anchor": "center",
+          "crop_normalized": {
+            "x": 0.08,
+            "y": 0.08,
+            "w": 0.84,
+            "h": 0.84
+          },
+          "object_fit": "cover",
+          "mask": {
+            "kind": "none",
+            "asset_id": null,
+            "feather_px": 0
+          },
+          "style": {
+            "font_token": null,
+            "color_token": null,
+            "stroke_token": null,
+            "max_lines": 3
+          },
+          "map_binding": null
+        },
+        {
+          "layer_id": "title_015",
+          "layer_kind": "headline",
+          "asset_id": null,
+          "text": "Confusion around the route",
+          "source_claim_id": null,
+          "z_index": 5,
+          "rect_px": {
+            "x": 100,
+            "y": 80,
+            "w": 1720,
+            "h": 900
+          },
+          "anchor": "center",
+          "crop_normalized": {
+            "x": 0.08,
+            "y": 0.08,
+            "w": 0.84,
+            "h": 0.84
+          },
+          "object_fit": "cover",
+          "mask": {
+            "kind": "none",
+            "asset_id": null,
+            "feather_px": 0
+          },
+          "style": {
+            "font_token": null,
+            "color_token": null,
+            "stroke_token": null,
+            "max_lines": 3
+          },
+          "map_binding": null
+        }
+      ],
+      "events": [
+        {
+          "event_id": "event_015",
+          "layer_id": "title_015",
+          "preset_id": "title-mask-reveal",
+          "start_frame": 15,
+          "duration_frames": 18,
+          "cue_word_id": "word_015",
+          "params": {
+            "direction": "up",
+            "distance_px": 30
+          },
+          "animated_property": "opacity",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 0,
+              "easing": "ease_out"
+            },
+            {
+              "frame": 18,
+              "value": 1,
+              "easing": "ease_out"
+            }
+          ],
+          "cue_binding": {
+            "word_id": "word_015",
+            "offset_frames": 0
+          }
+        }
+      ],
+      "camera": {
+        "mode": "push_in",
+        "keyframes": [
+          {
+            "at_frame": 0,
+            "x_px": 0,
+            "y_px": 0,
+            "scale": 1,
+            "rotation_deg": 0,
+            "opacity": 1,
+            "easing": "linear"
+          },
+          {
+            "at_frame": 224,
+            "x_px": -8,
+            "y_px": -3,
+            "scale": 1.05,
+            "rotation_deg": 0,
+            "opacity": 1,
+            "easing": "ease_in_out"
+          }
+        ],
+        "focus_entity_id": null,
+        "clamp_to_content": true
+      },
+      "transition_out": {
+        "type": "hard_cut",
+        "duration_frames": 0
+      },
+      "story_cue_span": {
+        "first_word_id": "word_015",
+        "last_word_id": "word_015"
+      }
+    },
+    {
+      "scene_id": "scene_016",
+      "setup_id": "setup_016",
+      "template_id": "T08",
+      "variant_id": "B",
+      "start_frame": 3375,
+      "duration_frames": 225,
+      "asset_ids": [
+        "asset_008"
+      ],
+      "layers": [
+        {
+          "layer_id": "layer_016",
+          "layer_kind": "archival_photo",
+          "asset_id": "asset_008",
+          "text": null,
+          "source_claim_id": null,
+          "z_index": 0,
+          "rect_px": {
+            "x": 100,
+            "y": 80,
+            "w": 1720,
+            "h": 900
+          },
+          "anchor": "center",
+          "crop_normalized": {
+            "x": 0.08,
+            "y": 0.08,
+            "w": 0.84,
+            "h": 0.84
+          },
+          "object_fit": "cover",
+          "mask": {
+            "kind": "none",
+            "asset_id": null,
+            "feather_px": 0
+          },
+          "style": {
+            "font_token": null,
+            "color_token": null,
+            "stroke_token": null,
+            "max_lines": 3
+          },
+          "map_binding": null
+        },
+        {
+          "layer_id": "title_016",
+          "layer_kind": "headline",
+          "asset_id": null,
+          "text": "Confusion around the route",
+          "source_claim_id": null,
+          "z_index": 5,
+          "rect_px": {
+            "x": 100,
+            "y": 80,
+            "w": 1720,
+            "h": 900
+          },
+          "anchor": "center",
+          "crop_normalized": {
+            "x": 0.08,
+            "y": 0.08,
+            "w": 0.84,
+            "h": 0.84
+          },
+          "object_fit": "cover",
+          "mask": {
+            "kind": "none",
+            "asset_id": null,
+            "feather_px": 0
+          },
+          "style": {
+            "font_token": null,
+            "color_token": null,
+            "stroke_token": null,
+            "max_lines": 3
+          },
+          "map_binding": null
+        }
+      ],
+      "events": [
+        {
+          "event_id": "event_016",
+          "layer_id": "title_016",
+          "preset_id": "title-mask-reveal",
+          "start_frame": 15,
+          "duration_frames": 18,
+          "cue_word_id": "word_016",
+          "params": {
+            "direction": "up",
+            "distance_px": 30
+          },
+          "animated_property": "opacity",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 0,
+              "easing": "ease_out"
+            },
+            {
+              "frame": 18,
+              "value": 1,
+              "easing": "ease_out"
+            }
+          ],
+          "cue_binding": {
+            "word_id": "word_016",
+            "offset_frames": 0
+          }
+        }
+      ],
+      "camera": {
+        "mode": "push_in",
+        "keyframes": [
+          {
+            "at_frame": 0,
+            "x_px": 0,
+            "y_px": 0,
+            "scale": 1,
+            "rotation_deg": 0,
+            "opacity": 1,
+            "easing": "linear"
+          },
+          {
+            "at_frame": 224,
+            "x_px": -8,
+            "y_px": -3,
+            "scale": 1.05,
+            "rotation_deg": 0,
+            "opacity": 1,
+            "easing": "ease_in_out"
+          }
+        ],
+        "focus_entity_id": null,
+        "clamp_to_content": true
+      },
+      "transition_out": {
+        "type": "hard_cut",
+        "duration_frames": 0
+      },
+      "story_cue_span": {
+        "first_word_id": "word_016",
+        "last_word_id": "word_016"
+      }
+    },
+    {
+      "scene_id": "scene_017",
+      "setup_id": "setup_017",
+      "template_id": "T01",
+      "variant_id": "A",
+      "start_frame": 3600,
+      "duration_frames": 225,
+      "asset_ids": [
+        "asset_009"
+      ],
+      "layers": [
+        {
+          "layer_id": "layer_017",
+          "layer_kind": "map",
+          "asset_id": "asset_009",
+          "text": null,
+          "source_claim_id": null,
+          "z_index": 0,
+          "rect_px": {
+            "x": 100,
+            "y": 80,
+            "w": 1720,
+            "h": 900
+          },
+          "anchor": "center",
+          "crop_normalized": {
+            "x": 0.08,
+            "y": 0.08,
+            "w": 0.84,
+            "h": 0.84
+          },
+          "object_fit": "cover",
+          "mask": {
+            "kind": "none",
+            "asset_id": null,
+            "feather_px": 0
+          },
+          "style": {
+            "font_token": null,
+            "color_token": null,
+            "stroke_token": null,
+            "max_lines": 3
+          },
+          "map_binding": null
+        },
+        {
+          "layer_id": "title_017",
+          "layer_kind": "headline",
+          "asset_id": null,
+          "text": "The confrontation",
+          "source_claim_id": null,
+          "z_index": 5,
+          "rect_px": {
+            "x": 100,
+            "y": 80,
+            "w": 1720,
+            "h": 900
+          },
+          "anchor": "center",
+          "crop_normalized": {
+            "x": 0.08,
+            "y": 0.08,
+            "w": 0.84,
+            "h": 0.84
+          },
+          "object_fit": "cover",
+          "mask": {
+            "kind": "none",
+            "asset_id": null,
+            "feather_px": 0
+          },
+          "style": {
+            "font_token": null,
+            "color_token": null,
+            "stroke_token": null,
+            "max_lines": 3
+          },
+          "map_binding": null
+        }
+      ],
+      "events": [
+        {
+          "event_id": "event_017",
+          "layer_id": "title_017",
+          "preset_id": "title-mask-reveal",
+          "start_frame": 15,
+          "duration_frames": 18,
+          "cue_word_id": "word_017",
+          "params": {
+            "direction": "up",
+            "distance_px": 30
+          },
+          "animated_property": "opacity",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 0,
+              "easing": "ease_out"
+            },
+            {
+              "frame": 18,
+              "value": 1,
+              "easing": "ease_out"
+            }
+          ],
+          "cue_binding": {
+            "word_id": "word_017",
+            "offset_frames": 0
+          }
+        }
+      ],
+      "camera": {
+        "mode": "push_in",
+        "keyframes": [
+          {
+            "at_frame": 0,
+            "x_px": 0,
+            "y_px": 0,
+            "scale": 1,
+            "rotation_deg": 0,
+            "opacity": 1,
+            "easing": "linear"
+          },
+          {
+            "at_frame": 224,
+            "x_px": -8,
+            "y_px": -3,
+            "scale": 1.05,
+            "rotation_deg": 0,
+            "opacity": 1,
+            "easing": "ease_in_out"
+          }
+        ],
+        "focus_entity_id": null,
+        "clamp_to_content": true
+      },
+      "transition_out": {
+        "type": "hard_cut",
+        "duration_frames": 0
+      },
+      "story_cue_span": {
+        "first_word_id": "word_017",
+        "last_word_id": "word_017"
+      }
+    },
+    {
+      "scene_id": "scene_018",
+      "setup_id": "setup_018",
+      "template_id": "T01",
+      "variant_id": "B",
+      "start_frame": 3825,
+      "duration_frames": 225,
+      "asset_ids": [
+        "asset_009"
+      ],
+      "layers": [
+        {
+          "layer_id": "layer_018",
+          "layer_kind": "map",
+          "asset_id": "asset_009",
+          "text": null,
+          "source_claim_id": null,
+          "z_index": 0,
+          "rect_px": {
+            "x": 100,
+            "y": 80,
+            "w": 1720,
+            "h": 900
+          },
+          "anchor": "center",
+          "crop_normalized": {
+            "x": 0.08,
+            "y": 0.08,
+            "w": 0.84,
+            "h": 0.84
+          },
+          "object_fit": "cover",
+          "mask": {
+            "kind": "none",
+            "asset_id": null,
+            "feather_px": 0
+          },
+          "style": {
+            "font_token": null,
+            "color_token": null,
+            "stroke_token": null,
+            "max_lines": 3
+          },
+          "map_binding": null
+        },
+        {
+          "layer_id": "title_018",
+          "layer_kind": "headline",
+          "asset_id": null,
+          "text": "The confrontation",
+          "source_claim_id": null,
+          "z_index": 5,
+          "rect_px": {
+            "x": 100,
+            "y": 80,
+            "w": 1720,
+            "h": 900
+          },
+          "anchor": "center",
+          "crop_normalized": {
+            "x": 0.08,
+            "y": 0.08,
+            "w": 0.84,
+            "h": 0.84
+          },
+          "object_fit": "cover",
+          "mask": {
+            "kind": "none",
+            "asset_id": null,
+            "feather_px": 0
+          },
+          "style": {
+            "font_token": null,
+            "color_token": null,
+            "stroke_token": null,
+            "max_lines": 3
+          },
+          "map_binding": null
+        }
+      ],
+      "events": [
+        {
+          "event_id": "event_018",
+          "layer_id": "title_018",
+          "preset_id": "title-mask-reveal",
+          "start_frame": 15,
+          "duration_frames": 18,
+          "cue_word_id": "word_018",
+          "params": {
+            "direction": "up",
+            "distance_px": 30
+          },
+          "animated_property": "opacity",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 0,
+              "easing": "ease_out"
+            },
+            {
+              "frame": 18,
+              "value": 1,
+              "easing": "ease_out"
+            }
+          ],
+          "cue_binding": {
+            "word_id": "word_018",
+            "offset_frames": 0
+          }
+        }
+      ],
+      "camera": {
+        "mode": "push_in",
+        "keyframes": [
+          {
+            "at_frame": 0,
+            "x_px": 0,
+            "y_px": 0,
+            "scale": 1,
+            "rotation_deg": 0,
+            "opacity": 1,
+            "easing": "linear"
+          },
+          {
+            "at_frame": 224,
+            "x_px": -8,
+            "y_px": -3,
+            "scale": 1.05,
+            "rotation_deg": 0,
+            "opacity": 1,
+            "easing": "ease_in_out"
+          }
+        ],
+        "focus_entity_id": null,
+        "clamp_to_content": true
+      },
+      "transition_out": {
+        "type": "hard_cut",
+        "duration_frames": 0
+      },
+      "story_cue_span": {
+        "first_word_id": "word_018",
+        "last_word_id": "word_018"
+      }
+    },
+    {
+      "scene_id": "scene_019",
+      "setup_id": "setup_019",
+      "template_id": "T03",
+      "variant_id": "A",
+      "start_frame": 4050,
+      "duration_frames": 225,
+      "asset_ids": [
+        "asset_010"
+      ],
+      "layers": [
+        {
+          "layer_id": "layer_019",
+          "layer_kind": "archival_photo",
+          "asset_id": "asset_010",
+          "text": null,
+          "source_claim_id": null,
+          "z_index": 0,
+          "rect_px": {
+            "x": 100,
+            "y": 80,
+            "w": 1720,
+            "h": 900
+          },
+          "anchor": "center",
+          "crop_normalized": {
+            "x": 0.08,
+            "y": 0.08,
+            "w": 0.84,
+            "h": 0.84
+          },
+          "object_fit": "cover",
+          "mask": {
+            "kind": "none",
+            "asset_id": null,
+            "feather_px": 0
+          },
+          "style": {
+            "font_token": null,
+            "color_token": null,
+            "stroke_token": null,
+            "max_lines": 3
+          },
+          "map_binding": null
+        },
+        {
+          "layer_id": "title_019",
+          "layer_kind": "headline",
+          "asset_id": null,
+          "text": "News spreads",
+          "source_claim_id": null,
+          "z_index": 5,
+          "rect_px": {
+            "x": 100,
+            "y": 80,
+            "w": 1720,
+            "h": 900
+          },
+          "anchor": "center",
+          "crop_normalized": {
+            "x": 0.08,
+            "y": 0.08,
+            "w": 0.84,
+            "h": 0.84
+          },
+          "object_fit": "cover",
+          "mask": {
+            "kind": "none",
+            "asset_id": null,
+            "feather_px": 0
+          },
+          "style": {
+            "font_token": null,
+            "color_token": null,
+            "stroke_token": null,
+            "max_lines": 3
+          },
+          "map_binding": null
+        }
+      ],
+      "events": [
+        {
+          "event_id": "event_019",
+          "layer_id": "title_019",
+          "preset_id": "title-mask-reveal",
+          "start_frame": 15,
+          "duration_frames": 18,
+          "cue_word_id": "word_019",
+          "params": {
+            "direction": "up",
+            "distance_px": 30
+          },
+          "animated_property": "opacity",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 0,
+              "easing": "ease_out"
+            },
+            {
+              "frame": 18,
+              "value": 1,
+              "easing": "ease_out"
+            }
+          ],
+          "cue_binding": {
+            "word_id": "word_019",
+            "offset_frames": 0
+          }
+        }
+      ],
+      "camera": {
+        "mode": "push_in",
+        "keyframes": [
+          {
+            "at_frame": 0,
+            "x_px": 0,
+            "y_px": 0,
+            "scale": 1,
+            "rotation_deg": 0,
+            "opacity": 1,
+            "easing": "linear"
+          },
+          {
+            "at_frame": 224,
+            "x_px": -8,
+            "y_px": -3,
+            "scale": 1.05,
+            "rotation_deg": 0,
+            "opacity": 1,
+            "easing": "ease_in_out"
+          }
+        ],
+        "focus_entity_id": null,
+        "clamp_to_content": true
+      },
+      "transition_out": {
+        "type": "hard_cut",
+        "duration_frames": 0
+      },
+      "story_cue_span": {
+        "first_word_id": "word_019",
+        "last_word_id": "word_019"
+      }
+    },
+    {
+      "scene_id": "scene_020",
+      "setup_id": "setup_020",
+      "template_id": "T03",
+      "variant_id": "B",
+      "start_frame": 4275,
+      "duration_frames": 225,
+      "asset_ids": [
+        "asset_010"
+      ],
+      "layers": [
+        {
+          "layer_id": "layer_020",
+          "layer_kind": "archival_photo",
+          "asset_id": "asset_010",
+          "text": null,
+          "source_claim_id": null,
+          "z_index": 0,
+          "rect_px": {
+            "x": 100,
+            "y": 80,
+            "w": 1720,
+            "h": 900
+          },
+          "anchor": "center",
+          "crop_normalized": {
+            "x": 0.08,
+            "y": 0.08,
+            "w": 0.84,
+            "h": 0.84
+          },
+          "object_fit": "cover",
+          "mask": {
+            "kind": "none",
+            "asset_id": null,
+            "feather_px": 0
+          },
+          "style": {
+            "font_token": null,
+            "color_token": null,
+            "stroke_token": null,
+            "max_lines": 3
+          },
+          "map_binding": null
+        },
+        {
+          "layer_id": "title_020",
+          "layer_kind": "headline",
+          "asset_id": null,
+          "text": "News spreads",
+          "source_claim_id": null,
+          "z_index": 5,
+          "rect_px": {
+            "x": 100,
+            "y": 80,
+            "w": 1720,
+            "h": 900
+          },
+          "anchor": "center",
+          "crop_normalized": {
+            "x": 0.08,
+            "y": 0.08,
+            "w": 0.84,
+            "h": 0.84
+          },
+          "object_fit": "cover",
+          "mask": {
+            "kind": "none",
+            "asset_id": null,
+            "feather_px": 0
+          },
+          "style": {
+            "font_token": null,
+            "color_token": null,
+            "stroke_token": null,
+            "max_lines": 3
+          },
+          "map_binding": null
+        }
+      ],
+      "events": [
+        {
+          "event_id": "event_020",
+          "layer_id": "title_020",
+          "preset_id": "title-mask-reveal",
+          "start_frame": 15,
+          "duration_frames": 18,
+          "cue_word_id": "word_020",
+          "params": {
+            "direction": "up",
+            "distance_px": 30
+          },
+          "animated_property": "opacity",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 0,
+              "easing": "ease_out"
+            },
+            {
+              "frame": 18,
+              "value": 1,
+              "easing": "ease_out"
+            }
+          ],
+          "cue_binding": {
+            "word_id": "word_020",
+            "offset_frames": 0
+          }
+        }
+      ],
+      "camera": {
+        "mode": "push_in",
+        "keyframes": [
+          {
+            "at_frame": 0,
+            "x_px": 0,
+            "y_px": 0,
+            "scale": 1,
+            "rotation_deg": 0,
+            "opacity": 1,
+            "easing": "linear"
+          },
+          {
+            "at_frame": 224,
+            "x_px": -8,
+            "y_px": -3,
+            "scale": 1.05,
+            "rotation_deg": 0,
+            "opacity": 1,
+            "easing": "ease_in_out"
+          }
+        ],
+        "focus_entity_id": null,
+        "clamp_to_content": true
+      },
+      "transition_out": {
+        "type": "hard_cut",
+        "duration_frames": 0
+      },
+      "story_cue_span": {
+        "first_word_id": "word_020",
+        "last_word_id": "word_020"
+      }
+    },
+    {
+      "scene_id": "scene_021",
+      "setup_id": "setup_021",
+      "template_id": "T06",
+      "variant_id": "A",
+      "start_frame": 4500,
+      "duration_frames": 225,
+      "asset_ids": [
+        "asset_011"
+      ],
+      "layers": [
+        {
+          "layer_id": "layer_021",
+          "layer_kind": "archival_photo",
+          "asset_id": "asset_011",
+          "text": null,
+          "source_claim_id": null,
+          "z_index": 0,
+          "rect_px": {
+            "x": 100,
+            "y": 80,
+            "w": 1720,
+            "h": 900
+          },
+          "anchor": "center",
+          "crop_normalized": {
+            "x": 0.08,
+            "y": 0.08,
+            "w": 0.84,
+            "h": 0.84
+          },
+          "object_fit": "cover",
+          "mask": {
+            "kind": "none",
+            "asset_id": null,
+            "feather_px": 0
+          },
+          "style": {
+            "font_token": null,
+            "color_token": null,
+            "stroke_token": null,
+            "max_lines": 3
+          },
+          "map_binding": null
+        },
+        {
+          "layer_id": "title_021",
+          "layer_kind": "headline",
+          "asset_id": null,
+          "text": "The response in Vienna",
+          "source_claim_id": null,
+          "z_index": 5,
+          "rect_px": {
+            "x": 100,
+            "y": 80,
+            "w": 1720,
+            "h": 900
+          },
+          "anchor": "center",
+          "crop_normalized": {
+            "x": 0.08,
+            "y": 0.08,
+            "w": 0.84,
+            "h": 0.84
+          },
+          "object_fit": "cover",
+          "mask": {
+            "kind": "none",
+            "asset_id": null,
+            "feather_px": 0
+          },
+          "style": {
+            "font_token": null,
+            "color_token": null,
+            "stroke_token": null,
+            "max_lines": 3
+          },
+          "map_binding": null
+        }
+      ],
+      "events": [
+        {
+          "event_id": "event_021",
+          "layer_id": "title_021",
+          "preset_id": "title-mask-reveal",
+          "start_frame": 15,
+          "duration_frames": 18,
+          "cue_word_id": "word_021",
+          "params": {
+            "direction": "up",
+            "distance_px": 30
+          },
+          "animated_property": "opacity",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 0,
+              "easing": "ease_out"
+            },
+            {
+              "frame": 18,
+              "value": 1,
+              "easing": "ease_out"
+            }
+          ],
+          "cue_binding": {
+            "word_id": "word_021",
+            "offset_frames": 0
+          }
+        }
+      ],
+      "camera": {
+        "mode": "push_in",
+        "keyframes": [
+          {
+            "at_frame": 0,
+            "x_px": 0,
+            "y_px": 0,
+            "scale": 1,
+            "rotation_deg": 0,
+            "opacity": 1,
+            "easing": "linear"
+          },
+          {
+            "at_frame": 224,
+            "x_px": -8,
+            "y_px": -3,
+            "scale": 1.05,
+            "rotation_deg": 0,
+            "opacity": 1,
+            "easing": "ease_in_out"
+          }
+        ],
+        "focus_entity_id": null,
+        "clamp_to_content": true
+      },
+      "transition_out": {
+        "type": "hard_cut",
+        "duration_frames": 0
+      },
+      "story_cue_span": {
+        "first_word_id": "word_021",
+        "last_word_id": "word_021"
+      }
+    },
+    {
+      "scene_id": "scene_022",
+      "setup_id": "setup_022",
+      "template_id": "T06",
+      "variant_id": "B",
+      "start_frame": 4725,
+      "duration_frames": 225,
+      "asset_ids": [
+        "asset_011"
+      ],
+      "layers": [
+        {
+          "layer_id": "layer_022",
+          "layer_kind": "archival_photo",
+          "asset_id": "asset_011",
+          "text": null,
+          "source_claim_id": null,
+          "z_index": 0,
+          "rect_px": {
+            "x": 100,
+            "y": 80,
+            "w": 1720,
+            "h": 900
+          },
+          "anchor": "center",
+          "crop_normalized": {
+            "x": 0.08,
+            "y": 0.08,
+            "w": 0.84,
+            "h": 0.84
+          },
+          "object_fit": "cover",
+          "mask": {
+            "kind": "none",
+            "asset_id": null,
+            "feather_px": 0
+          },
+          "style": {
+            "font_token": null,
+            "color_token": null,
+            "stroke_token": null,
+            "max_lines": 3
+          },
+          "map_binding": null
+        },
+        {
+          "layer_id": "title_022",
+          "layer_kind": "headline",
+          "asset_id": null,
+          "text": "The response in Vienna",
+          "source_claim_id": null,
+          "z_index": 5,
+          "rect_px": {
+            "x": 100,
+            "y": 80,
+            "w": 1720,
+            "h": 900
+          },
+          "anchor": "center",
+          "crop_normalized": {
+            "x": 0.08,
+            "y": 0.08,
+            "w": 0.84,
+            "h": 0.84
+          },
+          "object_fit": "cover",
+          "mask": {
+            "kind": "none",
+            "asset_id": null,
+            "feather_px": 0
+          },
+          "style": {
+            "font_token": null,
+            "color_token": null,
+            "stroke_token": null,
+            "max_lines": 3
+          },
+          "map_binding": null
+        }
+      ],
+      "events": [
+        {
+          "event_id": "event_022",
+          "layer_id": "title_022",
+          "preset_id": "title-mask-reveal",
+          "start_frame": 15,
+          "duration_frames": 18,
+          "cue_word_id": "word_022",
+          "params": {
+            "direction": "up",
+            "distance_px": 30
+          },
+          "animated_property": "opacity",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 0,
+              "easing": "ease_out"
+            },
+            {
+              "frame": 18,
+              "value": 1,
+              "easing": "ease_out"
+            }
+          ],
+          "cue_binding": {
+            "word_id": "word_022",
+            "offset_frames": 0
+          }
+        }
+      ],
+      "camera": {
+        "mode": "push_in",
+        "keyframes": [
+          {
+            "at_frame": 0,
+            "x_px": 0,
+            "y_px": 0,
+            "scale": 1,
+            "rotation_deg": 0,
+            "opacity": 1,
+            "easing": "linear"
+          },
+          {
+            "at_frame": 224,
+            "x_px": -8,
+            "y_px": -3,
+            "scale": 1.05,
+            "rotation_deg": 0,
+            "opacity": 1,
+            "easing": "ease_in_out"
+          }
+        ],
+        "focus_entity_id": null,
+        "clamp_to_content": true
+      },
+      "transition_out": {
+        "type": "hard_cut",
+        "duration_frames": 0
+      },
+      "story_cue_span": {
+        "first_word_id": "word_022",
+        "last_word_id": "word_022"
+      }
+    },
+    {
+      "scene_id": "scene_023",
+      "setup_id": "setup_023",
+      "template_id": "T08",
+      "variant_id": "A",
+      "start_frame": 4950,
+      "duration_frames": 225,
+      "asset_ids": [
+        "asset_012"
+      ],
+      "layers": [
+        {
+          "layer_id": "layer_023",
+          "layer_kind": "archival_photo",
+          "asset_id": "asset_012",
+          "text": null,
+          "source_claim_id": null,
+          "z_index": 0,
+          "rect_px": {
+            "x": 100,
+            "y": 80,
+            "w": 1720,
+            "h": 900
+          },
+          "anchor": "center",
+          "crop_normalized": {
+            "x": 0.08,
+            "y": 0.08,
+            "w": 0.84,
+            "h": 0.84
+          },
+          "object_fit": "cover",
+          "mask": {
+            "kind": "none",
+            "asset_id": null,
+            "feather_px": 0
+          },
+          "style": {
+            "font_token": null,
+            "color_token": null,
+            "stroke_token": null,
+            "max_lines": 3
+          },
+          "map_binding": null
+        },
+        {
+          "layer_id": "title_023",
+          "layer_kind": "headline",
+          "asset_id": null,
+          "text": "The diplomatic demands",
+          "source_claim_id": null,
+          "z_index": 5,
+          "rect_px": {
+            "x": 100,
+            "y": 80,
+            "w": 1720,
+            "h": 900
+          },
+          "anchor": "center",
+          "crop_normalized": {
+            "x": 0.08,
+            "y": 0.08,
+            "w": 0.84,
+            "h": 0.84
+          },
+          "object_fit": "cover",
+          "mask": {
+            "kind": "none",
+            "asset_id": null,
+            "feather_px": 0
+          },
+          "style": {
+            "font_token": null,
+            "color_token": null,
+            "stroke_token": null,
+            "max_lines": 3
+          },
+          "map_binding": null
+        }
+      ],
+      "events": [
+        {
+          "event_id": "event_023",
+          "layer_id": "title_023",
+          "preset_id": "title-mask-reveal",
+          "start_frame": 15,
+          "duration_frames": 18,
+          "cue_word_id": "word_023",
+          "params": {
+            "direction": "up",
+            "distance_px": 30
+          },
+          "animated_property": "opacity",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 0,
+              "easing": "ease_out"
+            },
+            {
+              "frame": 18,
+              "value": 1,
+              "easing": "ease_out"
+            }
+          ],
+          "cue_binding": {
+            "word_id": "word_023",
+            "offset_frames": 0
+          }
+        }
+      ],
+      "camera": {
+        "mode": "push_in",
+        "keyframes": [
+          {
+            "at_frame": 0,
+            "x_px": 0,
+            "y_px": 0,
+            "scale": 1,
+            "rotation_deg": 0,
+            "opacity": 1,
+            "easing": "linear"
+          },
+          {
+            "at_frame": 224,
+            "x_px": -8,
+            "y_px": -3,
+            "scale": 1.05,
+            "rotation_deg": 0,
+            "opacity": 1,
+            "easing": "ease_in_out"
+          }
+        ],
+        "focus_entity_id": null,
+        "clamp_to_content": true
+      },
+      "transition_out": {
+        "type": "hard_cut",
+        "duration_frames": 0
+      },
+      "story_cue_span": {
+        "first_word_id": "word_023",
+        "last_word_id": "word_023"
+      }
+    },
+    {
+      "scene_id": "scene_024",
+      "setup_id": "setup_024",
+      "template_id": "T08",
+      "variant_id": "B",
+      "start_frame": 5175,
+      "duration_frames": 225,
+      "asset_ids": [
+        "asset_012"
+      ],
+      "layers": [
+        {
+          "layer_id": "layer_024",
+          "layer_kind": "archival_photo",
+          "asset_id": "asset_012",
+          "text": null,
+          "source_claim_id": null,
+          "z_index": 0,
+          "rect_px": {
+            "x": 100,
+            "y": 80,
+            "w": 1720,
+            "h": 900
+          },
+          "anchor": "center",
+          "crop_normalized": {
+            "x": 0.08,
+            "y": 0.08,
+            "w": 0.84,
+            "h": 0.84
+          },
+          "object_fit": "cover",
+          "mask": {
+            "kind": "none",
+            "asset_id": null,
+            "feather_px": 0
+          },
+          "style": {
+            "font_token": null,
+            "color_token": null,
+            "stroke_token": null,
+            "max_lines": 3
+          },
+          "map_binding": null
+        },
+        {
+          "layer_id": "title_024",
+          "layer_kind": "headline",
+          "asset_id": null,
+          "text": "The diplomatic demands",
+          "source_claim_id": null,
+          "z_index": 5,
+          "rect_px": {
+            "x": 100,
+            "y": 80,
+            "w": 1720,
+            "h": 900
+          },
+          "anchor": "center",
+          "crop_normalized": {
+            "x": 0.08,
+            "y": 0.08,
+            "w": 0.84,
+            "h": 0.84
+          },
+          "object_fit": "cover",
+          "mask": {
+            "kind": "none",
+            "asset_id": null,
+            "feather_px": 0
+          },
+          "style": {
+            "font_token": null,
+            "color_token": null,
+            "stroke_token": null,
+            "max_lines": 3
+          },
+          "map_binding": null
+        }
+      ],
+      "events": [
+        {
+          "event_id": "event_024",
+          "layer_id": "title_024",
+          "preset_id": "title-mask-reveal",
+          "start_frame": 15,
+          "duration_frames": 18,
+          "cue_word_id": "word_024",
+          "params": {
+            "direction": "up",
+            "distance_px": 30
+          },
+          "animated_property": "opacity",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 0,
+              "easing": "ease_out"
+            },
+            {
+              "frame": 18,
+              "value": 1,
+              "easing": "ease_out"
+            }
+          ],
+          "cue_binding": {
+            "word_id": "word_024",
+            "offset_frames": 0
+          }
+        }
+      ],
+      "camera": {
+        "mode": "push_in",
+        "keyframes": [
+          {
+            "at_frame": 0,
+            "x_px": 0,
+            "y_px": 0,
+            "scale": 1,
+            "rotation_deg": 0,
+            "opacity": 1,
+            "easing": "linear"
+          },
+          {
+            "at_frame": 224,
+            "x_px": -8,
+            "y_px": -3,
+            "scale": 1.05,
+            "rotation_deg": 0,
+            "opacity": 1,
+            "easing": "ease_in_out"
+          }
+        ],
+        "focus_entity_id": null,
+        "clamp_to_content": true
+      },
+      "transition_out": {
+        "type": "hard_cut",
+        "duration_frames": 0
+      },
+      "story_cue_span": {
+        "first_word_id": "word_024",
+        "last_word_id": "word_024"
+      }
+    },
+    {
+      "scene_id": "scene_025",
+      "setup_id": "setup_025",
+      "template_id": "T01",
+      "variant_id": "A",
+      "start_frame": 5400,
+      "duration_frames": 225,
+      "asset_ids": [
+        "asset_013"
+      ],
+      "layers": [
+        {
+          "layer_id": "layer_025",
+          "layer_kind": "map",
+          "asset_id": "asset_013",
+          "text": null,
+          "source_claim_id": null,
+          "z_index": 0,
+          "rect_px": {
+            "x": 100,
+            "y": 80,
+            "w": 1720,
+            "h": 900
+          },
+          "anchor": "center",
+          "crop_normalized": {
+            "x": 0.08,
+            "y": 0.08,
+            "w": 0.84,
+            "h": 0.84
+          },
+          "object_fit": "cover",
+          "mask": {
+            "kind": "none",
+            "asset_id": null,
+            "feather_px": 0
+          },
+          "style": {
+            "font_token": null,
+            "color_token": null,
+            "stroke_token": null,
+            "max_lines": 3
+          },
+          "map_binding": null
+        },
+        {
+          "layer_id": "title_025",
+          "layer_kind": "headline",
+          "asset_id": null,
+          "text": "Serbia and the ultimatum",
+          "source_claim_id": null,
+          "z_index": 5,
+          "rect_px": {
+            "x": 100,
+            "y": 80,
+            "w": 1720,
+            "h": 900
+          },
+          "anchor": "center",
+          "crop_normalized": {
+            "x": 0.08,
+            "y": 0.08,
+            "w": 0.84,
+            "h": 0.84
+          },
+          "object_fit": "cover",
+          "mask": {
+            "kind": "none",
+            "asset_id": null,
+            "feather_px": 0
+          },
+          "style": {
+            "font_token": null,
+            "color_token": null,
+            "stroke_token": null,
+            "max_lines": 3
+          },
+          "map_binding": null
+        }
+      ],
+      "events": [
+        {
+          "event_id": "event_025",
+          "layer_id": "title_025",
+          "preset_id": "title-mask-reveal",
+          "start_frame": 15,
+          "duration_frames": 18,
+          "cue_word_id": "word_025",
+          "params": {
+            "direction": "up",
+            "distance_px": 30
+          },
+          "animated_property": "opacity",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 0,
+              "easing": "ease_out"
+            },
+            {
+              "frame": 18,
+              "value": 1,
+              "easing": "ease_out"
+            }
+          ],
+          "cue_binding": {
+            "word_id": "word_025",
+            "offset_frames": 0
+          }
+        }
+      ],
+      "camera": {
+        "mode": "push_in",
+        "keyframes": [
+          {
+            "at_frame": 0,
+            "x_px": 0,
+            "y_px": 0,
+            "scale": 1,
+            "rotation_deg": 0,
+            "opacity": 1,
+            "easing": "linear"
+          },
+          {
+            "at_frame": 224,
+            "x_px": -8,
+            "y_px": -3,
+            "scale": 1.05,
+            "rotation_deg": 0,
+            "opacity": 1,
+            "easing": "ease_in_out"
+          }
+        ],
+        "focus_entity_id": null,
+        "clamp_to_content": true
+      },
+      "transition_out": {
+        "type": "hard_cut",
+        "duration_frames": 0
+      },
+      "story_cue_span": {
+        "first_word_id": "word_025",
+        "last_word_id": "word_025"
+      }
+    },
+    {
+      "scene_id": "scene_026",
+      "setup_id": "setup_026",
+      "template_id": "T01",
+      "variant_id": "B",
+      "start_frame": 5625,
+      "duration_frames": 225,
+      "asset_ids": [
+        "asset_013"
+      ],
+      "layers": [
+        {
+          "layer_id": "layer_026",
+          "layer_kind": "map",
+          "asset_id": "asset_013",
+          "text": null,
+          "source_claim_id": null,
+          "z_index": 0,
+          "rect_px": {
+            "x": 100,
+            "y": 80,
+            "w": 1720,
+            "h": 900
+          },
+          "anchor": "center",
+          "crop_normalized": {
+            "x": 0.08,
+            "y": 0.08,
+            "w": 0.84,
+            "h": 0.84
+          },
+          "object_fit": "cover",
+          "mask": {
+            "kind": "none",
+            "asset_id": null,
+            "feather_px": 0
+          },
+          "style": {
+            "font_token": null,
+            "color_token": null,
+            "stroke_token": null,
+            "max_lines": 3
+          },
+          "map_binding": null
+        },
+        {
+          "layer_id": "title_026",
+          "layer_kind": "headline",
+          "asset_id": null,
+          "text": "Serbia and the ultimatum",
+          "source_claim_id": null,
+          "z_index": 5,
+          "rect_px": {
+            "x": 100,
+            "y": 80,
+            "w": 1720,
+            "h": 900
+          },
+          "anchor": "center",
+          "crop_normalized": {
+            "x": 0.08,
+            "y": 0.08,
+            "w": 0.84,
+            "h": 0.84
+          },
+          "object_fit": "cover",
+          "mask": {
+            "kind": "none",
+            "asset_id": null,
+            "feather_px": 0
+          },
+          "style": {
+            "font_token": null,
+            "color_token": null,
+            "stroke_token": null,
+            "max_lines": 3
+          },
+          "map_binding": null
+        }
+      ],
+      "events": [
+        {
+          "event_id": "event_026",
+          "layer_id": "title_026",
+          "preset_id": "title-mask-reveal",
+          "start_frame": 15,
+          "duration_frames": 18,
+          "cue_word_id": "word_026",
+          "params": {
+            "direction": "up",
+            "distance_px": 30
+          },
+          "animated_property": "opacity",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 0,
+              "easing": "ease_out"
+            },
+            {
+              "frame": 18,
+              "value": 1,
+              "easing": "ease_out"
+            }
+          ],
+          "cue_binding": {
+            "word_id": "word_026",
+            "offset_frames": 0
+          }
+        }
+      ],
+      "camera": {
+        "mode": "push_in",
+        "keyframes": [
+          {
+            "at_frame": 0,
+            "x_px": 0,
+            "y_px": 0,
+            "scale": 1,
+            "rotation_deg": 0,
+            "opacity": 1,
+            "easing": "linear"
+          },
+          {
+            "at_frame": 224,
+            "x_px": -8,
+            "y_px": -3,
+            "scale": 1.05,
+            "rotation_deg": 0,
+            "opacity": 1,
+            "easing": "ease_in_out"
+          }
+        ],
+        "focus_entity_id": null,
+        "clamp_to_content": true
+      },
+      "transition_out": {
+        "type": "hard_cut",
+        "duration_frames": 0
+      },
+      "story_cue_span": {
+        "first_word_id": "word_026",
+        "last_word_id": "word_026"
+      }
+    },
+    {
+      "scene_id": "scene_027",
+      "setup_id": "setup_027",
+      "template_id": "T03",
+      "variant_id": "A",
+      "start_frame": 5850,
+      "duration_frames": 225,
+      "asset_ids": [
+        "asset_014"
+      ],
+      "layers": [
+        {
+          "layer_id": "layer_027",
+          "layer_kind": "archival_photo",
+          "asset_id": "asset_014",
+          "text": null,
+          "source_claim_id": null,
+          "z_index": 0,
+          "rect_px": {
+            "x": 100,
+            "y": 80,
+            "w": 1720,
+            "h": 900
+          },
+          "anchor": "center",
+          "crop_normalized": {
+            "x": 0.08,
+            "y": 0.08,
+            "w": 0.84,
+            "h": 0.84
+          },
+          "object_fit": "cover",
+          "mask": {
+            "kind": "none",
+            "asset_id": null,
+            "feather_px": 0
+          },
+          "style": {
+            "font_token": null,
+            "color_token": null,
+            "stroke_token": null,
+            "max_lines": 3
+          },
+          "map_binding": null
+        },
+        {
+          "layer_id": "title_027",
+          "layer_kind": "headline",
+          "asset_id": null,
+          "text": "Russia and mobilization",
+          "source_claim_id": null,
+          "z_index": 5,
+          "rect_px": {
+            "x": 100,
+            "y": 80,
+            "w": 1720,
+            "h": 900
+          },
+          "anchor": "center",
+          "crop_normalized": {
+            "x": 0.08,
+            "y": 0.08,
+            "w": 0.84,
+            "h": 0.84
+          },
+          "object_fit": "cover",
+          "mask": {
+            "kind": "none",
+            "asset_id": null,
+            "feather_px": 0
+          },
+          "style": {
+            "font_token": null,
+            "color_token": null,
+            "stroke_token": null,
+            "max_lines": 3
+          },
+          "map_binding": null
+        }
+      ],
+      "events": [
+        {
+          "event_id": "event_027",
+          "layer_id": "title_027",
+          "preset_id": "title-mask-reveal",
+          "start_frame": 15,
+          "duration_frames": 18,
+          "cue_word_id": "word_027",
+          "params": {
+            "direction": "up",
+            "distance_px": 30
+          },
+          "animated_property": "opacity",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 0,
+              "easing": "ease_out"
+            },
+            {
+              "frame": 18,
+              "value": 1,
+              "easing": "ease_out"
+            }
+          ],
+          "cue_binding": {
+            "word_id": "word_027",
+            "offset_frames": 0
+          }
+        }
+      ],
+      "camera": {
+        "mode": "push_in",
+        "keyframes": [
+          {
+            "at_frame": 0,
+            "x_px": 0,
+            "y_px": 0,
+            "scale": 1,
+            "rotation_deg": 0,
+            "opacity": 1,
+            "easing": "linear"
+          },
+          {
+            "at_frame": 224,
+            "x_px": -8,
+            "y_px": -3,
+            "scale": 1.05,
+            "rotation_deg": 0,
+            "opacity": 1,
+            "easing": "ease_in_out"
+          }
+        ],
+        "focus_entity_id": null,
+        "clamp_to_content": true
+      },
+      "transition_out": {
+        "type": "hard_cut",
+        "duration_frames": 0
+      },
+      "story_cue_span": {
+        "first_word_id": "word_027",
+        "last_word_id": "word_027"
+      }
+    },
+    {
+      "scene_id": "scene_028",
+      "setup_id": "setup_028",
+      "template_id": "T03",
+      "variant_id": "B",
+      "start_frame": 6075,
+      "duration_frames": 225,
+      "asset_ids": [
+        "asset_014"
+      ],
+      "layers": [
+        {
+          "layer_id": "layer_028",
+          "layer_kind": "archival_photo",
+          "asset_id": "asset_014",
+          "text": null,
+          "source_claim_id": null,
+          "z_index": 0,
+          "rect_px": {
+            "x": 100,
+            "y": 80,
+            "w": 1720,
+            "h": 900
+          },
+          "anchor": "center",
+          "crop_normalized": {
+            "x": 0.08,
+            "y": 0.08,
+            "w": 0.84,
+            "h": 0.84
+          },
+          "object_fit": "cover",
+          "mask": {
+            "kind": "none",
+            "asset_id": null,
+            "feather_px": 0
+          },
+          "style": {
+            "font_token": null,
+            "color_token": null,
+            "stroke_token": null,
+            "max_lines": 3
+          },
+          "map_binding": null
+        },
+        {
+          "layer_id": "title_028",
+          "layer_kind": "headline",
+          "asset_id": null,
+          "text": "Russia and mobilization",
+          "source_claim_id": null,
+          "z_index": 5,
+          "rect_px": {
+            "x": 100,
+            "y": 80,
+            "w": 1720,
+            "h": 900
+          },
+          "anchor": "center",
+          "crop_normalized": {
+            "x": 0.08,
+            "y": 0.08,
+            "w": 0.84,
+            "h": 0.84
+          },
+          "object_fit": "cover",
+          "mask": {
+            "kind": "none",
+            "asset_id": null,
+            "feather_px": 0
+          },
+          "style": {
+            "font_token": null,
+            "color_token": null,
+            "stroke_token": null,
+            "max_lines": 3
+          },
+          "map_binding": null
+        }
+      ],
+      "events": [
+        {
+          "event_id": "event_028",
+          "layer_id": "title_028",
+          "preset_id": "title-mask-reveal",
+          "start_frame": 15,
+          "duration_frames": 18,
+          "cue_word_id": "word_028",
+          "params": {
+            "direction": "up",
+            "distance_px": 30
+          },
+          "animated_property": "opacity",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 0,
+              "easing": "ease_out"
+            },
+            {
+              "frame": 18,
+              "value": 1,
+              "easing": "ease_out"
+            }
+          ],
+          "cue_binding": {
+            "word_id": "word_028",
+            "offset_frames": 0
+          }
+        }
+      ],
+      "camera": {
+        "mode": "push_in",
+        "keyframes": [
+          {
+            "at_frame": 0,
+            "x_px": 0,
+            "y_px": 0,
+            "scale": 1,
+            "rotation_deg": 0,
+            "opacity": 1,
+            "easing": "linear"
+          },
+          {
+            "at_frame": 224,
+            "x_px": -8,
+            "y_px": -3,
+            "scale": 1.05,
+            "rotation_deg": 0,
+            "opacity": 1,
+            "easing": "ease_in_out"
+          }
+        ],
+        "focus_entity_id": null,
+        "clamp_to_content": true
+      },
+      "transition_out": {
+        "type": "hard_cut",
+        "duration_frames": 0
+      },
+      "story_cue_span": {
+        "first_word_id": "word_028",
+        "last_word_id": "word_028"
+      }
+    },
+    {
+      "scene_id": "scene_029",
+      "setup_id": "setup_029",
+      "template_id": "T06",
+      "variant_id": "A",
+      "start_frame": 6300,
+      "duration_frames": 225,
+      "asset_ids": [
+        "asset_015"
+      ],
+      "layers": [
+        {
+          "layer_id": "layer_029",
+          "layer_kind": "archival_photo",
+          "asset_id": "asset_015",
+          "text": null,
+          "source_claim_id": null,
+          "z_index": 0,
+          "rect_px": {
+            "x": 100,
+            "y": 80,
+            "w": 1720,
+            "h": 900
+          },
+          "anchor": "center",
+          "crop_normalized": {
+            "x": 0.08,
+            "y": 0.08,
+            "w": 0.84,
+            "h": 0.84
+          },
+          "object_fit": "cover",
+          "mask": {
+            "kind": "none",
+            "asset_id": null,
+            "feather_px": 0
+          },
+          "style": {
+            "font_token": null,
+            "color_token": null,
+            "stroke_token": null,
+            "max_lines": 3
+          },
+          "map_binding": null
+        },
+        {
+          "layer_id": "title_029",
+          "layer_kind": "headline",
+          "asset_id": null,
+          "text": "Berlin's decisions",
+          "source_claim_id": null,
+          "z_index": 5,
+          "rect_px": {
+            "x": 100,
+            "y": 80,
+            "w": 1720,
+            "h": 900
+          },
+          "anchor": "center",
+          "crop_normalized": {
+            "x": 0.08,
+            "y": 0.08,
+            "w": 0.84,
+            "h": 0.84
+          },
+          "object_fit": "cover",
+          "mask": {
+            "kind": "none",
+            "asset_id": null,
+            "feather_px": 0
+          },
+          "style": {
+            "font_token": null,
+            "color_token": null,
+            "stroke_token": null,
+            "max_lines": 3
+          },
+          "map_binding": null
+        }
+      ],
+      "events": [
+        {
+          "event_id": "event_029",
+          "layer_id": "title_029",
+          "preset_id": "title-mask-reveal",
+          "start_frame": 15,
+          "duration_frames": 18,
+          "cue_word_id": "word_029",
+          "params": {
+            "direction": "up",
+            "distance_px": 30
+          },
+          "animated_property": "opacity",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 0,
+              "easing": "ease_out"
+            },
+            {
+              "frame": 18,
+              "value": 1,
+              "easing": "ease_out"
+            }
+          ],
+          "cue_binding": {
+            "word_id": "word_029",
+            "offset_frames": 0
+          }
+        }
+      ],
+      "camera": {
+        "mode": "push_in",
+        "keyframes": [
+          {
+            "at_frame": 0,
+            "x_px": 0,
+            "y_px": 0,
+            "scale": 1,
+            "rotation_deg": 0,
+            "opacity": 1,
+            "easing": "linear"
+          },
+          {
+            "at_frame": 224,
+            "x_px": -8,
+            "y_px": -3,
+            "scale": 1.05,
+            "rotation_deg": 0,
+            "opacity": 1,
+            "easing": "ease_in_out"
+          }
+        ],
+        "focus_entity_id": null,
+        "clamp_to_content": true
+      },
+      "transition_out": {
+        "type": "hard_cut",
+        "duration_frames": 0
+      },
+      "story_cue_span": {
+        "first_word_id": "word_029",
+        "last_word_id": "word_029"
+      }
+    },
+    {
+      "scene_id": "scene_030",
+      "setup_id": "setup_030",
+      "template_id": "T06",
+      "variant_id": "B",
+      "start_frame": 6525,
+      "duration_frames": 225,
+      "asset_ids": [
+        "asset_015"
+      ],
+      "layers": [
+        {
+          "layer_id": "layer_030",
+          "layer_kind": "archival_photo",
+          "asset_id": "asset_015",
+          "text": null,
+          "source_claim_id": null,
+          "z_index": 0,
+          "rect_px": {
+            "x": 100,
+            "y": 80,
+            "w": 1720,
+            "h": 900
+          },
+          "anchor": "center",
+          "crop_normalized": {
+            "x": 0.08,
+            "y": 0.08,
+            "w": 0.84,
+            "h": 0.84
+          },
+          "object_fit": "cover",
+          "mask": {
+            "kind": "none",
+            "asset_id": null,
+            "feather_px": 0
+          },
+          "style": {
+            "font_token": null,
+            "color_token": null,
+            "stroke_token": null,
+            "max_lines": 3
+          },
+          "map_binding": null
+        },
+        {
+          "layer_id": "title_030",
+          "layer_kind": "headline",
+          "asset_id": null,
+          "text": "Berlin's decisions",
+          "source_claim_id": null,
+          "z_index": 5,
+          "rect_px": {
+            "x": 100,
+            "y": 80,
+            "w": 1720,
+            "h": 900
+          },
+          "anchor": "center",
+          "crop_normalized": {
+            "x": 0.08,
+            "y": 0.08,
+            "w": 0.84,
+            "h": 0.84
+          },
+          "object_fit": "cover",
+          "mask": {
+            "kind": "none",
+            "asset_id": null,
+            "feather_px": 0
+          },
+          "style": {
+            "font_token": null,
+            "color_token": null,
+            "stroke_token": null,
+            "max_lines": 3
+          },
+          "map_binding": null
+        }
+      ],
+      "events": [
+        {
+          "event_id": "event_030",
+          "layer_id": "title_030",
+          "preset_id": "title-mask-reveal",
+          "start_frame": 15,
+          "duration_frames": 18,
+          "cue_word_id": "word_030",
+          "params": {
+            "direction": "up",
+            "distance_px": 30
+          },
+          "animated_property": "opacity",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 0,
+              "easing": "ease_out"
+            },
+            {
+              "frame": 18,
+              "value": 1,
+              "easing": "ease_out"
+            }
+          ],
+          "cue_binding": {
+            "word_id": "word_030",
+            "offset_frames": 0
+          }
+        }
+      ],
+      "camera": {
+        "mode": "push_in",
+        "keyframes": [
+          {
+            "at_frame": 0,
+            "x_px": 0,
+            "y_px": 0,
+            "scale": 1,
+            "rotation_deg": 0,
+            "opacity": 1,
+            "easing": "linear"
+          },
+          {
+            "at_frame": 224,
+            "x_px": -8,
+            "y_px": -3,
+            "scale": 1.05,
+            "rotation_deg": 0,
+            "opacity": 1,
+            "easing": "ease_in_out"
+          }
+        ],
+        "focus_entity_id": null,
+        "clamp_to_content": true
+      },
+      "transition_out": {
+        "type": "hard_cut",
+        "duration_frames": 0
+      },
+      "story_cue_span": {
+        "first_word_id": "word_030",
+        "last_word_id": "word_030"
+      }
+    },
+    {
+      "scene_id": "scene_031",
+      "setup_id": "setup_031",
+      "template_id": "T08",
+      "variant_id": "A",
+      "start_frame": 6750,
+      "duration_frames": 225,
+      "asset_ids": [
+        "asset_016"
+      ],
+      "layers": [
+        {
+          "layer_id": "layer_031",
+          "layer_kind": "archival_photo",
+          "asset_id": "asset_016",
+          "text": null,
+          "source_claim_id": null,
+          "z_index": 0,
+          "rect_px": {
+            "x": 100,
+            "y": 80,
+            "w": 1720,
+            "h": 900
+          },
+          "anchor": "center",
+          "crop_normalized": {
+            "x": 0.08,
+            "y": 0.08,
+            "w": 0.84,
+            "h": 0.84
+          },
+          "object_fit": "cover",
+          "mask": {
+            "kind": "none",
+            "asset_id": null,
+            "feather_px": 0
+          },
+          "style": {
+            "font_token": null,
+            "color_token": null,
+            "stroke_token": null,
+            "max_lines": 3
+          },
+          "map_binding": null
+        },
+        {
+          "layer_id": "title_031",
+          "layer_kind": "headline",
+          "asset_id": null,
+          "text": "Paris watches events",
+          "source_claim_id": null,
+          "z_index": 5,
+          "rect_px": {
+            "x": 100,
+            "y": 80,
+            "w": 1720,
+            "h": 900
+          },
+          "anchor": "center",
+          "crop_normalized": {
+            "x": 0.08,
+            "y": 0.08,
+            "w": 0.84,
+            "h": 0.84
+          },
+          "object_fit": "cover",
+          "mask": {
+            "kind": "none",
+            "asset_id": null,
+            "feather_px": 0
+          },
+          "style": {
+            "font_token": null,
+            "color_token": null,
+            "stroke_token": null,
+            "max_lines": 3
+          },
+          "map_binding": null
+        }
+      ],
+      "events": [
+        {
+          "event_id": "event_031",
+          "layer_id": "title_031",
+          "preset_id": "title-mask-reveal",
+          "start_frame": 15,
+          "duration_frames": 18,
+          "cue_word_id": "word_031",
+          "params": {
+            "direction": "up",
+            "distance_px": 30
+          },
+          "animated_property": "opacity",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 0,
+              "easing": "ease_out"
+            },
+            {
+              "frame": 18,
+              "value": 1,
+              "easing": "ease_out"
+            }
+          ],
+          "cue_binding": {
+            "word_id": "word_031",
+            "offset_frames": 0
+          }
+        }
+      ],
+      "camera": {
+        "mode": "push_in",
+        "keyframes": [
+          {
+            "at_frame": 0,
+            "x_px": 0,
+            "y_px": 0,
+            "scale": 1,
+            "rotation_deg": 0,
+            "opacity": 1,
+            "easing": "linear"
+          },
+          {
+            "at_frame": 224,
+            "x_px": -8,
+            "y_px": -3,
+            "scale": 1.05,
+            "rotation_deg": 0,
+            "opacity": 1,
+            "easing": "ease_in_out"
+          }
+        ],
+        "focus_entity_id": null,
+        "clamp_to_content": true
+      },
+      "transition_out": {
+        "type": "hard_cut",
+        "duration_frames": 0
+      },
+      "story_cue_span": {
+        "first_word_id": "word_031",
+        "last_word_id": "word_031"
+      }
+    },
+    {
+      "scene_id": "scene_032",
+      "setup_id": "setup_032",
+      "template_id": "T08",
+      "variant_id": "B",
+      "start_frame": 6975,
+      "duration_frames": 225,
+      "asset_ids": [
+        "asset_016"
+      ],
+      "layers": [
+        {
+          "layer_id": "layer_032",
+          "layer_kind": "archival_photo",
+          "asset_id": "asset_016",
+          "text": null,
+          "source_claim_id": null,
+          "z_index": 0,
+          "rect_px": {
+            "x": 100,
+            "y": 80,
+            "w": 1720,
+            "h": 900
+          },
+          "anchor": "center",
+          "crop_normalized": {
+            "x": 0.08,
+            "y": 0.08,
+            "w": 0.84,
+            "h": 0.84
+          },
+          "object_fit": "cover",
+          "mask": {
+            "kind": "none",
+            "asset_id": null,
+            "feather_px": 0
+          },
+          "style": {
+            "font_token": null,
+            "color_token": null,
+            "stroke_token": null,
+            "max_lines": 3
+          },
+          "map_binding": null
+        },
+        {
+          "layer_id": "title_032",
+          "layer_kind": "headline",
+          "asset_id": null,
+          "text": "Paris watches events",
+          "source_claim_id": null,
+          "z_index": 5,
+          "rect_px": {
+            "x": 100,
+            "y": 80,
+            "w": 1720,
+            "h": 900
+          },
+          "anchor": "center",
+          "crop_normalized": {
+            "x": 0.08,
+            "y": 0.08,
+            "w": 0.84,
+            "h": 0.84
+          },
+          "object_fit": "cover",
+          "mask": {
+            "kind": "none",
+            "asset_id": null,
+            "feather_px": 0
+          },
+          "style": {
+            "font_token": null,
+            "color_token": null,
+            "stroke_token": null,
+            "max_lines": 3
+          },
+          "map_binding": null
+        }
+      ],
+      "events": [
+        {
+          "event_id": "event_032",
+          "layer_id": "title_032",
+          "preset_id": "title-mask-reveal",
+          "start_frame": 15,
+          "duration_frames": 18,
+          "cue_word_id": "word_032",
+          "params": {
+            "direction": "up",
+            "distance_px": 30
+          },
+          "animated_property": "opacity",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 0,
+              "easing": "ease_out"
+            },
+            {
+              "frame": 18,
+              "value": 1,
+              "easing": "ease_out"
+            }
+          ],
+          "cue_binding": {
+            "word_id": "word_032",
+            "offset_frames": 0
+          }
+        }
+      ],
+      "camera": {
+        "mode": "push_in",
+        "keyframes": [
+          {
+            "at_frame": 0,
+            "x_px": 0,
+            "y_px": 0,
+            "scale": 1,
+            "rotation_deg": 0,
+            "opacity": 1,
+            "easing": "linear"
+          },
+          {
+            "at_frame": 224,
+            "x_px": -8,
+            "y_px": -3,
+            "scale": 1.05,
+            "rotation_deg": 0,
+            "opacity": 1,
+            "easing": "ease_in_out"
+          }
+        ],
+        "focus_entity_id": null,
+        "clamp_to_content": true
+      },
+      "transition_out": {
+        "type": "hard_cut",
+        "duration_frames": 0
+      },
+      "story_cue_span": {
+        "first_word_id": "word_032",
+        "last_word_id": "word_032"
+      }
+    },
+    {
+      "scene_id": "scene_033",
+      "setup_id": "setup_033",
+      "template_id": "T01",
+      "variant_id": "A",
+      "start_frame": 7200,
+      "duration_frames": 225,
+      "asset_ids": [
+        "asset_017"
+      ],
+      "layers": [
+        {
+          "layer_id": "layer_033",
+          "layer_kind": "map",
+          "asset_id": "asset_017",
+          "text": null,
+          "source_claim_id": null,
+          "z_index": 0,
+          "rect_px": {
+            "x": 100,
+            "y": 80,
+            "w": 1720,
+            "h": 900
+          },
+          "anchor": "center",
+          "crop_normalized": {
+            "x": 0.08,
+            "y": 0.08,
+            "w": 0.84,
+            "h": 0.84
+          },
+          "object_fit": "cover",
+          "mask": {
+            "kind": "none",
+            "asset_id": null,
+            "feather_px": 0
+          },
+          "style": {
+            "font_token": null,
+            "color_token": null,
+            "stroke_token": null,
+            "max_lines": 3
+          },
+          "map_binding": null
+        },
+        {
+          "layer_id": "title_033",
+          "layer_kind": "headline",
+          "asset_id": null,
+          "text": "London examines reports",
+          "source_claim_id": null,
+          "z_index": 5,
+          "rect_px": {
+            "x": 100,
+            "y": 80,
+            "w": 1720,
+            "h": 900
+          },
+          "anchor": "center",
+          "crop_normalized": {
+            "x": 0.08,
+            "y": 0.08,
+            "w": 0.84,
+            "h": 0.84
+          },
+          "object_fit": "cover",
+          "mask": {
+            "kind": "none",
+            "asset_id": null,
+            "feather_px": 0
+          },
+          "style": {
+            "font_token": null,
+            "color_token": null,
+            "stroke_token": null,
+            "max_lines": 3
+          },
+          "map_binding": null
+        }
+      ],
+      "events": [
+        {
+          "event_id": "event_033",
+          "layer_id": "title_033",
+          "preset_id": "title-mask-reveal",
+          "start_frame": 15,
+          "duration_frames": 18,
+          "cue_word_id": "word_033",
+          "params": {
+            "direction": "up",
+            "distance_px": 30
+          },
+          "animated_property": "opacity",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 0,
+              "easing": "ease_out"
+            },
+            {
+              "frame": 18,
+              "value": 1,
+              "easing": "ease_out"
+            }
+          ],
+          "cue_binding": {
+            "word_id": "word_033",
+            "offset_frames": 0
+          }
+        }
+      ],
+      "camera": {
+        "mode": "push_in",
+        "keyframes": [
+          {
+            "at_frame": 0,
+            "x_px": 0,
+            "y_px": 0,
+            "scale": 1,
+            "rotation_deg": 0,
+            "opacity": 1,
+            "easing": "linear"
+          },
+          {
+            "at_frame": 224,
+            "x_px": -8,
+            "y_px": -3,
+            "scale": 1.05,
+            "rotation_deg": 0,
+            "opacity": 1,
+            "easing": "ease_in_out"
+          }
+        ],
+        "focus_entity_id": null,
+        "clamp_to_content": true
+      },
+      "transition_out": {
+        "type": "hard_cut",
+        "duration_frames": 0
+      },
+      "story_cue_span": {
+        "first_word_id": "word_033",
+        "last_word_id": "word_033"
+      }
+    },
+    {
+      "scene_id": "scene_034",
+      "setup_id": "setup_034",
+      "template_id": "T01",
+      "variant_id": "B",
+      "start_frame": 7425,
+      "duration_frames": 225,
+      "asset_ids": [
+        "asset_017"
+      ],
+      "layers": [
+        {
+          "layer_id": "layer_034",
+          "layer_kind": "map",
+          "asset_id": "asset_017",
+          "text": null,
+          "source_claim_id": null,
+          "z_index": 0,
+          "rect_px": {
+            "x": 100,
+            "y": 80,
+            "w": 1720,
+            "h": 900
+          },
+          "anchor": "center",
+          "crop_normalized": {
+            "x": 0.08,
+            "y": 0.08,
+            "w": 0.84,
+            "h": 0.84
+          },
+          "object_fit": "cover",
+          "mask": {
+            "kind": "none",
+            "asset_id": null,
+            "feather_px": 0
+          },
+          "style": {
+            "font_token": null,
+            "color_token": null,
+            "stroke_token": null,
+            "max_lines": 3
+          },
+          "map_binding": null
+        },
+        {
+          "layer_id": "title_034",
+          "layer_kind": "headline",
+          "asset_id": null,
+          "text": "London examines reports",
+          "source_claim_id": null,
+          "z_index": 5,
+          "rect_px": {
+            "x": 100,
+            "y": 80,
+            "w": 1720,
+            "h": 900
+          },
+          "anchor": "center",
+          "crop_normalized": {
+            "x": 0.08,
+            "y": 0.08,
+            "w": 0.84,
+            "h": 0.84
+          },
+          "object_fit": "cover",
+          "mask": {
+            "kind": "none",
+            "asset_id": null,
+            "feather_px": 0
+          },
+          "style": {
+            "font_token": null,
+            "color_token": null,
+            "stroke_token": null,
+            "max_lines": 3
+          },
+          "map_binding": null
+        }
+      ],
+      "events": [
+        {
+          "event_id": "event_034",
+          "layer_id": "title_034",
+          "preset_id": "title-mask-reveal",
+          "start_frame": 15,
+          "duration_frames": 18,
+          "cue_word_id": "word_034",
+          "params": {
+            "direction": "up",
+            "distance_px": 30
+          },
+          "animated_property": "opacity",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 0,
+              "easing": "ease_out"
+            },
+            {
+              "frame": 18,
+              "value": 1,
+              "easing": "ease_out"
+            }
+          ],
+          "cue_binding": {
+            "word_id": "word_034",
+            "offset_frames": 0
+          }
+        }
+      ],
+      "camera": {
+        "mode": "push_in",
+        "keyframes": [
+          {
+            "at_frame": 0,
+            "x_px": 0,
+            "y_px": 0,
+            "scale": 1,
+            "rotation_deg": 0,
+            "opacity": 1,
+            "easing": "linear"
+          },
+          {
+            "at_frame": 224,
+            "x_px": -8,
+            "y_px": -3,
+            "scale": 1.05,
+            "rotation_deg": 0,
+            "opacity": 1,
+            "easing": "ease_in_out"
+          }
+        ],
+        "focus_entity_id": null,
+        "clamp_to_content": true
+      },
+      "transition_out": {
+        "type": "hard_cut",
+        "duration_frames": 0
+      },
+      "story_cue_span": {
+        "first_word_id": "word_034",
+        "last_word_id": "word_034"
+      }
+    },
+    {
+      "scene_id": "scene_035",
+      "setup_id": "setup_035",
+      "template_id": "T03",
+      "variant_id": "A",
+      "start_frame": 7650,
+      "duration_frames": 225,
+      "asset_ids": [
+        "asset_018"
+      ],
+      "layers": [
+        {
+          "layer_id": "layer_035",
+          "layer_kind": "archival_photo",
+          "asset_id": "asset_018",
+          "text": null,
+          "source_claim_id": null,
+          "z_index": 0,
+          "rect_px": {
+            "x": 100,
+            "y": 80,
+            "w": 1720,
+            "h": 900
+          },
+          "anchor": "center",
+          "crop_normalized": {
+            "x": 0.08,
+            "y": 0.08,
+            "w": 0.84,
+            "h": 0.84
+          },
+          "object_fit": "cover",
+          "mask": {
+            "kind": "none",
+            "asset_id": null,
+            "feather_px": 0
+          },
+          "style": {
+            "font_token": null,
+            "color_token": null,
+            "stroke_token": null,
+            "max_lines": 3
+          },
+          "map_binding": null
+        },
+        {
+          "layer_id": "title_035",
+          "layer_kind": "headline",
+          "asset_id": null,
+          "text": "Border crossings",
+          "source_claim_id": null,
+          "z_index": 5,
+          "rect_px": {
+            "x": 100,
+            "y": 80,
+            "w": 1720,
+            "h": 900
+          },
+          "anchor": "center",
+          "crop_normalized": {
+            "x": 0.08,
+            "y": 0.08,
+            "w": 0.84,
+            "h": 0.84
+          },
+          "object_fit": "cover",
+          "mask": {
+            "kind": "none",
+            "asset_id": null,
+            "feather_px": 0
+          },
+          "style": {
+            "font_token": null,
+            "color_token": null,
+            "stroke_token": null,
+            "max_lines": 3
+          },
+          "map_binding": null
+        }
+      ],
+      "events": [
+        {
+          "event_id": "event_035",
+          "layer_id": "title_035",
+          "preset_id": "title-mask-reveal",
+          "start_frame": 15,
+          "duration_frames": 18,
+          "cue_word_id": "word_035",
+          "params": {
+            "direction": "up",
+            "distance_px": 30
+          },
+          "animated_property": "opacity",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 0,
+              "easing": "ease_out"
+            },
+            {
+              "frame": 18,
+              "value": 1,
+              "easing": "ease_out"
+            }
+          ],
+          "cue_binding": {
+            "word_id": "word_035",
+            "offset_frames": 0
+          }
+        }
+      ],
+      "camera": {
+        "mode": "push_in",
+        "keyframes": [
+          {
+            "at_frame": 0,
+            "x_px": 0,
+            "y_px": 0,
+            "scale": 1,
+            "rotation_deg": 0,
+            "opacity": 1,
+            "easing": "linear"
+          },
+          {
+            "at_frame": 224,
+            "x_px": -8,
+            "y_px": -3,
+            "scale": 1.05,
+            "rotation_deg": 0,
+            "opacity": 1,
+            "easing": "ease_in_out"
+          }
+        ],
+        "focus_entity_id": null,
+        "clamp_to_content": true
+      },
+      "transition_out": {
+        "type": "hard_cut",
+        "duration_frames": 0
+      },
+      "story_cue_span": {
+        "first_word_id": "word_035",
+        "last_word_id": "word_035"
+      }
+    },
+    {
+      "scene_id": "scene_036",
+      "setup_id": "setup_036",
+      "template_id": "T03",
+      "variant_id": "B",
+      "start_frame": 7875,
+      "duration_frames": 225,
+      "asset_ids": [
+        "asset_018"
+      ],
+      "layers": [
+        {
+          "layer_id": "layer_036",
+          "layer_kind": "archival_photo",
+          "asset_id": "asset_018",
+          "text": null,
+          "source_claim_id": null,
+          "z_index": 0,
+          "rect_px": {
+            "x": 100,
+            "y": 80,
+            "w": 1720,
+            "h": 900
+          },
+          "anchor": "center",
+          "crop_normalized": {
+            "x": 0.08,
+            "y": 0.08,
+            "w": 0.84,
+            "h": 0.84
+          },
+          "object_fit": "cover",
+          "mask": {
+            "kind": "none",
+            "asset_id": null,
+            "feather_px": 0
+          },
+          "style": {
+            "font_token": null,
+            "color_token": null,
+            "stroke_token": null,
+            "max_lines": 3
+          },
+          "map_binding": null
+        },
+        {
+          "layer_id": "title_036",
+          "layer_kind": "headline",
+          "asset_id": null,
+          "text": "Border crossings",
+          "source_claim_id": null,
+          "z_index": 5,
+          "rect_px": {
+            "x": 100,
+            "y": 80,
+            "w": 1720,
+            "h": 900
+          },
+          "anchor": "center",
+          "crop_normalized": {
+            "x": 0.08,
+            "y": 0.08,
+            "w": 0.84,
+            "h": 0.84
+          },
+          "object_fit": "cover",
+          "mask": {
+            "kind": "none",
+            "asset_id": null,
+            "feather_px": 0
+          },
+          "style": {
+            "font_token": null,
+            "color_token": null,
+            "stroke_token": null,
+            "max_lines": 3
+          },
+          "map_binding": null
+        }
+      ],
+      "events": [
+        {
+          "event_id": "event_036",
+          "layer_id": "title_036",
+          "preset_id": "title-mask-reveal",
+          "start_frame": 15,
+          "duration_frames": 18,
+          "cue_word_id": "word_036",
+          "params": {
+            "direction": "up",
+            "distance_px": 30
+          },
+          "animated_property": "opacity",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 0,
+              "easing": "ease_out"
+            },
+            {
+              "frame": 18,
+              "value": 1,
+              "easing": "ease_out"
+            }
+          ],
+          "cue_binding": {
+            "word_id": "word_036",
+            "offset_frames": 0
+          }
+        }
+      ],
+      "camera": {
+        "mode": "push_in",
+        "keyframes": [
+          {
+            "at_frame": 0,
+            "x_px": 0,
+            "y_px": 0,
+            "scale": 1,
+            "rotation_deg": 0,
+            "opacity": 1,
+            "easing": "linear"
+          },
+          {
+            "at_frame": 224,
+            "x_px": -8,
+            "y_px": -3,
+            "scale": 1.05,
+            "rotation_deg": 0,
+            "opacity": 1,
+            "easing": "ease_in_out"
+          }
+        ],
+        "focus_entity_id": null,
+        "clamp_to_content": true
+      },
+      "transition_out": {
+        "type": "hard_cut",
+        "duration_frames": 0
+      },
+      "story_cue_span": {
+        "first_word_id": "word_036",
+        "last_word_id": "word_036"
+      }
+    },
+    {
+      "scene_id": "scene_037",
+      "setup_id": "setup_037",
+      "template_id": "T06",
+      "variant_id": "A",
+      "start_frame": 8100,
+      "duration_frames": 225,
+      "asset_ids": [
+        "asset_019"
+      ],
+      "layers": [
+        {
+          "layer_id": "layer_037",
+          "layer_kind": "archival_photo",
+          "asset_id": "asset_019",
+          "text": null,
+          "source_claim_id": null,
+          "z_index": 0,
+          "rect_px": {
+            "x": 100,
+            "y": 80,
+            "w": 1720,
+            "h": 900
+          },
+          "anchor": "center",
+          "crop_normalized": {
+            "x": 0.08,
+            "y": 0.08,
+            "w": 0.84,
+            "h": 0.84
+          },
+          "object_fit": "cover",
+          "mask": {
+            "kind": "none",
+            "asset_id": null,
+            "feather_px": 0
+          },
+          "style": {
+            "font_token": null,
+            "color_token": null,
+            "stroke_token": null,
+            "max_lines": 3
+          },
+          "map_binding": null
+        },
+        {
+          "layer_id": "title_037",
+          "layer_kind": "headline",
+          "asset_id": null,
+          "text": "Alliances and commitments",
+          "source_claim_id": null,
+          "z_index": 5,
+          "rect_px": {
+            "x": 100,
+            "y": 80,
+            "w": 1720,
+            "h": 900
+          },
+          "anchor": "center",
+          "crop_normalized": {
+            "x": 0.08,
+            "y": 0.08,
+            "w": 0.84,
+            "h": 0.84
+          },
+          "object_fit": "cover",
+          "mask": {
+            "kind": "none",
+            "asset_id": null,
+            "feather_px": 0
+          },
+          "style": {
+            "font_token": null,
+            "color_token": null,
+            "stroke_token": null,
+            "max_lines": 3
+          },
+          "map_binding": null
+        }
+      ],
+      "events": [
+        {
+          "event_id": "event_037",
+          "layer_id": "title_037",
+          "preset_id": "title-mask-reveal",
+          "start_frame": 15,
+          "duration_frames": 18,
+          "cue_word_id": "word_037",
+          "params": {
+            "direction": "up",
+            "distance_px": 30
+          },
+          "animated_property": "opacity",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 0,
+              "easing": "ease_out"
+            },
+            {
+              "frame": 18,
+              "value": 1,
+              "easing": "ease_out"
+            }
+          ],
+          "cue_binding": {
+            "word_id": "word_037",
+            "offset_frames": 0
+          }
+        }
+      ],
+      "camera": {
+        "mode": "push_in",
+        "keyframes": [
+          {
+            "at_frame": 0,
+            "x_px": 0,
+            "y_px": 0,
+            "scale": 1,
+            "rotation_deg": 0,
+            "opacity": 1,
+            "easing": "linear"
+          },
+          {
+            "at_frame": 224,
+            "x_px": -8,
+            "y_px": -3,
+            "scale": 1.05,
+            "rotation_deg": 0,
+            "opacity": 1,
+            "easing": "ease_in_out"
+          }
+        ],
+        "focus_entity_id": null,
+        "clamp_to_content": true
+      },
+      "transition_out": {
+        "type": "hard_cut",
+        "duration_frames": 0
+      },
+      "story_cue_span": {
+        "first_word_id": "word_037",
+        "last_word_id": "word_037"
+      }
+    },
+    {
+      "scene_id": "scene_038",
+      "setup_id": "setup_038",
+      "template_id": "T06",
+      "variant_id": "B",
+      "start_frame": 8325,
+      "duration_frames": 225,
+      "asset_ids": [
+        "asset_019"
+      ],
+      "layers": [
+        {
+          "layer_id": "layer_038",
+          "layer_kind": "archival_photo",
+          "asset_id": "asset_019",
+          "text": null,
+          "source_claim_id": null,
+          "z_index": 0,
+          "rect_px": {
+            "x": 100,
+            "y": 80,
+            "w": 1720,
+            "h": 900
+          },
+          "anchor": "center",
+          "crop_normalized": {
+            "x": 0.08,
+            "y": 0.08,
+            "w": 0.84,
+            "h": 0.84
+          },
+          "object_fit": "cover",
+          "mask": {
+            "kind": "none",
+            "asset_id": null,
+            "feather_px": 0
+          },
+          "style": {
+            "font_token": null,
+            "color_token": null,
+            "stroke_token": null,
+            "max_lines": 3
+          },
+          "map_binding": null
+        },
+        {
+          "layer_id": "title_038",
+          "layer_kind": "headline",
+          "asset_id": null,
+          "text": "Alliances and commitments",
+          "source_claim_id": null,
+          "z_index": 5,
+          "rect_px": {
+            "x": 100,
+            "y": 80,
+            "w": 1720,
+            "h": 900
+          },
+          "anchor": "center",
+          "crop_normalized": {
+            "x": 0.08,
+            "y": 0.08,
+            "w": 0.84,
+            "h": 0.84
+          },
+          "object_fit": "cover",
+          "mask": {
+            "kind": "none",
+            "asset_id": null,
+            "feather_px": 0
+          },
+          "style": {
+            "font_token": null,
+            "color_token": null,
+            "stroke_token": null,
+            "max_lines": 3
+          },
+          "map_binding": null
+        }
+      ],
+      "events": [
+        {
+          "event_id": "event_038",
+          "layer_id": "title_038",
+          "preset_id": "title-mask-reveal",
+          "start_frame": 15,
+          "duration_frames": 18,
+          "cue_word_id": "word_038",
+          "params": {
+            "direction": "up",
+            "distance_px": 30
+          },
+          "animated_property": "opacity",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 0,
+              "easing": "ease_out"
+            },
+            {
+              "frame": 18,
+              "value": 1,
+              "easing": "ease_out"
+            }
+          ],
+          "cue_binding": {
+            "word_id": "word_038",
+            "offset_frames": 0
+          }
+        }
+      ],
+      "camera": {
+        "mode": "push_in",
+        "keyframes": [
+          {
+            "at_frame": 0,
+            "x_px": 0,
+            "y_px": 0,
+            "scale": 1,
+            "rotation_deg": 0,
+            "opacity": 1,
+            "easing": "linear"
+          },
+          {
+            "at_frame": 224,
+            "x_px": -8,
+            "y_px": -3,
+            "scale": 1.05,
+            "rotation_deg": 0,
+            "opacity": 1,
+            "easing": "ease_in_out"
+          }
+        ],
+        "focus_entity_id": null,
+        "clamp_to_content": true
+      },
+      "transition_out": {
+        "type": "hard_cut",
+        "duration_frames": 0
+      },
+      "story_cue_span": {
+        "first_word_id": "word_038",
+        "last_word_id": "word_038"
+      }
+    },
+    {
+      "scene_id": "scene_039",
+      "setup_id": "setup_039",
+      "template_id": "T08",
+      "variant_id": "A",
+      "start_frame": 8550,
+      "duration_frames": 225,
+      "asset_ids": [
+        "asset_020"
+      ],
+      "layers": [
+        {
+          "layer_id": "layer_039",
+          "layer_kind": "archival_photo",
+          "asset_id": "asset_020",
+          "text": null,
+          "source_claim_id": null,
+          "z_index": 0,
+          "rect_px": {
+            "x": 100,
+            "y": 80,
+            "w": 1720,
+            "h": 900
+          },
+          "anchor": "center",
+          "crop_normalized": {
+            "x": 0.08,
+            "y": 0.08,
+            "w": 0.84,
+            "h": 0.84
+          },
+          "object_fit": "cover",
+          "mask": {
+            "kind": "none",
+            "asset_id": null,
+            "feather_px": 0
+          },
+          "style": {
+            "font_token": null,
+            "color_token": null,
+            "stroke_token": null,
+            "max_lines": 3
+          },
+          "map_binding": null
+        },
+        {
+          "layer_id": "title_039",
+          "layer_kind": "headline",
+          "asset_id": null,
+          "text": "Public reaction",
+          "source_claim_id": null,
+          "z_index": 5,
+          "rect_px": {
+            "x": 100,
+            "y": 80,
+            "w": 1720,
+            "h": 900
+          },
+          "anchor": "center",
+          "crop_normalized": {
+            "x": 0.08,
+            "y": 0.08,
+            "w": 0.84,
+            "h": 0.84
+          },
+          "object_fit": "cover",
+          "mask": {
+            "kind": "none",
+            "asset_id": null,
+            "feather_px": 0
+          },
+          "style": {
+            "font_token": null,
+            "color_token": null,
+            "stroke_token": null,
+            "max_lines": 3
+          },
+          "map_binding": null
+        }
+      ],
+      "events": [
+        {
+          "event_id": "event_039",
+          "layer_id": "title_039",
+          "preset_id": "title-mask-reveal",
+          "start_frame": 15,
+          "duration_frames": 18,
+          "cue_word_id": "word_039",
+          "params": {
+            "direction": "up",
+            "distance_px": 30
+          },
+          "animated_property": "opacity",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 0,
+              "easing": "ease_out"
+            },
+            {
+              "frame": 18,
+              "value": 1,
+              "easing": "ease_out"
+            }
+          ],
+          "cue_binding": {
+            "word_id": "word_039",
+            "offset_frames": 0
+          }
+        }
+      ],
+      "camera": {
+        "mode": "push_in",
+        "keyframes": [
+          {
+            "at_frame": 0,
+            "x_px": 0,
+            "y_px": 0,
+            "scale": 1,
+            "rotation_deg": 0,
+            "opacity": 1,
+            "easing": "linear"
+          },
+          {
+            "at_frame": 224,
+            "x_px": -8,
+            "y_px": -3,
+            "scale": 1.05,
+            "rotation_deg": 0,
+            "opacity": 1,
+            "easing": "ease_in_out"
+          }
+        ],
+        "focus_entity_id": null,
+        "clamp_to_content": true
+      },
+      "transition_out": {
+        "type": "hard_cut",
+        "duration_frames": 0
+      },
+      "story_cue_span": {
+        "first_word_id": "word_039",
+        "last_word_id": "word_039"
+      }
+    },
+    {
+      "scene_id": "scene_040",
+      "setup_id": "setup_040",
+      "template_id": "T08",
+      "variant_id": "B",
+      "start_frame": 8775,
+      "duration_frames": 225,
+      "asset_ids": [
+        "asset_020"
+      ],
+      "layers": [
+        {
+          "layer_id": "layer_040",
+          "layer_kind": "archival_photo",
+          "asset_id": "asset_020",
+          "text": null,
+          "source_claim_id": null,
+          "z_index": 0,
+          "rect_px": {
+            "x": 100,
+            "y": 80,
+            "w": 1720,
+            "h": 900
+          },
+          "anchor": "center",
+          "crop_normalized": {
+            "x": 0.08,
+            "y": 0.08,
+            "w": 0.84,
+            "h": 0.84
+          },
+          "object_fit": "cover",
+          "mask": {
+            "kind": "none",
+            "asset_id": null,
+            "feather_px": 0
+          },
+          "style": {
+            "font_token": null,
+            "color_token": null,
+            "stroke_token": null,
+            "max_lines": 3
+          },
+          "map_binding": null
+        },
+        {
+          "layer_id": "title_040",
+          "layer_kind": "headline",
+          "asset_id": null,
+          "text": "Public reaction",
+          "source_claim_id": null,
+          "z_index": 5,
+          "rect_px": {
+            "x": 100,
+            "y": 80,
+            "w": 1720,
+            "h": 900
+          },
+          "anchor": "center",
+          "crop_normalized": {
+            "x": 0.08,
+            "y": 0.08,
+            "w": 0.84,
+            "h": 0.84
+          },
+          "object_fit": "cover",
+          "mask": {
+            "kind": "none",
+            "asset_id": null,
+            "feather_px": 0
+          },
+          "style": {
+            "font_token": null,
+            "color_token": null,
+            "stroke_token": null,
+            "max_lines": 3
+          },
+          "map_binding": null
+        }
+      ],
+      "events": [
+        {
+          "event_id": "event_040",
+          "layer_id": "title_040",
+          "preset_id": "title-mask-reveal",
+          "start_frame": 15,
+          "duration_frames": 18,
+          "cue_word_id": "word_040",
+          "params": {
+            "direction": "up",
+            "distance_px": 30
+          },
+          "animated_property": "opacity",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 0,
+              "easing": "ease_out"
+            },
+            {
+              "frame": 18,
+              "value": 1,
+              "easing": "ease_out"
+            }
+          ],
+          "cue_binding": {
+            "word_id": "word_040",
+            "offset_frames": 0
+          }
+        }
+      ],
+      "camera": {
+        "mode": "push_in",
+        "keyframes": [
+          {
+            "at_frame": 0,
+            "x_px": 0,
+            "y_px": 0,
+            "scale": 1,
+            "rotation_deg": 0,
+            "opacity": 1,
+            "easing": "linear"
+          },
+          {
+            "at_frame": 224,
+            "x_px": -8,
+            "y_px": -3,
+            "scale": 1.05,
+            "rotation_deg": 0,
+            "opacity": 1,
+            "easing": "ease_in_out"
+          }
+        ],
+        "focus_entity_id": null,
+        "clamp_to_content": true
+      },
+      "transition_out": {
+        "type": "hard_cut",
+        "duration_frames": 0
+      },
+      "story_cue_span": {
+        "first_word_id": "word_040",
+        "last_word_id": "word_040"
+      }
+    },
+    {
+      "scene_id": "scene_041",
+      "setup_id": "setup_041",
+      "template_id": "T01",
+      "variant_id": "A",
+      "start_frame": 9000,
+      "duration_frames": 225,
+      "asset_ids": [
+        "asset_021"
+      ],
+      "layers": [
+        {
+          "layer_id": "layer_041",
+          "layer_kind": "map",
+          "asset_id": "asset_021",
+          "text": null,
+          "source_claim_id": null,
+          "z_index": 0,
+          "rect_px": {
+            "x": 100,
+            "y": 80,
+            "w": 1720,
+            "h": 900
+          },
+          "anchor": "center",
+          "crop_normalized": {
+            "x": 0.08,
+            "y": 0.08,
+            "w": 0.84,
+            "h": 0.84
+          },
+          "object_fit": "cover",
+          "mask": {
+            "kind": "none",
+            "asset_id": null,
+            "feather_px": 0
+          },
+          "style": {
+            "font_token": null,
+            "color_token": null,
+            "stroke_token": null,
+            "max_lines": 3
+          },
+          "map_binding": null
+        },
+        {
+          "layer_id": "title_041",
+          "layer_kind": "headline",
+          "asset_id": null,
+          "text": "The timetable accelerates",
+          "source_claim_id": null,
+          "z_index": 5,
+          "rect_px": {
+            "x": 100,
+            "y": 80,
+            "w": 1720,
+            "h": 900
+          },
+          "anchor": "center",
+          "crop_normalized": {
+            "x": 0.08,
+            "y": 0.08,
+            "w": 0.84,
+            "h": 0.84
+          },
+          "object_fit": "cover",
+          "mask": {
+            "kind": "none",
+            "asset_id": null,
+            "feather_px": 0
+          },
+          "style": {
+            "font_token": null,
+            "color_token": null,
+            "stroke_token": null,
+            "max_lines": 3
+          },
+          "map_binding": null
+        }
+      ],
+      "events": [
+        {
+          "event_id": "event_041",
+          "layer_id": "title_041",
+          "preset_id": "title-mask-reveal",
+          "start_frame": 15,
+          "duration_frames": 18,
+          "cue_word_id": "word_041",
+          "params": {
+            "direction": "up",
+            "distance_px": 30
+          },
+          "animated_property": "opacity",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 0,
+              "easing": "ease_out"
+            },
+            {
+              "frame": 18,
+              "value": 1,
+              "easing": "ease_out"
+            }
+          ],
+          "cue_binding": {
+            "word_id": "word_041",
+            "offset_frames": 0
+          }
+        }
+      ],
+      "camera": {
+        "mode": "push_in",
+        "keyframes": [
+          {
+            "at_frame": 0,
+            "x_px": 0,
+            "y_px": 0,
+            "scale": 1,
+            "rotation_deg": 0,
+            "opacity": 1,
+            "easing": "linear"
+          },
+          {
+            "at_frame": 224,
+            "x_px": -8,
+            "y_px": -3,
+            "scale": 1.05,
+            "rotation_deg": 0,
+            "opacity": 1,
+            "easing": "ease_in_out"
+          }
+        ],
+        "focus_entity_id": null,
+        "clamp_to_content": true
+      },
+      "transition_out": {
+        "type": "hard_cut",
+        "duration_frames": 0
+      },
+      "story_cue_span": {
+        "first_word_id": "word_041",
+        "last_word_id": "word_041"
+      }
+    },
+    {
+      "scene_id": "scene_042",
+      "setup_id": "setup_042",
+      "template_id": "T01",
+      "variant_id": "B",
+      "start_frame": 9225,
+      "duration_frames": 225,
+      "asset_ids": [
+        "asset_021"
+      ],
+      "layers": [
+        {
+          "layer_id": "layer_042",
+          "layer_kind": "map",
+          "asset_id": "asset_021",
+          "text": null,
+          "source_claim_id": null,
+          "z_index": 0,
+          "rect_px": {
+            "x": 100,
+            "y": 80,
+            "w": 1720,
+            "h": 900
+          },
+          "anchor": "center",
+          "crop_normalized": {
+            "x": 0.08,
+            "y": 0.08,
+            "w": 0.84,
+            "h": 0.84
+          },
+          "object_fit": "cover",
+          "mask": {
+            "kind": "none",
+            "asset_id": null,
+            "feather_px": 0
+          },
+          "style": {
+            "font_token": null,
+            "color_token": null,
+            "stroke_token": null,
+            "max_lines": 3
+          },
+          "map_binding": null
+        },
+        {
+          "layer_id": "title_042",
+          "layer_kind": "headline",
+          "asset_id": null,
+          "text": "The timetable accelerates",
+          "source_claim_id": null,
+          "z_index": 5,
+          "rect_px": {
+            "x": 100,
+            "y": 80,
+            "w": 1720,
+            "h": 900
+          },
+          "anchor": "center",
+          "crop_normalized": {
+            "x": 0.08,
+            "y": 0.08,
+            "w": 0.84,
+            "h": 0.84
+          },
+          "object_fit": "cover",
+          "mask": {
+            "kind": "none",
+            "asset_id": null,
+            "feather_px": 0
+          },
+          "style": {
+            "font_token": null,
+            "color_token": null,
+            "stroke_token": null,
+            "max_lines": 3
+          },
+          "map_binding": null
+        }
+      ],
+      "events": [
+        {
+          "event_id": "event_042",
+          "layer_id": "title_042",
+          "preset_id": "title-mask-reveal",
+          "start_frame": 15,
+          "duration_frames": 18,
+          "cue_word_id": "word_042",
+          "params": {
+            "direction": "up",
+            "distance_px": 30
+          },
+          "animated_property": "opacity",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 0,
+              "easing": "ease_out"
+            },
+            {
+              "frame": 18,
+              "value": 1,
+              "easing": "ease_out"
+            }
+          ],
+          "cue_binding": {
+            "word_id": "word_042",
+            "offset_frames": 0
+          }
+        }
+      ],
+      "camera": {
+        "mode": "push_in",
+        "keyframes": [
+          {
+            "at_frame": 0,
+            "x_px": 0,
+            "y_px": 0,
+            "scale": 1,
+            "rotation_deg": 0,
+            "opacity": 1,
+            "easing": "linear"
+          },
+          {
+            "at_frame": 224,
+            "x_px": -8,
+            "y_px": -3,
+            "scale": 1.05,
+            "rotation_deg": 0,
+            "opacity": 1,
+            "easing": "ease_in_out"
+          }
+        ],
+        "focus_entity_id": null,
+        "clamp_to_content": true
+      },
+      "transition_out": {
+        "type": "hard_cut",
+        "duration_frames": 0
+      },
+      "story_cue_span": {
+        "first_word_id": "word_042",
+        "last_word_id": "word_042"
+      }
+    },
+    {
+      "scene_id": "scene_043",
+      "setup_id": "setup_043",
+      "template_id": "T03",
+      "variant_id": "A",
+      "start_frame": 9450,
+      "duration_frames": 225,
+      "asset_ids": [
+        "asset_022"
+      ],
+      "layers": [
+        {
+          "layer_id": "layer_043",
+          "layer_kind": "archival_photo",
+          "asset_id": "asset_022",
+          "text": null,
+          "source_claim_id": null,
+          "z_index": 0,
+          "rect_px": {
+            "x": 100,
+            "y": 80,
+            "w": 1720,
+            "h": 900
+          },
+          "anchor": "center",
+          "crop_normalized": {
+            "x": 0.08,
+            "y": 0.08,
+            "w": 0.84,
+            "h": 0.84
+          },
+          "object_fit": "cover",
+          "mask": {
+            "kind": "none",
+            "asset_id": null,
+            "feather_px": 0
+          },
+          "style": {
+            "font_token": null,
+            "color_token": null,
+            "stroke_token": null,
+            "max_lines": 3
+          },
+          "map_binding": null
+        },
+        {
+          "layer_id": "title_043",
+          "layer_kind": "headline",
+          "asset_id": null,
+          "text": "The first weeks of war",
+          "source_claim_id": null,
+          "z_index": 5,
+          "rect_px": {
+            "x": 100,
+            "y": 80,
+            "w": 1720,
+            "h": 900
+          },
+          "anchor": "center",
+          "crop_normalized": {
+            "x": 0.08,
+            "y": 0.08,
+            "w": 0.84,
+            "h": 0.84
+          },
+          "object_fit": "cover",
+          "mask": {
+            "kind": "none",
+            "asset_id": null,
+            "feather_px": 0
+          },
+          "style": {
+            "font_token": null,
+            "color_token": null,
+            "stroke_token": null,
+            "max_lines": 3
+          },
+          "map_binding": null
+        }
+      ],
+      "events": [
+        {
+          "event_id": "event_043",
+          "layer_id": "title_043",
+          "preset_id": "title-mask-reveal",
+          "start_frame": 15,
+          "duration_frames": 18,
+          "cue_word_id": "word_043",
+          "params": {
+            "direction": "up",
+            "distance_px": 30
+          },
+          "animated_property": "opacity",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 0,
+              "easing": "ease_out"
+            },
+            {
+              "frame": 18,
+              "value": 1,
+              "easing": "ease_out"
+            }
+          ],
+          "cue_binding": {
+            "word_id": "word_043",
+            "offset_frames": 0
+          }
+        }
+      ],
+      "camera": {
+        "mode": "push_in",
+        "keyframes": [
+          {
+            "at_frame": 0,
+            "x_px": 0,
+            "y_px": 0,
+            "scale": 1,
+            "rotation_deg": 0,
+            "opacity": 1,
+            "easing": "linear"
+          },
+          {
+            "at_frame": 224,
+            "x_px": -8,
+            "y_px": -3,
+            "scale": 1.05,
+            "rotation_deg": 0,
+            "opacity": 1,
+            "easing": "ease_in_out"
+          }
+        ],
+        "focus_entity_id": null,
+        "clamp_to_content": true
+      },
+      "transition_out": {
+        "type": "hard_cut",
+        "duration_frames": 0
+      },
+      "story_cue_span": {
+        "first_word_id": "word_043",
+        "last_word_id": "word_043"
+      }
+    },
+    {
+      "scene_id": "scene_044",
+      "setup_id": "setup_044",
+      "template_id": "T03",
+      "variant_id": "B",
+      "start_frame": 9675,
+      "duration_frames": 225,
+      "asset_ids": [
+        "asset_022"
+      ],
+      "layers": [
+        {
+          "layer_id": "layer_044",
+          "layer_kind": "archival_photo",
+          "asset_id": "asset_022",
+          "text": null,
+          "source_claim_id": null,
+          "z_index": 0,
+          "rect_px": {
+            "x": 100,
+            "y": 80,
+            "w": 1720,
+            "h": 900
+          },
+          "anchor": "center",
+          "crop_normalized": {
+            "x": 0.08,
+            "y": 0.08,
+            "w": 0.84,
+            "h": 0.84
+          },
+          "object_fit": "cover",
+          "mask": {
+            "kind": "none",
+            "asset_id": null,
+            "feather_px": 0
+          },
+          "style": {
+            "font_token": null,
+            "color_token": null,
+            "stroke_token": null,
+            "max_lines": 3
+          },
+          "map_binding": null
+        },
+        {
+          "layer_id": "title_044",
+          "layer_kind": "headline",
+          "asset_id": null,
+          "text": "The first weeks of war",
+          "source_claim_id": null,
+          "z_index": 5,
+          "rect_px": {
+            "x": 100,
+            "y": 80,
+            "w": 1720,
+            "h": 900
+          },
+          "anchor": "center",
+          "crop_normalized": {
+            "x": 0.08,
+            "y": 0.08,
+            "w": 0.84,
+            "h": 0.84
+          },
+          "object_fit": "cover",
+          "mask": {
+            "kind": "none",
+            "asset_id": null,
+            "feather_px": 0
+          },
+          "style": {
+            "font_token": null,
+            "color_token": null,
+            "stroke_token": null,
+            "max_lines": 3
+          },
+          "map_binding": null
+        }
+      ],
+      "events": [
+        {
+          "event_id": "event_044",
+          "layer_id": "title_044",
+          "preset_id": "title-mask-reveal",
+          "start_frame": 15,
+          "duration_frames": 18,
+          "cue_word_id": "word_044",
+          "params": {
+            "direction": "up",
+            "distance_px": 30
+          },
+          "animated_property": "opacity",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 0,
+              "easing": "ease_out"
+            },
+            {
+              "frame": 18,
+              "value": 1,
+              "easing": "ease_out"
+            }
+          ],
+          "cue_binding": {
+            "word_id": "word_044",
+            "offset_frames": 0
+          }
+        }
+      ],
+      "camera": {
+        "mode": "push_in",
+        "keyframes": [
+          {
+            "at_frame": 0,
+            "x_px": 0,
+            "y_px": 0,
+            "scale": 1,
+            "rotation_deg": 0,
+            "opacity": 1,
+            "easing": "linear"
+          },
+          {
+            "at_frame": 224,
+            "x_px": -8,
+            "y_px": -3,
+            "scale": 1.05,
+            "rotation_deg": 0,
+            "opacity": 1,
+            "easing": "ease_in_out"
+          }
+        ],
+        "focus_entity_id": null,
+        "clamp_to_content": true
+      },
+      "transition_out": {
+        "type": "hard_cut",
+        "duration_frames": 0
+      },
+      "story_cue_span": {
+        "first_word_id": "word_044",
+        "last_word_id": "word_044"
+      }
+    },
+    {
+      "scene_id": "scene_045",
+      "setup_id": "setup_045",
+      "template_id": "T06",
+      "variant_id": "A",
+      "start_frame": 9900,
+      "duration_frames": 225,
+      "asset_ids": [
+        "asset_023"
+      ],
+      "layers": [
+        {
+          "layer_id": "layer_045",
+          "layer_kind": "archival_photo",
+          "asset_id": "asset_023",
+          "text": null,
+          "source_claim_id": null,
+          "z_index": 0,
+          "rect_px": {
+            "x": 100,
+            "y": 80,
+            "w": 1720,
+            "h": 900
+          },
+          "anchor": "center",
+          "crop_normalized": {
+            "x": 0.08,
+            "y": 0.08,
+            "w": 0.84,
+            "h": 0.84
+          },
+          "object_fit": "cover",
+          "mask": {
+            "kind": "none",
+            "asset_id": null,
+            "feather_px": 0
+          },
+          "style": {
+            "font_token": null,
+            "color_token": null,
+            "stroke_token": null,
+            "max_lines": 3
+          },
+          "map_binding": null
+        },
+        {
+          "layer_id": "title_045",
+          "layer_kind": "headline",
+          "asset_id": null,
+          "text": "Consequences across Europe",
+          "source_claim_id": null,
+          "z_index": 5,
+          "rect_px": {
+            "x": 100,
+            "y": 80,
+            "w": 1720,
+            "h": 900
+          },
+          "anchor": "center",
+          "crop_normalized": {
+            "x": 0.08,
+            "y": 0.08,
+            "w": 0.84,
+            "h": 0.84
+          },
+          "object_fit": "cover",
+          "mask": {
+            "kind": "none",
+            "asset_id": null,
+            "feather_px": 0
+          },
+          "style": {
+            "font_token": null,
+            "color_token": null,
+            "stroke_token": null,
+            "max_lines": 3
+          },
+          "map_binding": null
+        }
+      ],
+      "events": [
+        {
+          "event_id": "event_045",
+          "layer_id": "title_045",
+          "preset_id": "title-mask-reveal",
+          "start_frame": 15,
+          "duration_frames": 18,
+          "cue_word_id": "word_045",
+          "params": {
+            "direction": "up",
+            "distance_px": 30
+          },
+          "animated_property": "opacity",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 0,
+              "easing": "ease_out"
+            },
+            {
+              "frame": 18,
+              "value": 1,
+              "easing": "ease_out"
+            }
+          ],
+          "cue_binding": {
+            "word_id": "word_045",
+            "offset_frames": 0
+          }
+        }
+      ],
+      "camera": {
+        "mode": "push_in",
+        "keyframes": [
+          {
+            "at_frame": 0,
+            "x_px": 0,
+            "y_px": 0,
+            "scale": 1,
+            "rotation_deg": 0,
+            "opacity": 1,
+            "easing": "linear"
+          },
+          {
+            "at_frame": 224,
+            "x_px": -8,
+            "y_px": -3,
+            "scale": 1.05,
+            "rotation_deg": 0,
+            "opacity": 1,
+            "easing": "ease_in_out"
+          }
+        ],
+        "focus_entity_id": null,
+        "clamp_to_content": true
+      },
+      "transition_out": {
+        "type": "hard_cut",
+        "duration_frames": 0
+      },
+      "story_cue_span": {
+        "first_word_id": "word_045",
+        "last_word_id": "word_045"
+      }
+    },
+    {
+      "scene_id": "scene_046",
+      "setup_id": "setup_046",
+      "template_id": "T06",
+      "variant_id": "B",
+      "start_frame": 10125,
+      "duration_frames": 225,
+      "asset_ids": [
+        "asset_023"
+      ],
+      "layers": [
+        {
+          "layer_id": "layer_046",
+          "layer_kind": "archival_photo",
+          "asset_id": "asset_023",
+          "text": null,
+          "source_claim_id": null,
+          "z_index": 0,
+          "rect_px": {
+            "x": 100,
+            "y": 80,
+            "w": 1720,
+            "h": 900
+          },
+          "anchor": "center",
+          "crop_normalized": {
+            "x": 0.08,
+            "y": 0.08,
+            "w": 0.84,
+            "h": 0.84
+          },
+          "object_fit": "cover",
+          "mask": {
+            "kind": "none",
+            "asset_id": null,
+            "feather_px": 0
+          },
+          "style": {
+            "font_token": null,
+            "color_token": null,
+            "stroke_token": null,
+            "max_lines": 3
+          },
+          "map_binding": null
+        },
+        {
+          "layer_id": "title_046",
+          "layer_kind": "headline",
+          "asset_id": null,
+          "text": "Consequences across Europe",
+          "source_claim_id": null,
+          "z_index": 5,
+          "rect_px": {
+            "x": 100,
+            "y": 80,
+            "w": 1720,
+            "h": 900
+          },
+          "anchor": "center",
+          "crop_normalized": {
+            "x": 0.08,
+            "y": 0.08,
+            "w": 0.84,
+            "h": 0.84
+          },
+          "object_fit": "cover",
+          "mask": {
+            "kind": "none",
+            "asset_id": null,
+            "feather_px": 0
+          },
+          "style": {
+            "font_token": null,
+            "color_token": null,
+            "stroke_token": null,
+            "max_lines": 3
+          },
+          "map_binding": null
+        }
+      ],
+      "events": [
+        {
+          "event_id": "event_046",
+          "layer_id": "title_046",
+          "preset_id": "title-mask-reveal",
+          "start_frame": 15,
+          "duration_frames": 18,
+          "cue_word_id": "word_046",
+          "params": {
+            "direction": "up",
+            "distance_px": 30
+          },
+          "animated_property": "opacity",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 0,
+              "easing": "ease_out"
+            },
+            {
+              "frame": 18,
+              "value": 1,
+              "easing": "ease_out"
+            }
+          ],
+          "cue_binding": {
+            "word_id": "word_046",
+            "offset_frames": 0
+          }
+        }
+      ],
+      "camera": {
+        "mode": "push_in",
+        "keyframes": [
+          {
+            "at_frame": 0,
+            "x_px": 0,
+            "y_px": 0,
+            "scale": 1,
+            "rotation_deg": 0,
+            "opacity": 1,
+            "easing": "linear"
+          },
+          {
+            "at_frame": 224,
+            "x_px": -8,
+            "y_px": -3,
+            "scale": 1.05,
+            "rotation_deg": 0,
+            "opacity": 1,
+            "easing": "ease_in_out"
+          }
+        ],
+        "focus_entity_id": null,
+        "clamp_to_content": true
+      },
+      "transition_out": {
+        "type": "hard_cut",
+        "duration_frames": 0
+      },
+      "story_cue_span": {
+        "first_word_id": "word_046",
+        "last_word_id": "word_046"
+      }
+    },
+    {
+      "scene_id": "scene_047",
+      "setup_id": "setup_047",
+      "template_id": "T08",
+      "variant_id": "A",
+      "start_frame": 10350,
+      "duration_frames": 225,
+      "asset_ids": [
+        "asset_024"
+      ],
+      "layers": [
+        {
+          "layer_id": "layer_047",
+          "layer_kind": "archival_photo",
+          "asset_id": "asset_024",
+          "text": null,
+          "source_claim_id": null,
+          "z_index": 0,
+          "rect_px": {
+            "x": 100,
+            "y": 80,
+            "w": 1720,
+            "h": 900
+          },
+          "anchor": "center",
+          "crop_normalized": {
+            "x": 0.08,
+            "y": 0.08,
+            "w": 0.84,
+            "h": 0.84
+          },
+          "object_fit": "cover",
+          "mask": {
+            "kind": "none",
+            "asset_id": null,
+            "feather_px": 0
+          },
+          "style": {
+            "font_token": null,
+            "color_token": null,
+            "stroke_token": null,
+            "max_lines": 3
+          },
+          "map_binding": null
+        },
+        {
+          "layer_id": "title_047",
+          "layer_kind": "headline",
+          "asset_id": null,
+          "text": "Why one event mattered",
+          "source_claim_id": null,
+          "z_index": 5,
+          "rect_px": {
+            "x": 100,
+            "y": 80,
+            "w": 1720,
+            "h": 900
+          },
+          "anchor": "center",
+          "crop_normalized": {
+            "x": 0.08,
+            "y": 0.08,
+            "w": 0.84,
+            "h": 0.84
+          },
+          "object_fit": "cover",
+          "mask": {
+            "kind": "none",
+            "asset_id": null,
+            "feather_px": 0
+          },
+          "style": {
+            "font_token": null,
+            "color_token": null,
+            "stroke_token": null,
+            "max_lines": 3
+          },
+          "map_binding": null
+        }
+      ],
+      "events": [
+        {
+          "event_id": "event_047",
+          "layer_id": "title_047",
+          "preset_id": "title-mask-reveal",
+          "start_frame": 15,
+          "duration_frames": 18,
+          "cue_word_id": "word_047",
+          "params": {
+            "direction": "up",
+            "distance_px": 30
+          },
+          "animated_property": "opacity",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 0,
+              "easing": "ease_out"
+            },
+            {
+              "frame": 18,
+              "value": 1,
+              "easing": "ease_out"
+            }
+          ],
+          "cue_binding": {
+            "word_id": "word_047",
+            "offset_frames": 0
+          }
+        }
+      ],
+      "camera": {
+        "mode": "push_in",
+        "keyframes": [
+          {
+            "at_frame": 0,
+            "x_px": 0,
+            "y_px": 0,
+            "scale": 1,
+            "rotation_deg": 0,
+            "opacity": 1,
+            "easing": "linear"
+          },
+          {
+            "at_frame": 224,
+            "x_px": -8,
+            "y_px": -3,
+            "scale": 1.05,
+            "rotation_deg": 0,
+            "opacity": 1,
+            "easing": "ease_in_out"
+          }
+        ],
+        "focus_entity_id": null,
+        "clamp_to_content": true
+      },
+      "transition_out": {
+        "type": "hard_cut",
+        "duration_frames": 0
+      },
+      "story_cue_span": {
+        "first_word_id": "word_047",
+        "last_word_id": "word_047"
+      }
+    },
+    {
+      "scene_id": "scene_048",
+      "setup_id": "setup_048",
+      "template_id": "T08",
+      "variant_id": "B",
+      "start_frame": 10575,
+      "duration_frames": 225,
+      "asset_ids": [
+        "asset_024"
+      ],
+      "layers": [
+        {
+          "layer_id": "layer_048",
+          "layer_kind": "archival_photo",
+          "asset_id": "asset_024",
+          "text": null,
+          "source_claim_id": null,
+          "z_index": 0,
+          "rect_px": {
+            "x": 100,
+            "y": 80,
+            "w": 1720,
+            "h": 900
+          },
+          "anchor": "center",
+          "crop_normalized": {
+            "x": 0.08,
+            "y": 0.08,
+            "w": 0.84,
+            "h": 0.84
+          },
+          "object_fit": "cover",
+          "mask": {
+            "kind": "none",
+            "asset_id": null,
+            "feather_px": 0
+          },
+          "style": {
+            "font_token": null,
+            "color_token": null,
+            "stroke_token": null,
+            "max_lines": 3
+          },
+          "map_binding": null
+        },
+        {
+          "layer_id": "title_048",
+          "layer_kind": "headline",
+          "asset_id": null,
+          "text": "Why one event mattered",
+          "source_claim_id": null,
+          "z_index": 5,
+          "rect_px": {
+            "x": 100,
+            "y": 80,
+            "w": 1720,
+            "h": 900
+          },
+          "anchor": "center",
+          "crop_normalized": {
+            "x": 0.08,
+            "y": 0.08,
+            "w": 0.84,
+            "h": 0.84
+          },
+          "object_fit": "cover",
+          "mask": {
+            "kind": "none",
+            "asset_id": null,
+            "feather_px": 0
+          },
+          "style": {
+            "font_token": null,
+            "color_token": null,
+            "stroke_token": null,
+            "max_lines": 3
+          },
+          "map_binding": null
+        }
+      ],
+      "events": [
+        {
+          "event_id": "event_048",
+          "layer_id": "title_048",
+          "preset_id": "title-mask-reveal",
+          "start_frame": 15,
+          "duration_frames": 18,
+          "cue_word_id": "word_048",
+          "params": {
+            "direction": "up",
+            "distance_px": 30
+          },
+          "animated_property": "opacity",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 0,
+              "easing": "ease_out"
+            },
+            {
+              "frame": 18,
+              "value": 1,
+              "easing": "ease_out"
+            }
+          ],
+          "cue_binding": {
+            "word_id": "word_048",
+            "offset_frames": 0
+          }
+        }
+      ],
+      "camera": {
+        "mode": "push_in",
+        "keyframes": [
+          {
+            "at_frame": 0,
+            "x_px": 0,
+            "y_px": 0,
+            "scale": 1,
+            "rotation_deg": 0,
+            "opacity": 1,
+            "easing": "linear"
+          },
+          {
+            "at_frame": 224,
+            "x_px": -8,
+            "y_px": -3,
+            "scale": 1.05,
+            "rotation_deg": 0,
+            "opacity": 1,
+            "easing": "ease_in_out"
+          }
+        ],
+        "focus_entity_id": null,
+        "clamp_to_content": true
+      },
+      "transition_out": {
+        "type": "hard_cut",
+        "duration_frames": 0
+      },
+      "story_cue_span": {
+        "first_word_id": "word_048",
+        "last_word_id": "word_048"
+      }
+    }
+  ]
+}

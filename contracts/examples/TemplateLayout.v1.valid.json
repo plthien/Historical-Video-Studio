@@ -1,0 +1,63 @@
+{
+  "schema_version": "TemplateLayout.v1",
+  "template_id": "T01",
+  "template_version": "1.0.0",
+  "variant_id": "A",
+  "canvas": {
+    "width": 1920,
+    "height": 1080,
+    "fps": 30
+  },
+  "safe_area_px": {
+    "left": 96,
+    "right": 96,
+    "top": 60,
+    "bottom": 60
+  },
+  "slots": [
+    {
+      "slot_id": "map_hero",
+      "role": "map",
+      "required": true,
+      "rect_normalized": {
+        "x": 0.04,
+        "y": 0.04,
+        "w": 0.72,
+        "h": 0.92
+      },
+      "z_index": 0,
+      "fit": "contain",
+      "max_lines": 2
+    },
+    {
+      "slot_id": "headline_hero",
+      "role": "headline",
+      "required": true,
+      "rect_normalized": {
+        "x": 0.74,
+        "y": 0.15,
+        "w": 0.22,
+        "h": 0.4
+      },
+      "z_index": 5,
+      "fit": "contain",
+      "max_lines": 3
+    }
+  ],
+  "allowed_presets": [
+    "camera-push",
+    "title-mask-reveal"
+  ],
+  "camera_limits": {
+    "min_scale": 0.9,
+    "max_scale": 1.2,
+    "max_rotation_deg": 4,
+    "max_translation_px": 300
+  },
+  "transition_limits": {
+    "min_frames": 0,
+    "max_frames": 25
+  },
+  "overflow_policy": "try_variant_then_block",
+  "fallback_policy": "SAME_APPROVED_ASSET_ONLY"
+}

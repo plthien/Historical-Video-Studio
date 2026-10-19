@@ -1,0 +1,3895 @@
+{
+  "schema_version": "VisualBlueprint.v1",
+  "project_id": "proj_longform",
+  "story_revision_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "setup_plans": [
+    {
+      "setup_id": "setup_001",
+      "template_id": "T01",
+      "variant_id": "A",
+      "section_refs": [
+        "sec_001"
+      ],
+      "claim_refs": [
+        "claim_001"
+      ],
+      "requirement_refs": [
+        "req_001"
+      ],
+      "layer_roles": [
+        "map",
+        "headline"
+      ],
+      "editorial_direction": {
+        "visual_purpose": "Establish the historical geography context with precise visual hierarchy",
+        "viewer_takeaway": "Understand who, where and why this context matters",
+        "on_screen_text": [
+          {
+            "text": "THE FRAGILE MAP OF EUROPE",
+            "role": "headline",
+            "claim_ref": null,
+            "max_lines": 2
+          }
+        ],
+        "reveal_plan": [
+          {
+            "beat_id": "beat_001",
+            "action": "establish",
+            "target_role": "map",
+            "cue": {
+              "section_id": "sec_001",
+              "phrase": "The",
+              "occurrence": 0
+            },
+            "priority": 1
+          }
+        ],
+        "asset_slots": [
+          {
+            "slot_id": "slot_sec_001",
+            "requirement_id": "req_001",
+            "semantic_role": "reviewed primary contextual evidence",
+            "usage": "background",
+            "mandatory": true
+          }
+        ],
+        "camera_intent": "push_in",
+        "composition_intent": "map_full",
+        "emotional_tone": "neutral",
+        "layout_variant_hint": "A",
+        "duration_policy": "voice_locked",
+        "transition_intent": "hard_cut",
+        "historical_map_requirement_id": "req_001"
+      },
+      "asset_slot_bindings": [
+        {
+          "slot_id": "slot_sec_001",
+          "requirement_id": "req_001",
+          "approved_asset_id": null,
+          "selection_reason": "G3 required — no approval implied by fixture"
+        }
+      ],
+      "layout_control": {
+        "layout_id": "T01.A.v1",
+        "safe_area_pct": {
+          "left": 0.05,
+          "top": 0.06,
+          "right": 0.05,
+          "bottom": 0.06
+        },
+        "text_density": "balanced",
+        "focal_point": [
+          0.5,
+          0.5
+        ]
+      }
+    },
+    {
+      "setup_id": "setup_002",
+      "template_id": "T01",
+      "variant_id": "B",
+      "section_refs": [
+        "sec_001"
+      ],
+      "claim_refs": [
+        "claim_001"
+      ],
+      "requirement_refs": [
+        "req_001"
+      ],
+      "layer_roles": [
+        "map",
+        "headline"
+      ],
+      "editorial_direction": {
+        "visual_purpose": "Establish the historical geography context with precise visual hierarchy",
+        "viewer_takeaway": "Understand who, where and why this context matters",
+        "on_screen_text": [
+          {
+            "text": "THE FRAGILE MAP OF EUROPE",
+            "role": "headline",
+            "claim_ref": null,
+            "max_lines": 2
+          }
+        ],
+        "reveal_plan": [
+          {
+            "beat_id": "beat_002",
+            "action": "highlight",
+            "target_role": "map",
+            "cue": {
+              "section_id": "sec_001",
+              "phrase": "sources",
+              "occurrence": 0
+            },
+            "priority": 1
+          }
+        ],
+        "asset_slots": [
+          {
+            "slot_id": "slot_sec_001",
+            "requirement_id": "req_001",
+            "semantic_role": "reviewed primary contextual evidence",
+            "usage": "background",
+            "mandatory": true
+          }
+        ],
+        "camera_intent": "push_in",
+        "composition_intent": "map_full",
+        "emotional_tone": "neutral",
+        "layout_variant_hint": "A",
+        "duration_policy": "voice_locked",
+        "transition_intent": "hard_cut",
+        "historical_map_requirement_id": "req_001"
+      },
+      "asset_slot_bindings": [
+        {
+          "slot_id": "slot_sec_001",
+          "requirement_id": "req_001",
+          "approved_asset_id": null,
+          "selection_reason": "G3 required — no approval implied by fixture"
+        }
+      ],
+      "layout_control": {
+        "layout_id": "T01.B.v1",
+        "safe_area_pct": {
+          "left": 0.05,
+          "top": 0.06,
+          "right": 0.05,
+          "bottom": 0.06
+        },
+        "text_density": "balanced",
+        "focal_point": [
+          0.5,
+          0.5
+        ]
+      }
+    },
+    {
+      "setup_id": "setup_003",
+      "template_id": "T03",
+      "variant_id": "A",
+      "section_refs": [
+        "sec_002"
+      ],
+      "claim_refs": [
+        "claim_002"
+      ],
+      "requirement_refs": [
+        "req_002"
+      ],
+      "layer_roles": [
+        "archival_photo",
+        "headline"
+      ],
+      "editorial_direction": {
+        "visual_purpose": "Establish the historical evidence context with precise visual hierarchy",
+        "viewer_takeaway": "Understand who, where and why this context matters",
+        "on_screen_text": [
+          {
+            "text": "A CONTINENT OF EMPIRES",
+            "role": "headline",
+            "claim_ref": null,
+            "max_lines": 2
+          }
+        ],
+        "reveal_plan": [
+          {
+            "beat_id": "beat_003",
+            "action": "establish",
+            "target_role": "headline",
+            "cue": {
+              "section_id": "sec_002",
+              "phrase": "A",
+              "occurrence": 0
+            },
+            "priority": 1
+          }
+        ],
+        "asset_slots": [
+          {
+            "slot_id": "slot_sec_002",
+            "requirement_id": "req_002",
+            "semantic_role": "reviewed primary contextual evidence",
+            "usage": "background",
+            "mandatory": true
+          }
+        ],
+        "camera_intent": "push_in",
+        "composition_intent": "map_full",
+        "emotional_tone": "neutral",
+        "layout_variant_hint": "A",
+        "duration_policy": "voice_locked",
+        "transition_intent": "hard_cut",
+        "historical_map_requirement_id": null
+      },
+      "asset_slot_bindings": [
+        {
+          "slot_id": "slot_sec_002",
+          "requirement_id": "req_002",
+          "approved_asset_id": null,
+          "selection_reason": "G3 required — no approval implied by fixture"
+        }
+      ],
+      "layout_control": {
+        "layout_id": "T03.A.v1",
+        "safe_area_pct": {
+          "left": 0.05,
+          "top": 0.06,
+          "right": 0.05,
+          "bottom": 0.06
+        },
+        "text_density": "balanced",
+        "focal_point": [
+          0.5,
+          0.5
+        ]
+      }
+    },
+    {
+      "setup_id": "setup_004",
+      "template_id": "T03",
+      "variant_id": "B",
+      "section_refs": [
+        "sec_002"
+      ],
+      "claim_refs": [
+        "claim_002"
+      ],
+      "requirement_refs": [
+        "req_002"
+      ],
+      "layer_roles": [
+        "archival_photo",
+        "headline"
+      ],
+      "editorial_direction": {
+        "visual_purpose": "Establish the historical evidence context with precise visual hierarchy",
+        "viewer_takeaway": "Understand who, where and why this context matters",
+        "on_screen_text": [
+          {
+            "text": "A CONTINENT OF EMPIRES",
+            "role": "headline",
+            "claim_ref": null,
+            "max_lines": 2
+          }
+        ],
+        "reveal_plan": [
+          {
+            "beat_id": "beat_004",
+            "action": "highlight",
+            "target_role": "headline",
+            "cue": {
+              "section_id": "sec_002",
+              "phrase": "sources",
+              "occurrence": 0
+            },
+            "priority": 1
+          }
+        ],
+        "asset_slots": [
+          {
+            "slot_id": "slot_sec_002",
+            "requirement_id": "req_002",
+            "semantic_role": "reviewed primary contextual evidence",
+            "usage": "background",
+            "mandatory": true
+          }
+        ],
+        "camera_intent": "push_in",
+        "composition_intent": "map_full",
+        "emotional_tone": "neutral",
+        "layout_variant_hint": "A",
+        "duration_policy": "voice_locked",
+        "transition_intent": "hard_cut",
+        "historical_map_requirement_id": null
+      },
+      "asset_slot_bindings": [
+        {
+          "slot_id": "slot_sec_002",
+          "requirement_id": "req_002",
+          "approved_asset_id": null,
+          "selection_reason": "G3 required — no approval implied by fixture"
+        }
+      ],
+      "layout_control": {
+        "layout_id": "T03.B.v1",
+        "safe_area_pct": {
+          "left": 0.05,
+          "top": 0.06,
+          "right": 0.05,
+          "bottom": 0.06
+        },
+        "text_density": "balanced",
+        "focal_point": [
+          0.5,
+          0.5
+        ]
+      }
+    },
+    {
+      "setup_id": "setup_005",
+      "template_id": "T06",
+      "variant_id": "A",
+      "section_refs": [
+        "sec_003"
+      ],
+      "claim_refs": [
+        "claim_003"
+      ],
+      "requirement_refs": [
+        "req_003"
+      ],
+      "layer_roles": [
+        "archival_photo",
+        "headline"
+      ],
+      "editorial_direction": {
+        "visual_purpose": "Establish the historical evidence context with precise visual hierarchy",
+        "viewer_takeaway": "Understand who, where and why this context matters",
+        "on_screen_text": [
+          {
+            "text": "BOSNIA AND POLITICAL TENSIONS",
+            "role": "headline",
+            "claim_ref": null,
+            "max_lines": 2
+          }
+        ],
+        "reveal_plan": [
+          {
+            "beat_id": "beat_005",
+            "action": "establish",
+            "target_role": "headline",
+            "cue": {
+              "section_id": "sec_003",
+              "phrase": "Bosnia",
+              "occurrence": 0
+            },
+            "priority": 1
+          }
+        ],
+        "asset_slots": [
+          {
+            "slot_id": "slot_sec_003",
+            "requirement_id": "req_003",
+            "semantic_role": "reviewed primary contextual evidence",
+            "usage": "background",
+            "mandatory": true
+          }
+        ],
+        "camera_intent": "push_in",
+        "composition_intent": "map_full",
+        "emotional_tone": "neutral",
+        "layout_variant_hint": "A",
+        "duration_policy": "voice_locked",
+        "transition_intent": "hard_cut",
+        "historical_map_requirement_id": null
+      },
+      "asset_slot_bindings": [
+        {
+          "slot_id": "slot_sec_003",
+          "requirement_id": "req_003",
+          "approved_asset_id": null,
+          "selection_reason": "G3 required — no approval implied by fixture"
+        }
+      ],
+      "layout_control": {
+        "layout_id": "T03.A.v1",
+        "safe_area_pct": {
+          "left": 0.05,
+          "top": 0.06,
+          "right": 0.05,
+          "bottom": 0.06
+        },
+        "text_density": "balanced",
+        "focal_point": [
+          0.5,
+          0.5
+        ]
+      }
+    },
+    {
+      "setup_id": "setup_006",
+      "template_id": "T06",
+      "variant_id": "B",
+      "section_refs": [
+        "sec_003"
+      ],
+      "claim_refs": [
+        "claim_003"
+      ],
+      "requirement_refs": [
+        "req_003"
+      ],
+      "layer_roles": [
+        "archival_photo",
+        "headline"
+      ],
+      "editorial_direction": {
+        "visual_purpose": "Establish the historical evidence context with precise visual hierarchy",
+        "viewer_takeaway": "Understand who, where and why this context matters",
+        "on_screen_text": [
+          {
+            "text": "BOSNIA AND POLITICAL TENSIONS",
+            "role": "headline",
+            "claim_ref": null,
+            "max_lines": 2
+          }
+        ],
+        "reveal_plan": [
+          {
+            "beat_id": "beat_006",
+            "action": "highlight",
+            "target_role": "headline",
+            "cue": {
+              "section_id": "sec_003",
+              "phrase": "sources",
+              "occurrence": 0
+            },
+            "priority": 1
+          }
+        ],
+        "asset_slots": [
+          {
+            "slot_id": "slot_sec_003",
+            "requirement_id": "req_003",
+            "semantic_role": "reviewed primary contextual evidence",
+            "usage": "background",
+            "mandatory": true
+          }
+        ],
+        "camera_intent": "push_in",
+        "composition_intent": "map_full",
+        "emotional_tone": "neutral",
+        "layout_variant_hint": "A",
+        "duration_policy": "voice_locked",
+        "transition_intent": "hard_cut",
+        "historical_map_requirement_id": null
+      },
+      "asset_slot_bindings": [
+        {
+          "slot_id": "slot_sec_003",
+          "requirement_id": "req_003",
+          "approved_asset_id": null,
+          "selection_reason": "G3 required — no approval implied by fixture"
+        }
+      ],
+      "layout_control": {
+        "layout_id": "T03.B.v1",
+        "safe_area_pct": {
+          "left": 0.05,
+          "top": 0.06,
+          "right": 0.05,
+          "bottom": 0.06
+        },
+        "text_density": "balanced",
+        "focal_point": [
+          0.5,
+          0.5
+        ]
+      }
+    },
+    {
+      "setup_id": "setup_007",
+      "template_id": "T08",
+      "variant_id": "A",
+      "section_refs": [
+        "sec_004"
+      ],
+      "claim_refs": [
+        "claim_004"
+      ],
+      "requirement_refs": [
+        "req_004"
+      ],
+      "layer_roles": [
+        "archival_photo",
+        "headline"
+      ],
+      "editorial_direction": {
+        "visual_purpose": "Establish the historical evidence context with precise visual hierarchy",
+        "viewer_takeaway": "Understand who, where and why this context matters",
+        "on_screen_text": [
+          {
+            "text": "THE SARAJEVO VISIT",
+            "role": "headline",
+            "claim_ref": null,
+            "max_lines": 2
+          }
+        ],
+        "reveal_plan": [
+          {
+            "beat_id": "beat_007",
+            "action": "establish",
+            "target_role": "headline",
+            "cue": {
+              "section_id": "sec_004",
+              "phrase": "The",
+              "occurrence": 0
+            },
+            "priority": 1
+          }
+        ],
+        "asset_slots": [
+          {
+            "slot_id": "slot_sec_004",
+            "requirement_id": "req_004",
+            "semantic_role": "reviewed primary contextual evidence",
+            "usage": "background",
+            "mandatory": true
+          }
+        ],
+        "camera_intent": "push_in",
+        "composition_intent": "map_full",
+        "emotional_tone": "neutral",
+        "layout_variant_hint": "A",
+        "duration_policy": "voice_locked",
+        "transition_intent": "hard_cut",
+        "historical_map_requirement_id": null
+      },
+      "asset_slot_bindings": [
+        {
+          "slot_id": "slot_sec_004",
+          "requirement_id": "req_004",
+          "approved_asset_id": null,
+          "selection_reason": "G3 required — no approval implied by fixture"
+        }
+      ],
+      "layout_control": {
+        "layout_id": "T03.A.v1",
+        "safe_area_pct": {
+          "left": 0.05,
+          "top": 0.06,
+          "right": 0.05,
+          "bottom": 0.06
+        },
+        "text_density": "balanced",
+        "focal_point": [
+          0.5,
+          0.5
+        ]
+      }
+    },
+    {
+      "setup_id": "setup_008",
+      "template_id": "T08",
+      "variant_id": "B",
+      "section_refs": [
+        "sec_004"
+      ],
+      "claim_refs": [
+        "claim_004"
+      ],
+      "requirement_refs": [
+        "req_004"
+      ],
+      "layer_roles": [
+        "archival_photo",
+        "headline"
+      ],
+      "editorial_direction": {
+        "visual_purpose": "Establish the historical evidence context with precise visual hierarchy",
+        "viewer_takeaway": "Understand who, where and why this context matters",
+        "on_screen_text": [
+          {
+            "text": "THE SARAJEVO VISIT",
+            "role": "headline",
+            "claim_ref": null,
+            "max_lines": 2
+          }
+        ],
+        "reveal_plan": [
+          {
+            "beat_id": "beat_008",
+            "action": "highlight",
+            "target_role": "headline",
+            "cue": {
+              "section_id": "sec_004",
+              "phrase": "sources",
+              "occurrence": 0
+            },
+            "priority": 1
+          }
+        ],
+        "asset_slots": [
+          {
+            "slot_id": "slot_sec_004",
+            "requirement_id": "req_004",
+            "semantic_role": "reviewed primary contextual evidence",
+            "usage": "background",
+            "mandatory": true
+          }
+        ],
+        "camera_intent": "push_in",
+        "composition_intent": "map_full",
+        "emotional_tone": "neutral",
+        "layout_variant_hint": "A",
+        "duration_policy": "voice_locked",
+        "transition_intent": "hard_cut",
+        "historical_map_requirement_id": null
+      },
+      "asset_slot_bindings": [
+        {
+          "slot_id": "slot_sec_004",
+          "requirement_id": "req_004",
+          "approved_asset_id": null,
+          "selection_reason": "G3 required — no approval implied by fixture"
+        }
+      ],
+      "layout_control": {
+        "layout_id": "T03.B.v1",
+        "safe_area_pct": {
+          "left": 0.05,
+          "top": 0.06,
+          "right": 0.05,
+          "bottom": 0.06
+        },
+        "text_density": "balanced",
+        "focal_point": [
+          0.5,
+          0.5
+        ]
+      }
+    },
+    {
+      "setup_id": "setup_009",
+      "template_id": "T01",
+      "variant_id": "A",
+      "section_refs": [
+        "sec_005"
+      ],
+      "claim_refs": [
+        "claim_005"
+      ],
+      "requirement_refs": [
+        "req_005"
+      ],
+      "layer_roles": [
+        "map",
+        "headline"
+      ],
+      "editorial_direction": {
+        "visual_purpose": "Establish the historical geography context with precise visual hierarchy",
+        "viewer_takeaway": "Understand who, where and why this context matters",
+        "on_screen_text": [
+          {
+            "text": "THE CITY AND ITS STREETS",
+            "role": "headline",
+            "claim_ref": null,
+            "max_lines": 2
+          }
+        ],
+        "reveal_plan": [
+          {
+            "beat_id": "beat_009",
+            "action": "establish",
+            "target_role": "map",
+            "cue": {
+              "section_id": "sec_005",
+              "phrase": "The",
+              "occurrence": 0
+            },
+            "priority": 1
+          }
+        ],
+        "asset_slots": [
+          {
+            "slot_id": "slot_sec_005",
+            "requirement_id": "req_005",
+            "semantic_role": "reviewed primary contextual evidence",
+            "usage": "background",
+            "mandatory": true
+          }
+        ],
+        "camera_intent": "push_in",
+        "composition_intent": "map_full",
+        "emotional_tone": "neutral",
+        "layout_variant_hint": "A",
+        "duration_policy": "voice_locked",
+        "transition_intent": "hard_cut",
+        "historical_map_requirement_id": "req_005"
+      },
+      "asset_slot_bindings": [
+        {
+          "slot_id": "slot_sec_005",
+          "requirement_id": "req_005",
+          "approved_asset_id": null,
+          "selection_reason": "G3 required — no approval implied by fixture"
+        }
+      ],
+      "layout_control": {
+        "layout_id": "T01.A.v1",
+        "safe_area_pct": {
+          "left": 0.05,
+          "top": 0.06,
+          "right": 0.05,
+          "bottom": 0.06
+        },
+        "text_density": "balanced",
+        "focal_point": [
+          0.5,
+          0.5
+        ]
+      }
+    },
+    {
+      "setup_id": "setup_010",
+      "template_id": "T01",
+      "variant_id": "B",
+      "section_refs": [
+        "sec_005"
+      ],
+      "claim_refs": [
+        "claim_005"
+      ],
+      "requirement_refs": [
+        "req_005"
+      ],
+      "layer_roles": [
+        "map",
+        "headline"
+      ],
+      "editorial_direction": {
+        "visual_purpose": "Establish the historical geography context with precise visual hierarchy",
+        "viewer_takeaway": "Understand who, where and why this context matters",
+        "on_screen_text": [
+          {
+            "text": "THE CITY AND ITS STREETS",
+            "role": "headline",
+            "claim_ref": null,
+            "max_lines": 2
+          }
+        ],
+        "reveal_plan": [
+          {
+            "beat_id": "beat_010",
+            "action": "highlight",
+            "target_role": "map",
+            "cue": {
+              "section_id": "sec_005",
+              "phrase": "sources",
+              "occurrence": 0
+            },
+            "priority": 1
+          }
+        ],
+        "asset_slots": [
+          {
+            "slot_id": "slot_sec_005",
+            "requirement_id": "req_005",
+            "semantic_role": "reviewed primary contextual evidence",
+            "usage": "background",
+            "mandatory": true
+          }
+        ],
+        "camera_intent": "push_in",
+        "composition_intent": "map_full",
+        "emotional_tone": "neutral",
+        "layout_variant_hint": "A",
+        "duration_policy": "voice_locked",
+        "transition_intent": "hard_cut",
+        "historical_map_requirement_id": "req_005"
+      },
+      "asset_slot_bindings": [
+        {
+          "slot_id": "slot_sec_005",
+          "requirement_id": "req_005",
+          "approved_asset_id": null,
+          "selection_reason": "G3 required — no approval implied by fixture"
+        }
+      ],
+      "layout_control": {
+        "layout_id": "T01.B.v1",
+        "safe_area_pct": {
+          "left": 0.05,
+          "top": 0.06,
+          "right": 0.05,
+          "bottom": 0.06
+        },
+        "text_density": "balanced",
+        "focal_point": [
+          0.5,
+          0.5
+        ]
+      }
+    },
+    {
+      "setup_id": "setup_011",
+      "template_id": "T03",
+      "variant_id": "A",
+      "section_refs": [
+        "sec_006"
+      ],
+      "claim_refs": [
+        "claim_006"
+      ],
+      "requirement_refs": [
+        "req_006"
+      ],
+      "layer_roles": [
+        "archival_photo",
+        "headline"
+      ],
+      "editorial_direction": {
+        "visual_purpose": "Establish the historical evidence context with precise visual hierarchy",
+        "viewer_takeaway": "Understand who, where and why this context matters",
+        "on_screen_text": [
+          {
+            "text": "A PROCESSION ON THE MOVE",
+            "role": "headline",
+            "claim_ref": null,
+            "max_lines": 2
+          }
+        ],
+        "reveal_plan": [
+          {
+            "beat_id": "beat_011",
+            "action": "establish",
+            "target_role": "headline",
+            "cue": {
+              "section_id": "sec_006",
+              "phrase": "A",
+              "occurrence": 0
+            },
+            "priority": 1
+          }
+        ],
+        "asset_slots": [
+          {
+            "slot_id": "slot_sec_006",
+            "requirement_id": "req_006",
+            "semantic_role": "reviewed primary contextual evidence",
+            "usage": "background",
+            "mandatory": true
+          }
+        ],
+        "camera_intent": "push_in",
+        "composition_intent": "map_full",
+        "emotional_tone": "neutral",
+        "layout_variant_hint": "A",
+        "duration_policy": "voice_locked",
+        "transition_intent": "hard_cut",
+        "historical_map_requirement_id": null
+      },
+      "asset_slot_bindings": [
+        {
+          "slot_id": "slot_sec_006",
+          "requirement_id": "req_006",
+          "approved_asset_id": null,
+          "selection_reason": "G3 required — no approval implied by fixture"
+        }
+      ],
+      "layout_control": {
+        "layout_id": "T03.A.v1",
+        "safe_area_pct": {
+          "left": 0.05,
+          "top": 0.06,
+          "right": 0.05,
+          "bottom": 0.06
+        },
+        "text_density": "balanced",
+        "focal_point": [
+          0.5,
+          0.5
+        ]
+      }
+    },
+    {
+      "setup_id": "setup_012",
+      "template_id": "T03",
+      "variant_id": "B",
+      "section_refs": [
+        "sec_006"
+      ],
+      "claim_refs": [
+        "claim_006"
+      ],
+      "requirement_refs": [
+        "req_006"
+      ],
+      "layer_roles": [
+        "archival_photo",
+        "headline"
+      ],
+      "editorial_direction": {
+        "visual_purpose": "Establish the historical evidence context with precise visual hierarchy",
+        "viewer_takeaway": "Understand who, where and why this context matters",
+        "on_screen_text": [
+          {
+            "text": "A PROCESSION ON THE MOVE",
+            "role": "headline",
+            "claim_ref": null,
+            "max_lines": 2
+          }
+        ],
+        "reveal_plan": [
+          {
+            "beat_id": "beat_012",
+            "action": "highlight",
+            "target_role": "headline",
+            "cue": {
+              "section_id": "sec_006",
+              "phrase": "sources",
+              "occurrence": 0
+            },
+            "priority": 1
+          }
+        ],
+        "asset_slots": [
+          {
+            "slot_id": "slot_sec_006",
+            "requirement_id": "req_006",
+            "semantic_role": "reviewed primary contextual evidence",
+            "usage": "background",
+            "mandatory": true
+          }
+        ],
+        "camera_intent": "push_in",
+        "composition_intent": "map_full",
+        "emotional_tone": "neutral",
+        "layout_variant_hint": "A",
+        "duration_policy": "voice_locked",
+        "transition_intent": "hard_cut",
+        "historical_map_requirement_id": null
+      },
+      "asset_slot_bindings": [
+        {
+          "slot_id": "slot_sec_006",
+          "requirement_id": "req_006",
+          "approved_asset_id": null,
+          "selection_reason": "G3 required — no approval implied by fixture"
+        }
+      ],
+      "layout_control": {
+        "layout_id": "T03.B.v1",
+        "safe_area_pct": {
+          "left": 0.05,
+          "top": 0.06,
+          "right": 0.05,
+          "bottom": 0.06
+        },
+        "text_density": "balanced",
+        "focal_point": [
+          0.5,
+          0.5
+        ]
+      }
+    },
+    {
+      "setup_id": "setup_013",
+      "template_id": "T06",
+      "variant_id": "A",
+      "section_refs": [
+        "sec_007"
+      ],
+      "claim_refs": [
+        "claim_007"
+      ],
+      "requirement_refs": [
+        "req_007"
+      ],
+      "layer_roles": [
+        "archival_photo",
+        "headline"
+      ],
+      "editorial_direction": {
+        "visual_purpose": "Establish the historical evidence context with precise visual hierarchy",
+        "viewer_takeaway": "Understand who, where and why this context matters",
+        "on_screen_text": [
+          {
+            "text": "THE FIRST TURNING POINT",
+            "role": "headline",
+            "claim_ref": null,
+            "max_lines": 2
+          }
+        ],
+        "reveal_plan": [
+          {
+            "beat_id": "beat_013",
+            "action": "establish",
+            "target_role": "headline",
+            "cue": {
+              "section_id": "sec_007",
+              "phrase": "The",
+              "occurrence": 0
+            },
+            "priority": 1
+          }
+        ],
+        "asset_slots": [
+          {
+            "slot_id": "slot_sec_007",
+            "requirement_id": "req_007",
+            "semantic_role": "reviewed primary contextual evidence",
+            "usage": "background",
+            "mandatory": true
+          }
+        ],
+        "camera_intent": "push_in",
+        "composition_intent": "map_full",
+        "emotional_tone": "neutral",
+        "layout_variant_hint": "A",
+        "duration_policy": "voice_locked",
+        "transition_intent": "hard_cut",
+        "historical_map_requirement_id": null
+      },
+      "asset_slot_bindings": [
+        {
+          "slot_id": "slot_sec_007",
+          "requirement_id": "req_007",
+          "approved_asset_id": null,
+          "selection_reason": "G3 required — no approval implied by fixture"
+        }
+      ],
+      "layout_control": {
+        "layout_id": "T03.A.v1",
+        "safe_area_pct": {
+          "left": 0.05,
+          "top": 0.06,
+          "right": 0.05,
+          "bottom": 0.06
+        },
+        "text_density": "balanced",
+        "focal_point": [
+          0.5,
+          0.5
+        ]
+      }
+    },
+    {
+      "setup_id": "setup_014",
+      "template_id": "T06",
+      "variant_id": "B",
+      "section_refs": [
+        "sec_007"
+      ],
+      "claim_refs": [
+        "claim_007"
+      ],
+      "requirement_refs": [
+        "req_007"
+      ],
+      "layer_roles": [
+        "archival_photo",
+        "headline"
+      ],
+      "editorial_direction": {
+        "visual_purpose": "Establish the historical evidence context with precise visual hierarchy",
+        "viewer_takeaway": "Understand who, where and why this context matters",
+        "on_screen_text": [
+          {
+            "text": "THE FIRST TURNING POINT",
+            "role": "headline",
+            "claim_ref": null,
+            "max_lines": 2
+          }
+        ],
+        "reveal_plan": [
+          {
+            "beat_id": "beat_014",
+            "action": "highlight",
+            "target_role": "headline",
+            "cue": {
+              "section_id": "sec_007",
+              "phrase": "sources",
+              "occurrence": 0
+            },
+            "priority": 1
+          }
+        ],
+        "asset_slots": [
+          {
+            "slot_id": "slot_sec_007",
+            "requirement_id": "req_007",
+            "semantic_role": "reviewed primary contextual evidence",
+            "usage": "background",
+            "mandatory": true
+          }
+        ],
+        "camera_intent": "push_in",
+        "composition_intent": "map_full",
+        "emotional_tone": "neutral",
+        "layout_variant_hint": "A",
+        "duration_policy": "voice_locked",
+        "transition_intent": "hard_cut",
+        "historical_map_requirement_id": null
+      },
+      "asset_slot_bindings": [
+        {
+          "slot_id": "slot_sec_007",
+          "requirement_id": "req_007",
+          "approved_asset_id": null,
+          "selection_reason": "G3 required — no approval implied by fixture"
+        }
+      ],
+      "layout_control": {
+        "layout_id": "T03.B.v1",
+        "safe_area_pct": {
+          "left": 0.05,
+          "top": 0.06,
+          "right": 0.05,
+          "bottom": 0.06
+        },
+        "text_density": "balanced",
+        "focal_point": [
+          0.5,
+          0.5
+        ]
+      }
+    },
+    {
+      "setup_id": "setup_015",
+      "template_id": "T08",
+      "variant_id": "A",
+      "section_refs": [
+        "sec_008"
+      ],
+      "claim_refs": [
+        "claim_008"
+      ],
+      "requirement_refs": [
+        "req_008"
+      ],
+      "layer_roles": [
+        "archival_photo",
+        "headline"
+      ],
+      "editorial_direction": {
+        "visual_purpose": "Establish the historical evidence context with precise visual hierarchy",
+        "viewer_takeaway": "Understand who, where and why this context matters",
+        "on_screen_text": [
+          {
+            "text": "CONFUSION AROUND THE ROUTE",
+            "role": "headline",
+            "claim_ref": null,
+            "max_lines": 2
+          }
+        ],
+        "reveal_plan": [
+          {
+            "beat_id": "beat_015",
+            "action": "establish",
+            "target_role": "headline",
+            "cue": {
+              "section_id": "sec_008",
+              "phrase": "Confusion",
+              "occurrence": 0
+            },
+            "priority": 1
+          }
+        ],
+        "asset_slots": [
+          {
+            "slot_id": "slot_sec_008",
+            "requirement_id": "req_008",
+            "semantic_role": "reviewed primary contextual evidence",
+            "usage": "background",
+            "mandatory": true
+          }
+        ],
+        "camera_intent": "push_in",
+        "composition_intent": "map_full",
+        "emotional_tone": "neutral",
+        "layout_variant_hint": "A",
+        "duration_policy": "voice_locked",
+        "transition_intent": "hard_cut",
+        "historical_map_requirement_id": null
+      },
+      "asset_slot_bindings": [
+        {
+          "slot_id": "slot_sec_008",
+          "requirement_id": "req_008",
+          "approved_asset_id": null,
+          "selection_reason": "G3 required — no approval implied by fixture"
+        }
+      ],
+      "layout_control": {
+        "layout_id": "T03.A.v1",
+        "safe_area_pct": {
+          "left": 0.05,
+          "top": 0.06,
+          "right": 0.05,
+          "bottom": 0.06
+        },
+        "text_density": "balanced",
+        "focal_point": [
+          0.5,
+          0.5
+        ]
+      }
+    },
+    {
+      "setup_id": "setup_016",
+      "template_id": "T08",
+      "variant_id": "B",
+      "section_refs": [
+        "sec_008"
+      ],
+      "claim_refs": [
+        "claim_008"
+      ],
+      "requirement_refs": [
+        "req_008"
+      ],
+      "layer_roles": [
+        "archival_photo",
+        "headline"
+      ],
+      "editorial_direction": {
+        "visual_purpose": "Establish the historical evidence context with precise visual hierarchy",
+        "viewer_takeaway": "Understand who, where and why this context matters",
+        "on_screen_text": [
+          {
+            "text": "CONFUSION AROUND THE ROUTE",
+            "role": "headline",
+            "claim_ref": null,
+            "max_lines": 2
+          }
+        ],
+        "reveal_plan": [
+          {
+            "beat_id": "beat_016",
+            "action": "highlight",
+            "target_role": "headline",
+            "cue": {
+              "section_id": "sec_008",
+              "phrase": "sources",
+              "occurrence": 0
+            },
+            "priority": 1
+          }
+        ],
+        "asset_slots": [
+          {
+            "slot_id": "slot_sec_008",
+            "requirement_id": "req_008",
+            "semantic_role": "reviewed primary contextual evidence",
+            "usage": "background",
+            "mandatory": true
+          }
+        ],
+        "camera_intent": "push_in",
+        "composition_intent": "map_full",
+        "emotional_tone": "neutral",
+        "layout_variant_hint": "A",
+        "duration_policy": "voice_locked",
+        "transition_intent": "hard_cut",
+        "historical_map_requirement_id": null
+      },
+      "asset_slot_bindings": [
+        {
+          "slot_id": "slot_sec_008",
+          "requirement_id": "req_008",
+          "approved_asset_id": null,
+          "selection_reason": "G3 required — no approval implied by fixture"
+        }
+      ],
+      "layout_control": {
+        "layout_id": "T03.B.v1",
+        "safe_area_pct": {
+          "left": 0.05,
+          "top": 0.06,
+          "right": 0.05,
+          "bottom": 0.06
+        },
+        "text_density": "balanced",
+        "focal_point": [
+          0.5,
+          0.5
+        ]
+      }
+    },
+    {
+      "setup_id": "setup_017",
+      "template_id": "T01",
+      "variant_id": "A",
+      "section_refs": [
+        "sec_009"
+      ],
+      "claim_refs": [
+        "claim_009"
+      ],
+      "requirement_refs": [
+        "req_009"
+      ],
+      "layer_roles": [
+        "map",
+        "headline"
+      ],
+      "editorial_direction": {
+        "visual_purpose": "Establish the historical geography context with precise visual hierarchy",
+        "viewer_takeaway": "Understand who, where and why this context matters",
+        "on_screen_text": [
+          {
+            "text": "THE CONFRONTATION",
+            "role": "headline",
+            "claim_ref": null,
+            "max_lines": 2
+          }
+        ],
+        "reveal_plan": [
+          {
+            "beat_id": "beat_017",
+            "action": "establish",
+            "target_role": "map",
+            "cue": {
+              "section_id": "sec_009",
+              "phrase": "The",
+              "occurrence": 0
+            },
+            "priority": 1
+          }
+        ],
+        "asset_slots": [
+          {
+            "slot_id": "slot_sec_009",
+            "requirement_id": "req_009",
+            "semantic_role": "reviewed primary contextual evidence",
+            "usage": "background",
+            "mandatory": true
+          }
+        ],
+        "camera_intent": "push_in",
+        "composition_intent": "map_full",
+        "emotional_tone": "neutral",
+        "layout_variant_hint": "A",
+        "duration_policy": "voice_locked",
+        "transition_intent": "hard_cut",
+        "historical_map_requirement_id": "req_009"
+      },
+      "asset_slot_bindings": [
+        {
+          "slot_id": "slot_sec_009",
+          "requirement_id": "req_009",
+          "approved_asset_id": null,
+          "selection_reason": "G3 required — no approval implied by fixture"
+        }
+      ],
+      "layout_control": {
+        "layout_id": "T01.A.v1",
+        "safe_area_pct": {
+          "left": 0.05,
+          "top": 0.06,
+          "right": 0.05,
+          "bottom": 0.06
+        },
+        "text_density": "balanced",
+        "focal_point": [
+          0.5,
+          0.5
+        ]
+      }
+    },
+    {
+      "setup_id": "setup_018",
+      "template_id": "T01",
+      "variant_id": "B",
+      "section_refs": [
+        "sec_009"
+      ],
+      "claim_refs": [
+        "claim_009"
+      ],
+      "requirement_refs": [
+        "req_009"
+      ],
+      "layer_roles": [
+        "map",
+        "headline"
+      ],
+      "editorial_direction": {
+        "visual_purpose": "Establish the historical geography context with precise visual hierarchy",
+        "viewer_takeaway": "Understand who, where and why this context matters",
+        "on_screen_text": [
+          {
+            "text": "THE CONFRONTATION",
+            "role": "headline",
+            "claim_ref": null,
+            "max_lines": 2
+          }
+        ],
+        "reveal_plan": [
+          {
+            "beat_id": "beat_018",
+            "action": "highlight",
+            "target_role": "map",
+            "cue": {
+              "section_id": "sec_009",
+              "phrase": "sources",
+              "occurrence": 0
+            },
+            "priority": 1
+          }
+        ],
+        "asset_slots": [
+          {
+            "slot_id": "slot_sec_009",
+            "requirement_id": "req_009",
+            "semantic_role": "reviewed primary contextual evidence",
+            "usage": "background",
+            "mandatory": true
+          }
+        ],
+        "camera_intent": "push_in",
+        "composition_intent": "map_full",
+        "emotional_tone": "neutral",
+        "layout_variant_hint": "A",
+        "duration_policy": "voice_locked",
+        "transition_intent": "hard_cut",
+        "historical_map_requirement_id": "req_009"
+      },
+      "asset_slot_bindings": [
+        {
+          "slot_id": "slot_sec_009",
+          "requirement_id": "req_009",
+          "approved_asset_id": null,
+          "selection_reason": "G3 required — no approval implied by fixture"
+        }
+      ],
+      "layout_control": {
+        "layout_id": "T01.B.v1",
+        "safe_area_pct": {
+          "left": 0.05,
+          "top": 0.06,
+          "right": 0.05,
+          "bottom": 0.06
+        },
+        "text_density": "balanced",
+        "focal_point": [
+          0.5,
+          0.5
+        ]
+      }
+    },
+    {
+      "setup_id": "setup_019",
+      "template_id": "T03",
+      "variant_id": "A",
+      "section_refs": [
+        "sec_010"
+      ],
+      "claim_refs": [
+        "claim_010"
+      ],
+      "requirement_refs": [
+        "req_010"
+      ],
+      "layer_roles": [
+        "archival_photo",
+        "headline"
+      ],
+      "editorial_direction": {
+        "visual_purpose": "Establish the historical evidence context with precise visual hierarchy",
+        "viewer_takeaway": "Understand who, where and why this context matters",
+        "on_screen_text": [
+          {
+            "text": "NEWS SPREADS",
+            "role": "headline",
+            "claim_ref": null,
+            "max_lines": 2
+          }
+        ],
+        "reveal_plan": [
+          {
+            "beat_id": "beat_019",
+            "action": "establish",
+            "target_role": "headline",
+            "cue": {
+              "section_id": "sec_010",
+              "phrase": "News",
+              "occurrence": 0
+            },
+            "priority": 1
+          }
+        ],
+        "asset_slots": [
+          {
+            "slot_id": "slot_sec_010",
+            "requirement_id": "req_010",
+            "semantic_role": "reviewed primary contextual evidence",
+            "usage": "background",
+            "mandatory": true
+          }
+        ],
+        "camera_intent": "push_in",
+        "composition_intent": "map_full",
+        "emotional_tone": "neutral",
+        "layout_variant_hint": "A",
+        "duration_policy": "voice_locked",
+        "transition_intent": "hard_cut",
+        "historical_map_requirement_id": null
+      },
+      "asset_slot_bindings": [
+        {
+          "slot_id": "slot_sec_010",
+          "requirement_id": "req_010",
+          "approved_asset_id": null,
+          "selection_reason": "G3 required — no approval implied by fixture"
+        }
+      ],
+      "layout_control": {
+        "layout_id": "T03.A.v1",
+        "safe_area_pct": {
+          "left": 0.05,
+          "top": 0.06,
+          "right": 0.05,
+          "bottom": 0.06
+        },
+        "text_density": "balanced",
+        "focal_point": [
+          0.5,
+          0.5
+        ]
+      }
+    },
+    {
+      "setup_id": "setup_020",
+      "template_id": "T03",
+      "variant_id": "B",
+      "section_refs": [
+        "sec_010"
+      ],
+      "claim_refs": [
+        "claim_010"
+      ],
+      "requirement_refs": [
+        "req_010"
+      ],
+      "layer_roles": [
+        "archival_photo",
+        "headline"
+      ],
+      "editorial_direction": {
+        "visual_purpose": "Establish the historical evidence context with precise visual hierarchy",
+        "viewer_takeaway": "Understand who, where and why this context matters",
+        "on_screen_text": [
+          {
+            "text": "NEWS SPREADS",
+            "role": "headline",
+            "claim_ref": null,
+            "max_lines": 2
+          }
+        ],
+        "reveal_plan": [
+          {
+            "beat_id": "beat_020",
+            "action": "highlight",
+            "target_role": "headline",
+            "cue": {
+              "section_id": "sec_010",
+              "phrase": "sources",
+              "occurrence": 0
+            },
+            "priority": 1
+          }
+        ],
+        "asset_slots": [
+          {
+            "slot_id": "slot_sec_010",
+            "requirement_id": "req_010",
+            "semantic_role": "reviewed primary contextual evidence",
+            "usage": "background",
+            "mandatory": true
+          }
+        ],
+        "camera_intent": "push_in",
+        "composition_intent": "map_full",
+        "emotional_tone": "neutral",
+        "layout_variant_hint": "A",
+        "duration_policy": "voice_locked",
+        "transition_intent": "hard_cut",
+        "historical_map_requirement_id": null
+      },
+      "asset_slot_bindings": [
+        {
+          "slot_id": "slot_sec_010",
+          "requirement_id": "req_010",
+          "approved_asset_id": null,
+          "selection_reason": "G3 required — no approval implied by fixture"
+        }
+      ],
+      "layout_control": {
+        "layout_id": "T03.B.v1",
+        "safe_area_pct": {
+          "left": 0.05,
+          "top": 0.06,
+          "right": 0.05,
+          "bottom": 0.06
+        },
+        "text_density": "balanced",
+        "focal_point": [
+          0.5,
+          0.5
+        ]
+      }
+    },
+    {
+      "setup_id": "setup_021",
+      "template_id": "T06",
+      "variant_id": "A",
+      "section_refs": [
+        "sec_011"
+      ],
+      "claim_refs": [
+        "claim_011"
+      ],
+      "requirement_refs": [
+        "req_011"
+      ],
+      "layer_roles": [
+        "archival_photo",
+        "headline"
+      ],
+      "editorial_direction": {
+        "visual_purpose": "Establish the historical evidence context with precise visual hierarchy",
+        "viewer_takeaway": "Understand who, where and why this context matters",
+        "on_screen_text": [
+          {
+            "text": "THE RESPONSE IN VIENNA",
+            "role": "headline",
+            "claim_ref": null,
+            "max_lines": 2
+          }
+        ],
+        "reveal_plan": [
+          {
+            "beat_id": "beat_021",
+            "action": "establish",
+            "target_role": "headline",
+            "cue": {
+              "section_id": "sec_011",
+              "phrase": "The",
+              "occurrence": 0
+            },
+            "priority": 1
+          }
+        ],
+        "asset_slots": [
+          {
+            "slot_id": "slot_sec_011",
+            "requirement_id": "req_011",
+            "semantic_role": "reviewed primary contextual evidence",
+            "usage": "background",
+            "mandatory": true
+          }
+        ],
+        "camera_intent": "push_in",
+        "composition_intent": "map_full",
+        "emotional_tone": "neutral",
+        "layout_variant_hint": "A",
+        "duration_policy": "voice_locked",
+        "transition_intent": "hard_cut",
+        "historical_map_requirement_id": null
+      },
+      "asset_slot_bindings": [
+        {
+          "slot_id": "slot_sec_011",
+          "requirement_id": "req_011",
+          "approved_asset_id": null,
+          "selection_reason": "G3 required — no approval implied by fixture"
+        }
+      ],
+      "layout_control": {
+        "layout_id": "T03.A.v1",
+        "safe_area_pct": {
+          "left": 0.05,
+          "top": 0.06,
+          "right": 0.05,
+          "bottom": 0.06
+        },
+        "text_density": "balanced",
+        "focal_point": [
+          0.5,
+          0.5
+        ]
+      }
+    },
+    {
+      "setup_id": "setup_022",
+      "template_id": "T06",
+      "variant_id": "B",
+      "section_refs": [
+        "sec_011"
+      ],
+      "claim_refs": [
+        "claim_011"
+      ],
+      "requirement_refs": [
+        "req_011"
+      ],
+      "layer_roles": [
+        "archival_photo",
+        "headline"
+      ],
+      "editorial_direction": {
+        "visual_purpose": "Establish the historical evidence context with precise visual hierarchy",
+        "viewer_takeaway": "Understand who, where and why this context matters",
+        "on_screen_text": [
+          {
+            "text": "THE RESPONSE IN VIENNA",
+            "role": "headline",
+            "claim_ref": null,
+            "max_lines": 2
+          }
+        ],
+        "reveal_plan": [
+          {
+            "beat_id": "beat_022",
+            "action": "highlight",
+            "target_role": "headline",
+            "cue": {
+              "section_id": "sec_011",
+              "phrase": "sources",
+              "occurrence": 0
+            },
+            "priority": 1
+          }
+        ],
+        "asset_slots": [
+          {
+            "slot_id": "slot_sec_011",
+            "requirement_id": "req_011",
+            "semantic_role": "reviewed primary contextual evidence",
+            "usage": "background",
+            "mandatory": true
+          }
+        ],
+        "camera_intent": "push_in",
+        "composition_intent": "map_full",
+        "emotional_tone": "neutral",
+        "layout_variant_hint": "A",
+        "duration_policy": "voice_locked",
+        "transition_intent": "hard_cut",
+        "historical_map_requirement_id": null
+      },
+      "asset_slot_bindings": [
+        {
+          "slot_id": "slot_sec_011",
+          "requirement_id": "req_011",
+          "approved_asset_id": null,
+          "selection_reason": "G3 required — no approval implied by fixture"
+        }
+      ],
+      "layout_control": {
+        "layout_id": "T03.B.v1",
+        "safe_area_pct": {
+          "left": 0.05,
+          "top": 0.06,
+          "right": 0.05,
+          "bottom": 0.06
+        },
+        "text_density": "balanced",
+        "focal_point": [
+          0.5,
+          0.5
+        ]
+      }
+    },
+    {
+      "setup_id": "setup_023",
+      "template_id": "T08",
+      "variant_id": "A",
+      "section_refs": [
+        "sec_012"
+      ],
+      "claim_refs": [
+        "claim_012"
+      ],
+      "requirement_refs": [
+        "req_012"
+      ],
+      "layer_roles": [
+        "archival_photo",
+        "headline"
+      ],
+      "editorial_direction": {
+        "visual_purpose": "Establish the historical evidence context with precise visual hierarchy",
+        "viewer_takeaway": "Understand who, where and why this context matters",
+        "on_screen_text": [
+          {
+            "text": "THE DIPLOMATIC DEMANDS",
+            "role": "headline",
+            "claim_ref": null,
+            "max_lines": 2
+          }
+        ],
+        "reveal_plan": [
+          {
+            "beat_id": "beat_023",
+            "action": "establish",
+            "target_role": "headline",
+            "cue": {
+              "section_id": "sec_012",
+              "phrase": "The",
+              "occurrence": 0
+            },
+            "priority": 1
+          }
+        ],
+        "asset_slots": [
+          {
+            "slot_id": "slot_sec_012",
+            "requirement_id": "req_012",
+            "semantic_role": "reviewed primary contextual evidence",
+            "usage": "background",
+            "mandatory": true
+          }
+        ],
+        "camera_intent": "push_in",
+        "composition_intent": "map_full",
+        "emotional_tone": "neutral",
+        "layout_variant_hint": "A",
+        "duration_policy": "voice_locked",
+        "transition_intent": "hard_cut",
+        "historical_map_requirement_id": null
+      },
+      "asset_slot_bindings": [
+        {
+          "slot_id": "slot_sec_012",
+          "requirement_id": "req_012",
+          "approved_asset_id": null,
+          "selection_reason": "G3 required — no approval implied by fixture"
+        }
+      ],
+      "layout_control": {
+        "layout_id": "T03.A.v1",
+        "safe_area_pct": {
+          "left": 0.05,
+          "top": 0.06,
+          "right": 0.05,
+          "bottom": 0.06
+        },
+        "text_density": "balanced",
+        "focal_point": [
+          0.5,
+          0.5
+        ]
+      }
+    },
+    {
+      "setup_id": "setup_024",
+      "template_id": "T08",
+      "variant_id": "B",
+      "section_refs": [
+        "sec_012"
+      ],
+      "claim_refs": [
+        "claim_012"
+      ],
+      "requirement_refs": [
+        "req_012"
+      ],
+      "layer_roles": [
+        "archival_photo",
+        "headline"
+      ],
+      "editorial_direction": {
+        "visual_purpose": "Establish the historical evidence context with precise visual hierarchy",
+        "viewer_takeaway": "Understand who, where and why this context matters",
+        "on_screen_text": [
+          {
+            "text": "THE DIPLOMATIC DEMANDS",
+            "role": "headline",
+            "claim_ref": null,
+            "max_lines": 2
+          }
+        ],
+        "reveal_plan": [
+          {
+            "beat_id": "beat_024",
+            "action": "highlight",
+            "target_role": "headline",
+            "cue": {
+              "section_id": "sec_012",
+              "phrase": "sources",
+              "occurrence": 0
+            },
+            "priority": 1
+          }
+        ],
+        "asset_slots": [
+          {
+            "slot_id": "slot_sec_012",
+            "requirement_id": "req_012",
+            "semantic_role": "reviewed primary contextual evidence",
+            "usage": "background",
+            "mandatory": true
+          }
+        ],
+        "camera_intent": "push_in",
+        "composition_intent": "map_full",
+        "emotional_tone": "neutral",
+        "layout_variant_hint": "A",
+        "duration_policy": "voice_locked",
+        "transition_intent": "hard_cut",
+        "historical_map_requirement_id": null
+      },
+      "asset_slot_bindings": [
+        {
+          "slot_id": "slot_sec_012",
+          "requirement_id": "req_012",
+          "approved_asset_id": null,
+          "selection_reason": "G3 required — no approval implied by fixture"
+        }
+      ],
+      "layout_control": {
+        "layout_id": "T03.B.v1",
+        "safe_area_pct": {
+          "left": 0.05,
+          "top": 0.06,
+          "right": 0.05,
+          "bottom": 0.06
+        },
+        "text_density": "balanced",
+        "focal_point": [
+          0.5,
+          0.5
+        ]
+      }
+    },
+    {
+      "setup_id": "setup_025",
+      "template_id": "T01",
+      "variant_id": "A",
+      "section_refs": [
+        "sec_013"
+      ],
+      "claim_refs": [
+        "claim_013"
+      ],
+      "requirement_refs": [
+        "req_013"
+      ],
+      "layer_roles": [
+        "map",
+        "headline"
+      ],
+      "editorial_direction": {
+        "visual_purpose": "Establish the historical geography context with precise visual hierarchy",
+        "viewer_takeaway": "Understand who, where and why this context matters",
+        "on_screen_text": [
+          {
+            "text": "SERBIA AND THE ULTIMATUM",
+            "role": "headline",
+            "claim_ref": null,
+            "max_lines": 2
+          }
+        ],
+        "reveal_plan": [
+          {
+            "beat_id": "beat_025",
+            "action": "establish",
+            "target_role": "map",
+            "cue": {
+              "section_id": "sec_013",
+              "phrase": "Serbia",
+              "occurrence": 0
+            },
+            "priority": 1
+          }
+        ],
+        "asset_slots": [
+          {
+            "slot_id": "slot_sec_013",
+            "requirement_id": "req_013",
+            "semantic_role": "reviewed primary contextual evidence",
+            "usage": "background",
+            "mandatory": true
+          }
+        ],
+        "camera_intent": "push_in",
+        "composition_intent": "map_full",
+        "emotional_tone": "neutral",
+        "layout_variant_hint": "A",
+        "duration_policy": "voice_locked",
+        "transition_intent": "hard_cut",
+        "historical_map_requirement_id": "req_013"
+      },
+      "asset_slot_bindings": [
+        {
+          "slot_id": "slot_sec_013",
+          "requirement_id": "req_013",
+          "approved_asset_id": null,
+          "selection_reason": "G3 required — no approval implied by fixture"
+        }
+      ],
+      "layout_control": {
+        "layout_id": "T01.A.v1",
+        "safe_area_pct": {
+          "left": 0.05,
+          "top": 0.06,
+          "right": 0.05,
+          "bottom": 0.06
+        },
+        "text_density": "balanced",
+        "focal_point": [
+          0.5,
+          0.5
+        ]
+      }
+    },
+    {
+      "setup_id": "setup_026",
+      "template_id": "T01",
+      "variant_id": "B",
+      "section_refs": [
+        "sec_013"
+      ],
+      "claim_refs": [
+        "claim_013"
+      ],
+      "requirement_refs": [
+        "req_013"
+      ],
+      "layer_roles": [
+        "map",
+        "headline"
+      ],
+      "editorial_direction": {
+        "visual_purpose": "Establish the historical geography context with precise visual hierarchy",
+        "viewer_takeaway": "Understand who, where and why this context matters",
+        "on_screen_text": [
+          {
+            "text": "SERBIA AND THE ULTIMATUM",
+            "role": "headline",
+            "claim_ref": null,
+            "max_lines": 2
+          }
+        ],
+        "reveal_plan": [
+          {
+            "beat_id": "beat_026",
+            "action": "highlight",
+            "target_role": "map",
+            "cue": {
+              "section_id": "sec_013",
+              "phrase": "sources",
+              "occurrence": 0
+            },
+            "priority": 1
+          }
+        ],
+        "asset_slots": [
+          {
+            "slot_id": "slot_sec_013",
+            "requirement_id": "req_013",
+            "semantic_role": "reviewed primary contextual evidence",
+            "usage": "background",
+            "mandatory": true
+          }
+        ],
+        "camera_intent": "push_in",
+        "composition_intent": "map_full",
+        "emotional_tone": "neutral",
+        "layout_variant_hint": "A",
+        "duration_policy": "voice_locked",
+        "transition_intent": "hard_cut",
+        "historical_map_requirement_id": "req_013"
+      },
+      "asset_slot_bindings": [
+        {
+          "slot_id": "slot_sec_013",
+          "requirement_id": "req_013",
+          "approved_asset_id": null,
+          "selection_reason": "G3 required — no approval implied by fixture"
+        }
+      ],
+      "layout_control": {
+        "layout_id": "T01.B.v1",
+        "safe_area_pct": {
+          "left": 0.05,
+          "top": 0.06,
+          "right": 0.05,
+          "bottom": 0.06
+        },
+        "text_density": "balanced",
+        "focal_point": [
+          0.5,
+          0.5
+        ]
+      }
+    },
+    {
+      "setup_id": "setup_027",
+      "template_id": "T03",
+      "variant_id": "A",
+      "section_refs": [
+        "sec_014"
+      ],
+      "claim_refs": [
+        "claim_014"
+      ],
+      "requirement_refs": [
+        "req_014"
+      ],
+      "layer_roles": [
+        "archival_photo",
+        "headline"
+      ],
+      "editorial_direction": {
+        "visual_purpose": "Establish the historical evidence context with precise visual hierarchy",
+        "viewer_takeaway": "Understand who, where and why this context matters",
+        "on_screen_text": [
+          {
+            "text": "RUSSIA AND MOBILIZATION",
+            "role": "headline",
+            "claim_ref": null,
+            "max_lines": 2
+          }
+        ],
+        "reveal_plan": [
+          {
+            "beat_id": "beat_027",
+            "action": "establish",
+            "target_role": "headline",
+            "cue": {
+              "section_id": "sec_014",
+              "phrase": "Russia",
+              "occurrence": 0
+            },
+            "priority": 1
+          }
+        ],
+        "asset_slots": [
+          {
+            "slot_id": "slot_sec_014",
+            "requirement_id": "req_014",
+            "semantic_role": "reviewed primary contextual evidence",
+            "usage": "background",
+            "mandatory": true
+          }
+        ],
+        "camera_intent": "push_in",
+        "composition_intent": "map_full",
+        "emotional_tone": "neutral",
+        "layout_variant_hint": "A",
+        "duration_policy": "voice_locked",
+        "transition_intent": "hard_cut",
+        "historical_map_requirement_id": null
+      },
+      "asset_slot_bindings": [
+        {
+          "slot_id": "slot_sec_014",
+          "requirement_id": "req_014",
+          "approved_asset_id": null,
+          "selection_reason": "G3 required — no approval implied by fixture"
+        }
+      ],
+      "layout_control": {
+        "layout_id": "T03.A.v1",
+        "safe_area_pct": {
+          "left": 0.05,
+          "top": 0.06,
+          "right": 0.05,
+          "bottom": 0.06
+        },
+        "text_density": "balanced",
+        "focal_point": [
+          0.5,
+          0.5
+        ]
+      }
+    },
+    {
+      "setup_id": "setup_028",
+      "template_id": "T03",
+      "variant_id": "B",
+      "section_refs": [
+        "sec_014"
+      ],
+      "claim_refs": [
+        "claim_014"
+      ],
+      "requirement_refs": [
+        "req_014"
+      ],
+      "layer_roles": [
+        "archival_photo",
+        "headline"
+      ],
+      "editorial_direction": {
+        "visual_purpose": "Establish the historical evidence context with precise visual hierarchy",
+        "viewer_takeaway": "Understand who, where and why this context matters",
+        "on_screen_text": [
+          {
+            "text": "RUSSIA AND MOBILIZATION",
+            "role": "headline",
+            "claim_ref": null,
+            "max_lines": 2
+          }
+        ],
+        "reveal_plan": [
+          {
+            "beat_id": "beat_028",
+            "action": "highlight",
+            "target_role": "headline",
+            "cue": {
+              "section_id": "sec_014",
+              "phrase": "sources",
+              "occurrence": 0
+            },
+            "priority": 1
+          }
+        ],
+        "asset_slots": [
+          {
+            "slot_id": "slot_sec_014",
+            "requirement_id": "req_014",
+            "semantic_role": "reviewed primary contextual evidence",
+            "usage": "background",
+            "mandatory": true
+          }
+        ],
+        "camera_intent": "push_in",
+        "composition_intent": "map_full",
+        "emotional_tone": "neutral",
+        "layout_variant_hint": "A",
+        "duration_policy": "voice_locked",
+        "transition_intent": "hard_cut",
+        "historical_map_requirement_id": null
+      },
+      "asset_slot_bindings": [
+        {
+          "slot_id": "slot_sec_014",
+          "requirement_id": "req_014",
+          "approved_asset_id": null,
+          "selection_reason": "G3 required — no approval implied by fixture"
+        }
+      ],
+      "layout_control": {
+        "layout_id": "T03.B.v1",
+        "safe_area_pct": {
+          "left": 0.05,
+          "top": 0.06,
+          "right": 0.05,
+          "bottom": 0.06
+        },
+        "text_density": "balanced",
+        "focal_point": [
+          0.5,
+          0.5
+        ]
+      }
+    },
+    {
+      "setup_id": "setup_029",
+      "template_id": "T06",
+      "variant_id": "A",
+      "section_refs": [
+        "sec_015"
+      ],
+      "claim_refs": [
+        "claim_015"
+      ],
+      "requirement_refs": [
+        "req_015"
+      ],
+      "layer_roles": [
+        "archival_photo",
+        "headline"
+      ],
+      "editorial_direction": {
+        "visual_purpose": "Establish the historical evidence context with precise visual hierarchy",
+        "viewer_takeaway": "Understand who, where and why this context matters",
+        "on_screen_text": [
+          {
+            "text": "BERLIN'S DECISIONS",
+            "role": "headline",
+            "claim_ref": null,
+            "max_lines": 2
+          }
+        ],
+        "reveal_plan": [
+          {
+            "beat_id": "beat_029",
+            "action": "establish",
+            "target_role": "headline",
+            "cue": {
+              "section_id": "sec_015",
+              "phrase": "Berlin's",
+              "occurrence": 0
+            },
+            "priority": 1
+          }
+        ],
+        "asset_slots": [
+          {
+            "slot_id": "slot_sec_015",
+            "requirement_id": "req_015",
+            "semantic_role": "reviewed primary contextual evidence",
+            "usage": "background",
+            "mandatory": true
+          }
+        ],
+        "camera_intent": "push_in",
+        "composition_intent": "map_full",
+        "emotional_tone": "neutral",
+        "layout_variant_hint": "A",
+        "duration_policy": "voice_locked",
+        "transition_intent": "hard_cut",
+        "historical_map_requirement_id": null
+      },
+      "asset_slot_bindings": [
+        {
+          "slot_id": "slot_sec_015",
+          "requirement_id": "req_015",
+          "approved_asset_id": null,
+          "selection_reason": "G3 required — no approval implied by fixture"
+        }
+      ],
+      "layout_control": {
+        "layout_id": "T03.A.v1",
+        "safe_area_pct": {
+          "left": 0.05,
+          "top": 0.06,
+          "right": 0.05,
+          "bottom": 0.06
+        },
+        "text_density": "balanced",
+        "focal_point": [
+          0.5,
+          0.5
+        ]
+      }
+    },
+    {
+      "setup_id": "setup_030",
+      "template_id": "T06",
+      "variant_id": "B",
+      "section_refs": [
+        "sec_015"
+      ],
+      "claim_refs": [
+        "claim_015"
+      ],
+      "requirement_refs": [
+        "req_015"
+      ],
+      "layer_roles": [
+        "archival_photo",
+        "headline"
+      ],
+      "editorial_direction": {
+        "visual_purpose": "Establish the historical evidence context with precise visual hierarchy",
+        "viewer_takeaway": "Understand who, where and why this context matters",
+        "on_screen_text": [
+          {
+            "text": "BERLIN'S DECISIONS",
+            "role": "headline",
+            "claim_ref": null,
+            "max_lines": 2
+          }
+        ],
+        "reveal_plan": [
+          {
+            "beat_id": "beat_030",
+            "action": "highlight",
+            "target_role": "headline",
+            "cue": {
+              "section_id": "sec_015",
+              "phrase": "sources",
+              "occurrence": 0
+            },
+            "priority": 1
+          }
+        ],
+        "asset_slots": [
+          {
+            "slot_id": "slot_sec_015",
+            "requirement_id": "req_015",
+            "semantic_role": "reviewed primary contextual evidence",
+            "usage": "background",
+            "mandatory": true
+          }
+        ],
+        "camera_intent": "push_in",
+        "composition_intent": "map_full",
+        "emotional_tone": "neutral",
+        "layout_variant_hint": "A",
+        "duration_policy": "voice_locked",
+        "transition_intent": "hard_cut",
+        "historical_map_requirement_id": null
+      },
+      "asset_slot_bindings": [
+        {
+          "slot_id": "slot_sec_015",
+          "requirement_id": "req_015",
+          "approved_asset_id": null,
+          "selection_reason": "G3 required — no approval implied by fixture"
+        }
+      ],
+      "layout_control": {
+        "layout_id": "T03.B.v1",
+        "safe_area_pct": {
+          "left": 0.05,
+          "top": 0.06,
+          "right": 0.05,
+          "bottom": 0.06
+        },
+        "text_density": "balanced",
+        "focal_point": [
+          0.5,
+          0.5
+        ]
+      }
+    },
+    {
+      "setup_id": "setup_031",
+      "template_id": "T08",
+      "variant_id": "A",
+      "section_refs": [
+        "sec_016"
+      ],
+      "claim_refs": [
+        "claim_016"
+      ],
+      "requirement_refs": [
+        "req_016"
+      ],
+      "layer_roles": [
+        "archival_photo",
+        "headline"
+      ],
+      "editorial_direction": {
+        "visual_purpose": "Establish the historical evidence context with precise visual hierarchy",
+        "viewer_takeaway": "Understand who, where and why this context matters",
+        "on_screen_text": [
+          {
+            "text": "PARIS WATCHES EVENTS",
+            "role": "headline",
+            "claim_ref": null,
+            "max_lines": 2
+          }
+        ],
+        "reveal_plan": [
+          {
+            "beat_id": "beat_031",
+            "action": "establish",
+            "target_role": "headline",
+            "cue": {
+              "section_id": "sec_016",
+              "phrase": "Paris",
+              "occurrence": 0
+            },
+            "priority": 1
+          }
+        ],
+        "asset_slots": [
+          {
+            "slot_id": "slot_sec_016",
+            "requirement_id": "req_016",
+            "semantic_role": "reviewed primary contextual evidence",
+            "usage": "background",
+            "mandatory": true
+          }
+        ],
+        "camera_intent": "push_in",
+        "composition_intent": "map_full",
+        "emotional_tone": "neutral",
+        "layout_variant_hint": "A",
+        "duration_policy": "voice_locked",
+        "transition_intent": "hard_cut",
+        "historical_map_requirement_id": null
+      },
+      "asset_slot_bindings": [
+        {
+          "slot_id": "slot_sec_016",
+          "requirement_id": "req_016",
+          "approved_asset_id": null,
+          "selection_reason": "G3 required — no approval implied by fixture"
+        }
+      ],
+      "layout_control": {
+        "layout_id": "T03.A.v1",
+        "safe_area_pct": {
+          "left": 0.05,
+          "top": 0.06,
+          "right": 0.05,
+          "bottom": 0.06
+        },
+        "text_density": "balanced",
+        "focal_point": [
+          0.5,
+          0.5
+        ]
+      }
+    },
+    {
+      "setup_id": "setup_032",
+      "template_id": "T08",
+      "variant_id": "B",
+      "section_refs": [
+        "sec_016"
+      ],
+      "claim_refs": [
+        "claim_016"
+      ],
+      "requirement_refs": [
+        "req_016"
+      ],
+      "layer_roles": [
+        "archival_photo",
+        "headline"
+      ],
+      "editorial_direction": {
+        "visual_purpose": "Establish the historical evidence context with precise visual hierarchy",
+        "viewer_takeaway": "Understand who, where and why this context matters",
+        "on_screen_text": [
+          {
+            "text": "PARIS WATCHES EVENTS",
+            "role": "headline",
+            "claim_ref": null,
+            "max_lines": 2
+          }
+        ],
+        "reveal_plan": [
+          {
+            "beat_id": "beat_032",
+            "action": "highlight",
+            "target_role": "headline",
+            "cue": {
+              "section_id": "sec_016",
+              "phrase": "sources",
+              "occurrence": 0
+            },
+            "priority": 1
+          }
+        ],
+        "asset_slots": [
+          {
+            "slot_id": "slot_sec_016",
+            "requirement_id": "req_016",
+            "semantic_role": "reviewed primary contextual evidence",
+            "usage": "background",
+            "mandatory": true
+          }
+        ],
+        "camera_intent": "push_in",
+        "composition_intent": "map_full",
+        "emotional_tone": "neutral",
+        "layout_variant_hint": "A",
+        "duration_policy": "voice_locked",
+        "transition_intent": "hard_cut",
+        "historical_map_requirement_id": null
+      },
+      "asset_slot_bindings": [
+        {
+          "slot_id": "slot_sec_016",
+          "requirement_id": "req_016",
+          "approved_asset_id": null,
+          "selection_reason": "G3 required — no approval implied by fixture"
+        }
+      ],
+      "layout_control": {
+        "layout_id": "T03.B.v1",
+        "safe_area_pct": {
+          "left": 0.05,
+          "top": 0.06,
+          "right": 0.05,
+          "bottom": 0.06
+        },
+        "text_density": "balanced",
+        "focal_point": [
+          0.5,
+          0.5
+        ]
+      }
+    },
+    {
+      "setup_id": "setup_033",
+      "template_id": "T01",
+      "variant_id": "A",
+      "section_refs": [
+        "sec_017"
+      ],
+      "claim_refs": [
+        "claim_017"
+      ],
+      "requirement_refs": [
+        "req_017"
+      ],
+      "layer_roles": [
+        "map",
+        "headline"
+      ],
+      "editorial_direction": {
+        "visual_purpose": "Establish the historical geography context with precise visual hierarchy",
+        "viewer_takeaway": "Understand who, where and why this context matters",
+        "on_screen_text": [
+          {
+            "text": "LONDON EXAMINES REPORTS",
+            "role": "headline",
+            "claim_ref": null,
+            "max_lines": 2
+          }
+        ],
+        "reveal_plan": [
+          {
+            "beat_id": "beat_033",
+            "action": "establish",
+            "target_role": "map",
+            "cue": {
+              "section_id": "sec_017",
+              "phrase": "London",
+              "occurrence": 0
+            },
+            "priority": 1
+          }
+        ],
+        "asset_slots": [
+          {
+            "slot_id": "slot_sec_017",
+            "requirement_id": "req_017",
+            "semantic_role": "reviewed primary contextual evidence",
+            "usage": "background",
+            "mandatory": true
+          }
+        ],
+        "camera_intent": "push_in",
+        "composition_intent": "map_full",
+        "emotional_tone": "neutral",
+        "layout_variant_hint": "A",
+        "duration_policy": "voice_locked",
+        "transition_intent": "hard_cut",
+        "historical_map_requirement_id": "req_017"
+      },
+      "asset_slot_bindings": [
+        {
+          "slot_id": "slot_sec_017",
+          "requirement_id": "req_017",
+          "approved_asset_id": null,
+          "selection_reason": "G3 required — no approval implied by fixture"
+        }
+      ],
+      "layout_control": {
+        "layout_id": "T01.A.v1",
+        "safe_area_pct": {
+          "left": 0.05,
+          "top": 0.06,
+          "right": 0.05,
+          "bottom": 0.06
+        },
+        "text_density": "balanced",
+        "focal_point": [
+          0.5,
+          0.5
+        ]
+      }
+    },
+    {
+      "setup_id": "setup_034",
+      "template_id": "T01",
+      "variant_id": "B",
+      "section_refs": [
+        "sec_017"
+      ],
+      "claim_refs": [
+        "claim_017"
+      ],
+      "requirement_refs": [
+        "req_017"
+      ],
+      "layer_roles": [
+        "map",
+        "headline"
+      ],
+      "editorial_direction": {
+        "visual_purpose": "Establish the historical geography context with precise visual hierarchy",
+        "viewer_takeaway": "Understand who, where and why this context matters",
+        "on_screen_text": [
+          {
+            "text": "LONDON EXAMINES REPORTS",
+            "role": "headline",
+            "claim_ref": null,
+            "max_lines": 2
+          }
+        ],
+        "reveal_plan": [
+          {
+            "beat_id": "beat_034",
+            "action": "highlight",
+            "target_role": "map",
+            "cue": {
+              "section_id": "sec_017",
+              "phrase": "sources",
+              "occurrence": 0
+            },
+            "priority": 1
+          }
+        ],
+        "asset_slots": [
+          {
+            "slot_id": "slot_sec_017",
+            "requirement_id": "req_017",
+            "semantic_role": "reviewed primary contextual evidence",
+            "usage": "background",
+            "mandatory": true
+          }
+        ],
+        "camera_intent": "push_in",
+        "composition_intent": "map_full",
+        "emotional_tone": "neutral",
+        "layout_variant_hint": "A",
+        "duration_policy": "voice_locked",
+        "transition_intent": "hard_cut",
+        "historical_map_requirement_id": "req_017"
+      },
+      "asset_slot_bindings": [
+        {
+          "slot_id": "slot_sec_017",
+          "requirement_id": "req_017",
+          "approved_asset_id": null,
+          "selection_reason": "G3 required — no approval implied by fixture"
+        }
+      ],
+      "layout_control": {
+        "layout_id": "T01.B.v1",
+        "safe_area_pct": {
+          "left": 0.05,
+          "top": 0.06,
+          "right": 0.05,
+          "bottom": 0.06
+        },
+        "text_density": "balanced",
+        "focal_point": [
+          0.5,
+          0.5
+        ]
+      }
+    },
+    {
+      "setup_id": "setup_035",
+      "template_id": "T03",
+      "variant_id": "A",
+      "section_refs": [
+        "sec_018"
+      ],
+      "claim_refs": [
+        "claim_018"
+      ],
+      "requirement_refs": [
+        "req_018"
+      ],
+      "layer_roles": [
+        "archival_photo",
+        "headline"
+      ],
+      "editorial_direction": {
+        "visual_purpose": "Establish the historical evidence context with precise visual hierarchy",
+        "viewer_takeaway": "Understand who, where and why this context matters",
+        "on_screen_text": [
+          {
+            "text": "BORDER CROSSINGS",
+            "role": "headline",
+            "claim_ref": null,
+            "max_lines": 2
+          }
+        ],
+        "reveal_plan": [
+          {
+            "beat_id": "beat_035",
+            "action": "establish",
+            "target_role": "headline",
+            "cue": {
+              "section_id": "sec_018",
+              "phrase": "Border",
+              "occurrence": 0
+            },
+            "priority": 1
+          }
+        ],
+        "asset_slots": [
+          {
+            "slot_id": "slot_sec_018",
+            "requirement_id": "req_018",
+            "semantic_role": "reviewed primary contextual evidence",
+            "usage": "background",
+            "mandatory": true
+          }
+        ],
+        "camera_intent": "push_in",
+        "composition_intent": "map_full",
+        "emotional_tone": "neutral",
+        "layout_variant_hint": "A",
+        "duration_policy": "voice_locked",
+        "transition_intent": "hard_cut",
+        "historical_map_requirement_id": null
+      },
+      "asset_slot_bindings": [
+        {
+          "slot_id": "slot_sec_018",
+          "requirement_id": "req_018",
+          "approved_asset_id": null,
+          "selection_reason": "G3 required — no approval implied by fixture"
+        }
+      ],
+      "layout_control": {
+        "layout_id": "T03.A.v1",
+        "safe_area_pct": {
+          "left": 0.05,
+          "top": 0.06,
+          "right": 0.05,
+          "bottom": 0.06
+        },
+        "text_density": "balanced",
+        "focal_point": [
+          0.5,
+          0.5
+        ]
+      }
+    },
+    {
+      "setup_id": "setup_036",
+      "template_id": "T03",
+      "variant_id": "B",
+      "section_refs": [
+        "sec_018"
+      ],
+      "claim_refs": [
+        "claim_018"
+      ],
+      "requirement_refs": [
+        "req_018"
+      ],
+      "layer_roles": [
+        "archival_photo",
+        "headline"
+      ],
+      "editorial_direction": {
+        "visual_purpose": "Establish the historical evidence context with precise visual hierarchy",
+        "viewer_takeaway": "Understand who, where and why this context matters",
+        "on_screen_text": [
+          {
+            "text": "BORDER CROSSINGS",
+            "role": "headline",
+            "claim_ref": null,
+            "max_lines": 2
+          }
+        ],
+        "reveal_plan": [
+          {
+            "beat_id": "beat_036",
+            "action": "highlight",
+            "target_role": "headline",
+            "cue": {
+              "section_id": "sec_018",
+              "phrase": "sources",
+              "occurrence": 0
+            },
+            "priority": 1
+          }
+        ],
+        "asset_slots": [
+          {
+            "slot_id": "slot_sec_018",
+            "requirement_id": "req_018",
+            "semantic_role": "reviewed primary contextual evidence",
+            "usage": "background",
+            "mandatory": true
+          }
+        ],
+        "camera_intent": "push_in",
+        "composition_intent": "map_full",
+        "emotional_tone": "neutral",
+        "layout_variant_hint": "A",
+        "duration_policy": "voice_locked",
+        "transition_intent": "hard_cut",
+        "historical_map_requirement_id": null
+      },
+      "asset_slot_bindings": [
+        {
+          "slot_id": "slot_sec_018",
+          "requirement_id": "req_018",
+          "approved_asset_id": null,
+          "selection_reason": "G3 required — no approval implied by fixture"
+        }
+      ],
+      "layout_control": {
+        "layout_id": "T03.B.v1",
+        "safe_area_pct": {
+          "left": 0.05,
+          "top": 0.06,
+          "right": 0.05,
+          "bottom": 0.06
+        },
+        "text_density": "balanced",
+        "focal_point": [
+          0.5,
+          0.5
+        ]
+      }
+    },
+    {
+      "setup_id": "setup_037",
+      "template_id": "T06",
+      "variant_id": "A",
+      "section_refs": [
+        "sec_019"
+      ],
+      "claim_refs": [
+        "claim_019"
+      ],
+      "requirement_refs": [
+        "req_019"
+      ],
+      "layer_roles": [
+        "archival_photo",
+        "headline"
+      ],
+      "editorial_direction": {
+        "visual_purpose": "Establish the historical evidence context with precise visual hierarchy",
+        "viewer_takeaway": "Understand who, where and why this context matters",
+        "on_screen_text": [
+          {
+            "text": "ALLIANCES AND COMMITMENTS",
+            "role": "headline",
+            "claim_ref": null,
+            "max_lines": 2
+          }
+        ],
+        "reveal_plan": [
+          {
+            "beat_id": "beat_037",
+            "action": "establish",
+            "target_role": "headline",
+            "cue": {
+              "section_id": "sec_019",
+              "phrase": "Alliances",
+              "occurrence": 0
+            },
+            "priority": 1
+          }
+        ],
+        "asset_slots": [
+          {
+            "slot_id": "slot_sec_019",
+            "requirement_id": "req_019",
+            "semantic_role": "reviewed primary contextual evidence",
+            "usage": "background",
+            "mandatory": true
+          }
+        ],
+        "camera_intent": "push_in",
+        "composition_intent": "map_full",
+        "emotional_tone": "neutral",
+        "layout_variant_hint": "A",
+        "duration_policy": "voice_locked",
+        "transition_intent": "hard_cut",
+        "historical_map_requirement_id": null
+      },
+      "asset_slot_bindings": [
+        {
+          "slot_id": "slot_sec_019",
+          "requirement_id": "req_019",
+          "approved_asset_id": null,
+          "selection_reason": "G3 required — no approval implied by fixture"
+        }
+      ],
+      "layout_control": {
+        "layout_id": "T03.A.v1",
+        "safe_area_pct": {
+          "left": 0.05,
+          "top": 0.06,
+          "right": 0.05,
+          "bottom": 0.06
+        },
+        "text_density": "balanced",
+        "focal_point": [
+          0.5,
+          0.5
+        ]
+      }
+    },
+    {
+      "setup_id": "setup_038",
+      "template_id": "T06",
+      "variant_id": "B",
+      "section_refs": [
+        "sec_019"
+      ],
+      "claim_refs": [
+        "claim_019"
+      ],
+      "requirement_refs": [
+        "req_019"
+      ],
+      "layer_roles": [
+        "archival_photo",
+        "headline"
+      ],
+      "editorial_direction": {
+        "visual_purpose": "Establish the historical evidence context with precise visual hierarchy",
+        "viewer_takeaway": "Understand who, where and why this context matters",
+        "on_screen_text": [
+          {
+            "text": "ALLIANCES AND COMMITMENTS",
+            "role": "headline",
+            "claim_ref": null,
+            "max_lines": 2
+          }
+        ],
+        "reveal_plan": [
+          {
+            "beat_id": "beat_038",
+            "action": "highlight",
+            "target_role": "headline",
+            "cue": {
+              "section_id": "sec_019",
+              "phrase": "sources",
+              "occurrence": 0
+            },
+            "priority": 1
+          }
+        ],
+        "asset_slots": [
+          {
+            "slot_id": "slot_sec_019",
+            "requirement_id": "req_019",
+            "semantic_role": "reviewed primary contextual evidence",
+            "usage": "background",
+            "mandatory": true
+          }
+        ],
+        "camera_intent": "push_in",
+        "composition_intent": "map_full",
+        "emotional_tone": "neutral",
+        "layout_variant_hint": "A",
+        "duration_policy": "voice_locked",
+        "transition_intent": "hard_cut",
+        "historical_map_requirement_id": null
+      },
+      "asset_slot_bindings": [
+        {
+          "slot_id": "slot_sec_019",
+          "requirement_id": "req_019",
+          "approved_asset_id": null,
+          "selection_reason": "G3 required — no approval implied by fixture"
+        }
+      ],
+      "layout_control": {
+        "layout_id": "T03.B.v1",
+        "safe_area_pct": {
+          "left": 0.05,
+          "top": 0.06,
+          "right": 0.05,
+          "bottom": 0.06
+        },
+        "text_density": "balanced",
+        "focal_point": [
+          0.5,
+          0.5
+        ]
+      }
+    },
+    {
+      "setup_id": "setup_039",
+      "template_id": "T08",
+      "variant_id": "A",
+      "section_refs": [
+        "sec_020"
+      ],
+      "claim_refs": [
+        "claim_020"
+      ],
+      "requirement_refs": [
+        "req_020"
+      ],
+      "layer_roles": [
+        "archival_photo",
+        "headline"
+      ],
+      "editorial_direction": {
+        "visual_purpose": "Establish the historical evidence context with precise visual hierarchy",
+        "viewer_takeaway": "Understand who, where and why this context matters",
+        "on_screen_text": [
+          {
+            "text": "PUBLIC REACTION",
+            "role": "headline",
+            "claim_ref": null,
+            "max_lines": 2
+          }
+        ],
+        "reveal_plan": [
+          {
+            "beat_id": "beat_039",
+            "action": "establish",
+            "target_role": "headline",
+            "cue": {
+              "section_id": "sec_020",
+              "phrase": "Public",
+              "occurrence": 0
+            },
+            "priority": 1
+          }
+        ],
+        "asset_slots": [
+          {
+            "slot_id": "slot_sec_020",
+            "requirement_id": "req_020",
+            "semantic_role": "reviewed primary contextual evidence",
+            "usage": "background",
+            "mandatory": true
+          }
+        ],
+        "camera_intent": "push_in",
+        "composition_intent": "map_full",
+        "emotional_tone": "neutral",
+        "layout_variant_hint": "A",
+        "duration_policy": "voice_locked",
+        "transition_intent": "hard_cut",
+        "historical_map_requirement_id": null
+      },
+      "asset_slot_bindings": [
+        {
+          "slot_id": "slot_sec_020",
+          "requirement_id": "req_020",
+          "approved_asset_id": null,
+          "selection_reason": "G3 required — no approval implied by fixture"
+        }
+      ],
+      "layout_control": {
+        "layout_id": "T03.A.v1",
+        "safe_area_pct": {
+          "left": 0.05,
+          "top": 0.06,
+          "right": 0.05,
+          "bottom": 0.06
+        },
+        "text_density": "balanced",
+        "focal_point": [
+          0.5,
+          0.5
+        ]
+      }
+    },
+    {
+      "setup_id": "setup_040",
+      "template_id": "T08",
+      "variant_id": "B",
+      "section_refs": [
+        "sec_020"
+      ],
+      "claim_refs": [
+        "claim_020"
+      ],
+      "requirement_refs": [
+        "req_020"
+      ],
+      "layer_roles": [
+        "archival_photo",
+        "headline"
+      ],
+      "editorial_direction": {
+        "visual_purpose": "Establish the historical evidence context with precise visual hierarchy",
+        "viewer_takeaway": "Understand who, where and why this context matters",
+        "on_screen_text": [
+          {
+            "text": "PUBLIC REACTION",
+            "role": "headline",
+            "claim_ref": null,
+            "max_lines": 2
+          }
+        ],
+        "reveal_plan": [
+          {
+            "beat_id": "beat_040",
+            "action": "highlight",
+            "target_role": "headline",
+            "cue": {
+              "section_id": "sec_020",
+              "phrase": "sources",
+              "occurrence": 0
+            },
+            "priority": 1
+          }
+        ],
+        "asset_slots": [
+          {
+            "slot_id": "slot_sec_020",
+            "requirement_id": "req_020",
+            "semantic_role": "reviewed primary contextual evidence",
+            "usage": "background",
+            "mandatory": true
+          }
+        ],
+        "camera_intent": "push_in",
+        "composition_intent": "map_full",
+        "emotional_tone": "neutral",
+        "layout_variant_hint": "A",
+        "duration_policy": "voice_locked",
+        "transition_intent": "hard_cut",
+        "historical_map_requirement_id": null
+      },
+      "asset_slot_bindings": [
+        {
+          "slot_id": "slot_sec_020",
+          "requirement_id": "req_020",
+          "approved_asset_id": null,
+          "selection_reason": "G3 required — no approval implied by fixture"
+        }
+      ],
+      "layout_control": {
+        "layout_id": "T03.B.v1",
+        "safe_area_pct": {
+          "left": 0.05,
+          "top": 0.06,
+          "right": 0.05,
+          "bottom": 0.06
+        },
+        "text_density": "balanced",
+        "focal_point": [
+          0.5,
+          0.5
+        ]
+      }
+    },
+    {
+      "setup_id": "setup_041",
+      "template_id": "T01",
+      "variant_id": "A",
+      "section_refs": [
+        "sec_021"
+      ],
+      "claim_refs": [
+        "claim_021"
+      ],
+      "requirement_refs": [
+        "req_021"
+      ],
+      "layer_roles": [
+        "map",
+        "headline"
+      ],
+      "editorial_direction": {
+        "visual_purpose": "Establish the historical geography context with precise visual hierarchy",
+        "viewer_takeaway": "Understand who, where and why this context matters",
+        "on_screen_text": [
+          {
+            "text": "THE TIMETABLE ACCELERATES",
+            "role": "headline",
+            "claim_ref": null,
+            "max_lines": 2
+          }
+        ],
+        "reveal_plan": [
+          {
+            "beat_id": "beat_041",
+            "action": "establish",
+            "target_role": "map",
+            "cue": {
+              "section_id": "sec_021",
+              "phrase": "The",
+              "occurrence": 0
+            },
+            "priority": 1
+          }
+        ],
+        "asset_slots": [
+          {
+            "slot_id": "slot_sec_021",
+            "requirement_id": "req_021",
+            "semantic_role": "reviewed primary contextual evidence",
+            "usage": "background",
+            "mandatory": true
+          }
+        ],
+        "camera_intent": "push_in",
+        "composition_intent": "map_full",
+        "emotional_tone": "neutral",
+        "layout_variant_hint": "A",
+        "duration_policy": "voice_locked",
+        "transition_intent": "hard_cut",
+        "historical_map_requirement_id": "req_021"
+      },
+      "asset_slot_bindings": [
+        {
+          "slot_id": "slot_sec_021",
+          "requirement_id": "req_021",
+          "approved_asset_id": null,
+          "selection_reason": "G3 required — no approval implied by fixture"
+        }
+      ],
+      "layout_control": {
+        "layout_id": "T01.A.v1",
+        "safe_area_pct": {
+          "left": 0.05,
+          "top": 0.06,
+          "right": 0.05,
+          "bottom": 0.06
+        },
+        "text_density": "balanced",
+        "focal_point": [
+          0.5,
+          0.5
+        ]
+      }
+    },
+    {
+      "setup_id": "setup_042",
+      "template_id": "T01",
+      "variant_id": "B",
+      "section_refs": [
+        "sec_021"
+      ],
+      "claim_refs": [
+        "claim_021"
+      ],
+      "requirement_refs": [
+        "req_021"
+      ],
+      "layer_roles": [
+        "map",
+        "headline"
+      ],
+      "editorial_direction": {
+        "visual_purpose": "Establish the historical geography context with precise visual hierarchy",
+        "viewer_takeaway": "Understand who, where and why this context matters",
+        "on_screen_text": [
+          {
+            "text": "THE TIMETABLE ACCELERATES",
+            "role": "headline",
+            "claim_ref": null,
+            "max_lines": 2
+          }
+        ],
+        "reveal_plan": [
+          {
+            "beat_id": "beat_042",
+            "action": "highlight",
+            "target_role": "map",
+            "cue": {
+              "section_id": "sec_021",
+              "phrase": "sources",
+              "occurrence": 0
+            },
+            "priority": 1
+          }
+        ],
+        "asset_slots": [
+          {
+            "slot_id": "slot_sec_021",
+            "requirement_id": "req_021",
+            "semantic_role": "reviewed primary contextual evidence",
+            "usage": "background",
+            "mandatory": true
+          }
+        ],
+        "camera_intent": "push_in",
+        "composition_intent": "map_full",
+        "emotional_tone": "neutral",
+        "layout_variant_hint": "A",
+        "duration_policy": "voice_locked",
+        "transition_intent": "hard_cut",
+        "historical_map_requirement_id": "req_021"
+      },
+      "asset_slot_bindings": [
+        {
+          "slot_id": "slot_sec_021",
+          "requirement_id": "req_021",
+          "approved_asset_id": null,
+          "selection_reason": "G3 required — no approval implied by fixture"
+        }
+      ],
+      "layout_control": {
+        "layout_id": "T01.B.v1",
+        "safe_area_pct": {
+          "left": 0.05,
+          "top": 0.06,
+          "right": 0.05,
+          "bottom": 0.06
+        },
+        "text_density": "balanced",
+        "focal_point": [
+          0.5,
+          0.5
+        ]
+      }
+    },
+    {
+      "setup_id": "setup_043",
+      "template_id": "T03",
+      "variant_id": "A",
+      "section_refs": [
+        "sec_022"
+      ],
+      "claim_refs": [
+        "claim_022"
+      ],
+      "requirement_refs": [
+        "req_022"
+      ],
+      "layer_roles": [
+        "archival_photo",
+        "headline"
+      ],
+      "editorial_direction": {
+        "visual_purpose": "Establish the historical evidence context with precise visual hierarchy",
+        "viewer_takeaway": "Understand who, where and why this context matters",
+        "on_screen_text": [
+          {
+            "text": "THE FIRST WEEKS OF WAR",
+            "role": "headline",
+            "claim_ref": null,
+            "max_lines": 2
+          }
+        ],
+        "reveal_plan": [
+          {
+            "beat_id": "beat_043",
+            "action": "establish",
+            "target_role": "headline",
+            "cue": {
+              "section_id": "sec_022",
+              "phrase": "The",
+              "occurrence": 0
+            },
+            "priority": 1
+          }
+        ],
+        "asset_slots": [
+          {
+            "slot_id": "slot_sec_022",
+            "requirement_id": "req_022",
+            "semantic_role": "reviewed primary contextual evidence",
+            "usage": "background",
+            "mandatory": true
+          }
+        ],
+        "camera_intent": "push_in",
+        "composition_intent": "map_full",
+        "emotional_tone": "neutral",
+        "layout_variant_hint": "A",
+        "duration_policy": "voice_locked",
+        "transition_intent": "hard_cut",
+        "historical_map_requirement_id": null
+      },
+      "asset_slot_bindings": [
+        {
+          "slot_id": "slot_sec_022",
+          "requirement_id": "req_022",
+          "approved_asset_id": null,
+          "selection_reason": "G3 required — no approval implied by fixture"
+        }
+      ],
+      "layout_control": {
+        "layout_id": "T03.A.v1",
+        "safe_area_pct": {
+          "left": 0.05,
+          "top": 0.06,
+          "right": 0.05,
+          "bottom": 0.06
+        },
+        "text_density": "balanced",
+        "focal_point": [
+          0.5,
+          0.5
+        ]
+      }
+    },
+    {
+      "setup_id": "setup_044",
+      "template_id": "T03",
+      "variant_id": "B",
+      "section_refs": [
+        "sec_022"
+      ],
+      "claim_refs": [
+        "claim_022"
+      ],
+      "requirement_refs": [
+        "req_022"
+      ],
+      "layer_roles": [
+        "archival_photo",
+        "headline"
+      ],
+      "editorial_direction": {
+        "visual_purpose": "Establish the historical evidence context with precise visual hierarchy",
+        "viewer_takeaway": "Understand who, where and why this context matters",
+        "on_screen_text": [
+          {
+            "text": "THE FIRST WEEKS OF WAR",
+            "role": "headline",
+            "claim_ref": null,
+            "max_lines": 2
+          }
+        ],
+        "reveal_plan": [
+          {
+            "beat_id": "beat_044",
+            "action": "highlight",
+            "target_role": "headline",
+            "cue": {
+              "section_id": "sec_022",
+              "phrase": "sources",
+              "occurrence": 0
+            },
+            "priority": 1
+          }
+        ],
+        "asset_slots": [
+          {
+            "slot_id": "slot_sec_022",
+            "requirement_id": "req_022",
+            "semantic_role": "reviewed primary contextual evidence",
+            "usage": "background",
+            "mandatory": true
+          }
+        ],
+        "camera_intent": "push_in",
+        "composition_intent": "map_full",
+        "emotional_tone": "neutral",
+        "layout_variant_hint": "A",
+        "duration_policy": "voice_locked",
+        "transition_intent": "hard_cut",
+        "historical_map_requirement_id": null
+      },
+      "asset_slot_bindings": [
+        {
+          "slot_id": "slot_sec_022",
+          "requirement_id": "req_022",
+          "approved_asset_id": null,
+          "selection_reason": "G3 required — no approval implied by fixture"
+        }
+      ],
+      "layout_control": {
+        "layout_id": "T03.B.v1",
+        "safe_area_pct": {
+          "left": 0.05,
+          "top": 0.06,
+          "right": 0.05,
+          "bottom": 0.06
+        },
+        "text_density": "balanced",
+        "focal_point": [
+          0.5,
+          0.5
+        ]
+      }
+    },
+    {
+      "setup_id": "setup_045",
+      "template_id": "T06",
+      "variant_id": "A",
+      "section_refs": [
+        "sec_023"
+      ],
+      "claim_refs": [
+        "claim_023"
+      ],
+      "requirement_refs": [
+        "req_023"
+      ],
+      "layer_roles": [
+        "archival_photo",
+        "headline"
+      ],
+      "editorial_direction": {
+        "visual_purpose": "Establish the historical evidence context with precise visual hierarchy",
+        "viewer_takeaway": "Understand who, where and why this context matters",
+        "on_screen_text": [
+          {
+            "text": "CONSEQUENCES ACROSS EUROPE",
+            "role": "headline",
+            "claim_ref": null,
+            "max_lines": 2
+          }
+        ],
+        "reveal_plan": [
+          {
+            "beat_id": "beat_045",
+            "action": "establish",
+            "target_role": "headline",
+            "cue": {
+              "section_id": "sec_023",
+              "phrase": "Consequences",
+              "occurrence": 0
+            },
+            "priority": 1
+          }
+        ],
+        "asset_slots": [
+          {
+            "slot_id": "slot_sec_023",
+            "requirement_id": "req_023",
+            "semantic_role": "reviewed primary contextual evidence",
+            "usage": "background",
+            "mandatory": true
+          }
+        ],
+        "camera_intent": "push_in",
+        "composition_intent": "map_full",
+        "emotional_tone": "neutral",
+        "layout_variant_hint": "A",
+        "duration_policy": "voice_locked",
+        "transition_intent": "hard_cut",
+        "historical_map_requirement_id": null
+      },
+      "asset_slot_bindings": [
+        {
+          "slot_id": "slot_sec_023",
+          "requirement_id": "req_023",
+          "approved_asset_id": null,
+          "selection_reason": "G3 required — no approval implied by fixture"
+        }
+      ],
+      "layout_control": {
+        "layout_id": "T03.A.v1",
+        "safe_area_pct": {
+          "left": 0.05,
+          "top": 0.06,
+          "right": 0.05,
+          "bottom": 0.06
+        },
+        "text_density": "balanced",
+        "focal_point": [
+          0.5,
+          0.5
+        ]
+      }
+    },
+    {
+      "setup_id": "setup_046",
+      "template_id": "T06",
+      "variant_id": "B",
+      "section_refs": [
+        "sec_023"
+      ],
+      "claim_refs": [
+        "claim_023"
+      ],
+      "requirement_refs": [
+        "req_023"
+      ],
+      "layer_roles": [
+        "archival_photo",
+        "headline"
+      ],
+      "editorial_direction": {
+        "visual_purpose": "Establish the historical evidence context with precise visual hierarchy",
+        "viewer_takeaway": "Understand who, where and why this context matters",
+        "on_screen_text": [
+          {
+            "text": "CONSEQUENCES ACROSS EUROPE",
+            "role": "headline",
+            "claim_ref": null,
+            "max_lines": 2
+          }
+        ],
+        "reveal_plan": [
+          {
+            "beat_id": "beat_046",
+            "action": "highlight",
+            "target_role": "headline",
+            "cue": {
+              "section_id": "sec_023",
+              "phrase": "sources",
+              "occurrence": 0
+            },
+            "priority": 1
+          }
+        ],
+        "asset_slots": [
+          {
+            "slot_id": "slot_sec_023",
+            "requirement_id": "req_023",
+            "semantic_role": "reviewed primary contextual evidence",
+            "usage": "background",
+            "mandatory": true
+          }
+        ],
+        "camera_intent": "push_in",
+        "composition_intent": "map_full",
+        "emotional_tone": "neutral",
+        "layout_variant_hint": "A",
+        "duration_policy": "voice_locked",
+        "transition_intent": "hard_cut",
+        "historical_map_requirement_id": null
+      },
+      "asset_slot_bindings": [
+        {
+          "slot_id": "slot_sec_023",
+          "requirement_id": "req_023",
+          "approved_asset_id": null,
+          "selection_reason": "G3 required — no approval implied by fixture"
+        }
+      ],
+      "layout_control": {
+        "layout_id": "T03.B.v1",
+        "safe_area_pct": {
+          "left": 0.05,
+          "top": 0.06,
+          "right": 0.05,
+          "bottom": 0.06
+        },
+        "text_density": "balanced",
+        "focal_point": [
+          0.5,
+          0.5
+        ]
+      }
+    },
+    {
+      "setup_id": "setup_047",
+      "template_id": "T08",
+      "variant_id": "A",
+      "section_refs": [
+        "sec_024"
+      ],
+      "claim_refs": [
+        "claim_024"
+      ],
+      "requirement_refs": [
+        "req_024"
+      ],
+      "layer_roles": [
+        "archival_photo",
+        "headline"
+      ],
+      "editorial_direction": {
+        "visual_purpose": "Establish the historical evidence context with precise visual hierarchy",
+        "viewer_takeaway": "Understand who, where and why this context matters",
+        "on_screen_text": [
+          {
+            "text": "WHY ONE EVENT MATTERED",
+            "role": "headline",
+            "claim_ref": null,
+            "max_lines": 2
+          }
+        ],
+        "reveal_plan": [
+          {
+            "beat_id": "beat_047",
+            "action": "establish",
+            "target_role": "headline",
+            "cue": {
+              "section_id": "sec_024",
+              "phrase": "Why",
+              "occurrence": 0
+            },
+            "priority": 1
+          }
+        ],
+        "asset_slots": [
+          {
+            "slot_id": "slot_sec_024",
+            "requirement_id": "req_024",
+            "semantic_role": "reviewed primary contextual evidence",
+            "usage": "background",
+            "mandatory": true
+          }
+        ],
+        "camera_intent": "push_in",
+        "composition_intent": "map_full",
+        "emotional_tone": "neutral",
+        "layout_variant_hint": "A",
+        "duration_policy": "voice_locked",
+        "transition_intent": "hard_cut",
+        "historical_map_requirement_id": null
+      },
+      "asset_slot_bindings": [
+        {
+          "slot_id": "slot_sec_024",
+          "requirement_id": "req_024",
+          "approved_asset_id": null,
+          "selection_reason": "G3 required — no approval implied by fixture"
+        }
+      ],
+      "layout_control": {
+        "layout_id": "T03.A.v1",
+        "safe_area_pct": {
+          "left": 0.05,
+          "top": 0.06,
+          "right": 0.05,
+          "bottom": 0.06
+        },
+        "text_density": "balanced",
+        "focal_point": [
+          0.5,
+          0.5
+        ]
+      }
+    },
+    {
+      "setup_id": "setup_048",
+      "template_id": "T08",
+      "variant_id": "B",
+      "section_refs": [
+        "sec_024"
+      ],
+      "claim_refs": [
+        "claim_024"
+      ],
+      "requirement_refs": [
+        "req_024"
+      ],
+      "layer_roles": [
+        "archival_photo",
+        "headline"
+      ],
+      "editorial_direction": {
+        "visual_purpose": "Establish the historical evidence context with precise visual hierarchy",
+        "viewer_takeaway": "Understand who, where and why this context matters",
+        "on_screen_text": [
+          {
+            "text": "WHY ONE EVENT MATTERED",
+            "role": "headline",
+            "claim_ref": null,
+            "max_lines": 2
+          }
+        ],
+        "reveal_plan": [
+          {
+            "beat_id": "beat_048",
+            "action": "highlight",
+            "target_role": "headline",
+            "cue": {
+              "section_id": "sec_024",
+              "phrase": "sources",
+              "occurrence": 0
+            },
+            "priority": 1
+          }
+        ],
+        "asset_slots": [
+          {
+            "slot_id": "slot_sec_024",
+            "requirement_id": "req_024",
+            "semantic_role": "reviewed primary contextual evidence",
+            "usage": "background",
+            "mandatory": true
+          }
+        ],
+        "camera_intent": "push_in",
+        "composition_intent": "map_full",
+        "emotional_tone": "neutral",
+        "layout_variant_hint": "A",
+        "duration_policy": "voice_locked",
+        "transition_intent": "hard_cut",
+        "historical_map_requirement_id": null
+      },
+      "asset_slot_bindings": [
+        {
+          "slot_id": "slot_sec_024",
+          "requirement_id": "req_024",
+          "approved_asset_id": null,
+          "selection_reason": "G3 required — no approval implied by fixture"
+        }
+      ],
+      "layout_control": {
+        "layout_id": "T03.B.v1",
+        "safe_area_pct": {
+          "left": 0.05,
+          "top": 0.06,
+          "right": 0.05,
+          "bottom": 0.06
+        },
+        "text_density": "balanced",
+        "focal_point": [
+          0.5,
+          0.5
+        ]
+      }
+    }
+  ]
+}

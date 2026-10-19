@@ -30,14 +30,68 @@
           "layer_kind": "map",
           "asset_id": "asset_001",
           "text": null,
-          "source_claim_id": null
+          "source_claim_id": null,
+          "z_index": 0,
+          "rect_px": {
+            "x": 100,
+            "y": 80,
+            "w": 1720,
+            "h": 900
+          },
+          "anchor": "center",
+          "crop_normalized": {
+            "x": 0.08,
+            "y": 0.08,
+            "w": 0.84,
+            "h": 0.84
+          },
+          "object_fit": "cover",
+          "mask": {
+            "kind": "none",
+            "asset_id": null,
+            "feather_px": 0
+          },
+          "style": {
+            "font_token": null,
+            "color_token": null,
+            "stroke_token": null,
+            "max_lines": 3
+          },
+          "map_binding": null
         },
         {
           "layer_id": "layer_002",
           "layer_kind": "headline",
           "asset_id": null,
           "text": "1871",
-          "source_claim_id": "claim_001"
+          "source_claim_id": "claim_001",
+          "z_index": 1,
+          "rect_px": {
+            "x": 100,
+            "y": 80,
+            "w": 1720,
+            "h": 900
+          },
+          "anchor": "center",
+          "crop_normalized": {
+            "x": 0.08,
+            "y": 0.08,
+            "w": 0.84,
+            "h": 0.84
+          },
+          "object_fit": "cover",
+          "mask": {
+            "kind": "none",
+            "asset_id": null,
+            "feather_px": 0
+          },
+          "style": {
+            "font_token": null,
+            "color_token": null,
+            "stroke_token": null,
+            "max_lines": 3
+          },
+          "map_binding": null
         }
       ],
       "events": [
@@ -51,9 +105,59 @@
           "params": {
             "direction": "up",
             "distance_px": 30
+          },
+          "animated_property": "opacity",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 0,
+              "easing": "ease_out"
+            },
+            {
+              "frame": 18,
+              "value": 1,
+              "easing": "ease_out"
+            }
+          ],
+          "cue_binding": {
+            "word_id": "word_002",
+            "offset_frames": 0
           }
         }
-      ]
+      ],
+      "camera": {
+        "mode": "push_in",
+        "keyframes": [
+          {
+            "at_frame": 0,
+            "x_px": 0,
+            "y_px": 0,
+            "scale": 1,
+            "rotation_deg": 0,
+            "opacity": 1,
+            "easing": "linear"
+          },
+          {
+            "at_frame": 149,
+            "x_px": -8,
+            "y_px": -3,
+            "scale": 1.05,
+            "rotation_deg": 0,
+            "opacity": 1,
+            "easing": "ease_in_out"
+          }
+        ],
+        "focus_entity_id": null,
+        "clamp_to_content": true
+      },
+      "transition_out": {
+        "type": "hard_cut",
+        "duration_frames": 0
+      },
+      "story_cue_span": {
+        "first_word_id": "word_001",
+        "last_word_id": "word_002"
+      }
     }
   ]
 }

@@ -1,0 +1,3450 @@
+{
+  "schema_version": "StoryPackage.v1",
+  "project": {
+    "project_id": "proj_longform",
+    "title": "1914 Sarajevo Long-form Design Fixture (Unverified Editorial Draft)",
+    "language": "en",
+    "style_id": "HistoryEditorialPaper.v1"
+  },
+  "sections": [
+    {
+      "section_id": "sec_001",
+      "narration": "The fragile map of Europe. To understand the crisis, first look at the competing empires and the borders that defined their political choices. Each decision was shaped by earlier conflicts, diplomatic pressures, and fears about neighboring states. A careful visual timeline makes the sequence comprehensible without manufacturing photographs or quotations that do not exist.",
+      "claim_refs": [
+        "claim_001"
+      ],
+      "asset_requirement_refs": [
+        "req_001"
+      ]
+    },
+    {
+      "section_id": "sec_002",
+      "narration": "A continent of empires. Historic records provide some details but leave other questions open. This sequence separates confirmed developments from interpretations, using the original archive material whenever that material can be identified and reviewed. Period-specific sources and captions help the viewer distinguish direct evidence from editorial explanation and reconstruction.",
+      "claim_refs": [
+        "claim_002"
+      ],
+      "asset_requirement_refs": [
+        "req_002"
+      ]
+    },
+    {
+      "section_id": "sec_003",
+      "narration": "Bosnia and political tensions. The next turning point followed from decisions already underway. We can show the geography, the people, and the chronology without pretending that every surviving photograph depicts the exact scene described in the narration. A careful visual timeline makes the sequence comprehensible without manufacturing photographs or quotations that do not exist.",
+      "claim_refs": [
+        "claim_003"
+      ],
+      "asset_requirement_refs": [
+        "req_003"
+      ]
+    },
+    {
+      "section_id": "sec_004",
+      "narration": "The Sarajevo visit. The wider consequences were not visible to everyone at once. The story unfolds through diplomatic statements, changing maps, and dated contemporary records, with each new connection introduced only when its source is understood. Period-specific sources and captions help the viewer distinguish direct evidence from editorial explanation and reconstruction.",
+      "claim_refs": [
+        "claim_004"
+      ],
+      "asset_requirement_refs": [
+        "req_004"
+      ]
+    },
+    {
+      "section_id": "sec_005",
+      "narration": "The city and its streets. To understand the crisis, first look at the competing empires and the borders that defined their political choices. Each decision was shaped by earlier conflicts, diplomatic pressures, and fears about neighboring states. A careful visual timeline makes the sequence comprehensible without manufacturing photographs or quotations that do not exist.",
+      "claim_refs": [
+        "claim_005"
+      ],
+      "asset_requirement_refs": [
+        "req_005"
+      ]
+    },
+    {
+      "section_id": "sec_006",
+      "narration": "A procession on the move. Historic records provide some details but leave other questions open. This sequence separates confirmed developments from interpretations, using the original archive material whenever that material can be identified and reviewed. Period-specific sources and captions help the viewer distinguish direct evidence from editorial explanation and reconstruction.",
+      "claim_refs": [
+        "claim_006"
+      ],
+      "asset_requirement_refs": [
+        "req_006"
+      ]
+    },
+    {
+      "section_id": "sec_007",
+      "narration": "The first turning point. The next turning point followed from decisions already underway. We can show the geography, the people, and the chronology without pretending that every surviving photograph depicts the exact scene described in the narration. A careful visual timeline makes the sequence comprehensible without manufacturing photographs or quotations that do not exist.",
+      "claim_refs": [
+        "claim_007"
+      ],
+      "asset_requirement_refs": [
+        "req_007"
+      ]
+    },
+    {
+      "section_id": "sec_008",
+      "narration": "Confusion around the route. The wider consequences were not visible to everyone at once. The story unfolds through diplomatic statements, changing maps, and dated contemporary records, with each new connection introduced only when its source is understood. Period-specific sources and captions help the viewer distinguish direct evidence from editorial explanation and reconstruction.",
+      "claim_refs": [
+        "claim_008"
+      ],
+      "asset_requirement_refs": [
+        "req_008"
+      ]
+    },
+    {
+      "section_id": "sec_009",
+      "narration": "The confrontation. To understand the crisis, first look at the competing empires and the borders that defined their political choices. Each decision was shaped by earlier conflicts, diplomatic pressures, and fears about neighboring states. A careful visual timeline makes the sequence comprehensible without manufacturing photographs or quotations that do not exist.",
+      "claim_refs": [
+        "claim_009"
+      ],
+      "asset_requirement_refs": [
+        "req_009"
+      ]
+    },
+    {
+      "section_id": "sec_010",
+      "narration": "News spreads. Historic records provide some details but leave other questions open. This sequence separates confirmed developments from interpretations, using the original archive material whenever that material can be identified and reviewed. Period-specific sources and captions help the viewer distinguish direct evidence from editorial explanation and reconstruction.",
+      "claim_refs": [
+        "claim_010"
+      ],
+      "asset_requirement_refs": [
+        "req_010"
+      ]
+    },
+    {
+      "section_id": "sec_011",
+      "narration": "The response in Vienna. The next turning point followed from decisions already underway. We can show the geography, the people, and the chronology without pretending that every surviving photograph depicts the exact scene described in the narration. A careful visual timeline makes the sequence comprehensible without manufacturing photographs or quotations that do not exist.",
+      "claim_refs": [
+        "claim_011"
+      ],
+      "asset_requirement_refs": [
+        "req_011"
+      ]
+    },
+    {
+      "section_id": "sec_012",
+      "narration": "The diplomatic demands. The wider consequences were not visible to everyone at once. The story unfolds through diplomatic statements, changing maps, and dated contemporary records, with each new connection introduced only when its source is understood. Period-specific sources and captions help the viewer distinguish direct evidence from editorial explanation and reconstruction.",
+      "claim_refs": [
+        "claim_012"
+      ],
+      "asset_requirement_refs": [
+        "req_012"
+      ]
+    },
+    {
+      "section_id": "sec_013",
+      "narration": "Serbia and the ultimatum. To understand the crisis, first look at the competing empires and the borders that defined their political choices. Each decision was shaped by earlier conflicts, diplomatic pressures, and fears about neighboring states. A careful visual timeline makes the sequence comprehensible without manufacturing photographs or quotations that do not exist.",
+      "claim_refs": [
+        "claim_013"
+      ],
+      "asset_requirement_refs": [
+        "req_013"
+      ]
+    },
+    {
+      "section_id": "sec_014",
+      "narration": "Russia and mobilization. Historic records provide some details but leave other questions open. This sequence separates confirmed developments from interpretations, using the original archive material whenever that material can be identified and reviewed. Period-specific sources and captions help the viewer distinguish direct evidence from editorial explanation and reconstruction.",
+      "claim_refs": [
+        "claim_014"
+      ],
+      "asset_requirement_refs": [
+        "req_014"
+      ]
+    },
+    {
+      "section_id": "sec_015",
+      "narration": "Berlin's decisions. The next turning point followed from decisions already underway. We can show the geography, the people, and the chronology without pretending that every surviving photograph depicts the exact scene described in the narration. A careful visual timeline makes the sequence comprehensible without manufacturing photographs or quotations that do not exist.",
+      "claim_refs": [
+        "claim_015"
+      ],
+      "asset_requirement_refs": [
+        "req_015"
+      ]
+    },
+    {
+      "section_id": "sec_016",
+      "narration": "Paris watches events. The wider consequences were not visible to everyone at once. The story unfolds through diplomatic statements, changing maps, and dated contemporary records, with each new connection introduced only when its source is understood. Period-specific sources and captions help the viewer distinguish direct evidence from editorial explanation and reconstruction.",
+      "claim_refs": [
+        "claim_016"
+      ],
+      "asset_requirement_refs": [
+        "req_016"
+      ]
+    },
+    {
+      "section_id": "sec_017",
+      "narration": "London examines reports. To understand the crisis, first look at the competing empires and the borders that defined their political choices. Each decision was shaped by earlier conflicts, diplomatic pressures, and fears about neighboring states. A careful visual timeline makes the sequence comprehensible without manufacturing photographs or quotations that do not exist.",
+      "claim_refs": [
+        "claim_017"
+      ],
+      "asset_requirement_refs": [
+        "req_017"
+      ]
+    },
+    {
+      "section_id": "sec_018",
+      "narration": "Border crossings. Historic records provide some details but leave other questions open. This sequence separates confirmed developments from interpretations, using the original archive material whenever that material can be identified and reviewed. Period-specific sources and captions help the viewer distinguish direct evidence from editorial explanation and reconstruction.",
+      "claim_refs": [
+        "claim_018"
+      ],
+      "asset_requirement_refs": [
+        "req_018"
+      ]
+    },
+    {
+      "section_id": "sec_019",
+      "narration": "Alliances and commitments. The next turning point followed from decisions already underway. We can show the geography, the people, and the chronology without pretending that every surviving photograph depicts the exact scene described in the narration. A careful visual timeline makes the sequence comprehensible without manufacturing photographs or quotations that do not exist.",
+      "claim_refs": [
+        "claim_019"
+      ],
+      "asset_requirement_refs": [
+        "req_019"
+      ]
+    },
+    {
+      "section_id": "sec_020",
+      "narration": "Public reaction. The wider consequences were not visible to everyone at once. The story unfolds through diplomatic statements, changing maps, and dated contemporary records, with each new connection introduced only when its source is understood. Period-specific sources and captions help the viewer distinguish direct evidence from editorial explanation and reconstruction.",
+      "claim_refs": [
+        "claim_020"
+      ],
+      "asset_requirement_refs": [
+        "req_020"
+      ]
+    },
+    {
+      "section_id": "sec_021",
+      "narration": "The timetable accelerates. To understand the crisis, first look at the competing empires and the borders that defined their political choices. Each decision was shaped by earlier conflicts, diplomatic pressures, and fears about neighboring states. A careful visual timeline makes the sequence comprehensible without manufacturing photographs or quotations that do not exist.",
+      "claim_refs": [
+        "claim_021"
+      ],
+      "asset_requirement_refs": [
+        "req_021"
+      ]
+    },
+    {
+      "section_id": "sec_022",
+      "narration": "The first weeks of war. Historic records provide some details but leave other questions open. This sequence separates confirmed developments from interpretations, using the original archive material whenever that material can be identified and reviewed. Period-specific sources and captions help the viewer distinguish direct evidence from editorial explanation and reconstruction.",
+      "claim_refs": [
+        "claim_022"
+      ],
+      "asset_requirement_refs": [
+        "req_022"
+      ]
+    },
+    {
+      "section_id": "sec_023",
+      "narration": "Consequences across Europe. The next turning point followed from decisions already underway. We can show the geography, the people, and the chronology without pretending that every surviving photograph depicts the exact scene described in the narration. A careful visual timeline makes the sequence comprehensible without manufacturing photographs or quotations that do not exist.",
+      "claim_refs": [
+        "claim_023"
+      ],
+      "asset_requirement_refs": [
+        "req_023"
+      ]
+    },
+    {
+      "section_id": "sec_024",
+      "narration": "Why one event mattered. The wider consequences were not visible to everyone at once. The story unfolds through diplomatic statements, changing maps, and dated contemporary records, with each new connection introduced only when its source is understood. Period-specific sources and captions help the viewer distinguish direct evidence from editorial explanation and reconstruction.",
+      "claim_refs": [
+        "claim_024"
+      ],
+      "asset_requirement_refs": [
+        "req_024"
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_id": "claim_001",
+      "text": "Editorial placeholder claim for chapter 1: The fragile map of Europe. Verify against genuine historical sources before any G1 approval.",
+      "source_leads": [
+        {
+          "url": "https://www.loc.gov/",
+          "title": "Archive search lead only"
+        }
+      ],
+      "critical": true,
+      "status": "UNVERIFIED"
+    },
+    {
+      "claim_id": "claim_002",
+      "text": "Editorial placeholder claim for chapter 2: A continent of empires. Verify against genuine historical sources before any G1 approval.",
+      "source_leads": [
+        {
+          "url": "https://www.loc.gov/",
+          "title": "Archive search lead only"
+        }
+      ],
+      "critical": true,
+      "status": "UNVERIFIED"
+    },
+    {
+      "claim_id": "claim_003",
+      "text": "Editorial placeholder claim for chapter 3: Bosnia and political tensions. Verify against genuine historical sources before any G1 approval.",
+      "source_leads": [
+        {
+          "url": "https://www.loc.gov/",
+          "title": "Archive search lead only"
+        }
+      ],
+      "critical": true,
+      "status": "UNVERIFIED"
+    },
+    {
+      "claim_id": "claim_004",
+      "text": "Editorial placeholder claim for chapter 4: The Sarajevo visit. Verify against genuine historical sources before any G1 approval.",
+      "source_leads": [
+        {
+          "url": "https://www.loc.gov/",
+          "title": "Archive search lead only"
+        }
+      ],
+      "critical": true,
+      "status": "UNVERIFIED"
+    },
+    {
+      "claim_id": "claim_005",
+      "text": "Editorial placeholder claim for chapter 5: The city and its streets. Verify against genuine historical sources before any G1 approval.",
+      "source_leads": [
+        {
+          "url": "https://www.loc.gov/",
+          "title": "Archive search lead only"
+        }
+      ],
+      "critical": true,
+      "status": "UNVERIFIED"
+    },
+    {
+      "claim_id": "claim_006",
+      "text": "Editorial placeholder claim for chapter 6: A procession on the move. Verify against genuine historical sources before any G1 approval.",
+      "source_leads": [
+        {
+          "url": "https://www.loc.gov/",
+          "title": "Archive search lead only"
+        }
+      ],
+      "critical": true,
+      "status": "UNVERIFIED"
+    },
+    {
+      "claim_id": "claim_007",
+      "text": "Editorial placeholder claim for chapter 7: The first turning point. Verify against genuine historical sources before any G1 approval.",
+      "source_leads": [
+        {
+          "url": "https://www.loc.gov/",
+          "title": "Archive search lead only"
+        }
+      ],
+      "critical": true,
+      "status": "UNVERIFIED"
+    },
+    {
+      "claim_id": "claim_008",
+      "text": "Editorial placeholder claim for chapter 8: Confusion around the route. Verify against genuine historical sources before any G1 approval.",
+      "source_leads": [
+        {
+          "url": "https://www.loc.gov/",
+          "title": "Archive search lead only"
+        }
+      ],
+      "critical": true,
+      "status": "UNVERIFIED"
+    },
+    {
+      "claim_id": "claim_009",
+      "text": "Editorial placeholder claim for chapter 9: The confrontation. Verify against genuine historical sources before any G1 approval.",
+      "source_leads": [
+        {
+          "url": "https://www.loc.gov/",
+          "title": "Archive search lead only"
+        }
+      ],
+      "critical": true,
+      "status": "UNVERIFIED"
+    },
+    {
+      "claim_id": "claim_010",
+      "text": "Editorial placeholder claim for chapter 10: News spreads. Verify against genuine historical sources before any G1 approval.",
+      "source_leads": [
+        {
+          "url": "https://www.loc.gov/",
+          "title": "Archive search lead only"
+        }
+      ],
+      "critical": true,
+      "status": "UNVERIFIED"
+    },
+    {
+      "claim_id": "claim_011",
+      "text": "Editorial placeholder claim for chapter 11: The response in Vienna. Verify against genuine historical sources before any G1 approval.",
+      "source_leads": [
+        {
+          "url": "https://www.loc.gov/",
+          "title": "Archive search lead only"
+        }
+      ],
+      "critical": true,
+      "status": "UNVERIFIED"
+    },
+    {
+      "claim_id": "claim_012",
+      "text": "Editorial placeholder claim for chapter 12: The diplomatic demands. Verify against genuine historical sources before any G1 approval.",
+      "source_leads": [
+        {
+          "url": "https://www.loc.gov/",
+          "title": "Archive search lead only"
+        }
+      ],
+      "critical": true,
+      "status": "UNVERIFIED"
+    },
+    {
+      "claim_id": "claim_013",
+      "text": "Editorial placeholder claim for chapter 13: Serbia and the ultimatum. Verify against genuine historical sources before any G1 approval.",
+      "source_leads": [
+        {
+          "url": "https://www.loc.gov/",
+          "title": "Archive search lead only"
+        }
+      ],
+      "critical": true,
+      "status": "UNVERIFIED"
+    },
+    {
+      "claim_id": "claim_014",
+      "text": "Editorial placeholder claim for chapter 14: Russia and mobilization. Verify against genuine historical sources before any G1 approval.",
+      "source_leads": [
+        {
+          "url": "https://www.loc.gov/",
+          "title": "Archive search lead only"
+        }
+      ],
+      "critical": true,
+      "status": "UNVERIFIED"
+    },
+    {
+      "claim_id": "claim_015",
+      "text": "Editorial placeholder claim for chapter 15: Berlin's decisions. Verify against genuine historical sources before any G1 approval.",
+      "source_leads": [
+        {
+          "url": "https://www.loc.gov/",
+          "title": "Archive search lead only"
+        }
+      ],
+      "critical": true,
+      "status": "UNVERIFIED"
+    },
+    {
+      "claim_id": "claim_016",
+      "text": "Editorial placeholder claim for chapter 16: Paris watches events. Verify against genuine historical sources before any G1 approval.",
+      "source_leads": [
+        {
+          "url": "https://www.loc.gov/",
+          "title": "Archive search lead only"
+        }
+      ],
+      "critical": true,
+      "status": "UNVERIFIED"
+    },
+    {
+      "claim_id": "claim_017",
+      "text": "Editorial placeholder claim for chapter 17: London examines reports. Verify against genuine historical sources before any G1 approval.",
+      "source_leads": [
+        {
+          "url": "https://www.loc.gov/",
+          "title": "Archive search lead only"
+        }
+      ],
+      "critical": true,
+      "status": "UNVERIFIED"
+    },
+    {
+      "claim_id": "claim_018",
+      "text": "Editorial placeholder claim for chapter 18: Border crossings. Verify against genuine historical sources before any G1 approval.",
+      "source_leads": [
+        {
+          "url": "https://www.loc.gov/",
+          "title": "Archive search lead only"
+        }
+      ],
+      "critical": true,
+      "status": "UNVERIFIED"
+    },
+    {
+      "claim_id": "claim_019",
+      "text": "Editorial placeholder claim for chapter 19: Alliances and commitments. Verify against genuine historical sources before any G1 approval.",
+      "source_leads": [
+        {
+          "url": "https://www.loc.gov/",
+          "title": "Archive search lead only"
+        }
+      ],
+      "critical": true,
+      "status": "UNVERIFIED"
+    },
+    {
+      "claim_id": "claim_020",
+      "text": "Editorial placeholder claim for chapter 20: Public reaction. Verify against genuine historical sources before any G1 approval.",
+      "source_leads": [
+        {
+          "url": "https://www.loc.gov/",
+          "title": "Archive search lead only"
+        }
+      ],
+      "critical": true,
+      "status": "UNVERIFIED"
+    },
+    {
+      "claim_id": "claim_021",
+      "text": "Editorial placeholder claim for chapter 21: The timetable accelerates. Verify against genuine historical sources before any G1 approval.",
+      "source_leads": [
+        {
+          "url": "https://www.loc.gov/",
+          "title": "Archive search lead only"
+        }
+      ],
+      "critical": true,
+      "status": "UNVERIFIED"
+    },
+    {
+      "claim_id": "claim_022",
+      "text": "Editorial placeholder claim for chapter 22: The first weeks of war. Verify against genuine historical sources before any G1 approval.",
+      "source_leads": [
+        {
+          "url": "https://www.loc.gov/",
+          "title": "Archive search lead only"
+        }
+      ],
+      "critical": true,
+      "status": "UNVERIFIED"
+    },
+    {
+      "claim_id": "claim_023",
+      "text": "Editorial placeholder claim for chapter 23: Consequences across Europe. Verify against genuine historical sources before any G1 approval.",
+      "source_leads": [
+        {
+          "url": "https://www.loc.gov/",
+          "title": "Archive search lead only"
+        }
+      ],
+      "critical": true,
+      "status": "UNVERIFIED"
+    },
+    {
+      "claim_id": "claim_024",
+      "text": "Editorial placeholder claim for chapter 24: Why one event mattered. Verify against genuine historical sources before any G1 approval.",
+      "source_leads": [
+        {
+          "url": "https://www.loc.gov/",
+          "title": "Archive search lead only"
+        }
+      ],
+      "critical": true,
+      "status": "UNVERIFIED"
+    }
+  ],
+  "asset_requirements": [
+    {
+      "requirement_id": "req_001",
+      "subject": "Reviewed evidence: The fragile map of Europe",
+      "asset_class": "HISTORICAL_MAP",
+      "exactness": "context_related",
+      "required": true,
+      "start_year": 1914,
+      "end_year": 1914,
+      "source_leads": [],
+      "map_reconstruction_policy": "exact_period_map"
+    },
+    {
+      "requirement_id": "req_002",
+      "subject": "Reviewed evidence: A continent of empires",
+      "asset_class": "ARCHIVAL_PHOTO",
+      "exactness": "context_related",
+      "required": true,
+      "start_year": 1914,
+      "end_year": 1914,
+      "source_leads": [],
+      "map_reconstruction_policy": "not_applicable"
+    },
+    {
+      "requirement_id": "req_003",
+      "subject": "Reviewed evidence: Bosnia and political tensions",
+      "asset_class": "HISTORICAL_DOCUMENT",
+      "exactness": "context_related",
+      "required": true,
+      "start_year": 1914,
+      "end_year": 1914,
+      "source_leads": [],
+      "map_reconstruction_policy": "not_applicable"
+    },
+    {
+      "requirement_id": "req_004",
+      "subject": "Reviewed evidence: The Sarajevo visit",
+      "asset_class": "HISTORICAL_ARTWORK",
+      "exactness": "context_related",
+      "required": true,
+      "start_year": 1914,
+      "end_year": 1914,
+      "source_leads": [],
+      "map_reconstruction_policy": "not_applicable"
+    },
+    {
+      "requirement_id": "req_005",
+      "subject": "Reviewed evidence: The city and its streets",
+      "asset_class": "HISTORICAL_MAP",
+      "exactness": "context_related",
+      "required": true,
+      "start_year": 1914,
+      "end_year": 1914,
+      "source_leads": [],
+      "map_reconstruction_policy": "exact_period_map"
+    },
+    {
+      "requirement_id": "req_006",
+      "subject": "Reviewed evidence: A procession on the move",
+      "asset_class": "ARCHIVAL_PHOTO",
+      "exactness": "context_related",
+      "required": true,
+      "start_year": 1914,
+      "end_year": 1914,
+      "source_leads": [],
+      "map_reconstruction_policy": "not_applicable"
+    },
+    {
+      "requirement_id": "req_007",
+      "subject": "Reviewed evidence: The first turning point",
+      "asset_class": "HISTORICAL_DOCUMENT",
+      "exactness": "context_related",
+      "required": true,
+      "start_year": 1914,
+      "end_year": 1914,
+      "source_leads": [],
+      "map_reconstruction_policy": "not_applicable"
+    },
+    {
+      "requirement_id": "req_008",
+      "subject": "Reviewed evidence: Confusion around the route",
+      "asset_class": "HISTORICAL_ARTWORK",
+      "exactness": "context_related",
+      "required": true,
+      "start_year": 1914,
+      "end_year": 1914,
+      "source_leads": [],
+      "map_reconstruction_policy": "not_applicable"
+    },
+    {
+      "requirement_id": "req_009",
+      "subject": "Reviewed evidence: The confrontation",
+      "asset_class": "HISTORICAL_MAP",
+      "exactness": "context_related",
+      "required": true,
+      "start_year": 1914,
+      "end_year": 1914,
+      "source_leads": [],
+      "map_reconstruction_policy": "exact_period_map"
+    },
+    {
+      "requirement_id": "req_010",
+      "subject": "Reviewed evidence: News spreads",
+      "asset_class": "ARCHIVAL_PHOTO",
+      "exactness": "context_related",
+      "required": true,
+      "start_year": 1914,
+      "end_year": 1914,
+      "source_leads": [],
+      "map_reconstruction_policy": "not_applicable"
+    },
+    {
+      "requirement_id": "req_011",
+      "subject": "Reviewed evidence: The response in Vienna",
+      "asset_class": "HISTORICAL_DOCUMENT",
+      "exactness": "context_related",
+      "required": true,
+      "start_year": 1914,
+      "end_year": 1914,
+      "source_leads": [],
+      "map_reconstruction_policy": "not_applicable"
+    },
+    {
+      "requirement_id": "req_012",
+      "subject": "Reviewed evidence: The diplomatic demands",
+      "asset_class": "HISTORICAL_ARTWORK",
+      "exactness": "context_related",
+      "required": true,
+      "start_year": 1914,
+      "end_year": 1914,
+      "source_leads": [],
+      "map_reconstruction_policy": "not_applicable"
+    },
+    {
+      "requirement_id": "req_013",
+      "subject": "Reviewed evidence: Serbia and the ultimatum",
+      "asset_class": "HISTORICAL_MAP",
+      "exactness": "context_related",
+      "required": true,
+      "start_year": 1914,
+      "end_year": 1914,
+      "source_leads": [],
+      "map_reconstruction_policy": "exact_period_map"
+    },
+    {
+      "requirement_id": "req_014",
+      "subject": "Reviewed evidence: Russia and mobilization",
+      "asset_class": "ARCHIVAL_PHOTO",
+      "exactness": "context_related",
+      "required": true,
+      "start_year": 1914,
+      "end_year": 1914,
+      "source_leads": [],
+      "map_reconstruction_policy": "not_applicable"
+    },
+    {
+      "requirement_id": "req_015",
+      "subject": "Reviewed evidence: Berlin's decisions",
+      "asset_class": "HISTORICAL_DOCUMENT",
+      "exactness": "context_related",
+      "required": true,
+      "start_year": 1914,
+      "end_year": 1914,
+      "source_leads": [],
+      "map_reconstruction_policy": "not_applicable"
+    },
+    {
+      "requirement_id": "req_016",
+      "subject": "Reviewed evidence: Paris watches events",
+      "asset_class": "HISTORICAL_ARTWORK",
+      "exactness": "context_related",
+      "required": true,
+      "start_year": 1914,
+      "end_year": 1914,
+      "source_leads": [],
+      "map_reconstruction_policy": "not_applicable"
+    },
+    {
+      "requirement_id": "req_017",
+      "subject": "Reviewed evidence: London examines reports",
+      "asset_class": "HISTORICAL_MAP",
+      "exactness": "context_related",
+      "required": true,
+      "start_year": 1914,
+      "end_year": 1914,
+      "source_leads": [],
+      "map_reconstruction_policy": "exact_period_map"
+    },
+    {
+      "requirement_id": "req_018",
+      "subject": "Reviewed evidence: Border crossings",
+      "asset_class": "ARCHIVAL_PHOTO",
+      "exactness": "context_related",
+      "required": true,
+      "start_year": 1914,
+      "end_year": 1914,
+      "source_leads": [],
+      "map_reconstruction_policy": "not_applicable"
+    },
+    {
+      "requirement_id": "req_019",
+      "subject": "Reviewed evidence: Alliances and commitments",
+      "asset_class": "HISTORICAL_DOCUMENT",
+      "exactness": "context_related",
+      "required": true,
+      "start_year": 1914,
+      "end_year": 1914,
+      "source_leads": [],
+      "map_reconstruction_policy": "not_applicable"
+    },
+    {
+      "requirement_id": "req_020",
+      "subject": "Reviewed evidence: Public reaction",
+      "asset_class": "HISTORICAL_ARTWORK",
+      "exactness": "context_related",
+      "required": true,
+      "start_year": 1914,
+      "end_year": 1914,
+      "source_leads": [],
+      "map_reconstruction_policy": "not_applicable"
+    },
+    {
+      "requirement_id": "req_021",
+      "subject": "Reviewed evidence: The timetable accelerates",
+      "asset_class": "HISTORICAL_MAP",
+      "exactness": "context_related",
+      "required": true,
+      "start_year": 1914,
+      "end_year": 1914,
+      "source_leads": [],
+      "map_reconstruction_policy": "exact_period_map"
+    },
+    {
+      "requirement_id": "req_022",
+      "subject": "Reviewed evidence: The first weeks of war",
+      "asset_class": "ARCHIVAL_PHOTO",
+      "exactness": "context_related",
+      "required": true,
+      "start_year": 1914,
+      "end_year": 1914,
+      "source_leads": [],
+      "map_reconstruction_policy": "not_applicable"
+    },
+    {
+      "requirement_id": "req_023",
+      "subject": "Reviewed evidence: Consequences across Europe",
+      "asset_class": "HISTORICAL_DOCUMENT",
+      "exactness": "context_related",
+      "required": true,
+      "start_year": 1914,
+      "end_year": 1914,
+      "source_leads": [],
+      "map_reconstruction_policy": "not_applicable"
+    },
+    {
+      "requirement_id": "req_024",
+      "subject": "Reviewed evidence: Why one event mattered",
+      "asset_class": "HISTORICAL_ARTWORK",
+      "exactness": "context_related",
+      "required": true,
+      "start_year": 1914,
+      "end_year": 1914,
+      "source_leads": [],
+      "map_reconstruction_policy": "not_applicable"
+    }
+  ],
+  "visual_setups": [
+    {
+      "setup_id": "setup_001",
+      "section_refs": [
+        "sec_001"
+      ],
+      "intent": "geography",
+      "preferred_template": "T01",
+      "requirement_refs": [
+        "req_001"
+      ],
+      "claim_refs": [
+        "claim_001"
+      ],
+      "direction": {
+        "visual_purpose": "Establish the historical geography context with precise visual hierarchy",
+        "viewer_takeaway": "Understand who, where and why this context matters",
+        "on_screen_text": [
+          {
+            "text": "THE FRAGILE MAP OF EUROPE",
+            "role": "headline",
+            "claim_ref": null,
+            "max_lines": 2
+          }
+        ],
+        "reveal_plan": [
+          {
+            "beat_id": "beat_001",
+            "action": "establish",
+            "target_role": "map",
+            "cue": {
+              "section_id": "sec_001",
+              "phrase": "The",
+              "occurrence": 0
+            },
+            "priority": 1
+          }
+        ],
+        "asset_slots": [
+          {
+            "slot_id": "slot_sec_001",
+            "requirement_id": "req_001",
+            "semantic_role": "reviewed primary contextual evidence",
+            "usage": "background",
+            "mandatory": true
+          }
+        ],
+        "camera_intent": "push_in",
+        "composition_intent": "map_full",
+        "emotional_tone": "neutral",
+        "layout_variant_hint": "A",
+        "duration_policy": "voice_locked",
+        "transition_intent": "hard_cut",
+        "historical_map_requirement_id": "req_001"
+      }
+    },
+    {
+      "setup_id": "setup_002",
+      "section_refs": [
+        "sec_001"
+      ],
+      "intent": "geography",
+      "preferred_template": "T01",
+      "requirement_refs": [
+        "req_001"
+      ],
+      "claim_refs": [
+        "claim_001"
+      ],
+      "direction": {
+        "visual_purpose": "Establish the historical geography context with precise visual hierarchy",
+        "viewer_takeaway": "Understand who, where and why this context matters",
+        "on_screen_text": [
+          {
+            "text": "THE FRAGILE MAP OF EUROPE",
+            "role": "headline",
+            "claim_ref": null,
+            "max_lines": 2
+          }
+        ],
+        "reveal_plan": [
+          {
+            "beat_id": "beat_002",
+            "action": "highlight",
+            "target_role": "map",
+            "cue": {
+              "section_id": "sec_001",
+              "phrase": "sources",
+              "occurrence": 0
+            },
+            "priority": 1
+          }
+        ],
+        "asset_slots": [
+          {
+            "slot_id": "slot_sec_001",
+            "requirement_id": "req_001",
+            "semantic_role": "reviewed primary contextual evidence",
+            "usage": "background",
+            "mandatory": true
+          }
+        ],
+        "camera_intent": "push_in",
+        "composition_intent": "map_full",
+        "emotional_tone": "neutral",
+        "layout_variant_hint": "A",
+        "duration_policy": "voice_locked",
+        "transition_intent": "hard_cut",
+        "historical_map_requirement_id": "req_001"
+      }
+    },
+    {
+      "setup_id": "setup_003",
+      "section_refs": [
+        "sec_002"
+      ],
+      "intent": "evidence",
+      "preferred_template": "T03",
+      "requirement_refs": [
+        "req_002"
+      ],
+      "claim_refs": [
+        "claim_002"
+      ],
+      "direction": {
+        "visual_purpose": "Establish the historical evidence context with precise visual hierarchy",
+        "viewer_takeaway": "Understand who, where and why this context matters",
+        "on_screen_text": [
+          {
+            "text": "A CONTINENT OF EMPIRES",
+            "role": "headline",
+            "claim_ref": null,
+            "max_lines": 2
+          }
+        ],
+        "reveal_plan": [
+          {
+            "beat_id": "beat_003",
+            "action": "establish",
+            "target_role": "headline",
+            "cue": {
+              "section_id": "sec_002",
+              "phrase": "A",
+              "occurrence": 0
+            },
+            "priority": 1
+          }
+        ],
+        "asset_slots": [
+          {
+            "slot_id": "slot_sec_002",
+            "requirement_id": "req_002",
+            "semantic_role": "reviewed primary contextual evidence",
+            "usage": "background",
+            "mandatory": true
+          }
+        ],
+        "camera_intent": "push_in",
+        "composition_intent": "map_full",
+        "emotional_tone": "neutral",
+        "layout_variant_hint": "A",
+        "duration_policy": "voice_locked",
+        "transition_intent": "hard_cut",
+        "historical_map_requirement_id": null
+      }
+    },
+    {
+      "setup_id": "setup_004",
+      "section_refs": [
+        "sec_002"
+      ],
+      "intent": "evidence",
+      "preferred_template": "T03",
+      "requirement_refs": [
+        "req_002"
+      ],
+      "claim_refs": [
+        "claim_002"
+      ],
+      "direction": {
+        "visual_purpose": "Establish the historical evidence context with precise visual hierarchy",
+        "viewer_takeaway": "Understand who, where and why this context matters",
+        "on_screen_text": [
+          {
+            "text": "A CONTINENT OF EMPIRES",
+            "role": "headline",
+            "claim_ref": null,
+            "max_lines": 2
+          }
+        ],
+        "reveal_plan": [
+          {
+            "beat_id": "beat_004",
+            "action": "highlight",
+            "target_role": "headline",
+            "cue": {
+              "section_id": "sec_002",
+              "phrase": "sources",
+              "occurrence": 0
+            },
+            "priority": 1
+          }
+        ],
+        "asset_slots": [
+          {
+            "slot_id": "slot_sec_002",
+            "requirement_id": "req_002",
+            "semantic_role": "reviewed primary contextual evidence",
+            "usage": "background",
+            "mandatory": true
+          }
+        ],
+        "camera_intent": "push_in",
+        "composition_intent": "map_full",
+        "emotional_tone": "neutral",
+        "layout_variant_hint": "A",
+        "duration_policy": "voice_locked",
+        "transition_intent": "hard_cut",
+        "historical_map_requirement_id": null
+      }
+    },
+    {
+      "setup_id": "setup_005",
+      "section_refs": [
+        "sec_003"
+      ],
+      "intent": "evidence",
+      "preferred_template": "T06",
+      "requirement_refs": [
+        "req_003"
+      ],
+      "claim_refs": [
+        "claim_003"
+      ],
+      "direction": {
+        "visual_purpose": "Establish the historical evidence context with precise visual hierarchy",
+        "viewer_takeaway": "Understand who, where and why this context matters",
+        "on_screen_text": [
+          {
+            "text": "BOSNIA AND POLITICAL TENSIONS",
+            "role": "headline",
+            "claim_ref": null,
+            "max_lines": 2
+          }
+        ],
+        "reveal_plan": [
+          {
+            "beat_id": "beat_005",
+            "action": "establish",
+            "target_role": "headline",
+            "cue": {
+              "section_id": "sec_003",
+              "phrase": "Bosnia",
+              "occurrence": 0
+            },
+            "priority": 1
+          }
+        ],
+        "asset_slots": [
+          {
+            "slot_id": "slot_sec_003",
+            "requirement_id": "req_003",
+            "semantic_role": "reviewed primary contextual evidence",
+            "usage": "background",
+            "mandatory": true
+          }
+        ],
+        "camera_intent": "push_in",
+        "composition_intent": "map_full",
+        "emotional_tone": "neutral",
+        "layout_variant_hint": "A",
+        "duration_policy": "voice_locked",
+        "transition_intent": "hard_cut",
+        "historical_map_requirement_id": null
+      }
+    },
+    {
+      "setup_id": "setup_006",
+      "section_refs": [
+        "sec_003"
+      ],
+      "intent": "evidence",
+      "preferred_template": "T06",
+      "requirement_refs": [
+        "req_003"
+      ],
+      "claim_refs": [
+        "claim_003"
+      ],
+      "direction": {
+        "visual_purpose": "Establish the historical evidence context with precise visual hierarchy",
+        "viewer_takeaway": "Understand who, where and why this context matters",
+        "on_screen_text": [
+          {
+            "text": "BOSNIA AND POLITICAL TENSIONS",
+            "role": "headline",
+            "claim_ref": null,
+            "max_lines": 2
+          }
+        ],
+        "reveal_plan": [
+          {
+            "beat_id": "beat_006",
+            "action": "highlight",
+            "target_role": "headline",
+            "cue": {
+              "section_id": "sec_003",
+              "phrase": "sources",
+              "occurrence": 0
+            },
+            "priority": 1
+          }
+        ],
+        "asset_slots": [
+          {
+            "slot_id": "slot_sec_003",
+            "requirement_id": "req_003",
+            "semantic_role": "reviewed primary contextual evidence",
+            "usage": "background",
+            "mandatory": true
+          }
+        ],
+        "camera_intent": "push_in",
+        "composition_intent": "map_full",
+        "emotional_tone": "neutral",
+        "layout_variant_hint": "A",
+        "duration_policy": "voice_locked",
+        "transition_intent": "hard_cut",
+        "historical_map_requirement_id": null
+      }
+    },
+    {
+      "setup_id": "setup_007",
+      "section_refs": [
+        "sec_004"
+      ],
+      "intent": "evidence",
+      "preferred_template": "T08",
+      "requirement_refs": [
+        "req_004"
+      ],
+      "claim_refs": [
+        "claim_004"
+      ],
+      "direction": {
+        "visual_purpose": "Establish the historical evidence context with precise visual hierarchy",
+        "viewer_takeaway": "Understand who, where and why this context matters",
+        "on_screen_text": [
+          {
+            "text": "THE SARAJEVO VISIT",
+            "role": "headline",
+            "claim_ref": null,
+            "max_lines": 2
+          }
+        ],
+        "reveal_plan": [
+          {
+            "beat_id": "beat_007",
+            "action": "establish",
+            "target_role": "headline",
+            "cue": {
+              "section_id": "sec_004",
+              "phrase": "The",
+              "occurrence": 0
+            },
+            "priority": 1
+          }
+        ],
+        "asset_slots": [
+          {
+            "slot_id": "slot_sec_004",
+            "requirement_id": "req_004",
+            "semantic_role": "reviewed primary contextual evidence",
+            "usage": "background",
+            "mandatory": true
+          }
+        ],
+        "camera_intent": "push_in",
+        "composition_intent": "map_full",
+        "emotional_tone": "neutral",
+        "layout_variant_hint": "A",
+        "duration_policy": "voice_locked",
+        "transition_intent": "hard_cut",
+        "historical_map_requirement_id": null
+      }
+    },
+    {
+      "setup_id": "setup_008",
+      "section_refs": [
+        "sec_004"
+      ],
+      "intent": "evidence",
+      "preferred_template": "T08",
+      "requirement_refs": [
+        "req_004"
+      ],
+      "claim_refs": [
+        "claim_004"
+      ],
+      "direction": {
+        "visual_purpose": "Establish the historical evidence context with precise visual hierarchy",
+        "viewer_takeaway": "Understand who, where and why this context matters",
+        "on_screen_text": [
+          {
+            "text": "THE SARAJEVO VISIT",
+            "role": "headline",
+            "claim_ref": null,
+            "max_lines": 2
+          }
+        ],
+        "reveal_plan": [
+          {
+            "beat_id": "beat_008",
+            "action": "highlight",
+            "target_role": "headline",
+            "cue": {
+              "section_id": "sec_004",
+              "phrase": "sources",
+              "occurrence": 0
+            },
+            "priority": 1
+          }
+        ],
+        "asset_slots": [
+          {
+            "slot_id": "slot_sec_004",
+            "requirement_id": "req_004",
+            "semantic_role": "reviewed primary contextual evidence",
+            "usage": "background",
+            "mandatory": true
+          }
+        ],
+        "camera_intent": "push_in",
+        "composition_intent": "map_full",
+        "emotional_tone": "neutral",
+        "layout_variant_hint": "A",
+        "duration_policy": "voice_locked",
+        "transition_intent": "hard_cut",
+        "historical_map_requirement_id": null
+      }
+    },
+    {
+      "setup_id": "setup_009",
+      "section_refs": [
+        "sec_005"
+      ],
+      "intent": "geography",
+      "preferred_template": "T01",
+      "requirement_refs": [
+        "req_005"
+      ],
+      "claim_refs": [
+        "claim_005"
+      ],
+      "direction": {
+        "visual_purpose": "Establish the historical geography context with precise visual hierarchy",
+        "viewer_takeaway": "Understand who, where and why this context matters",
+        "on_screen_text": [
+          {
+            "text": "THE CITY AND ITS STREETS",
+            "role": "headline",
+            "claim_ref": null,
+            "max_lines": 2
+          }
+        ],
+        "reveal_plan": [
+          {
+            "beat_id": "beat_009",
+            "action": "establish",
+            "target_role": "map",
+            "cue": {
+              "section_id": "sec_005",
+              "phrase": "The",
+              "occurrence": 0
+            },
+            "priority": 1
+          }
+        ],
+        "asset_slots": [
+          {
+            "slot_id": "slot_sec_005",
+            "requirement_id": "req_005",
+            "semantic_role": "reviewed primary contextual evidence",
+            "usage": "background",
+            "mandatory": true
+          }
+        ],
+        "camera_intent": "push_in",
+        "composition_intent": "map_full",
+        "emotional_tone": "neutral",
+        "layout_variant_hint": "A",
+        "duration_policy": "voice_locked",
+        "transition_intent": "hard_cut",
+        "historical_map_requirement_id": "req_005"
+      }
+    },
+    {
+      "setup_id": "setup_010",
+      "section_refs": [
+        "sec_005"
+      ],
+      "intent": "geography",
+      "preferred_template": "T01",
+      "requirement_refs": [
+        "req_005"
+      ],
+      "claim_refs": [
+        "claim_005"
+      ],
+      "direction": {
+        "visual_purpose": "Establish the historical geography context with precise visual hierarchy",
+        "viewer_takeaway": "Understand who, where and why this context matters",
+        "on_screen_text": [
+          {
+            "text": "THE CITY AND ITS STREETS",
+            "role": "headline",
+            "claim_ref": null,
+            "max_lines": 2
+          }
+        ],
+        "reveal_plan": [
+          {
+            "beat_id": "beat_010",
+            "action": "highlight",
+            "target_role": "map",
+            "cue": {
+              "section_id": "sec_005",
+              "phrase": "sources",
+              "occurrence": 0
+            },
+            "priority": 1
+          }
+        ],
+        "asset_slots": [
+          {
+            "slot_id": "slot_sec_005",
+            "requirement_id": "req_005",
+            "semantic_role": "reviewed primary contextual evidence",
+            "usage": "background",
+            "mandatory": true
+          }
+        ],
+        "camera_intent": "push_in",
+        "composition_intent": "map_full",
+        "emotional_tone": "neutral",
+        "layout_variant_hint": "A",
+        "duration_policy": "voice_locked",
+        "transition_intent": "hard_cut",
+        "historical_map_requirement_id": "req_005"
+      }
+    },
+    {
+      "setup_id": "setup_011",
+      "section_refs": [
+        "sec_006"
+      ],
+      "intent": "evidence",
+      "preferred_template": "T03",
+      "requirement_refs": [
+        "req_006"
+      ],
+      "claim_refs": [
+        "claim_006"
+      ],
+      "direction": {
+        "visual_purpose": "Establish the historical evidence context with precise visual hierarchy",
+        "viewer_takeaway": "Understand who, where and why this context matters",
+        "on_screen_text": [
+          {
+            "text": "A PROCESSION ON THE MOVE",
+            "role": "headline",
+            "claim_ref": null,
+            "max_lines": 2
+          }
+        ],
+        "reveal_plan": [
+          {
+            "beat_id": "beat_011",
+            "action": "establish",
+            "target_role": "headline",
+            "cue": {
+              "section_id": "sec_006",
+              "phrase": "A",
+              "occurrence": 0
+            },
+            "priority": 1
+          }
+        ],
+        "asset_slots": [
+          {
+            "slot_id": "slot_sec_006",
+            "requirement_id": "req_006",
+            "semantic_role": "reviewed primary contextual evidence",
+            "usage": "background",
+            "mandatory": true
+          }
+        ],
+        "camera_intent": "push_in",
+        "composition_intent": "map_full",
+        "emotional_tone": "neutral",
+        "layout_variant_hint": "A",
+        "duration_policy": "voice_locked",
+        "transition_intent": "hard_cut",
+        "historical_map_requirement_id": null
+      }
+    },
+    {
+      "setup_id": "setup_012",
+      "section_refs": [
+        "sec_006"
+      ],
+      "intent": "evidence",
+      "preferred_template": "T03",
+      "requirement_refs": [
+        "req_006"
+      ],
+      "claim_refs": [
+        "claim_006"
+      ],
+      "direction": {
+        "visual_purpose": "Establish the historical evidence context with precise visual hierarchy",
+        "viewer_takeaway": "Understand who, where and why this context matters",
+        "on_screen_text": [
+          {
+            "text": "A PROCESSION ON THE MOVE",
+            "role": "headline",
+            "claim_ref": null,
+            "max_lines": 2
+          }
+        ],
+        "reveal_plan": [
+          {
+            "beat_id": "beat_012",
+            "action": "highlight",
+            "target_role": "headline",
+            "cue": {
+              "section_id": "sec_006",
+              "phrase": "sources",
+              "occurrence": 0
+            },
+            "priority": 1
+          }
+        ],
+        "asset_slots": [
+          {
+            "slot_id": "slot_sec_006",
+            "requirement_id": "req_006",
+            "semantic_role": "reviewed primary contextual evidence",
+            "usage": "background",
+            "mandatory": true
+          }
+        ],
+        "camera_intent": "push_in",
+        "composition_intent": "map_full",
+        "emotional_tone": "neutral",
+        "layout_variant_hint": "A",
+        "duration_policy": "voice_locked",
+        "transition_intent": "hard_cut",
+        "historical_map_requirement_id": null
+      }
+    },
+    {
+      "setup_id": "setup_013",
+      "section_refs": [
+        "sec_007"
+      ],
+      "intent": "evidence",
+      "preferred_template": "T06",
+      "requirement_refs": [
+        "req_007"
+      ],
+      "claim_refs": [
+        "claim_007"
+      ],
+      "direction": {
+        "visual_purpose": "Establish the historical evidence context with precise visual hierarchy",
+        "viewer_takeaway": "Understand who, where and why this context matters",
+        "on_screen_text": [
+          {
+            "text": "THE FIRST TURNING POINT",
+            "role": "headline",
+            "claim_ref": null,
+            "max_lines": 2
+          }
+        ],
+        "reveal_plan": [
+          {
+            "beat_id": "beat_013",
+            "action": "establish",
+            "target_role": "headline",
+            "cue": {
+              "section_id": "sec_007",
+              "phrase": "The",
+              "occurrence": 0
+            },
+            "priority": 1
+          }
+        ],
+        "asset_slots": [
+          {
+            "slot_id": "slot_sec_007",
+            "requirement_id": "req_007",
+            "semantic_role": "reviewed primary contextual evidence",
+            "usage": "background",
+            "mandatory": true
+          }
+        ],
+        "camera_intent": "push_in",
+        "composition_intent": "map_full",
+        "emotional_tone": "neutral",
+        "layout_variant_hint": "A",
+        "duration_policy": "voice_locked",
+        "transition_intent": "hard_cut",
+        "historical_map_requirement_id": null
+      }
+    },
+    {
+      "setup_id": "setup_014",
+      "section_refs": [
+        "sec_007"
+      ],
+      "intent": "evidence",
+      "preferred_template": "T06",
+      "requirement_refs": [
+        "req_007"
+      ],
+      "claim_refs": [
+        "claim_007"
+      ],
+      "direction": {
+        "visual_purpose": "Establish the historical evidence context with precise visual hierarchy",
+        "viewer_takeaway": "Understand who, where and why this context matters",
+        "on_screen_text": [
+          {
+            "text": "THE FIRST TURNING POINT",
+            "role": "headline",
+            "claim_ref": null,
+            "max_lines": 2
+          }
+        ],
+        "reveal_plan": [
+          {
+            "beat_id": "beat_014",
+            "action": "highlight",
+            "target_role": "headline",
+            "cue": {
+              "section_id": "sec_007",
+              "phrase": "sources",
+              "occurrence": 0
+            },
+            "priority": 1
+          }
+        ],
+        "asset_slots": [
+          {
+            "slot_id": "slot_sec_007",
+            "requirement_id": "req_007",
+            "semantic_role": "reviewed primary contextual evidence",
+            "usage": "background",
+            "mandatory": true
+          }
+        ],
+        "camera_intent": "push_in",
+        "composition_intent": "map_full",
+        "emotional_tone": "neutral",
+        "layout_variant_hint": "A",
+        "duration_policy": "voice_locked",
+        "transition_intent": "hard_cut",
+        "historical_map_requirement_id": null
+      }
+    },
+    {
+      "setup_id": "setup_015",
+      "section_refs": [
+        "sec_008"
+      ],
+      "intent": "evidence",
+      "preferred_template": "T08",
+      "requirement_refs": [
+        "req_008"
+      ],
+      "claim_refs": [
+        "claim_008"
+      ],
+      "direction": {
+        "visual_purpose": "Establish the historical evidence context with precise visual hierarchy",
+        "viewer_takeaway": "Understand who, where and why this context matters",
+        "on_screen_text": [
+          {
+            "text": "CONFUSION AROUND THE ROUTE",
+            "role": "headline",
+            "claim_ref": null,
+            "max_lines": 2
+          }
+        ],
+        "reveal_plan": [
+          {
+            "beat_id": "beat_015",
+            "action": "establish",
+            "target_role": "headline",
+            "cue": {
+              "section_id": "sec_008",
+              "phrase": "Confusion",
+              "occurrence": 0
+            },
+            "priority": 1
+          }
+        ],
+        "asset_slots": [
+          {
+            "slot_id": "slot_sec_008",
+            "requirement_id": "req_008",
+            "semantic_role": "reviewed primary contextual evidence",
+            "usage": "background",
+            "mandatory": true
+          }
+        ],
+        "camera_intent": "push_in",
+        "composition_intent": "map_full",
+        "emotional_tone": "neutral",
+        "layout_variant_hint": "A",
+        "duration_policy": "voice_locked",
+        "transition_intent": "hard_cut",
+        "historical_map_requirement_id": null
+      }
+    },
+    {
+      "setup_id": "setup_016",
+      "section_refs": [
+        "sec_008"
+      ],
+      "intent": "evidence",
+      "preferred_template": "T08",
+      "requirement_refs": [
+        "req_008"
+      ],
+      "claim_refs": [
+        "claim_008"
+      ],
+      "direction": {
+        "visual_purpose": "Establish the historical evidence context with precise visual hierarchy",
+        "viewer_takeaway": "Understand who, where and why this context matters",
+        "on_screen_text": [
+          {
+            "text": "CONFUSION AROUND THE ROUTE",
+            "role": "headline",
+            "claim_ref": null,
+            "max_lines": 2
+          }
+        ],
+        "reveal_plan": [
+          {
+            "beat_id": "beat_016",
+            "action": "highlight",
+            "target_role": "headline",
+            "cue": {
+              "section_id": "sec_008",
+              "phrase": "sources",
+              "occurrence": 0
+            },
+            "priority": 1
+          }
+        ],
+        "asset_slots": [
+          {
+            "slot_id": "slot_sec_008",
+            "requirement_id": "req_008",
+            "semantic_role": "reviewed primary contextual evidence",
+            "usage": "background",
+            "mandatory": true
+          }
+        ],
+        "camera_intent": "push_in",
+        "composition_intent": "map_full",
+        "emotional_tone": "neutral",
+        "layout_variant_hint": "A",
+        "duration_policy": "voice_locked",
+        "transition_intent": "hard_cut",
+        "historical_map_requirement_id": null
+      }
+    },
+    {
+      "setup_id": "setup_017",
+      "section_refs": [
+        "sec_009"
+      ],
+      "intent": "geography",
+      "preferred_template": "T01",
+      "requirement_refs": [
+        "req_009"
+      ],
+      "claim_refs": [
+        "claim_009"
+      ],
+      "direction": {
+        "visual_purpose": "Establish the historical geography context with precise visual hierarchy",
+        "viewer_takeaway": "Understand who, where and why this context matters",
+        "on_screen_text": [
+          {
+            "text": "THE CONFRONTATION",
+            "role": "headline",
+            "claim_ref": null,
+            "max_lines": 2
+          }
+        ],
+        "reveal_plan": [
+          {
+            "beat_id": "beat_017",
+            "action": "establish",
+            "target_role": "map",
+            "cue": {
+              "section_id": "sec_009",
+              "phrase": "The",
+              "occurrence": 0
+            },
+            "priority": 1
+          }
+        ],
+        "asset_slots": [
+          {
+            "slot_id": "slot_sec_009",
+            "requirement_id": "req_009",
+            "semantic_role": "reviewed primary contextual evidence",
+            "usage": "background",
+            "mandatory": true
+          }
+        ],
+        "camera_intent": "push_in",
+        "composition_intent": "map_full",
+        "emotional_tone": "neutral",
+        "layout_variant_hint": "A",
+        "duration_policy": "voice_locked",
+        "transition_intent": "hard_cut",
+        "historical_map_requirement_id": "req_009"
+      }
+    },
+    {
+      "setup_id": "setup_018",
+      "section_refs": [
+        "sec_009"
+      ],
+      "intent": "geography",
+      "preferred_template": "T01",
+      "requirement_refs": [
+        "req_009"
+      ],
+      "claim_refs": [
+        "claim_009"
+      ],
+      "direction": {
+        "visual_purpose": "Establish the historical geography context with precise visual hierarchy",
+        "viewer_takeaway": "Understand who, where and why this context matters",
+        "on_screen_text": [
+          {
+            "text": "THE CONFRONTATION",
+            "role": "headline",
+            "claim_ref": null,
+            "max_lines": 2
+          }
+        ],
+        "reveal_plan": [
+          {
+            "beat_id": "beat_018",
+            "action": "highlight",
+            "target_role": "map",
+            "cue": {
+              "section_id": "sec_009",
+              "phrase": "sources",
+              "occurrence": 0
+            },
+            "priority": 1
+          }
+        ],
+        "asset_slots": [
+          {
+            "slot_id": "slot_sec_009",
+            "requirement_id": "req_009",
+            "semantic_role": "reviewed primary contextual evidence",
+            "usage": "background",
+            "mandatory": true
+          }
+        ],
+        "camera_intent": "push_in",
+        "composition_intent": "map_full",
+        "emotional_tone": "neutral",
+        "layout_variant_hint": "A",
+        "duration_policy": "voice_locked",
+        "transition_intent": "hard_cut",
+        "historical_map_requirement_id": "req_009"
+      }
+    },
+    {
+      "setup_id": "setup_019",
+      "section_refs": [
+        "sec_010"
+      ],
+      "intent": "evidence",
+      "preferred_template": "T03",
+      "requirement_refs": [
+        "req_010"
+      ],
+      "claim_refs": [
+        "claim_010"
+      ],
+      "direction": {
+        "visual_purpose": "Establish the historical evidence context with precise visual hierarchy",
+        "viewer_takeaway": "Understand who, where and why this context matters",
+        "on_screen_text": [
+          {
+            "text": "NEWS SPREADS",
+            "role": "headline",
+            "claim_ref": null,
+            "max_lines": 2
+          }
+        ],
+        "reveal_plan": [
+          {
+            "beat_id": "beat_019",
+            "action": "establish",
+            "target_role": "headline",
+            "cue": {
+              "section_id": "sec_010",
+              "phrase": "News",
+              "occurrence": 0
+            },
+            "priority": 1
+          }
+        ],
+        "asset_slots": [
+          {
+            "slot_id": "slot_sec_010",
+            "requirement_id": "req_010",
+            "semantic_role": "reviewed primary contextual evidence",
+            "usage": "background",
+            "mandatory": true
+          }
+        ],
+        "camera_intent": "push_in",
+        "composition_intent": "map_full",
+        "emotional_tone": "neutral",
+        "layout_variant_hint": "A",
+        "duration_policy": "voice_locked",
+        "transition_intent": "hard_cut",
+        "historical_map_requirement_id": null
+      }
+    },
+    {
+      "setup_id": "setup_020",
+      "section_refs": [
+        "sec_010"
+      ],
+      "intent": "evidence",
+      "preferred_template": "T03",
+      "requirement_refs": [
+        "req_010"
+      ],
+      "claim_refs": [
+        "claim_010"
+      ],
+      "direction": {
+        "visual_purpose": "Establish the historical evidence context with precise visual hierarchy",
+        "viewer_takeaway": "Understand who, where and why this context matters",
+        "on_screen_text": [
+          {
+            "text": "NEWS SPREADS",
+            "role": "headline",
+            "claim_ref": null,
+            "max_lines": 2
+          }
+        ],
+        "reveal_plan": [
+          {
+            "beat_id": "beat_020",
+            "action": "highlight",
+            "target_role": "headline",
+            "cue": {
+              "section_id": "sec_010",
+              "phrase": "sources",
+              "occurrence": 0
+            },
+            "priority": 1
+          }
+        ],
+        "asset_slots": [
+          {
+            "slot_id": "slot_sec_010",
+            "requirement_id": "req_010",
+            "semantic_role": "reviewed primary contextual evidence",
+            "usage": "background",
+            "mandatory": true
+          }
+        ],
+        "camera_intent": "push_in",
+        "composition_intent": "map_full",
+        "emotional_tone": "neutral",
+        "layout_variant_hint": "A",
+        "duration_policy": "voice_locked",
+        "transition_intent": "hard_cut",
+        "historical_map_requirement_id": null
+      }
+    },
+    {
+      "setup_id": "setup_021",
+      "section_refs": [
+        "sec_011"
+      ],
+      "intent": "evidence",
+      "preferred_template": "T06",
+      "requirement_refs": [
+        "req_011"
+      ],
+      "claim_refs": [
+        "claim_011"
+      ],
+      "direction": {
+        "visual_purpose": "Establish the historical evidence context with precise visual hierarchy",
+        "viewer_takeaway": "Understand who, where and why this context matters",
+        "on_screen_text": [
+          {
+            "text": "THE RESPONSE IN VIENNA",
+            "role": "headline",
+            "claim_ref": null,
+            "max_lines": 2
+          }
+        ],
+        "reveal_plan": [
+          {
+            "beat_id": "beat_021",
+            "action": "establish",
+            "target_role": "headline",
+            "cue": {
+              "section_id": "sec_011",
+              "phrase": "The",
+              "occurrence": 0
+            },
+            "priority": 1
+          }
+        ],
+        "asset_slots": [
+          {
+            "slot_id": "slot_sec_011",
+            "requirement_id": "req_011",
+            "semantic_role": "reviewed primary contextual evidence",
+            "usage": "background",
+            "mandatory": true
+          }
+        ],
+        "camera_intent": "push_in",
+        "composition_intent": "map_full",
+        "emotional_tone": "neutral",
+        "layout_variant_hint": "A",
+        "duration_policy": "voice_locked",
+        "transition_intent": "hard_cut",
+        "historical_map_requirement_id": null
+      }
+    },
+    {
+      "setup_id": "setup_022",
+      "section_refs": [
+        "sec_011"
+      ],
+      "intent": "evidence",
+      "preferred_template": "T06",
+      "requirement_refs": [
+        "req_011"
+      ],
+      "claim_refs": [
+        "claim_011"
+      ],
+      "direction": {
+        "visual_purpose": "Establish the historical evidence context with precise visual hierarchy",
+        "viewer_takeaway": "Understand who, where and why this context matters",
+        "on_screen_text": [
+          {
+            "text": "THE RESPONSE IN VIENNA",
+            "role": "headline",
+            "claim_ref": null,
+            "max_lines": 2
+          }
+        ],
+        "reveal_plan": [
+          {
+            "beat_id": "beat_022",
+            "action": "highlight",
+            "target_role": "headline",
+            "cue": {
+              "section_id": "sec_011",
+              "phrase": "sources",
+              "occurrence": 0
+            },
+            "priority": 1
+          }
+        ],
+        "asset_slots": [
+          {
+            "slot_id": "slot_sec_011",
+            "requirement_id": "req_011",
+            "semantic_role": "reviewed primary contextual evidence",
+            "usage": "background",
+            "mandatory": true
+          }
+        ],
+        "camera_intent": "push_in",
+        "composition_intent": "map_full",
+        "emotional_tone": "neutral",
+        "layout_variant_hint": "A",
+        "duration_policy": "voice_locked",
+        "transition_intent": "hard_cut",
+        "historical_map_requirement_id": null
+      }
+    },
+    {
+      "setup_id": "setup_023",
+      "section_refs": [
+        "sec_012"
+      ],
+      "intent": "evidence",
+      "preferred_template": "T08",
+      "requirement_refs": [
+        "req_012"
+      ],
+      "claim_refs": [
+        "claim_012"
+      ],
+      "direction": {
+        "visual_purpose": "Establish the historical evidence context with precise visual hierarchy",
+        "viewer_takeaway": "Understand who, where and why this context matters",
+        "on_screen_text": [
+          {
+            "text": "THE DIPLOMATIC DEMANDS",
+            "role": "headline",
+            "claim_ref": null,
+            "max_lines": 2
+          }
+        ],
+        "reveal_plan": [
+          {
+            "beat_id": "beat_023",
+            "action": "establish",
+            "target_role": "headline",
+            "cue": {
+              "section_id": "sec_012",
+              "phrase": "The",
+              "occurrence": 0
+            },
+            "priority": 1
+          }
+        ],
+        "asset_slots": [
+          {
+            "slot_id": "slot_sec_012",
+            "requirement_id": "req_012",
+            "semantic_role": "reviewed primary contextual evidence",
+            "usage": "background",
+            "mandatory": true
+          }
+        ],
+        "camera_intent": "push_in",
+        "composition_intent": "map_full",
+        "emotional_tone": "neutral",
+        "layout_variant_hint": "A",
+        "duration_policy": "voice_locked",
+        "transition_intent": "hard_cut",
+        "historical_map_requirement_id": null
+      }
+    },
+    {
+      "setup_id": "setup_024",
+      "section_refs": [
+        "sec_012"
+      ],
+      "intent": "evidence",
+      "preferred_template": "T08",
+      "requirement_refs": [
+        "req_012"
+      ],
+      "claim_refs": [
+        "claim_012"
+      ],
+      "direction": {
+        "visual_purpose": "Establish the historical evidence context with precise visual hierarchy",
+        "viewer_takeaway": "Understand who, where and why this context matters",
+        "on_screen_text": [
+          {
+            "text": "THE DIPLOMATIC DEMANDS",
+            "role": "headline",
+            "claim_ref": null,
+            "max_lines": 2
+          }
+        ],
+        "reveal_plan": [
+          {
+            "beat_id": "beat_024",
+            "action": "highlight",
+            "target_role": "headline",
+            "cue": {
+              "section_id": "sec_012",
+              "phrase": "sources",
+              "occurrence": 0
+            },
+            "priority": 1
+          }
+        ],
+        "asset_slots": [
+          {
+            "slot_id": "slot_sec_012",
+            "requirement_id": "req_012",
+            "semantic_role": "reviewed primary contextual evidence",
+            "usage": "background",
+            "mandatory": true
+          }
+        ],
+        "camera_intent": "push_in",
+        "composition_intent": "map_full",
+        "emotional_tone": "neutral",
+        "layout_variant_hint": "A",
+        "duration_policy": "voice_locked",
+        "transition_intent": "hard_cut",
+        "historical_map_requirement_id": null
+      }
+    },
+    {
+      "setup_id": "setup_025",
+      "section_refs": [
+        "sec_013"
+      ],
+      "intent": "geography",
+      "preferred_template": "T01",
+      "requirement_refs": [
+        "req_013"
+      ],
+      "claim_refs": [
+        "claim_013"
+      ],
+      "direction": {
+        "visual_purpose": "Establish the historical geography context with precise visual hierarchy",
+        "viewer_takeaway": "Understand who, where and why this context matters",
+        "on_screen_text": [
+          {
+            "text": "SERBIA AND THE ULTIMATUM",
+            "role": "headline",
+            "claim_ref": null,
+            "max_lines": 2
+          }
+        ],
+        "reveal_plan": [
+          {
+            "beat_id": "beat_025",
+            "action": "establish",
+            "target_role": "map",
+            "cue": {
+              "section_id": "sec_013",
+              "phrase": "Serbia",
+              "occurrence": 0
+            },
+            "priority": 1
+          }
+        ],
+        "asset_slots": [
+          {
+            "slot_id": "slot_sec_013",
+            "requirement_id": "req_013",
+            "semantic_role": "reviewed primary contextual evidence",
+            "usage": "background",
+            "mandatory": true
+          }
+        ],
+        "camera_intent": "push_in",
+        "composition_intent": "map_full",
+        "emotional_tone": "neutral",
+        "layout_variant_hint": "A",
+        "duration_policy": "voice_locked",
+        "transition_intent": "hard_cut",
+        "historical_map_requirement_id": "req_013"
+      }
+    },
+    {
+      "setup_id": "setup_026",
+      "section_refs": [
+        "sec_013"
+      ],
+      "intent": "geography",
+      "preferred_template": "T01",
+      "requirement_refs": [
+        "req_013"
+      ],
+      "claim_refs": [
+        "claim_013"
+      ],
+      "direction": {
+        "visual_purpose": "Establish the historical geography context with precise visual hierarchy",
+        "viewer_takeaway": "Understand who, where and why this context matters",
+        "on_screen_text": [
+          {
+            "text": "SERBIA AND THE ULTIMATUM",
+            "role": "headline",
+            "claim_ref": null,
+            "max_lines": 2
+          }
+        ],
+        "reveal_plan": [
+          {
+            "beat_id": "beat_026",
+            "action": "highlight",
+            "target_role": "map",
+            "cue": {
+              "section_id": "sec_013",
+              "phrase": "sources",
+              "occurrence": 0
+            },
+            "priority": 1
+          }
+        ],
+        "asset_slots": [
+          {
+            "slot_id": "slot_sec_013",
+            "requirement_id": "req_013",
+            "semantic_role": "reviewed primary contextual evidence",
+            "usage": "background",
+            "mandatory": true
+          }
+        ],
+        "camera_intent": "push_in",
+        "composition_intent": "map_full",
+        "emotional_tone": "neutral",
+        "layout_variant_hint": "A",
+        "duration_policy": "voice_locked",
+        "transition_intent": "hard_cut",
+        "historical_map_requirement_id": "req_013"
+      }
+    },
+    {
+      "setup_id": "setup_027",
+      "section_refs": [
+        "sec_014"
+      ],
+      "intent": "evidence",
+      "preferred_template": "T03",
+      "requirement_refs": [
+        "req_014"
+      ],
+      "claim_refs": [
+        "claim_014"
+      ],
+      "direction": {
+        "visual_purpose": "Establish the historical evidence context with precise visual hierarchy",
+        "viewer_takeaway": "Understand who, where and why this context matters",
+        "on_screen_text": [
+          {
+            "text": "RUSSIA AND MOBILIZATION",
+            "role": "headline",
+            "claim_ref": null,
+            "max_lines": 2
+          }
+        ],
+        "reveal_plan": [
+          {
+            "beat_id": "beat_027",
+            "action": "establish",
+            "target_role": "headline",
+            "cue": {
+              "section_id": "sec_014",
+              "phrase": "Russia",
+              "occurrence": 0
+            },
+            "priority": 1
+          }
+        ],
+        "asset_slots": [
+          {
+            "slot_id": "slot_sec_014",
+            "requirement_id": "req_014",
+            "semantic_role": "reviewed primary contextual evidence",
+            "usage": "background",
+            "mandatory": true
+          }
+        ],
+        "camera_intent": "push_in",
+        "composition_intent": "map_full",
+        "emotional_tone": "neutral",
+        "layout_variant_hint": "A",
+        "duration_policy": "voice_locked",
+        "transition_intent": "hard_cut",
+        "historical_map_requirement_id": null
+      }
+    },
+    {
+      "setup_id": "setup_028",
+      "section_refs": [
+        "sec_014"
+      ],
+      "intent": "evidence",
+      "preferred_template": "T03",
+      "requirement_refs": [
+        "req_014"
+      ],
+      "claim_refs": [
+        "claim_014"
+      ],
+      "direction": {
+        "visual_purpose": "Establish the historical evidence context with precise visual hierarchy",
+        "viewer_takeaway": "Understand who, where and why this context matters",
+        "on_screen_text": [
+          {
+            "text": "RUSSIA AND MOBILIZATION",
+            "role": "headline",
+            "claim_ref": null,
+            "max_lines": 2
+          }
+        ],
+        "reveal_plan": [
+          {
+            "beat_id": "beat_028",
+            "action": "highlight",
+            "target_role": "headline",
+            "cue": {
+              "section_id": "sec_014",
+              "phrase": "sources",
+              "occurrence": 0
+            },
+            "priority": 1
+          }
+        ],
+        "asset_slots": [
+          {
+            "slot_id": "slot_sec_014",
+            "requirement_id": "req_014",
+            "semantic_role": "reviewed primary contextual evidence",
+            "usage": "background",
+            "mandatory": true
+          }
+        ],
+        "camera_intent": "push_in",
+        "composition_intent": "map_full",
+        "emotional_tone": "neutral",
+        "layout_variant_hint": "A",
+        "duration_policy": "voice_locked",
+        "transition_intent": "hard_cut",
+        "historical_map_requirement_id": null
+      }
+    },
+    {
+      "setup_id": "setup_029",
+      "section_refs": [
+        "sec_015"
+      ],
+      "intent": "evidence",
+      "preferred_template": "T06",
+      "requirement_refs": [
+        "req_015"
+      ],
+      "claim_refs": [
+        "claim_015"
+      ],
+      "direction": {
+        "visual_purpose": "Establish the historical evidence context with precise visual hierarchy",
+        "viewer_takeaway": "Understand who, where and why this context matters",
+        "on_screen_text": [
+          {
+            "text": "BERLIN'S DECISIONS",
+            "role": "headline",
+            "claim_ref": null,
+            "max_lines": 2
+          }
+        ],
+        "reveal_plan": [
+          {
+            "beat_id": "beat_029",
+            "action": "establish",
+            "target_role": "headline",
+            "cue": {
+              "section_id": "sec_015",
+              "phrase": "Berlin's",
+              "occurrence": 0
+            },
+            "priority": 1
+          }
+        ],
+        "asset_slots": [
+          {
+            "slot_id": "slot_sec_015",
+            "requirement_id": "req_015",
+            "semantic_role": "reviewed primary contextual evidence",
+            "usage": "background",
+            "mandatory": true
+          }
+        ],
+        "camera_intent": "push_in",
+        "composition_intent": "map_full",
+        "emotional_tone": "neutral",
+        "layout_variant_hint": "A",
+        "duration_policy": "voice_locked",
+        "transition_intent": "hard_cut",
+        "historical_map_requirement_id": null
+      }
+    },
+    {
+      "setup_id": "setup_030",
+      "section_refs": [
+        "sec_015"
+      ],
+      "intent": "evidence",
+      "preferred_template": "T06",
+      "requirement_refs": [
+        "req_015"
+      ],
+      "claim_refs": [
+        "claim_015"
+      ],
+      "direction": {
+        "visual_purpose": "Establish the historical evidence context with precise visual hierarchy",
+        "viewer_takeaway": "Understand who, where and why this context matters",
+        "on_screen_text": [
+          {
+            "text": "BERLIN'S DECISIONS",
+            "role": "headline",
+            "claim_ref": null,
+            "max_lines": 2
+          }
+        ],
+        "reveal_plan": [
+          {
+            "beat_id": "beat_030",
+            "action": "highlight",
+            "target_role": "headline",
+            "cue": {
+              "section_id": "sec_015",
+              "phrase": "sources",
+              "occurrence": 0
+            },
+            "priority": 1
+          }
+        ],
+        "asset_slots": [
+          {
+            "slot_id": "slot_sec_015",
+            "requirement_id": "req_015",
+            "semantic_role": "reviewed primary contextual evidence",
+            "usage": "background",
+            "mandatory": true
+          }
+        ],
+        "camera_intent": "push_in",
+        "composition_intent": "map_full",
+        "emotional_tone": "neutral",
+        "layout_variant_hint": "A",
+        "duration_policy": "voice_locked",
+        "transition_intent": "hard_cut",
+        "historical_map_requirement_id": null
+      }
+    },
+    {
+      "setup_id": "setup_031",
+      "section_refs": [
+        "sec_016"
+      ],
+      "intent": "evidence",
+      "preferred_template": "T08",
+      "requirement_refs": [
+        "req_016"
+      ],
+      "claim_refs": [
+        "claim_016"
+      ],
+      "direction": {
+        "visual_purpose": "Establish the historical evidence context with precise visual hierarchy",
+        "viewer_takeaway": "Understand who, where and why this context matters",
+        "on_screen_text": [
+          {
+            "text": "PARIS WATCHES EVENTS",
+            "role": "headline",
+            "claim_ref": null,
+            "max_lines": 2
+          }
+        ],
+        "reveal_plan": [
+          {
+            "beat_id": "beat_031",
+            "action": "establish",
+            "target_role": "headline",
+            "cue": {
+              "section_id": "sec_016",
+              "phrase": "Paris",
+              "occurrence": 0
+            },
+            "priority": 1
+          }
+        ],
+        "asset_slots": [
+          {
+            "slot_id": "slot_sec_016",
+            "requirement_id": "req_016",
+            "semantic_role": "reviewed primary contextual evidence",
+            "usage": "background",
+            "mandatory": true
+          }
+        ],
+        "camera_intent": "push_in",
+        "composition_intent": "map_full",
+        "emotional_tone": "neutral",
+        "layout_variant_hint": "A",
+        "duration_policy": "voice_locked",
+        "transition_intent": "hard_cut",
+        "historical_map_requirement_id": null
+      }
+    },
+    {
+      "setup_id": "setup_032",
+      "section_refs": [
+        "sec_016"
+      ],
+      "intent": "evidence",
+      "preferred_template": "T08",
+      "requirement_refs": [
+        "req_016"
+      ],
+      "claim_refs": [
+        "claim_016"
+      ],
+      "direction": {
+        "visual_purpose": "Establish the historical evidence context with precise visual hierarchy",
+        "viewer_takeaway": "Understand who, where and why this context matters",
+        "on_screen_text": [
+          {
+            "text": "PARIS WATCHES EVENTS",
+            "role": "headline",
+            "claim_ref": null,
+            "max_lines": 2
+          }
+        ],
+        "reveal_plan": [
+          {
+            "beat_id": "beat_032",
+            "action": "highlight",
+            "target_role": "headline",
+            "cue": {
+              "section_id": "sec_016",
+              "phrase": "sources",
+              "occurrence": 0
+            },
+            "priority": 1
+          }
+        ],
+        "asset_slots": [
+          {
+            "slot_id": "slot_sec_016",
+            "requirement_id": "req_016",
+            "semantic_role": "reviewed primary contextual evidence",
+            "usage": "background",
+            "mandatory": true
+          }
+        ],
+        "camera_intent": "push_in",
+        "composition_intent": "map_full",
+        "emotional_tone": "neutral",
+        "layout_variant_hint": "A",
+        "duration_policy": "voice_locked",
+        "transition_intent": "hard_cut",
+        "historical_map_requirement_id": null
+      }
+    },
+    {
+      "setup_id": "setup_033",
+      "section_refs": [
+        "sec_017"
+      ],
+      "intent": "geography",
+      "preferred_template": "T01",
+      "requirement_refs": [
+        "req_017"
+      ],
+      "claim_refs": [
+        "claim_017"
+      ],
+      "direction": {
+        "visual_purpose": "Establish the historical geography context with precise visual hierarchy",
+        "viewer_takeaway": "Understand who, where and why this context matters",
+        "on_screen_text": [
+          {
+            "text": "LONDON EXAMINES REPORTS",
+            "role": "headline",
+            "claim_ref": null,
+            "max_lines": 2
+          }
+        ],
+        "reveal_plan": [
+          {
+            "beat_id": "beat_033",
+            "action": "establish",
+            "target_role": "map",
+            "cue": {
+              "section_id": "sec_017",
+              "phrase": "London",
+              "occurrence": 0
+            },
+            "priority": 1
+          }
+        ],
+        "asset_slots": [
+          {
+            "slot_id": "slot_sec_017",
+            "requirement_id": "req_017",
+            "semantic_role": "reviewed primary contextual evidence",
+            "usage": "background",
+            "mandatory": true
+          }
+        ],
+        "camera_intent": "push_in",
+        "composition_intent": "map_full",
+        "emotional_tone": "neutral",
+        "layout_variant_hint": "A",
+        "duration_policy": "voice_locked",
+        "transition_intent": "hard_cut",
+        "historical_map_requirement_id": "req_017"
+      }
+    },
+    {
+      "setup_id": "setup_034",
+      "section_refs": [
+        "sec_017"
+      ],
+      "intent": "geography",
+      "preferred_template": "T01",
+      "requirement_refs": [
+        "req_017"
+      ],
+      "claim_refs": [
+        "claim_017"
+      ],
+      "direction": {
+        "visual_purpose": "Establish the historical geography context with precise visual hierarchy",
+        "viewer_takeaway": "Understand who, where and why this context matters",
+        "on_screen_text": [
+          {
+            "text": "LONDON EXAMINES REPORTS",
+            "role": "headline",
+            "claim_ref": null,
+            "max_lines": 2
+          }
+        ],
+        "reveal_plan": [
+          {
+            "beat_id": "beat_034",
+            "action": "highlight",
+            "target_role": "map",
+            "cue": {
+              "section_id": "sec_017",
+              "phrase": "sources",
+              "occurrence": 0
+            },
+            "priority": 1
+          }
+        ],
+        "asset_slots": [
+          {
+            "slot_id": "slot_sec_017",
+            "requirement_id": "req_017",
+            "semantic_role": "reviewed primary contextual evidence",
+            "usage": "background",
+            "mandatory": true
+          }
+        ],
+        "camera_intent": "push_in",
+        "composition_intent": "map_full",
+        "emotional_tone": "neutral",
+        "layout_variant_hint": "A",
+        "duration_policy": "voice_locked",
+        "transition_intent": "hard_cut",
+        "historical_map_requirement_id": "req_017"
+      }
+    },
+    {
+      "setup_id": "setup_035",
+      "section_refs": [
+        "sec_018"
+      ],
+      "intent": "evidence",
+      "preferred_template": "T03",
+      "requirement_refs": [
+        "req_018"
+      ],
+      "claim_refs": [
+        "claim_018"
+      ],
+      "direction": {
+        "visual_purpose": "Establish the historical evidence context with precise visual hierarchy",
+        "viewer_takeaway": "Understand who, where and why this context matters",
+        "on_screen_text": [
+          {
+            "text": "BORDER CROSSINGS",
+            "role": "headline",
+            "claim_ref": null,
+            "max_lines": 2
+          }
+        ],
+        "reveal_plan": [
+          {
+            "beat_id": "beat_035",
+            "action": "establish",
+            "target_role": "headline",
+            "cue": {
+              "section_id": "sec_018",
+              "phrase": "Border",
+              "occurrence": 0
+            },
+            "priority": 1
+          }
+        ],
+        "asset_slots": [
+          {
+            "slot_id": "slot_sec_018",
+            "requirement_id": "req_018",
+            "semantic_role": "reviewed primary contextual evidence",
+            "usage": "background",
+            "mandatory": true
+          }
+        ],
+        "camera_intent": "push_in",
+        "composition_intent": "map_full",
+        "emotional_tone": "neutral",
+        "layout_variant_hint": "A",
+        "duration_policy": "voice_locked",
+        "transition_intent": "hard_cut",
+        "historical_map_requirement_id": null
+      }
+    },
+    {
+      "setup_id": "setup_036",
+      "section_refs": [
+        "sec_018"
+      ],
+      "intent": "evidence",
+      "preferred_template": "T03",
+      "requirement_refs": [
+        "req_018"
+      ],
+      "claim_refs": [
+        "claim_018"
+      ],
+      "direction": {
+        "visual_purpose": "Establish the historical evidence context with precise visual hierarchy",
+        "viewer_takeaway": "Understand who, where and why this context matters",
+        "on_screen_text": [
+          {
+            "text": "BORDER CROSSINGS",
+            "role": "headline",
+            "claim_ref": null,
+            "max_lines": 2
+          }
+        ],
+        "reveal_plan": [
+          {
+            "beat_id": "beat_036",
+            "action": "highlight",
+            "target_role": "headline",
+            "cue": {
+              "section_id": "sec_018",
+              "phrase": "sources",
+              "occurrence": 0
+            },
+            "priority": 1
+          }
+        ],
+        "asset_slots": [
+          {
+            "slot_id": "slot_sec_018",
+            "requirement_id": "req_018",
+            "semantic_role": "reviewed primary contextual evidence",
+            "usage": "background",
+            "mandatory": true
+          }
+        ],
+        "camera_intent": "push_in",
+        "composition_intent": "map_full",
+        "emotional_tone": "neutral",
+        "layout_variant_hint": "A",
+        "duration_policy": "voice_locked",
+        "transition_intent": "hard_cut",
+        "historical_map_requirement_id": null
+      }
+    },
+    {
+      "setup_id": "setup_037",
+      "section_refs": [
+        "sec_019"
+      ],
+      "intent": "evidence",
+      "preferred_template": "T06",
+      "requirement_refs": [
+        "req_019"
+      ],
+      "claim_refs": [
+        "claim_019"
+      ],
+      "direction": {
+        "visual_purpose": "Establish the historical evidence context with precise visual hierarchy",
+        "viewer_takeaway": "Understand who, where and why this context matters",
+        "on_screen_text": [
+          {
+            "text": "ALLIANCES AND COMMITMENTS",
+            "role": "headline",
+            "claim_ref": null,
+            "max_lines": 2
+          }
+        ],
+        "reveal_plan": [
+          {
+            "beat_id": "beat_037",
+            "action": "establish",
+            "target_role": "headline",
+            "cue": {
+              "section_id": "sec_019",
+              "phrase": "Alliances",
+              "occurrence": 0
+            },
+            "priority": 1
+          }
+        ],
+        "asset_slots": [
+          {
+            "slot_id": "slot_sec_019",
+            "requirement_id": "req_019",
+            "semantic_role": "reviewed primary contextual evidence",
+            "usage": "background",
+            "mandatory": true
+          }
+        ],
+        "camera_intent": "push_in",
+        "composition_intent": "map_full",
+        "emotional_tone": "neutral",
+        "layout_variant_hint": "A",
+        "duration_policy": "voice_locked",
+        "transition_intent": "hard_cut",
+        "historical_map_requirement_id": null
+      }
+    },
+    {
+      "setup_id": "setup_038",
+      "section_refs": [
+        "sec_019"
+      ],
+      "intent": "evidence",
+      "preferred_template": "T06",
+      "requirement_refs": [
+        "req_019"
+      ],
+      "claim_refs": [
+        "claim_019"
+      ],
+      "direction": {
+        "visual_purpose": "Establish the historical evidence context with precise visual hierarchy",
+        "viewer_takeaway": "Understand who, where and why this context matters",
+        "on_screen_text": [
+          {
+            "text": "ALLIANCES AND COMMITMENTS",
+            "role": "headline",
+            "claim_ref": null,
+            "max_lines": 2
+          }
+        ],
+        "reveal_plan": [
+          {
+            "beat_id": "beat_038",
+            "action": "highlight",
+            "target_role": "headline",
+            "cue": {
+              "section_id": "sec_019",
+              "phrase": "sources",
+              "occurrence": 0
+            },
+            "priority": 1
+          }
+        ],
+        "asset_slots": [
+          {
+            "slot_id": "slot_sec_019",
+            "requirement_id": "req_019",
+            "semantic_role": "reviewed primary contextual evidence",
+            "usage": "background",
+            "mandatory": true
+          }
+        ],
+        "camera_intent": "push_in",
+        "composition_intent": "map_full",
+        "emotional_tone": "neutral",
+        "layout_variant_hint": "A",
+        "duration_policy": "voice_locked",
+        "transition_intent": "hard_cut",
+        "historical_map_requirement_id": null
+      }
+    },
+    {
+      "setup_id": "setup_039",
+      "section_refs": [
+        "sec_020"
+      ],
+      "intent": "evidence",
+      "preferred_template": "T08",
+      "requirement_refs": [
+        "req_020"
+      ],
+      "claim_refs": [
+        "claim_020"
+      ],
+      "direction": {
+        "visual_purpose": "Establish the historical evidence context with precise visual hierarchy",
+        "viewer_takeaway": "Understand who, where and why this context matters",
+        "on_screen_text": [
+          {
+            "text": "PUBLIC REACTION",
+            "role": "headline",
+            "claim_ref": null,
+            "max_lines": 2
+          }
+        ],
+        "reveal_plan": [
+          {
+            "beat_id": "beat_039",
+            "action": "establish",
+            "target_role": "headline",
+            "cue": {
+              "section_id": "sec_020",
+              "phrase": "Public",
+              "occurrence": 0
+            },
+            "priority": 1
+          }
+        ],
+        "asset_slots": [
+          {
+            "slot_id": "slot_sec_020",
+            "requirement_id": "req_020",
+            "semantic_role": "reviewed primary contextual evidence",
+            "usage": "background",
+            "mandatory": true
+          }
+        ],
+        "camera_intent": "push_in",
+        "composition_intent": "map_full",
+        "emotional_tone": "neutral",
+        "layout_variant_hint": "A",
+        "duration_policy": "voice_locked",
+        "transition_intent": "hard_cut",
+        "historical_map_requirement_id": null
+      }
+    },
+    {
+      "setup_id": "setup_040",
+      "section_refs": [
+        "sec_020"
+      ],
+      "intent": "evidence",
+      "preferred_template": "T08",
+      "requirement_refs": [
+        "req_020"
+      ],
+      "claim_refs": [
+        "claim_020"
+      ],
+      "direction": {
+        "visual_purpose": "Establish the historical evidence context with precise visual hierarchy",
+        "viewer_takeaway": "Understand who, where and why this context matters",
+        "on_screen_text": [
+          {
+            "text": "PUBLIC REACTION",
+            "role": "headline",
+            "claim_ref": null,
+            "max_lines": 2
+          }
+        ],
+        "reveal_plan": [
+          {
+            "beat_id": "beat_040",
+            "action": "highlight",
+            "target_role": "headline",
+            "cue": {
+              "section_id": "sec_020",
+              "phrase": "sources",
+              "occurrence": 0
+            },
+            "priority": 1
+          }
+        ],
+        "asset_slots": [
+          {
+            "slot_id": "slot_sec_020",
+            "requirement_id": "req_020",
+            "semantic_role": "reviewed primary contextual evidence",
+            "usage": "background",
+            "mandatory": true
+          }
+        ],
+        "camera_intent": "push_in",
+        "composition_intent": "map_full",
+        "emotional_tone": "neutral",
+        "layout_variant_hint": "A",
+        "duration_policy": "voice_locked",
+        "transition_intent": "hard_cut",
+        "historical_map_requirement_id": null
+      }
+    },
+    {
+      "setup_id": "setup_041",
+      "section_refs": [
+        "sec_021"
+      ],
+      "intent": "geography",
+      "preferred_template": "T01",
+      "requirement_refs": [
+        "req_021"
+      ],
+      "claim_refs": [
+        "claim_021"
+      ],
+      "direction": {
+        "visual_purpose": "Establish the historical geography context with precise visual hierarchy",
+        "viewer_takeaway": "Understand who, where and why this context matters",
+        "on_screen_text": [
+          {
+            "text": "THE TIMETABLE ACCELERATES",
+            "role": "headline",
+            "claim_ref": null,
+            "max_lines": 2
+          }
+        ],
+        "reveal_plan": [
+          {
+            "beat_id": "beat_041",
+            "action": "establish",
+            "target_role": "map",
+            "cue": {
+              "section_id": "sec_021",
+              "phrase": "The",
+              "occurrence": 0
+            },
+            "priority": 1
+          }
+        ],
+        "asset_slots": [
+          {
+            "slot_id": "slot_sec_021",
+            "requirement_id": "req_021",
+            "semantic_role": "reviewed primary contextual evidence",
+            "usage": "background",
+            "mandatory": true
+          }
+        ],
+        "camera_intent": "push_in",
+        "composition_intent": "map_full",
+        "emotional_tone": "neutral",
+        "layout_variant_hint": "A",
+        "duration_policy": "voice_locked",
+        "transition_intent": "hard_cut",
+        "historical_map_requirement_id": "req_021"
+      }
+    },
+    {
+      "setup_id": "setup_042",
+      "section_refs": [
+        "sec_021"
+      ],
+      "intent": "geography",
+      "preferred_template": "T01",
+      "requirement_refs": [
+        "req_021"
+      ],
+      "claim_refs": [
+        "claim_021"
+      ],
+      "direction": {
+        "visual_purpose": "Establish the historical geography context with precise visual hierarchy",
+        "viewer_takeaway": "Understand who, where and why this context matters",
+        "on_screen_text": [
+          {
+            "text": "THE TIMETABLE ACCELERATES",
+            "role": "headline",
+            "claim_ref": null,
+            "max_lines": 2
+          }
+        ],
+        "reveal_plan": [
+          {
+            "beat_id": "beat_042",
+            "action": "highlight",
+            "target_role": "map",
+            "cue": {
+              "section_id": "sec_021",
+              "phrase": "sources",
+              "occurrence": 0
+            },
+            "priority": 1
+          }
+        ],
+        "asset_slots": [
+          {
+            "slot_id": "slot_sec_021",
+            "requirement_id": "req_021",
+            "semantic_role": "reviewed primary contextual evidence",
+            "usage": "background",
+            "mandatory": true
+          }
+        ],
+        "camera_intent": "push_in",
+        "composition_intent": "map_full",
+        "emotional_tone": "neutral",
+        "layout_variant_hint": "A",
+        "duration_policy": "voice_locked",
+        "transition_intent": "hard_cut",
+        "historical_map_requirement_id": "req_021"
+      }
+    },
+    {
+      "setup_id": "setup_043",
+      "section_refs": [
+        "sec_022"
+      ],
+      "intent": "evidence",
+      "preferred_template": "T03",
+      "requirement_refs": [
+        "req_022"
+      ],
+      "claim_refs": [
+        "claim_022"
+      ],
+      "direction": {
+        "visual_purpose": "Establish the historical evidence context with precise visual hierarchy",
+        "viewer_takeaway": "Understand who, where and why this context matters",
+        "on_screen_text": [
+          {
+            "text": "THE FIRST WEEKS OF WAR",
+            "role": "headline",
+            "claim_ref": null,
+            "max_lines": 2
+          }
+        ],
+        "reveal_plan": [
+          {
+            "beat_id": "beat_043",
+            "action": "establish",
+            "target_role": "headline",
+            "cue": {
+              "section_id": "sec_022",
+              "phrase": "The",
+              "occurrence": 0
+            },
+            "priority": 1
+          }
+        ],
+        "asset_slots": [
+          {
+            "slot_id": "slot_sec_022",
+            "requirement_id": "req_022",
+            "semantic_role": "reviewed primary contextual evidence",
+            "usage": "background",
+            "mandatory": true
+          }
+        ],
+        "camera_intent": "push_in",
+        "composition_intent": "map_full",
+        "emotional_tone": "neutral",
+        "layout_variant_hint": "A",
+        "duration_policy": "voice_locked",
+        "transition_intent": "hard_cut",
+        "historical_map_requirement_id": null
+      }
+    },
+    {
+      "setup_id": "setup_044",
+      "section_refs": [
+        "sec_022"
+      ],
+      "intent": "evidence",
+      "preferred_template": "T03",
+      "requirement_refs": [
+        "req_022"
+      ],
+      "claim_refs": [
+        "claim_022"
+      ],
+      "direction": {
+        "visual_purpose": "Establish the historical evidence context with precise visual hierarchy",
+        "viewer_takeaway": "Understand who, where and why this context matters",
+        "on_screen_text": [
+          {
+            "text": "THE FIRST WEEKS OF WAR",
+            "role": "headline",
+            "claim_ref": null,
+            "max_lines": 2
+          }
+        ],
+        "reveal_plan": [
+          {
+            "beat_id": "beat_044",
+            "action": "highlight",
+            "target_role": "headline",
+            "cue": {
+              "section_id": "sec_022",
+              "phrase": "sources",
+              "occurrence": 0
+            },
+            "priority": 1
+          }
+        ],
+        "asset_slots": [
+          {
+            "slot_id": "slot_sec_022",
+            "requirement_id": "req_022",
+            "semantic_role": "reviewed primary contextual evidence",
+            "usage": "background",
+            "mandatory": true
+          }
+        ],
+        "camera_intent": "push_in",
+        "composition_intent": "map_full",
+        "emotional_tone": "neutral",
+        "layout_variant_hint": "A",
+        "duration_policy": "voice_locked",
+        "transition_intent": "hard_cut",
+        "historical_map_requirement_id": null
+      }
+    },
+    {
+      "setup_id": "setup_045",
+      "section_refs": [
+        "sec_023"
+      ],
+      "intent": "evidence",
+      "preferred_template": "T06",
+      "requirement_refs": [
+        "req_023"
+      ],
+      "claim_refs": [
+        "claim_023"
+      ],
+      "direction": {
+        "visual_purpose": "Establish the historical evidence context with precise visual hierarchy",
+        "viewer_takeaway": "Understand who, where and why this context matters",
+        "on_screen_text": [
+          {
+            "text": "CONSEQUENCES ACROSS EUROPE",
+            "role": "headline",
+            "claim_ref": null,
+            "max_lines": 2
+          }
+        ],
+        "reveal_plan": [
+          {
+            "beat_id": "beat_045",
+            "action": "establish",
+            "target_role": "headline",
+            "cue": {
+              "section_id": "sec_023",
+              "phrase": "Consequences",
+              "occurrence": 0
+            },
+            "priority": 1
+          }
+        ],
+        "asset_slots": [
+          {
+            "slot_id": "slot_sec_023",
+            "requirement_id": "req_023",
+            "semantic_role": "reviewed primary contextual evidence",
+            "usage": "background",
+            "mandatory": true
+          }
+        ],
+        "camera_intent": "push_in",
+        "composition_intent": "map_full",
+        "emotional_tone": "neutral",
+        "layout_variant_hint": "A",
+        "duration_policy": "voice_locked",
+        "transition_intent": "hard_cut",
+        "historical_map_requirement_id": null
+      }
+    },
+    {
+      "setup_id": "setup_046",
+      "section_refs": [
+        "sec_023"
+      ],
+      "intent": "evidence",
+      "preferred_template": "T06",
+      "requirement_refs": [
+        "req_023"
+      ],
+      "claim_refs": [
+        "claim_023"
+      ],
+      "direction": {
+        "visual_purpose": "Establish the historical evidence context with precise visual hierarchy",
+        "viewer_takeaway": "Understand who, where and why this context matters",
+        "on_screen_text": [
+          {
+            "text": "CONSEQUENCES ACROSS EUROPE",
+            "role": "headline",
+            "claim_ref": null,
+            "max_lines": 2
+          }
+        ],
+        "reveal_plan": [
+          {
+            "beat_id": "beat_046",
+            "action": "highlight",
+            "target_role": "headline",
+            "cue": {
+              "section_id": "sec_023",
+              "phrase": "sources",
+              "occurrence": 0
+            },
+            "priority": 1
+          }
+        ],
+        "asset_slots": [
+          {
+            "slot_id": "slot_sec_023",
+            "requirement_id": "req_023",
+            "semantic_role": "reviewed primary contextual evidence",
+            "usage": "background",
+            "mandatory": true
+          }
+        ],
+        "camera_intent": "push_in",
+        "composition_intent": "map_full",
+        "emotional_tone": "neutral",
+        "layout_variant_hint": "A",
+        "duration_policy": "voice_locked",
+        "transition_intent": "hard_cut",
+        "historical_map_requirement_id": null
+      }
+    },
+    {
+      "setup_id": "setup_047",
+      "section_refs": [
+        "sec_024"
+      ],
+      "intent": "evidence",
+      "preferred_template": "T08",
+      "requirement_refs": [
+        "req_024"
+      ],
+      "claim_refs": [
+        "claim_024"
+      ],
+      "direction": {
+        "visual_purpose": "Establish the historical evidence context with precise visual hierarchy",
+        "viewer_takeaway": "Understand who, where and why this context matters",
+        "on_screen_text": [
+          {
+            "text": "WHY ONE EVENT MATTERED",
+            "role": "headline",
+            "claim_ref": null,
+            "max_lines": 2
+          }
+        ],
+        "reveal_plan": [
+          {
+            "beat_id": "beat_047",
+            "action": "establish",
+            "target_role": "headline",
+            "cue": {
+              "section_id": "sec_024",
+              "phrase": "Why",
+              "occurrence": 0
+            },
+            "priority": 1
+          }
+        ],
+        "asset_slots": [
+          {
+            "slot_id": "slot_sec_024",
+            "requirement_id": "req_024",
+            "semantic_role": "reviewed primary contextual evidence",
+            "usage": "background",
+            "mandatory": true
+          }
+        ],
+        "camera_intent": "push_in",
+        "composition_intent": "map_full",
+        "emotional_tone": "neutral",
+        "layout_variant_hint": "A",
+        "duration_policy": "voice_locked",
+        "transition_intent": "hard_cut",
+        "historical_map_requirement_id": null
+      }
+    },
+    {
+      "setup_id": "setup_048",
+      "section_refs": [
+        "sec_024"
+      ],
+      "intent": "evidence",
+      "preferred_template": "T08",
+      "requirement_refs": [
+        "req_024"
+      ],
+      "claim_refs": [
+        "claim_024"
+      ],
+      "direction": {
+        "visual_purpose": "Establish the historical evidence context with precise visual hierarchy",
+        "viewer_takeaway": "Understand who, where and why this context matters",
+        "on_screen_text": [
+          {
+            "text": "WHY ONE EVENT MATTERED",
+            "role": "headline",
+            "claim_ref": null,
+            "max_lines": 2
+          }
+        ],
+        "reveal_plan": [
+          {
+            "beat_id": "beat_048",
+            "action": "highlight",
+            "target_role": "headline",
+            "cue": {
+              "section_id": "sec_024",
+              "phrase": "sources",
+              "occurrence": 0
+            },
+            "priority": 1
+          }
+        ],
+        "asset_slots": [
+          {
+            "slot_id": "slot_sec_024",
+            "requirement_id": "req_024",
+            "semantic_role": "reviewed primary contextual evidence",
+            "usage": "background",
+            "mandatory": true
+          }
+        ],
+        "camera_intent": "push_in",
+        "composition_intent": "map_full",
+        "emotional_tone": "neutral",
+        "layout_variant_hint": "A",
+        "duration_policy": "voice_locked",
+        "transition_intent": "hard_cut",
+        "historical_map_requirement_id": null
+      }
+    }
+  ],
+  "authoring_source": "external_chatgpt"
+}
