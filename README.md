@@ -3,6 +3,12 @@
 **NEW Windows-only local application — design/contract repository. Production code has not yet been implemented.**
 Goal: build the entire 5–10 minute historical motion graphics production flow in one production codebase (no standalone pilot), from one external ChatGPT JSON → Five Human Review Gates → Voice + Historical Assets/G-Labs → Deterministic Remotion Storyboard → Rendered MP4 + Attribution.
 
+## Codex execution rules and precise task plan
+- [AGENTS.md](AGENTS.md): mandatory Codex scope, Windows-only behavior, phase ownership and self-review.
+- [Engineering Coding Rules](docs/engineering/CODING_RULES.md): minimal fixes, meaningful tests, code-growth control.
+- [Studio implementation skill](.agents/skills/historical-video-studio/SKILL.md): one specialist skill covering the full pipeline.
+- [35-task A1–B3 execution matrix](docs/step01-02/IMPLEMENTATION_TASK_MATRIX.md): 2 phases, individual module/contracts/dependencies, Windows offline and live commands, phase scope freeze.
+
 ## Current authority (19 October 2026)
 **[FULL-FLOW IMPLEMENTATION PLAN](docs/step01-02/05_IMPLEMENTATION_PLAN.md)** — target is complete application V1 (2 engineering phases, overlapping workstreams), **not** Step03/Step04 PoC-first development. The original Master Spec/pilot sequencing is retained in docs/design as historical design baseline only.
 

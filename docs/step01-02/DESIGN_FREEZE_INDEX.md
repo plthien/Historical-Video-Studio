@@ -1,6 +1,6 @@
 # Step 01–02 — Full-Flow Design Handoff (2026-10-19 targeted repair)
 **Status:** design authority for complete Windows V1 implementation; no isolated PoC/Pilot product stage. Live provider/video acceptance still requires implementation evidence.
-**Execution roadmap:** [05_IMPLEMENTATION_PLAN.md](05_IMPLEMENTATION_PLAN.md) — full app in two engineering phases with dependency-aware workstreams.
+**Execution roadmap:** [05_IMPLEMENTATION_PLAN.md](05_IMPLEMENTATION_PLAN.md) + [binding task matrix](IMPLEMENTATION_TASK_MATRIX.md): 35 tasks across two engineering phases, exact module/contracts/dependencies, Windows command types and phase freeze checklists. Codex must read [AGENTS.md](../../AGENTS.md), [Coding Rules](../engineering/CODING_RULES.md) and [single skill](../../.agents/skills/historical-video-studio/SKILL.md).
 
 ## Canonical documents
 1. [01_PRODUCT_SPEC.md](01_PRODUCT_SPEC.md) — workflow, review gates, UI.
@@ -14,7 +14,7 @@
 - [Historical map engine](HISTORICAL_MAP_ENGINE.md): historical year-aware geometry, projection, routes and source review.
 - [Template T05–T10 sheets](TEMPLATE_DESIGN_SHEETS_T05_T10.md) and [all 30 versioned layout variants](../../contracts/registries/layouts.v1.json); [19 motion presets](../../contracts/registries/motion-presets.v1.json).
 - [12 JSON Schemas](../../contracts/schema), 12 strict fixtures and [24-section/48-scene/360s long-form synthetic fixtures](../../contracts/examples/longform).
-- [Base OpenAPI](../../contracts/openapi.yaml) plus [25 full-flow extension operations](../../contracts/openapi-fullflow-extension.json) (zero overlapping method/path; implementation combines).
+- [Base OpenAPI](../../contracts/openapi.yaml) plus [26 full-flow extension operations](../../contracts/openapi-fullflow-extension.json) (zero overlapping method/path; implementation combines).
 - [Original verbatim G-Labs webhook](../../contracts/providers/reference/WEBHOOK_INTEGRATION.vi(1).md) and [three archival-source adapters](../../contracts/providers/ARCHIVE_ADAPTER_MATRIX.v1.md).
 - [UI mockup](../../ui/mockups/index.html) and [UI/API mapping](UI_WIREFRAME_AND_API_MATRIX.md).
 - [Full-flow final six-role re-audit](FULL_FLOW_FINAL_REAUDIT.md) documents the five targeted repairs, residual runtime evidence and design-only PASS boundary.
