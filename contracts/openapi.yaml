@@ -155,6 +155,10 @@ paths:
       parameters:
         - {$ref: '#/components/parameters/ProjectId'}
         - {$ref: '#/components/parameters/Idempotency'}
+        - name: expected_revision
+          in: query
+          required: true
+          schema: {type: integer, minimum: 0}
       requestBody:
         required: true
         content:
