@@ -194,6 +194,14 @@
               ]
             },
             "minItems": 0
+          },
+          "map_reconstruction_policy": {
+            "type": "string",
+            "enum": [
+              "exact_period_map",
+              "verified_schematic",
+              "not_applicable"
+            ]
           }
         },
         "required": [
@@ -203,7 +211,8 @@
           "exactness",
           "required",
           "start_year",
-          "end_year"
+          "end_year",
+          "map_reconstruction_policy"
         ]
       },
       "minItems": 0
@@ -269,6 +278,273 @@
               "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
             },
             "minItems": 0
+          },
+          "direction": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "visual_purpose": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 450
+              },
+              "viewer_takeaway": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 450
+              },
+              "on_screen_text": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "text": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 260
+                    },
+                    "role": {
+                      "type": "string",
+                      "enum": [
+                        "headline",
+                        "date",
+                        "quote",
+                        "caption",
+                        "source",
+                        "map_label"
+                      ]
+                    },
+                    "claim_ref": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "max_lines": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 5
+                    }
+                  },
+                  "required": [
+                    "text",
+                    "role",
+                    "claim_ref"
+                  ]
+                },
+                "minItems": 0
+              },
+              "reveal_plan": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "beat_id": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+                    },
+                    "action": {
+                      "type": "string",
+                      "enum": [
+                        "establish",
+                        "introduce",
+                        "highlight",
+                        "compare",
+                        "move",
+                        "hold",
+                        "conclude"
+                      ]
+                    },
+                    "target_role": {
+                      "type": "string",
+                      "enum": [
+                        "map",
+                        "territory",
+                        "route",
+                        "portrait",
+                        "archival_photo",
+                        "document",
+                        "headline",
+                        "date",
+                        "text",
+                        "callout",
+                        "camera"
+                      ]
+                    },
+                    "cue": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {
+                        "section_id": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+                        },
+                        "phrase": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 200
+                        },
+                        "occurrence": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 100
+                        }
+                      },
+                      "required": [
+                        "section_id",
+                        "phrase",
+                        "occurrence"
+                      ]
+                    },
+                    "priority": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 5
+                    }
+                  },
+                  "required": [
+                    "beat_id",
+                    "action",
+                    "target_role",
+                    "cue",
+                    "priority"
+                  ]
+                },
+                "minItems": 1
+              },
+              "asset_slots": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "slot_id": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+                    },
+                    "requirement_id": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+                    },
+                    "semantic_role": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 120
+                    },
+                    "usage": {
+                      "type": "string",
+                      "enum": [
+                        "foreground",
+                        "background",
+                        "context",
+                        "evidence"
+                      ]
+                    },
+                    "mandatory": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "slot_id",
+                    "requirement_id",
+                    "semantic_role",
+                    "usage",
+                    "mandatory"
+                  ]
+                },
+                "minItems": 0
+              },
+              "camera_intent": {
+                "type": "string",
+                "enum": [
+                  "static",
+                  "pan",
+                  "push_in",
+                  "pull_out",
+                  "track_route",
+                  "compare_locked"
+                ]
+              },
+              "composition_intent": {
+                "type": "string",
+                "enum": [
+                  "left_subject",
+                  "right_subject",
+                  "center_hero",
+                  "split_evidence",
+                  "map_full",
+                  "collage",
+                  "chronology"
+                ]
+              },
+              "emotional_tone": {
+                "type": "string",
+                "enum": [
+                  "neutral",
+                  "serious",
+                  "tense",
+                  "reflective",
+                  "reveal"
+                ]
+              },
+              "layout_variant_hint": {
+                "type": "string",
+                "enum": [
+                  "A",
+                  "B",
+                  "C",
+                  "AUTO"
+                ]
+              },
+              "duration_policy": {
+                "type": "string",
+                "enum": [
+                  "voice_locked",
+                  "multi_section_hold"
+                ]
+              },
+              "transition_intent": {
+                "type": "string",
+                "enum": [
+                  "hard_cut",
+                  "cross_dissolve",
+                  "mask_reveal",
+                  "match_cut"
+                ]
+              },
+              "historical_map_requirement_id": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "visual_purpose",
+              "viewer_takeaway",
+              "on_screen_text",
+              "reveal_plan",
+              "asset_slots",
+              "camera_intent",
+              "composition_intent",
+              "emotional_tone",
+              "layout_variant_hint",
+              "duration_policy",
+              "transition_intent",
+              "historical_map_requirement_id"
+            ]
           }
         },
         "required": [
@@ -276,7 +552,8 @@
           "section_refs",
           "intent",
           "requirement_refs",
-          "claim_refs"
+          "claim_refs",
+          "direction"
         ]
       },
       "minItems": 1
@@ -293,5 +570,6 @@
     "asset_requirements",
     "visual_setups",
     "authoring_source"
-  ]
+  ],
+  "description": "One external ChatGPT JSON contains script + sourcing leads + structured editorial direction for deterministic Storyboard Compiler. Direction contains no executable code or invented word timings."
 }

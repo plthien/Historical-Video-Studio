@@ -150,11 +150,240 @@
                     "string",
                     "null"
                   ]
+                },
+                "z_index": {
+                  "type": "integer",
+                  "minimum": -30,
+                  "maximum": 100
+                },
+                "rect_px": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "x": {
+                      "type": "integer",
+                      "minimum": -1920,
+                      "maximum": 3840
+                    },
+                    "y": {
+                      "type": "integer",
+                      "minimum": -1080,
+                      "maximum": 2160
+                    },
+                    "w": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 3840
+                    },
+                    "h": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 2160
+                    }
+                  },
+                  "required": [
+                    "x",
+                    "y",
+                    "w",
+                    "h"
+                  ]
+                },
+                "anchor": {
+                  "type": "string",
+                  "enum": [
+                    "top_left",
+                    "center",
+                    "bottom_center",
+                    "world_point"
+                  ]
+                },
+                "crop_normalized": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "x": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 1
+                    },
+                    "y": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 1
+                    },
+                    "w": {
+                      "type": "number",
+                      "minimum": 0.001,
+                      "maximum": 1
+                    },
+                    "h": {
+                      "type": "number",
+                      "minimum": 0.001,
+                      "maximum": 1
+                    }
+                  },
+                  "required": [
+                    "x",
+                    "y",
+                    "w",
+                    "h"
+                  ]
+                },
+                "object_fit": {
+                  "type": "string",
+                  "enum": [
+                    "cover",
+                    "contain",
+                    "fill",
+                    "none"
+                  ]
+                },
+                "mask": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "kind": {
+                      "type": "string",
+                      "enum": [
+                        "none",
+                        "rectangle",
+                        "ellipse",
+                        "polygon_asset"
+                      ]
+                    },
+                    "asset_id": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "feather_px": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 80
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "asset_id",
+                    "feather_px"
+                  ]
+                },
+                "style": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "font_token": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "color_token": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "stroke_token": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "max_lines": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 8
+                    }
+                  },
+                  "required": [
+                    "font_token",
+                    "color_token",
+                    "stroke_token",
+                    "max_lines"
+                  ]
+                },
+                "map_binding": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {
+                        "historical_map_id": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+                        },
+                        "feature_id": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "coordinate_kind": {
+                          "type": "string",
+                          "enum": [
+                            "geo_wgs84",
+                            "raster_uv"
+                          ]
+                        },
+                        "anchor_latlon": {
+                          "anyOf": [
+                            {
+                              "type": "object",
+                              "additionalProperties": false,
+                              "properties": {
+                                "lon": {
+                                  "type": "number",
+                                  "minimum": -180,
+                                  "maximum": 180
+                                },
+                                "lat": {
+                                  "type": "number",
+                                  "minimum": -90,
+                                  "maximum": 90
+                                }
+                              },
+                              "required": [
+                                "lon",
+                                "lat"
+                              ]
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        }
+                      },
+                      "required": [
+                        "historical_map_id",
+                        "feature_id",
+                        "coordinate_kind",
+                        "anchor_latlon"
+                      ]
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
                 }
               },
               "required": [
                 "layer_id",
-                "layer_kind"
+                "layer_kind",
+                "z_index",
+                "rect_px",
+                "anchor",
+                "crop_normalized",
+                "object_fit",
+                "mask",
+                "style",
+                "map_binding"
               ],
               "additionalProperties": false
             },
@@ -220,6 +449,81 @@
                       "boolean"
                     ]
                   }
+                },
+                "keyframes": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "frame": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 1000000
+                      },
+                      "value": {
+                        "type": "number",
+                        "minimum": -10000,
+                        "maximum": 10000
+                      },
+                      "easing": {
+                        "type": "string",
+                        "enum": [
+                          "linear",
+                          "ease_in",
+                          "ease_out",
+                          "ease_in_out",
+                          "cubic_soft",
+                          "spring_subtle"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "frame",
+                      "value",
+                      "easing"
+                    ]
+                  },
+                  "minItems": 1
+                },
+                "animated_property": {
+                  "type": "string",
+                  "enum": [
+                    "opacity",
+                    "translate_x_px",
+                    "translate_y_px",
+                    "scale",
+                    "rotation_deg",
+                    "mask_progress",
+                    "path_progress",
+                    "highlight_progress"
+                  ]
+                },
+                "cue_binding": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "word_id": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "offset_frames": {
+                      "type": "integer",
+                      "minimum": -30,
+                      "maximum": 30
+                    }
+                  },
+                  "required": [
+                    "word_id",
+                    "offset_frames"
+                  ]
                 }
               },
               "required": [
@@ -227,11 +531,153 @@
                 "layer_id",
                 "preset_id",
                 "start_frame",
-                "duration_frames"
+                "duration_frames",
+                "animated_property",
+                "keyframes",
+                "cue_binding"
               ],
               "additionalProperties": false
             },
             "minItems": 0
+          },
+          "camera": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "mode": {
+                "type": "string",
+                "enum": [
+                  "static",
+                  "pan",
+                  "push_in",
+                  "pull_out",
+                  "track_route",
+                  "compare_locked"
+                ]
+              },
+              "keyframes": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "at_frame": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 1000000
+                    },
+                    "x_px": {
+                      "type": "number",
+                      "minimum": -3840,
+                      "maximum": 3840
+                    },
+                    "y_px": {
+                      "type": "number",
+                      "minimum": -2160,
+                      "maximum": 2160
+                    },
+                    "scale": {
+                      "type": "number",
+                      "minimum": 0.5,
+                      "maximum": 4
+                    },
+                    "rotation_deg": {
+                      "type": "number",
+                      "minimum": -15,
+                      "maximum": 15
+                    },
+                    "opacity": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 1
+                    },
+                    "easing": {
+                      "type": "string",
+                      "enum": [
+                        "linear",
+                        "ease_in",
+                        "ease_out",
+                        "ease_in_out",
+                        "cubic_soft",
+                        "spring_subtle"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "at_frame",
+                    "x_px",
+                    "y_px",
+                    "scale",
+                    "rotation_deg",
+                    "opacity",
+                    "easing"
+                  ]
+                },
+                "minItems": 2
+              },
+              "focus_entity_id": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "clamp_to_content": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "mode",
+              "keyframes",
+              "focus_entity_id",
+              "clamp_to_content"
+            ]
+          },
+          "transition_out": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "hard_cut",
+                  "cross_dissolve",
+                  "mask_reveal",
+                  "match_cut"
+                ]
+              },
+              "duration_frames": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 120
+              }
+            },
+            "required": [
+              "type",
+              "duration_frames"
+            ]
+          },
+          "story_cue_span": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "first_word_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+              },
+              "last_word_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+              }
+            },
+            "required": [
+              "first_word_id",
+              "last_word_id"
+            ]
           }
         },
         "required": [
@@ -243,7 +689,10 @@
           "duration_frames",
           "asset_ids",
           "layers",
-          "events"
+          "events",
+          "camera",
+          "transition_out",
+          "story_cue_span"
         ],
         "additionalProperties": false
       },
@@ -267,5 +716,6 @@
     "dependency_fingerprint",
     "scenes"
   ],
-  "additionalProperties": false
+  "additionalProperties": false,
+  "description": "Fully resolved frame-addressed Remotion input. All layer geometry/crop/style/mask/camera parameters explicit; renderer may not choose semantics or request providers at render time."
 }

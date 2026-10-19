@@ -129,6 +129,17 @@
         "null"
       ],
       "format": "uri"
+    },
+    "historical_map_record_id": {
+      "anyOf": [
+        {
+          "type": "string",
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+        },
+        {
+          "type": "null"
+        }
+      ]
     }
   },
   "required": [
