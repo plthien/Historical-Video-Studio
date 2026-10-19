@@ -1,38 +1,28 @@
-# Design Freeze Index — Step 01 and Step 02
-**Product:** Historical Video Studio | **Language:** English-first | **Mode:** Windows local, new clean build | **Scope:** Product & Architecture + Visual System.
-**Status:** Step 01/02 design frozen pending green latest Windows design-contract CI. Step 03 (real video PoC) and Step 04 (full app) are NOT built.
+# Step 01–02 — Full-Flow Design Handoff (2026-10-19 targeted repair)
+**Status:** design authority for complete Windows V1 implementation; no isolated PoC/Pilot product stage. Live provider/video acceptance still requires implementation evidence.
+**Execution roadmap:** [05_IMPLEMENTATION_PLAN.md](05_IMPLEMENTATION_PLAN.md) — full app in two engineering phases with dependency-aware workstreams.
 
 ## Canonical documents
-1. [01_PRODUCT_SPEC.md](01_PRODUCT_SPEC.md) — product, user journeys, six workspaces and five explicit review gates.
-2. [02_SYSTEM_ARCHITECTURE.md](02_SYSTEM_ARCHITECTURE.md) — adapters, tasks, revision DAG, provider ownership and renderer.
-3. [03_VISUAL_PRODUCTION_SPEC.md](03_VISUAL_PRODUCTION_SPEC.md) — reference breakdown, style, motion grammar and T01/T02/T03/T04/T08 detailed sheets.
-4. [04_DATA_CONTRACTS_AND_GATES.md](04_DATA_CONTRACTS_AND_GATES.md) — schema inventory, semantic validation and five approval transitions.
-5. [05_IMPLEMENTATION_PLAN.md](05_IMPLEMENTATION_PLAN.md) — Step 03 60–90s two-topic pilots, Step 04 full application, acceptance gates.
+1. [01_PRODUCT_SPEC.md](01_PRODUCT_SPEC.md) — workflow, review gates, UI.
+2. [02_SYSTEM_ARCHITECTURE.md](02_SYSTEM_ARCHITECTURE.md) — adapters, jobs, storage, renderer.
+3. [03_VISUAL_PRODUCTION_SPEC.md](03_VISUAL_PRODUCTION_SPEC.md) — historical editorial grammar and 10 templates.
+4. [04_DATA_CONTRACTS_AND_GATES.md](04_DATA_CONTRACTS_AND_GATES.md) — semantic guards, versioning, review approvals.
+5. [05_IMPLEMENTATION_PLAN.md](05_IMPLEMENTATION_PLAN.md) — **full flow and Windows release**, replacing prior pilot-first plan.
 
-## Supporting machine-readables and UX
-- [TEMPLATE_DESIGN_SHEETS_T05_T10.md](TEMPLATE_DESIGN_SHEETS_T05_T10.md): full remaining T05–T10 V1 sheets.
-- [UI_WIREFRAME_AND_API_MATRIX.md](UI_WIREFRAME_AND_API_MATRIX.md): screen/route/gate behavior.
-- [Interactive UI mockup](../../ui/mockups/index.html): static HTML/JS design prototype, open directly on a desktop browser. No Remotion Player or live backend embedded.
-- [Schema and fixture folder](../../contracts/README.md): 10 JSON Schema Draft 2020-12 shapes, 10 synthetic fixture instances.
-- [OpenAPI](../../contracts/openapi.yaml): design-level local service routes, no endpoints currently active.
-- [Provider contracts](../../contracts/providers): ElevenLabs alignment and G-Labs webhook projection.
-- [Final six-role audit](STEP01_STEP02_FINAL_SIX_ROLE_AUDIT.md) and original [Master Spec](../design/MASTER_DESIGN_SPECIFICATION_V1.md), [latest decisions](../design/DESIGN_DECISIONS_2026-10-19.md).
+## Mandatory complete-machine-readable extensions
+- [StoryPackage → VisualBlueprint → CompiledTimeline](FULL_FLOW_VISUAL_COMPILER_CONTRACT.md): source precedence, cue-to-frame binding, absolute layer/crop/mask/camera/keyframe output and dependency hashes.
+- [Historical map engine](HISTORICAL_MAP_ENGINE.md): historical year-aware geometry, projection, routes and source review.
+- [Template T05–T10 sheets](TEMPLATE_DESIGN_SHEETS_T05_T10.md) and [all 30 versioned layout variants](../../contracts/registries/layouts.v1.json); [18 motion presets](../../contracts/registries/motion-presets.v1.json).
+- [12 JSON Schemas](../../contracts/schema), 12 strict fixtures and [24-section/48-scene/360s long-form synthetic fixtures](../../contracts/examples/longform).
+- [Base OpenAPI](../../contracts/openapi.yaml) plus [25 full-flow extension operations](../../contracts/openapi-fullflow-extension.json) (zero overlapping method/path; implementation combines).
+- [Original verbatim G-Labs webhook](../../contracts/providers/reference/WEBHOOK_INTEGRATION.vi(1).md) and [three archival-source adapters](../../contracts/providers/ARCHIVE_ADAPTER_MATRIX.v1.md).
+- [UI mockup](../../ui/mockups/index.html) and [UI/API mapping](UI_WIREFRAME_AND_API_MATRIX.md).
 
-## Precedence
-1. User-agreed decisions in docs/design/DESIGN_DECISIONS_2026-10-19.md (English-first, G-Labs documented-contract-first).
-2. This Step 01/02 detailed package for field/interaction specifics.
-3. Original MASTER_DESIGN_SPECIFICATION_V1 and original six-role audit as historical baseline.
-Any new scope amendment after freeze requires documented decision and revisioned schema/style/template contract; never silently rewrite old evidence.
+## Precedence (avoid conflicting pilot statements)
+1. Latest direct user requirements: **implement full production flow, no separate pilot**; English-first; G-Labs contract-first; five review gates.
+2. FULL_FLOW_VISUAL_COMPILER_CONTRACT, HISTORICAL_MAP_ENGINE, updated 12 JSON Schemas and registries, API core+extension.
+3. **05_IMPLEMENTATION_PLAN.md** (replaces all legacy pilot-first phase sequencing).
+4. Remaining Step01/02 supporting specs and prior Master Spec only as historical rationale. When a legacy document uses the term Pilot, treat that language as superseded rather than implementation authority.
 
-## Step 01/02 vs Step 03/04
-**Done at design layer:** reproducible authoring data shape, user approval transitions, source/rights policy, ten visual template contracts, motion preset dictionary, renderer architecture, UI wireflow, implementation tasks, offline tests.
-**Not implemented:** Python backend, React production UI, Kokoro synthesis, ElevenLabs real alignment, G-Labs live provider, archive search, Remotion preview/render, MP4 outputs, real source licensing; all require Step 03 and Step 04.
-
-## Validation
-Windows workflow .github/workflows/design-contracts-windows.yml:
-~~~
-python -m pip install -r requirements-design.txt
-python scripts/check_design_contracts.py
-python -m unittest discover -s tests/contracts -p "test_*.py" -v
-~~~
-The suite covers schema shape, sample semantics, no fallback auto approval, historical asset class, date evidence and preset type; it **does not** run a real provider or check actual photographic content.
+## Validation and truth-in-status
+Windows-only .github/workflows/design-contracts-windows.yml checks JSON schemas/fixtures, semantic negatives, long-form shape, OpenAPI and registry coherence. This is contract CI, **not** a video quality or provider-runtime test. The long-form fixture contains unverified claims and synthetic timestamps; it cannot receive G1/G3 approval. Production acceptance requires full 5–10min MP4 and G1–G5 real human review.

@@ -106,3 +106,8 @@ Make fixture versions valid+invalid and ensure every hard failure returns stable
 
 ## 9. Step 01/02 contract review PASS criteria
 All schema files JSON parse under Draft 2020-12 and validate at least one positive instance and documented negative instances. Semantic cases have implementation functions identified. Every UI control has an intended API and permitted transition; no inert approve/cancel. Nothing here asserts live G-Labs/ElevenLabs provider test or functioning Remotion renderer.
+
+
+## 2026-10-19 Full-flow contract freeze override
+The inventory is now **12 strict JSON Schemas**, adding HistoricalMap.v1 and TemplateLayout.v1. StoryPackage.v1 setup.direction contains on-screen text, reveal plan, asset slots, camera/composition intents. VisualBlueprint.v1 setup_plans carry normalized direction, asset-slot bindings and layout controls. CompiledTimeline.v1 contains frame-ready layer coordinates, crop, z-order, fonts, map bindings, motion and camera keyframes, source word spans and transition. See FULL_FLOW_VISUAL_COMPILER_CONTRACT.md for stage ownership. 24-section/48-scene synthetic longform fixtures verify shape only, not source or audio validity.
+Base OpenAPI remains contracts/openapi.yaml; add-on file contracts/openapi-fullflow-extension.json defines typed edit/regenerate/asset search/scenes/delivery endpoints. Full app implementation merges operations; no URL/method collision is allowed. Full V1 is the only implementation goal; any previous Step 03 pilot-first schedule is superseded by 05_IMPLEMENTATION_PLAN.md.

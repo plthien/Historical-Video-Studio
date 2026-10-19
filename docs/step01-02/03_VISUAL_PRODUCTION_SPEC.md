@@ -1,5 +1,5 @@
 # 03 — VISUAL PRODUCTION & TEMPLATE SPECIFICATION · V1.0
-**Scope:** Step 02; defines reusable Remotion visual grammar, not a claim of rendered implementation. **Authority:** original MASTER_DESIGN_SPECIFICATION_V1 §§11–17 and six-role audit. This edition resolves the first 10 templates' technical/design slots and narrows the Step 03 pilot to T01/T02/T03/T04/T08.
+**Scope:** Step 02; defines reusable Remotion visual grammar, not a claim of rendered implementation. **Authority:** original MASTER_DESIGN_SPECIFICATION_V1 §§11–17 and six-role audit. This edition resolves the first 10 templates' technical/design slots and narrows the full implementation to T01/T02/T03/T04/T08.
 
 ## 1. What the reference video supports
 Reference **1015.mp4**, sampled/inspected as the basis for design: 298.284 s, 1920×1080/30fps, story about Sarajevo/Franz Ferdinand and cascading European events. Representative passage types:
@@ -52,35 +52,35 @@ Layer kinds allowlisted: map, territory, route, portrait, archival_photo, docume
 ## 6. Scene template design sheets — common contract
 Every template implements registry entry: id/version, slots with allowed asset_classes/text evidence type, min/max duration, layouts with normalized coordinates and safe margins, motion sets (default and alternative), entry/hold/exit timing policy, editable parameters, collision detection, accessible/reduced-motion alternative, editor controls, two fixture cases and a negative test. The layout uses canonical 1920×1080 coordinates but may scale from normalized percentages. Values are **design defaults**.
 
-### T01 MAP_TERRITORY_FOCUS · Step 03 pilot
+### T01 MAP_TERRITORY_FOCUS · Full V1
 Purpose: establish where and which territory. Slots: required approved historical/map source and period/region identity, optional territory mask, <=5 geographic labels, one headline/citation; only verified geometry for border overlays.
 Variants: A full-bleed map with anchored title at top-left; B map two-thirds + right claim card; C zoomed detail panel inset on broader map.
 Motion: camera-pan/2D-push and map-region-wipe with pinned geographic points; region highlight 0.4–0.9s after map establishes. Hold 1.5s minimum for place names, longer by speech.
 Operator: choose valid date/map, highlight palette, focal region, zoom endpoints and label offsets; all map coordinates derive from approved data. Reject date mismatch, unknown map source, label crosses safe area, region highlights modern border as past.
 Fixtures: (1) Austria-Hungary/Bosnia period map; (2) Germany 1871 map; negative: 2026 border polygon used for 1914 without explicit schematic interpretation.
 
-### T02 PORTRAIT_EXPLAINER · Step 03 pilot
+### T02 PORTRAIT_EXPLAINER · Full V1
 Purpose: identify and contextualize a person. Slots: exact identified portrait asset, name/role, optional date and verified fact; portrait cutout is optional treatment, not historical substitution.
 Variants: A left portrait/right title; B centered portrait with side note; C framed archival-card when segmentation edges fail.
 Motion: subtle portrait enter (photo-card-enter or small pop) + staggered title, optional camera-push with scale limits; reveal name on first mention, hold to read. Foreground is anchored; no arbitrary bounce for death/war tragedy.
 Operator: crop/mask mode, name width, fact strip and motion strength. Reject wrong-person asset, damaged cutout head, mislabeled portrait and overlapping text.
 Fixtures: Franz Ferdinand; Bismarck. Negative: model generated lookalike labeled archival portrait.
 
-### T03 ARCHIVAL_PHOTO_COLLAGE · Step 03 pilot
+### T03 ARCHIVAL_PHOTO_COLLAGE · Full V1
 Purpose: show a collection of sourced context/evidence. Slots: 1–3 reviewed archive assets, each with date/source attribution, optional one callout, no unsupported factual caption.
 Variants: A overlapping 3-card paper; B one hero photo and two supporting details; C sequential full-card focus and mini thumbnail tray.
 Motion: stagger-reveal, photo-card-enter, subtle Ken Burns on selected card; do not animate all frames continuously. Factual caption appears only while associated photo is unambiguously dominant. Hold individual material long enough to read context.
 Operator: choose card order/crop/rotation within conservative bound, source caption and highlight. Reject photo selection that implies wrong location/time or occludes the only relevant evidence.
 Fixtures: Sarajevo context collage; Prussian archival collection. Negative: related period city photo mislabeled exact assassination photograph.
 
-### T04 ROUTE_RECONSTRUCTION · Step 03 pilot
+### T04 ROUTE_RECONSTRUCTION · Full V1
 Purpose: explain cause/effect movement. Slots: reviewed path geometry/map or expressly schematic path, start/end/event markers, optional vehicle icon, step labels and dates.
 Variants: A full route draw; B event waypoint stepper; C side-by-side route and evidence photo strip.
 Motion: SVG line draw, marker follow at reviewed temporal cues, optional camera-pan that respects map frame; keep paths and labels grounded. Step pacing by aligned narration, no uncontrolled overshoot at coordinates.
 Operator: inspect geometry, order waypoints, point labels, choose schematic badge, focus camera. Reject guessed path, impossible waypoint order, vehicle outside route, modern streets passed off as 1914 facts.
 Fixtures: Sarajevo route reconstruction from sourced path; Bismarck-era railway itinerary where documented. Negative: route asset missing but automatically generated by AI.
 
-### T08 FACT_NUMBER_IMPACT · Step 03 pilot
+### T08 FACT_NUMBER_IMPACT · Full V1
 Purpose: punctuate exact date, figure or number. Slots: exact user-approved fact value, optional source/date, context one sentence; style neutral for grave content.
 Variants: A large centered date; B left large numeral/right context; C paper stamp overlay on current map/photo.
 Motion: title-mask-reveal or restrained pop-in; number-count only if interim values do not falsely claim measurements; freeze-hold over spoken numeral/claim. Treat final numerals as data, not generated image text.
@@ -102,7 +102,7 @@ Purpose: explain evidence or quote. Requires approved quotation/source or editor
 ### T10 GLOBAL_CONSEQUENCE · Full V1
 Purpose: move scale from local to regional/global outcomes. Requires approved map/relationships and label/claim IDs. Variants: map zoom-out with linked labels, network of regional cards, headline + map evidence; motion: restrained map pan/push, staggered labels, annotation line-draw. Editor: causal links and geographic regions. Negative: unsupported arrows asserting direct causation without evidence.
 
-T11 EVENT_CAUSAL_CHAIN and T12 SOURCE_COMPARISON are **future optional**; not required for V1 acceptance and must not grow the Step 03 pilot scope.
+T11 EVENT_CAUSAL_CHAIN and T12 SOURCE_COMPARISON are **future optional**; not required for V1 acceptance and must not grow the full implementation scope.
 
 ## 7. Motion preset registry v1
 The following references are catalog **names/IDs** from showheyohtaki/motion-prompt; not native Remotion components:
@@ -149,4 +149,8 @@ QC failure codes:
 Warnings are different from blocking errors: repeated template, subtle camera monotony or heavy visual complexity are editorial warnings for G4 operator.
 
 ## 10. Visual acceptance Step 02 design
-Each T01–T10 has purpose, slots, variants, motion, timing rules, editor controls and negative case. Five pilot templates fully enumerated and frozen to Step 03 scope. A change to template grammar after freeze increments registry version and invalidates affected CompiledTimelines. Design PASS is possible before video proof; “looks like sample” requires Step 03 filmed evidence and multi-role visual review.
+Each T01–T10 has purpose, slots, variants, motion, timing rules, editor controls and negative case. Five core templates fully enumerated and frozen to Step 03 scope. A change to template grammar after freeze increments registry version and invalidates affected CompiledTimelines. Design PASS is possible before video proof; “looks like sample” requires actual videoed evidence and multi-role visual review.
+
+
+## Full-flow design authority update (2026-10-19)
+This document describes editorial grammar. Explicit frame-ready geometry, crop, source-backed historical maps, mask, camera keyframes and 18 bounded motion presets are frozen in FULL_FLOW_VISUAL_COMPILER_CONTRACT.md, HISTORICAL_MAP_ENGINE.md, contracts/registries/layouts.v1.json and contracts/registries/motion-presets.v1.json. All 10 templates x A/B/C variants belong to full V1; no disposable pilot runtime/PoC requirement.

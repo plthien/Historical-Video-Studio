@@ -32,3 +32,15 @@ Minimum usable width 1366px; all actionable state conveyed in text and keyboard 
 
 ## Evidence needed to call UI implementation PASS
 Screenshots of each state; browser automation for missing asset two-option authorization, no silent fallback, double-click prevention, Gate 2 one approval→alignment, downstream staleness on edits, G4/G5 refusal when upstream unapproved, and real preview/export parity. Design mockup does not satisfy these runtime tests.
+
+
+## Full-flow API expansion and implementation contract (2026-10-19)
+The original UI/action table covers gate happy paths. Full-flow editing/repair/review controls map to operations in contracts/openapi-fullflow-extension.json, complementing contracts/openapi.yaml:
+- Story editor → PATCH /projects/{project_id}/story/sections/{section_id} and POST /story/claims/{claim_id}/review; must invalidate exactly affected dependencies.
+- Voice → POST /voice/sections/{section_id}/regenerate, /select-attempt, /correction; GET /voice/alignment and POST /voice/alignment/retry. Single human Approve Voice remains POST /gates/G2/decision, automatically starts assembly/alignment.
+- Archive board → GET /assets/requirements and /candidates; POST /assets/search and /assets/batch-approve; existing /assets/{requirement_id}/resolve preserves Manual vs Managed plus separate later approval.
+- Motion editor → GET /storyboard/scenes and /timeline; PATCH /storyboard/scenes/{scene_id}; allowed fields validated by frozen visual registry, approved G3 assets only.
+- Render/export → GET /render-jobs/{render_job_id}, POST /render-jobs/retry, GET /attributions, POST /delivery/export after G5 and GET /delivery/artifacts/{artifact_id}.
+- Provider settings / queue → GET /providers, PUT /providers/settings (secret write-only), GET /projects/{project_id}/jobs.
+
+The HTML file is a UX interaction **mock only**, not a shipped React editor. Full-flow implementation must provide functioning backend responses, async job IDs, disabled processing controls, human review blockers and exact revision conflicts for all these actions.

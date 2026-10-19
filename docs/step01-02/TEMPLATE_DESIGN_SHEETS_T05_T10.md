@@ -1,5 +1,5 @@
 # Full V1 Scene Template Design Sheets — T05–T10
-**Supplement to:** 03_VISUAL_PRODUCTION_SPEC.md. Together they define all ten V1 scene templates; T01, T02, T03, T04 and T08 are documented in 03 and are the only five Step 03 pilot implementation requirements.
+**Supplement to:** 03_VISUAL_PRODUCTION_SPEC.md. Together they define all ten V1 scene templates; T01, T02, T03, T04 and T08 are documented in 03 and are the only five first full-flow template implementations.
 **Status:** Design freeze, not implemented components. Default coordinates assume 1920×1080 and HistoryEditorialPaper.v1. All historical visuals must be G3-approved, all cues use frozen ElevenLabs WordTimingMap.
 
 ## Shared sheet format
@@ -81,4 +81,4 @@
 | T10 | approved regions and causal claims | A/B/C | focus-out/network labels | unsupported causal arrow |
 
 ## Freeze rule
-Runtime implementation of each template must supply visual fixtures (first/mid/hold/boundary frames), editable inspector parameters, deterministic state, accessibility contrast and preview/export parity test. If any output uses a replacement historical asset, it must be an **already-approved G3 binding**, not a creative code fallback. The 10 template descriptions and their schema IDs are stable for V1, but exact motion values remain provisional pending Step 03 pilot.
+Runtime implementation of each template must supply visual fixtures (first/mid/hold/boundary frames), editable inspector parameters, deterministic state, accessibility contrast and preview/export parity test. If any output uses a replacement historical asset, it must be an **already-approved G3 binding**, not a creative code fallback. The 10 template descriptions and their schema IDs are stable for V1, but exact motion values remain provisional pending full V1.
