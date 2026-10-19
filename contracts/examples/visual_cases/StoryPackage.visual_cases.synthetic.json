@@ -1,0 +1,2173 @@
+{
+  "schema_version": "StoryPackage.v1",
+  "project": {
+    "project_id": "proj_cases",
+    "title": "Visual template adversarial SYNTHETIC cases — NOT verified history",
+    "language": "en",
+    "style_id": "HistoryEditorialPaper.v1"
+  },
+  "sections": [
+    {
+      "section_id": "sec_01",
+      "narration": "Synthetic documentary sequence T01. The first visible piece of evidence introduces the subject, the second changes the viewer focus, and the final visual emphasizes the consequence. This text is not a verified historical claim.",
+      "claim_refs": [
+        "claim_01"
+      ],
+      "asset_requirement_refs": [
+        "req_01_map_main"
+      ]
+    },
+    {
+      "section_id": "sec_02",
+      "narration": "Synthetic documentary sequence T02. The first visible piece of evidence introduces the subject, the second changes the viewer focus, and the final visual emphasizes the consequence. This text is not a verified historical claim.",
+      "claim_refs": [
+        "claim_02"
+      ],
+      "asset_requirement_refs": [
+        "req_02_portrait_main"
+      ]
+    },
+    {
+      "section_id": "sec_03",
+      "narration": "Synthetic documentary sequence T03. The first visible piece of evidence introduces the subject, the second changes the viewer focus, and the final visual emphasizes the consequence. This text is not a verified historical claim.",
+      "claim_refs": [
+        "claim_03"
+      ],
+      "asset_requirement_refs": [
+        "req_03_hero_card",
+        "req_03_support_card",
+        "req_03_detail_card"
+      ]
+    },
+    {
+      "section_id": "sec_04",
+      "narration": "Synthetic documentary sequence T04. The first visible piece of evidence introduces the subject, the second changes the viewer focus, and the final visual emphasizes the consequence. This text is not a verified historical claim.",
+      "claim_refs": [
+        "claim_04"
+      ],
+      "asset_requirement_refs": [
+        "req_04_map_backdrop"
+      ]
+    },
+    {
+      "section_id": "sec_05",
+      "narration": "Synthetic documentary sequence T05. The first visible piece of evidence introduces the subject, the second changes the viewer focus, and the final visual emphasizes the consequence. This text is not a verified historical claim.",
+      "claim_refs": [
+        "claim_05"
+      ],
+      "asset_requirement_refs": []
+    },
+    {
+      "section_id": "sec_06",
+      "narration": "Synthetic documentary sequence T06. The first visible piece of evidence introduces the subject, the second changes the viewer focus, and the final visual emphasizes the consequence. This text is not a verified historical claim.",
+      "claim_refs": [
+        "claim_06"
+      ],
+      "asset_requirement_refs": [
+        "req_06_document_main"
+      ]
+    },
+    {
+      "section_id": "sec_07",
+      "narration": "Synthetic documentary sequence T07. The first visible piece of evidence introduces the subject, the second changes the viewer focus, and the final visual emphasizes the consequence. This text is not a verified historical claim.",
+      "claim_refs": [
+        "claim_07"
+      ],
+      "asset_requirement_refs": [
+        "req_07_map_before",
+        "req_07_map_after"
+      ]
+    },
+    {
+      "section_id": "sec_08",
+      "narration": "Synthetic documentary sequence T08. The first visible piece of evidence introduces the subject, the second changes the viewer focus, and the final visual emphasizes the consequence. This text is not a verified historical claim.",
+      "claim_refs": [
+        "claim_08"
+      ],
+      "asset_requirement_refs": []
+    },
+    {
+      "section_id": "sec_09",
+      "narration": "Synthetic documentary sequence T09. The first visible piece of evidence introduces the subject, the second changes the viewer focus, and the final visual emphasizes the consequence. This text is not a verified historical claim.",
+      "claim_refs": [
+        "claim_09"
+      ],
+      "asset_requirement_refs": [
+        "req_09_source_page"
+      ]
+    },
+    {
+      "section_id": "sec_10",
+      "narration": "Synthetic documentary sequence T10. The first visible piece of evidence introduces the subject, the second changes the viewer focus, and the final visual emphasizes the consequence. This text is not a verified historical claim.",
+      "claim_refs": [
+        "claim_10"
+      ],
+      "asset_requirement_refs": [
+        "req_10_region_overview"
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_id": "claim_01",
+      "text": "Synthetic unverified editorial label for T01",
+      "source_leads": [],
+      "critical": true,
+      "status": "UNVERIFIED"
+    },
+    {
+      "claim_id": "claim_02",
+      "text": "Synthetic unverified editorial label for T02",
+      "source_leads": [],
+      "critical": true,
+      "status": "UNVERIFIED"
+    },
+    {
+      "claim_id": "claim_03",
+      "text": "Synthetic unverified editorial label for T03",
+      "source_leads": [],
+      "critical": true,
+      "status": "UNVERIFIED"
+    },
+    {
+      "claim_id": "claim_04",
+      "text": "Synthetic unverified editorial label for T04",
+      "source_leads": [],
+      "critical": true,
+      "status": "UNVERIFIED"
+    },
+    {
+      "claim_id": "claim_05",
+      "text": "Synthetic unverified editorial label for T05",
+      "source_leads": [],
+      "critical": true,
+      "status": "UNVERIFIED"
+    },
+    {
+      "claim_id": "claim_06",
+      "text": "Synthetic unverified editorial label for T06",
+      "source_leads": [],
+      "critical": true,
+      "status": "UNVERIFIED"
+    },
+    {
+      "claim_id": "claim_07",
+      "text": "Synthetic unverified editorial label for T07",
+      "source_leads": [],
+      "critical": true,
+      "status": "UNVERIFIED"
+    },
+    {
+      "claim_id": "claim_08",
+      "text": "Synthetic unverified editorial label for T08",
+      "source_leads": [],
+      "critical": true,
+      "status": "UNVERIFIED"
+    },
+    {
+      "claim_id": "claim_09",
+      "text": "Synthetic unverified editorial label for T09",
+      "source_leads": [],
+      "critical": true,
+      "status": "UNVERIFIED"
+    },
+    {
+      "claim_id": "claim_10",
+      "text": "Synthetic unverified editorial label for T10",
+      "source_leads": [],
+      "critical": true,
+      "status": "UNVERIFIED"
+    }
+  ],
+  "asset_requirements": [
+    {
+      "requirement_id": "req_01_map_main",
+      "subject": "Synthetic source for map_main",
+      "asset_class": "HISTORICAL_MAP",
+      "exactness": "context_related",
+      "required": true,
+      "start_year": 1914,
+      "end_year": 1914,
+      "source_leads": [],
+      "map_reconstruction_policy": "exact_period_map"
+    },
+    {
+      "requirement_id": "req_02_portrait_main",
+      "subject": "Synthetic source for portrait_main",
+      "asset_class": "ARCHIVAL_PHOTO",
+      "exactness": "context_related",
+      "required": true,
+      "start_year": 1914,
+      "end_year": 1914,
+      "source_leads": [],
+      "map_reconstruction_policy": "not_applicable"
+    },
+    {
+      "requirement_id": "req_03_hero_card",
+      "subject": "Synthetic source for hero_card",
+      "asset_class": "ARCHIVAL_PHOTO",
+      "exactness": "context_related",
+      "required": true,
+      "start_year": 1914,
+      "end_year": 1914,
+      "source_leads": [],
+      "map_reconstruction_policy": "not_applicable"
+    },
+    {
+      "requirement_id": "req_03_support_card",
+      "subject": "Synthetic source for support_card",
+      "asset_class": "ARCHIVAL_PHOTO",
+      "exactness": "context_related",
+      "required": false,
+      "start_year": 1914,
+      "end_year": 1914,
+      "source_leads": [],
+      "map_reconstruction_policy": "not_applicable"
+    },
+    {
+      "requirement_id": "req_03_detail_card",
+      "subject": "Synthetic source for detail_card",
+      "asset_class": "ARCHIVAL_PHOTO",
+      "exactness": "context_related",
+      "required": false,
+      "start_year": 1914,
+      "end_year": 1914,
+      "source_leads": [],
+      "map_reconstruction_policy": "not_applicable"
+    },
+    {
+      "requirement_id": "req_04_map_backdrop",
+      "subject": "Synthetic source for map_backdrop",
+      "asset_class": "HISTORICAL_MAP",
+      "exactness": "context_related",
+      "required": true,
+      "start_year": 1914,
+      "end_year": 1914,
+      "source_leads": [],
+      "map_reconstruction_policy": "exact_period_map"
+    },
+    {
+      "requirement_id": "req_06_document_main",
+      "subject": "Synthetic source for document_main",
+      "asset_class": "HISTORICAL_DOCUMENT",
+      "exactness": "context_related",
+      "required": true,
+      "start_year": 1914,
+      "end_year": 1914,
+      "source_leads": [],
+      "map_reconstruction_policy": "not_applicable"
+    },
+    {
+      "requirement_id": "req_07_map_before",
+      "subject": "Synthetic source for map_before",
+      "asset_class": "HISTORICAL_MAP",
+      "exactness": "context_related",
+      "required": true,
+      "start_year": 1914,
+      "end_year": 1914,
+      "source_leads": [],
+      "map_reconstruction_policy": "exact_period_map"
+    },
+    {
+      "requirement_id": "req_07_map_after",
+      "subject": "Synthetic source for map_after",
+      "asset_class": "HISTORICAL_MAP",
+      "exactness": "context_related",
+      "required": true,
+      "start_year": 1914,
+      "end_year": 1914,
+      "source_leads": [],
+      "map_reconstruction_policy": "exact_period_map"
+    },
+    {
+      "requirement_id": "req_09_source_page",
+      "subject": "Synthetic source for source_page",
+      "asset_class": "HISTORICAL_DOCUMENT",
+      "exactness": "context_related",
+      "required": false,
+      "start_year": 1914,
+      "end_year": 1914,
+      "source_leads": [],
+      "map_reconstruction_policy": "not_applicable"
+    },
+    {
+      "requirement_id": "req_10_region_overview",
+      "subject": "Synthetic source for region_overview",
+      "asset_class": "HISTORICAL_MAP",
+      "exactness": "context_related",
+      "required": false,
+      "start_year": 1914,
+      "end_year": 1914,
+      "source_leads": [],
+      "map_reconstruction_policy": "exact_period_map"
+    }
+  ],
+  "visual_setups": [
+    {
+      "setup_id": "setup_01",
+      "section_refs": [
+        "sec_01"
+      ],
+      "intent": "geography",
+      "preferred_template": "T01",
+      "requirement_refs": [
+        "req_01_map_main"
+      ],
+      "claim_refs": [
+        "claim_01"
+      ],
+      "direction": {
+        "visual_purpose": "Exercise genuine map_full visual grammar",
+        "viewer_takeaway": "Meaning must emerge through composition, not zoom alone",
+        "on_screen_text": [
+          {
+            "text_id": "text_01_place_head",
+            "text": "UNVERIFIED place_head",
+            "role": "headline",
+            "claim_ref": "claim_01",
+            "max_lines": 3
+          },
+          {
+            "text_id": "text_01_feature_note",
+            "text": "UNVERIFIED feature_note",
+            "role": "caption",
+            "claim_ref": "claim_01",
+            "max_lines": 3
+          }
+        ],
+        "reveal_plan": [
+          {
+            "beat_id": "oldbeat_01",
+            "action": "establish",
+            "target_role": "headline",
+            "cue": {
+              "section_id": "sec_01",
+              "phrase": "Synthetic",
+              "occurrence": 0
+            },
+            "priority": 1
+          }
+        ],
+        "asset_slots": [
+          {
+            "slot_id": "slot_01_map_main",
+            "requirement_id": "req_01_map_main",
+            "semantic_role": "map_main",
+            "usage": "foreground",
+            "mandatory": true
+          }
+        ],
+        "camera_intent": "push_in",
+        "composition_intent": "split_evidence",
+        "emotional_tone": "serious",
+        "layout_variant_hint": "A",
+        "duration_policy": "voice_locked",
+        "transition_intent": "hard_cut",
+        "historical_map_requirement_id": "req_01_map_main",
+        "visual_beats": [
+          {
+            "beat_id": "beat_01_0",
+            "section_ref": "sec_01",
+            "cue": {
+              "section_id": "sec_01",
+              "phrase": "Synthetic",
+              "occurrence": 0
+            },
+            "action": "establish",
+            "focus_ref": "slot_01_map_main",
+            "shot_goal": "Demonstrate T01 compositional focus shift 1",
+            "source_claim_refs": [
+              "claim_01"
+            ],
+            "relationships": [],
+            "staging": [
+              {
+                "ref": "slot_01_map_main",
+                "operation": "enter",
+                "after_ref": null,
+                "motion_hint": "subtle_push",
+                "priority": 1
+              }
+            ],
+            "focus_move": "static",
+            "hold_policy": "narration_aligned",
+            "continuity": {
+              "group_id": "group_01",
+              "carry_refs": [],
+              "entry": "new_setup",
+              "exit": "same_canvas",
+              "reason": "Test-only visual reveal continuity"
+            }
+          },
+          {
+            "beat_id": "beat_01_1",
+            "section_ref": "sec_01",
+            "cue": {
+              "section_id": "sec_01",
+              "phrase": "the",
+              "occurrence": 0
+            },
+            "action": "reveal",
+            "focus_ref": "text_01_place_head",
+            "shot_goal": "Demonstrate T01 compositional focus shift 2",
+            "source_claim_refs": [
+              "claim_01"
+            ],
+            "relationships": [
+              {
+                "from_ref": "text_01_place_head",
+                "to_ref": "slot_01_map_main",
+                "relation": "foreground_of"
+              }
+            ],
+            "staging": [
+              {
+                "ref": "text_01_place_head",
+                "operation": "highlight",
+                "after_ref": "slot_01_map_main",
+                "motion_hint": "subtle_push",
+                "priority": 2
+              }
+            ],
+            "focus_move": "subject_to_subject",
+            "hold_policy": "narration_aligned",
+            "continuity": {
+              "group_id": "group_01",
+              "carry_refs": [
+                "slot_01_map_main"
+              ],
+              "entry": "carry_forward",
+              "exit": "same_canvas",
+              "reason": "Test-only visual reveal continuity"
+            }
+          },
+          {
+            "beat_id": "beat_01_2",
+            "section_ref": "sec_01",
+            "cue": {
+              "section_id": "sec_01",
+              "phrase": "the",
+              "occurrence": 0
+            },
+            "action": "consequence",
+            "focus_ref": "text_01_feature_note",
+            "shot_goal": "Demonstrate T01 compositional focus shift 3",
+            "source_claim_refs": [
+              "claim_01"
+            ],
+            "relationships": [
+              {
+                "from_ref": "text_01_feature_note",
+                "to_ref": "text_01_place_head",
+                "relation": "foreground_of"
+              }
+            ],
+            "staging": [
+              {
+                "ref": "text_01_feature_note",
+                "operation": "highlight",
+                "after_ref": "text_01_place_head",
+                "motion_hint": "subtle_push",
+                "priority": 3
+              }
+            ],
+            "focus_move": "subject_to_subject",
+            "hold_policy": "narration_aligned",
+            "continuity": {
+              "group_id": "group_01",
+              "carry_refs": [
+                "slot_01_map_main"
+              ],
+              "entry": "carry_forward",
+              "exit": "hard_cut",
+              "reason": "Test-only visual reveal continuity"
+            }
+          }
+        ],
+        "reuse_setup_id": null
+      }
+    },
+    {
+      "setup_id": "setup_02",
+      "section_refs": [
+        "sec_02"
+      ],
+      "intent": "evidence",
+      "preferred_template": "T02",
+      "requirement_refs": [
+        "req_02_portrait_main"
+      ],
+      "claim_refs": [
+        "claim_02"
+      ],
+      "direction": {
+        "visual_purpose": "Exercise genuine portrait_split visual grammar",
+        "viewer_takeaway": "Meaning must emerge through composition, not zoom alone",
+        "on_screen_text": [
+          {
+            "text_id": "text_02_person_name",
+            "text": "UNVERIFIED person_name",
+            "role": "headline",
+            "claim_ref": "claim_02",
+            "max_lines": 3
+          },
+          {
+            "text_id": "text_02_person_role",
+            "text": "UNVERIFIED person_role",
+            "role": "text",
+            "claim_ref": "claim_02",
+            "max_lines": 3
+          },
+          {
+            "text_id": "text_02_date_badge",
+            "text": "UNVERIFIED date_badge",
+            "role": "date",
+            "claim_ref": "claim_02",
+            "max_lines": 3
+          }
+        ],
+        "reveal_plan": [
+          {
+            "beat_id": "oldbeat_02",
+            "action": "establish",
+            "target_role": "headline",
+            "cue": {
+              "section_id": "sec_02",
+              "phrase": "Synthetic",
+              "occurrence": 0
+            },
+            "priority": 1
+          }
+        ],
+        "asset_slots": [
+          {
+            "slot_id": "slot_02_portrait_main",
+            "requirement_id": "req_02_portrait_main",
+            "semantic_role": "portrait_main",
+            "usage": "foreground",
+            "mandatory": true
+          }
+        ],
+        "camera_intent": "push_in",
+        "composition_intent": "split_evidence",
+        "emotional_tone": "serious",
+        "layout_variant_hint": "A",
+        "duration_policy": "voice_locked",
+        "transition_intent": "hard_cut",
+        "historical_map_requirement_id": null,
+        "visual_beats": [
+          {
+            "beat_id": "beat_02_0",
+            "section_ref": "sec_02",
+            "cue": {
+              "section_id": "sec_02",
+              "phrase": "Synthetic",
+              "occurrence": 0
+            },
+            "action": "establish",
+            "focus_ref": "slot_02_portrait_main",
+            "shot_goal": "Demonstrate T02 compositional focus shift 1",
+            "source_claim_refs": [
+              "claim_02"
+            ],
+            "relationships": [],
+            "staging": [
+              {
+                "ref": "slot_02_portrait_main",
+                "operation": "enter",
+                "after_ref": null,
+                "motion_hint": "subtle_push",
+                "priority": 1
+              }
+            ],
+            "focus_move": "static",
+            "hold_policy": "narration_aligned",
+            "continuity": {
+              "group_id": "group_02",
+              "carry_refs": [],
+              "entry": "new_setup",
+              "exit": "same_canvas",
+              "reason": "Test-only visual reveal continuity"
+            }
+          },
+          {
+            "beat_id": "beat_02_1",
+            "section_ref": "sec_02",
+            "cue": {
+              "section_id": "sec_02",
+              "phrase": "the",
+              "occurrence": 0
+            },
+            "action": "reveal",
+            "focus_ref": "text_02_person_name",
+            "shot_goal": "Demonstrate T02 compositional focus shift 2",
+            "source_claim_refs": [
+              "claim_02"
+            ],
+            "relationships": [
+              {
+                "from_ref": "text_02_person_name",
+                "to_ref": "slot_02_portrait_main",
+                "relation": "foreground_of"
+              }
+            ],
+            "staging": [
+              {
+                "ref": "text_02_person_name",
+                "operation": "highlight",
+                "after_ref": "slot_02_portrait_main",
+                "motion_hint": "subtle_push",
+                "priority": 2
+              }
+            ],
+            "focus_move": "subject_to_subject",
+            "hold_policy": "narration_aligned",
+            "continuity": {
+              "group_id": "group_02",
+              "carry_refs": [
+                "slot_02_portrait_main"
+              ],
+              "entry": "carry_forward",
+              "exit": "same_canvas",
+              "reason": "Test-only visual reveal continuity"
+            }
+          },
+          {
+            "beat_id": "beat_02_2",
+            "section_ref": "sec_02",
+            "cue": {
+              "section_id": "sec_02",
+              "phrase": "the",
+              "occurrence": 0
+            },
+            "action": "consequence",
+            "focus_ref": "text_02_person_role",
+            "shot_goal": "Demonstrate T02 compositional focus shift 3",
+            "source_claim_refs": [
+              "claim_02"
+            ],
+            "relationships": [
+              {
+                "from_ref": "text_02_person_role",
+                "to_ref": "text_02_person_name",
+                "relation": "foreground_of"
+              }
+            ],
+            "staging": [
+              {
+                "ref": "text_02_person_role",
+                "operation": "highlight",
+                "after_ref": "text_02_person_name",
+                "motion_hint": "subtle_push",
+                "priority": 3
+              }
+            ],
+            "focus_move": "subject_to_subject",
+            "hold_policy": "narration_aligned",
+            "continuity": {
+              "group_id": "group_02",
+              "carry_refs": [
+                "slot_02_portrait_main"
+              ],
+              "entry": "carry_forward",
+              "exit": "hard_cut",
+              "reason": "Test-only visual reveal continuity"
+            }
+          }
+        ],
+        "reuse_setup_id": null
+      }
+    },
+    {
+      "setup_id": "setup_03",
+      "section_refs": [
+        "sec_03"
+      ],
+      "intent": "evidence",
+      "preferred_template": "T03",
+      "requirement_refs": [
+        "req_03_hero_card",
+        "req_03_support_card",
+        "req_03_detail_card"
+      ],
+      "claim_refs": [
+        "claim_03"
+      ],
+      "direction": {
+        "visual_purpose": "Exercise genuine collage_multi_card visual grammar",
+        "viewer_takeaway": "Meaning must emerge through composition, not zoom alone",
+        "on_screen_text": [
+          {
+            "text_id": "text_03_caption",
+            "text": "UNVERIFIED caption",
+            "role": "text",
+            "claim_ref": "claim_03",
+            "max_lines": 3
+          }
+        ],
+        "reveal_plan": [
+          {
+            "beat_id": "oldbeat_03",
+            "action": "establish",
+            "target_role": "headline",
+            "cue": {
+              "section_id": "sec_03",
+              "phrase": "Synthetic",
+              "occurrence": 0
+            },
+            "priority": 1
+          }
+        ],
+        "asset_slots": [
+          {
+            "slot_id": "slot_03_hero_card",
+            "requirement_id": "req_03_hero_card",
+            "semantic_role": "hero_card",
+            "usage": "evidence",
+            "mandatory": true
+          },
+          {
+            "slot_id": "slot_03_support_card",
+            "requirement_id": "req_03_support_card",
+            "semantic_role": "support_card",
+            "usage": "evidence",
+            "mandatory": false
+          },
+          {
+            "slot_id": "slot_03_detail_card",
+            "requirement_id": "req_03_detail_card",
+            "semantic_role": "detail_card",
+            "usage": "evidence",
+            "mandatory": false
+          }
+        ],
+        "camera_intent": "push_in",
+        "composition_intent": "collage",
+        "emotional_tone": "serious",
+        "layout_variant_hint": "A",
+        "duration_policy": "voice_locked",
+        "transition_intent": "hard_cut",
+        "historical_map_requirement_id": null,
+        "visual_beats": [
+          {
+            "beat_id": "beat_03_0",
+            "section_ref": "sec_03",
+            "cue": {
+              "section_id": "sec_03",
+              "phrase": "Synthetic",
+              "occurrence": 0
+            },
+            "action": "establish",
+            "focus_ref": "slot_03_hero_card",
+            "shot_goal": "Demonstrate T03 compositional focus shift 1",
+            "source_claim_refs": [
+              "claim_03"
+            ],
+            "relationships": [],
+            "staging": [
+              {
+                "ref": "slot_03_hero_card",
+                "operation": "enter",
+                "after_ref": null,
+                "motion_hint": "stagger",
+                "priority": 1
+              }
+            ],
+            "focus_move": "static",
+            "hold_policy": "narration_aligned",
+            "continuity": {
+              "group_id": "group_03",
+              "carry_refs": [],
+              "entry": "new_setup",
+              "exit": "same_canvas",
+              "reason": "Test-only visual reveal continuity"
+            }
+          },
+          {
+            "beat_id": "beat_03_1",
+            "section_ref": "sec_03",
+            "cue": {
+              "section_id": "sec_03",
+              "phrase": "the",
+              "occurrence": 0
+            },
+            "action": "reveal",
+            "focus_ref": "slot_03_support_card",
+            "shot_goal": "Demonstrate T03 compositional focus shift 2",
+            "source_claim_refs": [
+              "claim_03"
+            ],
+            "relationships": [
+              {
+                "from_ref": "slot_03_support_card",
+                "to_ref": "slot_03_hero_card",
+                "relation": "foreground_of"
+              }
+            ],
+            "staging": [
+              {
+                "ref": "slot_03_support_card",
+                "operation": "highlight",
+                "after_ref": "slot_03_hero_card",
+                "motion_hint": "stagger",
+                "priority": 2
+              }
+            ],
+            "focus_move": "subject_to_subject",
+            "hold_policy": "narration_aligned",
+            "continuity": {
+              "group_id": "group_03",
+              "carry_refs": [
+                "slot_03_hero_card"
+              ],
+              "entry": "carry_forward",
+              "exit": "same_canvas",
+              "reason": "Test-only visual reveal continuity"
+            }
+          },
+          {
+            "beat_id": "beat_03_2",
+            "section_ref": "sec_03",
+            "cue": {
+              "section_id": "sec_03",
+              "phrase": "the",
+              "occurrence": 0
+            },
+            "action": "consequence",
+            "focus_ref": "slot_03_detail_card",
+            "shot_goal": "Demonstrate T03 compositional focus shift 3",
+            "source_claim_refs": [
+              "claim_03"
+            ],
+            "relationships": [
+              {
+                "from_ref": "slot_03_detail_card",
+                "to_ref": "slot_03_support_card",
+                "relation": "foreground_of"
+              }
+            ],
+            "staging": [
+              {
+                "ref": "slot_03_detail_card",
+                "operation": "highlight",
+                "after_ref": "slot_03_support_card",
+                "motion_hint": "stagger",
+                "priority": 3
+              }
+            ],
+            "focus_move": "subject_to_subject",
+            "hold_policy": "narration_aligned",
+            "continuity": {
+              "group_id": "group_03",
+              "carry_refs": [
+                "slot_03_hero_card"
+              ],
+              "entry": "carry_forward",
+              "exit": "hard_cut",
+              "reason": "Test-only visual reveal continuity"
+            }
+          }
+        ],
+        "reuse_setup_id": null
+      }
+    },
+    {
+      "setup_id": "setup_04",
+      "section_refs": [
+        "sec_04"
+      ],
+      "intent": "route",
+      "preferred_template": "T04",
+      "requirement_refs": [
+        "req_04_map_backdrop"
+      ],
+      "claim_refs": [
+        "claim_04"
+      ],
+      "direction": {
+        "visual_purpose": "Exercise genuine route_geo visual grammar",
+        "viewer_takeaway": "Meaning must emerge through composition, not zoom alone",
+        "on_screen_text": [
+          {
+            "text_id": "text_04_waypoint_callout",
+            "text": "UNVERIFIED waypoint_callout",
+            "role": "caption",
+            "claim_ref": "claim_04",
+            "max_lines": 3
+          },
+          {
+            "text_id": "text_04_route_title",
+            "text": "UNVERIFIED route_title",
+            "role": "headline",
+            "claim_ref": "claim_04",
+            "max_lines": 3
+          }
+        ],
+        "reveal_plan": [
+          {
+            "beat_id": "oldbeat_04",
+            "action": "establish",
+            "target_role": "headline",
+            "cue": {
+              "section_id": "sec_04",
+              "phrase": "Synthetic",
+              "occurrence": 0
+            },
+            "priority": 1
+          }
+        ],
+        "asset_slots": [
+          {
+            "slot_id": "slot_04_map_backdrop",
+            "requirement_id": "req_04_map_backdrop",
+            "semantic_role": "map_backdrop",
+            "usage": "evidence",
+            "mandatory": true
+          }
+        ],
+        "camera_intent": "track_route",
+        "composition_intent": "split_evidence",
+        "emotional_tone": "serious",
+        "layout_variant_hint": "A",
+        "duration_policy": "voice_locked",
+        "transition_intent": "hard_cut",
+        "historical_map_requirement_id": "req_04_map_backdrop",
+        "visual_beats": [
+          {
+            "beat_id": "beat_04_0",
+            "section_ref": "sec_04",
+            "cue": {
+              "section_id": "sec_04",
+              "phrase": "Synthetic",
+              "occurrence": 0
+            },
+            "action": "establish",
+            "focus_ref": "slot_04_map_backdrop",
+            "shot_goal": "Demonstrate T04 compositional focus shift 1",
+            "source_claim_refs": [
+              "claim_04"
+            ],
+            "relationships": [],
+            "staging": [
+              {
+                "ref": "slot_04_map_backdrop",
+                "operation": "enter",
+                "after_ref": null,
+                "motion_hint": "line_draw",
+                "priority": 1
+              }
+            ],
+            "focus_move": "static",
+            "hold_policy": "narration_aligned",
+            "continuity": {
+              "group_id": "group_04",
+              "carry_refs": [],
+              "entry": "new_setup",
+              "exit": "same_canvas",
+              "reason": "Test-only visual reveal continuity"
+            }
+          },
+          {
+            "beat_id": "beat_04_1",
+            "section_ref": "sec_04",
+            "cue": {
+              "section_id": "sec_04",
+              "phrase": "the",
+              "occurrence": 0
+            },
+            "action": "reveal",
+            "focus_ref": "text_04_waypoint_callout",
+            "shot_goal": "Demonstrate T04 compositional focus shift 2",
+            "source_claim_refs": [
+              "claim_04"
+            ],
+            "relationships": [
+              {
+                "from_ref": "text_04_waypoint_callout",
+                "to_ref": "slot_04_map_backdrop",
+                "relation": "foreground_of"
+              }
+            ],
+            "staging": [
+              {
+                "ref": "text_04_waypoint_callout",
+                "operation": "highlight",
+                "after_ref": "slot_04_map_backdrop",
+                "motion_hint": "line_draw",
+                "priority": 2
+              }
+            ],
+            "focus_move": "subject_to_subject",
+            "hold_policy": "narration_aligned",
+            "continuity": {
+              "group_id": "group_04",
+              "carry_refs": [
+                "slot_04_map_backdrop"
+              ],
+              "entry": "carry_forward",
+              "exit": "same_canvas",
+              "reason": "Test-only visual reveal continuity"
+            }
+          },
+          {
+            "beat_id": "beat_04_2",
+            "section_ref": "sec_04",
+            "cue": {
+              "section_id": "sec_04",
+              "phrase": "the",
+              "occurrence": 0
+            },
+            "action": "consequence",
+            "focus_ref": "text_04_route_title",
+            "shot_goal": "Demonstrate T04 compositional focus shift 3",
+            "source_claim_refs": [
+              "claim_04"
+            ],
+            "relationships": [
+              {
+                "from_ref": "text_04_route_title",
+                "to_ref": "text_04_waypoint_callout",
+                "relation": "foreground_of"
+              }
+            ],
+            "staging": [
+              {
+                "ref": "text_04_route_title",
+                "operation": "highlight",
+                "after_ref": "text_04_waypoint_callout",
+                "motion_hint": "line_draw",
+                "priority": 3
+              }
+            ],
+            "focus_move": "subject_to_subject",
+            "hold_policy": "narration_aligned",
+            "continuity": {
+              "group_id": "group_04",
+              "carry_refs": [
+                "slot_04_map_backdrop"
+              ],
+              "entry": "carry_forward",
+              "exit": "hard_cut",
+              "reason": "Test-only visual reveal continuity"
+            }
+          }
+        ],
+        "reuse_setup_id": null
+      }
+    },
+    {
+      "setup_id": "setup_05",
+      "section_refs": [
+        "sec_05"
+      ],
+      "intent": "chronology",
+      "preferred_template": "T05",
+      "requirement_refs": [],
+      "claim_refs": [
+        "claim_05"
+      ],
+      "direction": {
+        "visual_purpose": "Exercise genuine timeline_rail visual grammar",
+        "viewer_takeaway": "Meaning must emerge through composition, not zoom alone",
+        "on_screen_text": [
+          {
+            "text_id": "text_05_date_early",
+            "text": "UNVERIFIED date_early",
+            "role": "date",
+            "claim_ref": "claim_05",
+            "max_lines": 3
+          },
+          {
+            "text_id": "text_05_date_late",
+            "text": "UNVERIFIED date_late",
+            "role": "date",
+            "claim_ref": "claim_05",
+            "max_lines": 3
+          },
+          {
+            "text_id": "text_05_event_title",
+            "text": "UNVERIFIED event_title",
+            "role": "headline",
+            "claim_ref": "claim_05",
+            "max_lines": 3
+          }
+        ],
+        "reveal_plan": [
+          {
+            "beat_id": "oldbeat_05",
+            "action": "establish",
+            "target_role": "headline",
+            "cue": {
+              "section_id": "sec_05",
+              "phrase": "Synthetic",
+              "occurrence": 0
+            },
+            "priority": 1
+          }
+        ],
+        "asset_slots": [],
+        "camera_intent": "push_in",
+        "composition_intent": "chronology",
+        "emotional_tone": "serious",
+        "layout_variant_hint": "A",
+        "duration_policy": "voice_locked",
+        "transition_intent": "hard_cut",
+        "historical_map_requirement_id": null,
+        "visual_beats": [
+          {
+            "beat_id": "beat_05_0",
+            "section_ref": "sec_05",
+            "cue": {
+              "section_id": "sec_05",
+              "phrase": "Synthetic",
+              "occurrence": 0
+            },
+            "action": "establish",
+            "focus_ref": "text_05_date_early",
+            "shot_goal": "Demonstrate T05 compositional focus shift 1",
+            "source_claim_refs": [
+              "claim_05"
+            ],
+            "relationships": [],
+            "staging": [
+              {
+                "ref": "text_05_date_early",
+                "operation": "enter",
+                "after_ref": null,
+                "motion_hint": "subtle_push",
+                "priority": 1
+              }
+            ],
+            "focus_move": "static",
+            "hold_policy": "narration_aligned",
+            "continuity": {
+              "group_id": "group_05",
+              "carry_refs": [],
+              "entry": "new_setup",
+              "exit": "same_canvas",
+              "reason": "Test-only visual reveal continuity"
+            }
+          },
+          {
+            "beat_id": "beat_05_1",
+            "section_ref": "sec_05",
+            "cue": {
+              "section_id": "sec_05",
+              "phrase": "the",
+              "occurrence": 0
+            },
+            "action": "reveal",
+            "focus_ref": "text_05_date_late",
+            "shot_goal": "Demonstrate T05 compositional focus shift 2",
+            "source_claim_refs": [
+              "claim_05"
+            ],
+            "relationships": [
+              {
+                "from_ref": "text_05_date_late",
+                "to_ref": "text_05_date_early",
+                "relation": "foreground_of"
+              }
+            ],
+            "staging": [
+              {
+                "ref": "text_05_date_late",
+                "operation": "highlight",
+                "after_ref": "text_05_date_early",
+                "motion_hint": "subtle_push",
+                "priority": 2
+              }
+            ],
+            "focus_move": "subject_to_subject",
+            "hold_policy": "narration_aligned",
+            "continuity": {
+              "group_id": "group_05",
+              "carry_refs": [
+                "text_05_date_early"
+              ],
+              "entry": "carry_forward",
+              "exit": "same_canvas",
+              "reason": "Test-only visual reveal continuity"
+            }
+          },
+          {
+            "beat_id": "beat_05_2",
+            "section_ref": "sec_05",
+            "cue": {
+              "section_id": "sec_05",
+              "phrase": "the",
+              "occurrence": 0
+            },
+            "action": "consequence",
+            "focus_ref": "text_05_event_title",
+            "shot_goal": "Demonstrate T05 compositional focus shift 3",
+            "source_claim_refs": [
+              "claim_05"
+            ],
+            "relationships": [
+              {
+                "from_ref": "text_05_event_title",
+                "to_ref": "text_05_date_late",
+                "relation": "foreground_of"
+              }
+            ],
+            "staging": [
+              {
+                "ref": "text_05_event_title",
+                "operation": "highlight",
+                "after_ref": "text_05_date_late",
+                "motion_hint": "subtle_push",
+                "priority": 3
+              }
+            ],
+            "focus_move": "subject_to_subject",
+            "hold_policy": "narration_aligned",
+            "continuity": {
+              "group_id": "group_05",
+              "carry_refs": [
+                "text_05_date_early"
+              ],
+              "entry": "carry_forward",
+              "exit": "hard_cut",
+              "reason": "Test-only visual reveal continuity"
+            }
+          }
+        ],
+        "reuse_setup_id": null
+      }
+    },
+    {
+      "setup_id": "setup_06",
+      "section_refs": [
+        "sec_06"
+      ],
+      "intent": "evidence",
+      "preferred_template": "T06",
+      "requirement_refs": [
+        "req_06_document_main"
+      ],
+      "claim_refs": [
+        "claim_06"
+      ],
+      "direction": {
+        "visual_purpose": "Exercise genuine document_focus visual grammar",
+        "viewer_takeaway": "Meaning must emerge through composition, not zoom alone",
+        "on_screen_text": [
+          {
+            "text_id": "text_06_verified_excerpt",
+            "text": "UNVERIFIED verified_excerpt",
+            "role": "text",
+            "claim_ref": "claim_06",
+            "max_lines": 3
+          },
+          {
+            "text_id": "text_06_citation",
+            "text": "UNVERIFIED citation",
+            "role": "text",
+            "claim_ref": "claim_06",
+            "max_lines": 3
+          }
+        ],
+        "reveal_plan": [
+          {
+            "beat_id": "oldbeat_06",
+            "action": "establish",
+            "target_role": "headline",
+            "cue": {
+              "section_id": "sec_06",
+              "phrase": "Synthetic",
+              "occurrence": 0
+            },
+            "priority": 1
+          }
+        ],
+        "asset_slots": [
+          {
+            "slot_id": "slot_06_document_main",
+            "requirement_id": "req_06_document_main",
+            "semantic_role": "document_main",
+            "usage": "foreground",
+            "mandatory": true
+          }
+        ],
+        "camera_intent": "push_in",
+        "composition_intent": "split_evidence",
+        "emotional_tone": "serious",
+        "layout_variant_hint": "A",
+        "duration_policy": "voice_locked",
+        "transition_intent": "hard_cut",
+        "historical_map_requirement_id": null,
+        "visual_beats": [
+          {
+            "beat_id": "beat_06_0",
+            "section_ref": "sec_06",
+            "cue": {
+              "section_id": "sec_06",
+              "phrase": "Synthetic",
+              "occurrence": 0
+            },
+            "action": "establish",
+            "focus_ref": "slot_06_document_main",
+            "shot_goal": "Demonstrate T06 compositional focus shift 1",
+            "source_claim_refs": [
+              "claim_06"
+            ],
+            "relationships": [],
+            "staging": [
+              {
+                "ref": "slot_06_document_main",
+                "operation": "enter",
+                "after_ref": null,
+                "motion_hint": "subtle_push",
+                "priority": 1
+              }
+            ],
+            "focus_move": "static",
+            "hold_policy": "narration_aligned",
+            "continuity": {
+              "group_id": "group_06",
+              "carry_refs": [],
+              "entry": "new_setup",
+              "exit": "same_canvas",
+              "reason": "Test-only visual reveal continuity"
+            }
+          },
+          {
+            "beat_id": "beat_06_1",
+            "section_ref": "sec_06",
+            "cue": {
+              "section_id": "sec_06",
+              "phrase": "the",
+              "occurrence": 0
+            },
+            "action": "reveal",
+            "focus_ref": "text_06_verified_excerpt",
+            "shot_goal": "Demonstrate T06 compositional focus shift 2",
+            "source_claim_refs": [
+              "claim_06"
+            ],
+            "relationships": [
+              {
+                "from_ref": "text_06_verified_excerpt",
+                "to_ref": "slot_06_document_main",
+                "relation": "foreground_of"
+              }
+            ],
+            "staging": [
+              {
+                "ref": "text_06_verified_excerpt",
+                "operation": "highlight",
+                "after_ref": "slot_06_document_main",
+                "motion_hint": "subtle_push",
+                "priority": 2
+              }
+            ],
+            "focus_move": "subject_to_subject",
+            "hold_policy": "narration_aligned",
+            "continuity": {
+              "group_id": "group_06",
+              "carry_refs": [
+                "slot_06_document_main"
+              ],
+              "entry": "carry_forward",
+              "exit": "same_canvas",
+              "reason": "Test-only visual reveal continuity"
+            }
+          },
+          {
+            "beat_id": "beat_06_2",
+            "section_ref": "sec_06",
+            "cue": {
+              "section_id": "sec_06",
+              "phrase": "the",
+              "occurrence": 0
+            },
+            "action": "consequence",
+            "focus_ref": "text_06_citation",
+            "shot_goal": "Demonstrate T06 compositional focus shift 3",
+            "source_claim_refs": [
+              "claim_06"
+            ],
+            "relationships": [
+              {
+                "from_ref": "text_06_citation",
+                "to_ref": "text_06_verified_excerpt",
+                "relation": "foreground_of"
+              }
+            ],
+            "staging": [
+              {
+                "ref": "text_06_citation",
+                "operation": "highlight",
+                "after_ref": "text_06_verified_excerpt",
+                "motion_hint": "subtle_push",
+                "priority": 3
+              }
+            ],
+            "focus_move": "subject_to_subject",
+            "hold_policy": "narration_aligned",
+            "continuity": {
+              "group_id": "group_06",
+              "carry_refs": [
+                "slot_06_document_main"
+              ],
+              "entry": "carry_forward",
+              "exit": "hard_cut",
+              "reason": "Test-only visual reveal continuity"
+            }
+          }
+        ],
+        "reuse_setup_id": null
+      }
+    },
+    {
+      "setup_id": "setup_07",
+      "section_refs": [
+        "sec_07"
+      ],
+      "intent": "geography",
+      "preferred_template": "T07",
+      "requirement_refs": [
+        "req_07_map_before",
+        "req_07_map_after"
+      ],
+      "claim_refs": [
+        "claim_07"
+      ],
+      "direction": {
+        "visual_purpose": "Exercise genuine two_map_comparison visual grammar",
+        "viewer_takeaway": "Meaning must emerge through composition, not zoom alone",
+        "on_screen_text": [
+          {
+            "text_id": "text_07_date_before",
+            "text": "UNVERIFIED date_before",
+            "role": "date",
+            "claim_ref": "claim_07",
+            "max_lines": 3
+          },
+          {
+            "text_id": "text_07_date_after",
+            "text": "UNVERIFIED date_after",
+            "role": "date",
+            "claim_ref": "claim_07",
+            "max_lines": 3
+          },
+          {
+            "text_id": "text_07_delta_note",
+            "text": "UNVERIFIED delta_note",
+            "role": "caption",
+            "claim_ref": "claim_07",
+            "max_lines": 3
+          }
+        ],
+        "reveal_plan": [
+          {
+            "beat_id": "oldbeat_07",
+            "action": "establish",
+            "target_role": "headline",
+            "cue": {
+              "section_id": "sec_07",
+              "phrase": "Synthetic",
+              "occurrence": 0
+            },
+            "priority": 1
+          }
+        ],
+        "asset_slots": [
+          {
+            "slot_id": "slot_07_map_before",
+            "requirement_id": "req_07_map_before",
+            "semantic_role": "map_before",
+            "usage": "evidence",
+            "mandatory": true
+          },
+          {
+            "slot_id": "slot_07_map_after",
+            "requirement_id": "req_07_map_after",
+            "semantic_role": "map_after",
+            "usage": "evidence",
+            "mandatory": true
+          }
+        ],
+        "camera_intent": "compare_locked",
+        "composition_intent": "split_evidence",
+        "emotional_tone": "serious",
+        "layout_variant_hint": "A",
+        "duration_policy": "voice_locked",
+        "transition_intent": "hard_cut",
+        "historical_map_requirement_id": "req_07_map_before",
+        "visual_beats": [
+          {
+            "beat_id": "beat_07_0",
+            "section_ref": "sec_07",
+            "cue": {
+              "section_id": "sec_07",
+              "phrase": "Synthetic",
+              "occurrence": 0
+            },
+            "action": "establish",
+            "focus_ref": "slot_07_map_before",
+            "shot_goal": "Demonstrate T07 compositional focus shift 1",
+            "source_claim_refs": [
+              "claim_07"
+            ],
+            "relationships": [],
+            "staging": [
+              {
+                "ref": "slot_07_map_before",
+                "operation": "enter",
+                "after_ref": null,
+                "motion_hint": "subtle_push",
+                "priority": 1
+              }
+            ],
+            "focus_move": "static",
+            "hold_policy": "narration_aligned",
+            "continuity": {
+              "group_id": "group_07",
+              "carry_refs": [],
+              "entry": "new_setup",
+              "exit": "same_canvas",
+              "reason": "Test-only visual reveal continuity"
+            }
+          },
+          {
+            "beat_id": "beat_07_1",
+            "section_ref": "sec_07",
+            "cue": {
+              "section_id": "sec_07",
+              "phrase": "the",
+              "occurrence": 0
+            },
+            "action": "reveal",
+            "focus_ref": "slot_07_map_after",
+            "shot_goal": "Demonstrate T07 compositional focus shift 2",
+            "source_claim_refs": [
+              "claim_07"
+            ],
+            "relationships": [
+              {
+                "from_ref": "slot_07_map_after",
+                "to_ref": "slot_07_map_before",
+                "relation": "foreground_of"
+              }
+            ],
+            "staging": [
+              {
+                "ref": "slot_07_map_after",
+                "operation": "highlight",
+                "after_ref": "slot_07_map_before",
+                "motion_hint": "subtle_push",
+                "priority": 2
+              }
+            ],
+            "focus_move": "subject_to_subject",
+            "hold_policy": "narration_aligned",
+            "continuity": {
+              "group_id": "group_07",
+              "carry_refs": [
+                "slot_07_map_before"
+              ],
+              "entry": "carry_forward",
+              "exit": "same_canvas",
+              "reason": "Test-only visual reveal continuity"
+            }
+          },
+          {
+            "beat_id": "beat_07_2",
+            "section_ref": "sec_07",
+            "cue": {
+              "section_id": "sec_07",
+              "phrase": "the",
+              "occurrence": 0
+            },
+            "action": "consequence",
+            "focus_ref": "text_07_date_before",
+            "shot_goal": "Demonstrate T07 compositional focus shift 3",
+            "source_claim_refs": [
+              "claim_07"
+            ],
+            "relationships": [
+              {
+                "from_ref": "text_07_date_before",
+                "to_ref": "slot_07_map_after",
+                "relation": "foreground_of"
+              }
+            ],
+            "staging": [
+              {
+                "ref": "text_07_date_before",
+                "operation": "highlight",
+                "after_ref": "slot_07_map_after",
+                "motion_hint": "subtle_push",
+                "priority": 3
+              }
+            ],
+            "focus_move": "subject_to_subject",
+            "hold_policy": "narration_aligned",
+            "continuity": {
+              "group_id": "group_07",
+              "carry_refs": [
+                "slot_07_map_before"
+              ],
+              "entry": "carry_forward",
+              "exit": "hard_cut",
+              "reason": "Test-only visual reveal continuity"
+            }
+          }
+        ],
+        "reuse_setup_id": null
+      }
+    },
+    {
+      "setup_id": "setup_08",
+      "section_refs": [
+        "sec_08"
+      ],
+      "intent": "number",
+      "preferred_template": "T08",
+      "requirement_refs": [],
+      "claim_refs": [
+        "claim_08"
+      ],
+      "direction": {
+        "visual_purpose": "Exercise genuine fact_hero visual grammar",
+        "viewer_takeaway": "Meaning must emerge through composition, not zoom alone",
+        "on_screen_text": [
+          {
+            "text_id": "text_08_fact_value",
+            "text": "UNVERIFIED fact_value",
+            "role": "date",
+            "claim_ref": "claim_08",
+            "max_lines": 3
+          },
+          {
+            "text_id": "text_08_fact_label",
+            "text": "UNVERIFIED fact_label",
+            "role": "headline",
+            "claim_ref": "claim_08",
+            "max_lines": 3
+          },
+          {
+            "text_id": "text_08_source_note",
+            "text": "UNVERIFIED source_note",
+            "role": "text",
+            "claim_ref": "claim_08",
+            "max_lines": 3
+          }
+        ],
+        "reveal_plan": [
+          {
+            "beat_id": "oldbeat_08",
+            "action": "establish",
+            "target_role": "headline",
+            "cue": {
+              "section_id": "sec_08",
+              "phrase": "Synthetic",
+              "occurrence": 0
+            },
+            "priority": 1
+          }
+        ],
+        "asset_slots": [],
+        "camera_intent": "push_in",
+        "composition_intent": "split_evidence",
+        "emotional_tone": "serious",
+        "layout_variant_hint": "A",
+        "duration_policy": "voice_locked",
+        "transition_intent": "hard_cut",
+        "historical_map_requirement_id": null,
+        "visual_beats": [
+          {
+            "beat_id": "beat_08_0",
+            "section_ref": "sec_08",
+            "cue": {
+              "section_id": "sec_08",
+              "phrase": "Synthetic",
+              "occurrence": 0
+            },
+            "action": "establish",
+            "focus_ref": "text_08_fact_value",
+            "shot_goal": "Demonstrate T08 compositional focus shift 1",
+            "source_claim_refs": [
+              "claim_08"
+            ],
+            "relationships": [],
+            "staging": [
+              {
+                "ref": "text_08_fact_value",
+                "operation": "enter",
+                "after_ref": null,
+                "motion_hint": "subtle_push",
+                "priority": 1
+              }
+            ],
+            "focus_move": "static",
+            "hold_policy": "narration_aligned",
+            "continuity": {
+              "group_id": "group_08",
+              "carry_refs": [],
+              "entry": "new_setup",
+              "exit": "same_canvas",
+              "reason": "Test-only visual reveal continuity"
+            }
+          },
+          {
+            "beat_id": "beat_08_1",
+            "section_ref": "sec_08",
+            "cue": {
+              "section_id": "sec_08",
+              "phrase": "the",
+              "occurrence": 0
+            },
+            "action": "reveal",
+            "focus_ref": "text_08_fact_label",
+            "shot_goal": "Demonstrate T08 compositional focus shift 2",
+            "source_claim_refs": [
+              "claim_08"
+            ],
+            "relationships": [
+              {
+                "from_ref": "text_08_fact_label",
+                "to_ref": "text_08_fact_value",
+                "relation": "foreground_of"
+              }
+            ],
+            "staging": [
+              {
+                "ref": "text_08_fact_label",
+                "operation": "highlight",
+                "after_ref": "text_08_fact_value",
+                "motion_hint": "subtle_push",
+                "priority": 2
+              }
+            ],
+            "focus_move": "subject_to_subject",
+            "hold_policy": "narration_aligned",
+            "continuity": {
+              "group_id": "group_08",
+              "carry_refs": [
+                "text_08_fact_value"
+              ],
+              "entry": "carry_forward",
+              "exit": "same_canvas",
+              "reason": "Test-only visual reveal continuity"
+            }
+          },
+          {
+            "beat_id": "beat_08_2",
+            "section_ref": "sec_08",
+            "cue": {
+              "section_id": "sec_08",
+              "phrase": "the",
+              "occurrence": 0
+            },
+            "action": "consequence",
+            "focus_ref": "text_08_source_note",
+            "shot_goal": "Demonstrate T08 compositional focus shift 3",
+            "source_claim_refs": [
+              "claim_08"
+            ],
+            "relationships": [
+              {
+                "from_ref": "text_08_source_note",
+                "to_ref": "text_08_fact_label",
+                "relation": "foreground_of"
+              }
+            ],
+            "staging": [
+              {
+                "ref": "text_08_source_note",
+                "operation": "highlight",
+                "after_ref": "text_08_fact_label",
+                "motion_hint": "subtle_push",
+                "priority": 3
+              }
+            ],
+            "focus_move": "subject_to_subject",
+            "hold_policy": "narration_aligned",
+            "continuity": {
+              "group_id": "group_08",
+              "carry_refs": [
+                "text_08_fact_value"
+              ],
+              "entry": "carry_forward",
+              "exit": "hard_cut",
+              "reason": "Test-only visual reveal continuity"
+            }
+          }
+        ],
+        "reuse_setup_id": null
+      }
+    },
+    {
+      "setup_id": "setup_09",
+      "section_refs": [
+        "sec_09"
+      ],
+      "intent": "evidence",
+      "preferred_template": "T09",
+      "requirement_refs": [
+        "req_09_source_page"
+      ],
+      "claim_refs": [
+        "claim_09"
+      ],
+      "direction": {
+        "visual_purpose": "Exercise genuine quote_newspaper visual grammar",
+        "viewer_takeaway": "Meaning must emerge through composition, not zoom alone",
+        "on_screen_text": [
+          {
+            "text_id": "text_09_quote_text",
+            "text": "UNVERIFIED quote_text",
+            "role": "headline",
+            "claim_ref": "claim_09",
+            "max_lines": 3
+          },
+          {
+            "text_id": "text_09_attribution",
+            "text": "UNVERIFIED attribution",
+            "role": "text",
+            "claim_ref": "claim_09",
+            "max_lines": 3
+          }
+        ],
+        "reveal_plan": [
+          {
+            "beat_id": "oldbeat_09",
+            "action": "establish",
+            "target_role": "headline",
+            "cue": {
+              "section_id": "sec_09",
+              "phrase": "Synthetic",
+              "occurrence": 0
+            },
+            "priority": 1
+          }
+        ],
+        "asset_slots": [
+          {
+            "slot_id": "slot_09_source_page",
+            "requirement_id": "req_09_source_page",
+            "semantic_role": "source_page",
+            "usage": "evidence",
+            "mandatory": false
+          }
+        ],
+        "camera_intent": "push_in",
+        "composition_intent": "split_evidence",
+        "emotional_tone": "serious",
+        "layout_variant_hint": "A",
+        "duration_policy": "voice_locked",
+        "transition_intent": "hard_cut",
+        "historical_map_requirement_id": null,
+        "visual_beats": [
+          {
+            "beat_id": "beat_09_0",
+            "section_ref": "sec_09",
+            "cue": {
+              "section_id": "sec_09",
+              "phrase": "Synthetic",
+              "occurrence": 0
+            },
+            "action": "establish",
+            "focus_ref": "slot_09_source_page",
+            "shot_goal": "Demonstrate T09 compositional focus shift 1",
+            "source_claim_refs": [
+              "claim_09"
+            ],
+            "relationships": [],
+            "staging": [
+              {
+                "ref": "slot_09_source_page",
+                "operation": "enter",
+                "after_ref": null,
+                "motion_hint": "subtle_push",
+                "priority": 1
+              }
+            ],
+            "focus_move": "static",
+            "hold_policy": "narration_aligned",
+            "continuity": {
+              "group_id": "group_09",
+              "carry_refs": [],
+              "entry": "new_setup",
+              "exit": "same_canvas",
+              "reason": "Test-only visual reveal continuity"
+            }
+          },
+          {
+            "beat_id": "beat_09_1",
+            "section_ref": "sec_09",
+            "cue": {
+              "section_id": "sec_09",
+              "phrase": "the",
+              "occurrence": 0
+            },
+            "action": "reveal",
+            "focus_ref": "text_09_quote_text",
+            "shot_goal": "Demonstrate T09 compositional focus shift 2",
+            "source_claim_refs": [
+              "claim_09"
+            ],
+            "relationships": [
+              {
+                "from_ref": "text_09_quote_text",
+                "to_ref": "slot_09_source_page",
+                "relation": "foreground_of"
+              }
+            ],
+            "staging": [
+              {
+                "ref": "text_09_quote_text",
+                "operation": "highlight",
+                "after_ref": "slot_09_source_page",
+                "motion_hint": "subtle_push",
+                "priority": 2
+              }
+            ],
+            "focus_move": "subject_to_subject",
+            "hold_policy": "narration_aligned",
+            "continuity": {
+              "group_id": "group_09",
+              "carry_refs": [
+                "slot_09_source_page"
+              ],
+              "entry": "carry_forward",
+              "exit": "same_canvas",
+              "reason": "Test-only visual reveal continuity"
+            }
+          },
+          {
+            "beat_id": "beat_09_2",
+            "section_ref": "sec_09",
+            "cue": {
+              "section_id": "sec_09",
+              "phrase": "the",
+              "occurrence": 0
+            },
+            "action": "consequence",
+            "focus_ref": "text_09_attribution",
+            "shot_goal": "Demonstrate T09 compositional focus shift 3",
+            "source_claim_refs": [
+              "claim_09"
+            ],
+            "relationships": [
+              {
+                "from_ref": "text_09_attribution",
+                "to_ref": "text_09_quote_text",
+                "relation": "foreground_of"
+              }
+            ],
+            "staging": [
+              {
+                "ref": "text_09_attribution",
+                "operation": "highlight",
+                "after_ref": "text_09_quote_text",
+                "motion_hint": "subtle_push",
+                "priority": 3
+              }
+            ],
+            "focus_move": "subject_to_subject",
+            "hold_policy": "narration_aligned",
+            "continuity": {
+              "group_id": "group_09",
+              "carry_refs": [
+                "slot_09_source_page"
+              ],
+              "entry": "carry_forward",
+              "exit": "hard_cut",
+              "reason": "Test-only visual reveal continuity"
+            }
+          }
+        ],
+        "reuse_setup_id": null
+      }
+    },
+    {
+      "setup_id": "setup_10",
+      "section_refs": [
+        "sec_10"
+      ],
+      "intent": "evidence",
+      "preferred_template": "T10",
+      "requirement_refs": [
+        "req_10_region_overview"
+      ],
+      "claim_refs": [
+        "claim_10"
+      ],
+      "direction": {
+        "visual_purpose": "Exercise genuine causal_network visual grammar",
+        "viewer_takeaway": "Meaning must emerge through composition, not zoom alone",
+        "on_screen_text": [
+          {
+            "text_id": "text_10_entity_a",
+            "text": "UNVERIFIED entity_a",
+            "role": "caption",
+            "claim_ref": "claim_10",
+            "max_lines": 3
+          },
+          {
+            "text_id": "text_10_entity_b",
+            "text": "UNVERIFIED entity_b",
+            "role": "caption",
+            "claim_ref": "claim_10",
+            "max_lines": 3
+          }
+        ],
+        "reveal_plan": [
+          {
+            "beat_id": "oldbeat_10",
+            "action": "establish",
+            "target_role": "headline",
+            "cue": {
+              "section_id": "sec_10",
+              "phrase": "Synthetic",
+              "occurrence": 0
+            },
+            "priority": 1
+          }
+        ],
+        "asset_slots": [
+          {
+            "slot_id": "slot_10_region_overview",
+            "requirement_id": "req_10_region_overview",
+            "semantic_role": "region_overview",
+            "usage": "evidence",
+            "mandatory": false
+          }
+        ],
+        "camera_intent": "push_in",
+        "composition_intent": "split_evidence",
+        "emotional_tone": "serious",
+        "layout_variant_hint": "A",
+        "duration_policy": "voice_locked",
+        "transition_intent": "hard_cut",
+        "historical_map_requirement_id": "req_10_region_overview",
+        "visual_beats": [
+          {
+            "beat_id": "beat_10_0",
+            "section_ref": "sec_10",
+            "cue": {
+              "section_id": "sec_10",
+              "phrase": "Synthetic",
+              "occurrence": 0
+            },
+            "action": "establish",
+            "focus_ref": "slot_10_region_overview",
+            "shot_goal": "Demonstrate T10 compositional focus shift 1",
+            "source_claim_refs": [
+              "claim_10"
+            ],
+            "relationships": [],
+            "staging": [
+              {
+                "ref": "slot_10_region_overview",
+                "operation": "enter",
+                "after_ref": null,
+                "motion_hint": "subtle_push",
+                "priority": 1
+              }
+            ],
+            "focus_move": "static",
+            "hold_policy": "narration_aligned",
+            "continuity": {
+              "group_id": "group_10",
+              "carry_refs": [],
+              "entry": "new_setup",
+              "exit": "same_canvas",
+              "reason": "Test-only visual reveal continuity"
+            }
+          },
+          {
+            "beat_id": "beat_10_1",
+            "section_ref": "sec_10",
+            "cue": {
+              "section_id": "sec_10",
+              "phrase": "the",
+              "occurrence": 0
+            },
+            "action": "reveal",
+            "focus_ref": "text_10_entity_a",
+            "shot_goal": "Demonstrate T10 compositional focus shift 2",
+            "source_claim_refs": [
+              "claim_10"
+            ],
+            "relationships": [
+              {
+                "from_ref": "text_10_entity_a",
+                "to_ref": "slot_10_region_overview",
+                "relation": "foreground_of"
+              }
+            ],
+            "staging": [
+              {
+                "ref": "text_10_entity_a",
+                "operation": "highlight",
+                "after_ref": "slot_10_region_overview",
+                "motion_hint": "subtle_push",
+                "priority": 2
+              }
+            ],
+            "focus_move": "subject_to_subject",
+            "hold_policy": "narration_aligned",
+            "continuity": {
+              "group_id": "group_10",
+              "carry_refs": [
+                "slot_10_region_overview"
+              ],
+              "entry": "carry_forward",
+              "exit": "same_canvas",
+              "reason": "Test-only visual reveal continuity"
+            }
+          },
+          {
+            "beat_id": "beat_10_2",
+            "section_ref": "sec_10",
+            "cue": {
+              "section_id": "sec_10",
+              "phrase": "the",
+              "occurrence": 0
+            },
+            "action": "consequence",
+            "focus_ref": "text_10_entity_b",
+            "shot_goal": "Demonstrate T10 compositional focus shift 3",
+            "source_claim_refs": [
+              "claim_10"
+            ],
+            "relationships": [
+              {
+                "from_ref": "text_10_entity_b",
+                "to_ref": "text_10_entity_a",
+                "relation": "foreground_of"
+              }
+            ],
+            "staging": [
+              {
+                "ref": "text_10_entity_b",
+                "operation": "highlight",
+                "after_ref": "text_10_entity_a",
+                "motion_hint": "subtle_push",
+                "priority": 3
+              }
+            ],
+            "focus_move": "subject_to_subject",
+            "hold_policy": "narration_aligned",
+            "continuity": {
+              "group_id": "group_10",
+              "carry_refs": [
+                "slot_10_region_overview"
+              ],
+              "entry": "carry_forward",
+              "exit": "hard_cut",
+              "reason": "Test-only visual reveal continuity"
+            }
+          }
+        ],
+        "reuse_setup_id": null
+      }
+    }
+  ],
+  "authoring_source": "external_chatgpt"
+}

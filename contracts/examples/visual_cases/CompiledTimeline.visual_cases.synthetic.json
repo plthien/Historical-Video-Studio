@@ -1,0 +1,4176 @@
+{
+  "schema_version": "CompiledTimeline.v1",
+  "project_id": "proj_cases",
+  "fps": 30,
+  "width": 1920,
+  "height": 1080,
+  "total_frames": 1800,
+  "style_version": "HistoryEditorialPaper.v1",
+  "template_registry_version": "templates.v1.1",
+  "motion_registry_version": "presets.v1.1",
+  "story_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "audio_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+  "word_map_sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+  "asset_snapshot_sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+  "dependency_fingerprint": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+  "scenes": [
+    {
+      "scene_id": "scene_01",
+      "setup_id": "setup_01",
+      "template_id": "T01",
+      "variant_id": "A",
+      "start_frame": 0,
+      "duration_frames": 180,
+      "asset_ids": [
+        "asset_01_map_main"
+      ],
+      "layers": [
+        {
+          "layer_id": "layer_01_map_main",
+          "layer_kind": "map",
+          "asset_id": "asset_01_map_main",
+          "text": null,
+          "source_claim_id": "claim_01",
+          "z_index": 0,
+          "rect_px": {
+            "x": 115,
+            "y": 76,
+            "w": 1382,
+            "h": 907
+          },
+          "anchor": "center",
+          "crop_normalized": {
+            "x": 0,
+            "y": 0,
+            "w": 1,
+            "h": 1
+          },
+          "object_fit": "contain",
+          "mask": {
+            "kind": "none",
+            "asset_id": null,
+            "feather_px": 0
+          },
+          "style": {
+            "font_token": null,
+            "color_token": null,
+            "stroke_token": null,
+            "max_lines": 1
+          },
+          "map_binding": {
+            "historical_map_id": "map_fixture_01",
+            "feature_id": null,
+            "coordinate_kind": "geo_wgs84",
+            "anchor_latlon": null
+          },
+          "parent_layer_id": null,
+          "group_id": "render_group_01",
+          "transform_origin": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "depth_order": 0,
+          "treatment": {
+            "kind": "ink_map",
+            "source_preserving": true,
+            "evidence_badge": "archival"
+          },
+          "path_geometry_ref": null,
+          "text_layout": null
+        },
+        {
+          "layer_id": "layer_01_place_head",
+          "layer_kind": "headline",
+          "asset_id": null,
+          "text": "UNVERIFIED",
+          "source_claim_id": "claim_01",
+          "z_index": 1,
+          "rect_px": {
+            "x": 1402,
+            "y": 130,
+            "w": 403,
+            "h": 238
+          },
+          "anchor": "center",
+          "crop_normalized": {
+            "x": 0,
+            "y": 0,
+            "w": 1,
+            "h": 1
+          },
+          "object_fit": "contain",
+          "mask": {
+            "kind": "none",
+            "asset_id": null,
+            "feather_px": 0
+          },
+          "style": {
+            "font_token": null,
+            "color_token": null,
+            "stroke_token": null,
+            "max_lines": 3
+          },
+          "map_binding": null,
+          "parent_layer_id": null,
+          "group_id": "render_group_01",
+          "transform_origin": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "depth_order": 1,
+          "treatment": {
+            "kind": "headline_text",
+            "source_preserving": true,
+            "evidence_badge": "none"
+          },
+          "path_geometry_ref": null,
+          "text_layout": {
+            "font_token": "headline_sans",
+            "font_size_px": 48,
+            "line_height": 1.2,
+            "letter_spacing_px": 0,
+            "horizontal_align": "left",
+            "vertical_align": "center",
+            "max_lines": 3,
+            "overflow": "block"
+          }
+        },
+        {
+          "layer_id": "layer_01_feature_note",
+          "layer_kind": "callout",
+          "asset_id": null,
+          "text": "UNVERIFIED",
+          "source_claim_id": "claim_01",
+          "z_index": 2,
+          "rect_px": {
+            "x": 1344,
+            "y": 529,
+            "w": 461,
+            "h": 248
+          },
+          "anchor": "center",
+          "crop_normalized": {
+            "x": 0,
+            "y": 0,
+            "w": 1,
+            "h": 1
+          },
+          "object_fit": "contain",
+          "mask": {
+            "kind": "none",
+            "asset_id": null,
+            "feather_px": 0
+          },
+          "style": {
+            "font_token": null,
+            "color_token": null,
+            "stroke_token": null,
+            "max_lines": 3
+          },
+          "map_binding": null,
+          "parent_layer_id": null,
+          "group_id": "render_group_01",
+          "transform_origin": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "depth_order": 2,
+          "treatment": {
+            "kind": "none",
+            "source_preserving": true,
+            "evidence_badge": "none"
+          },
+          "path_geometry_ref": null,
+          "text_layout": {
+            "font_token": "headline_sans",
+            "font_size_px": 48,
+            "line_height": 1.2,
+            "letter_spacing_px": 0,
+            "horizontal_align": "left",
+            "vertical_align": "center",
+            "max_lines": 3,
+            "overflow": "block"
+          }
+        }
+      ],
+      "events": [
+        {
+          "event_id": "event_01_0",
+          "layer_id": "layer_01_map_main",
+          "preset_id": "camera-pan",
+          "start_frame": 8,
+          "duration_frames": 30,
+          "cue_word_id": "word_001",
+          "params": {
+            "start_target_layer_id": "layer_01_map_main",
+            "end_target_layer_id": "layer_01_place_head",
+            "max_translate_px": 150,
+            "keep_context_visible": true
+          },
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 0,
+              "easing": "ease_out"
+            },
+            {
+              "frame": 30,
+              "value": 1,
+              "easing": "ease_out"
+            }
+          ],
+          "animated_property": "opacity",
+          "cue_binding": {
+            "word_id": "word_001",
+            "offset_frames": 0
+          },
+          "phases": [
+            {
+              "phase_id": "phase_01_0",
+              "kind": "enter",
+              "start_offset_frames": 0,
+              "duration_frames": 30,
+              "depends_on_phase_ids": []
+            }
+          ],
+          "motion_space": "screen",
+          "affected_layer_ids": [
+            "layer_01_map_main"
+          ],
+          "stagger": null,
+          "depth_parallax": null
+        },
+        {
+          "event_id": "event_01_1",
+          "layer_id": "layer_01_place_head",
+          "preset_id": "title-mask-reveal",
+          "start_frame": 48,
+          "duration_frames": 30,
+          "cue_word_id": "word_001",
+          "params": {
+            "direction": "up",
+            "distance_px": 30,
+            "feather_px": 4
+          },
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 0,
+              "easing": "ease_out"
+            },
+            {
+              "frame": 30,
+              "value": 1,
+              "easing": "ease_out"
+            }
+          ],
+          "animated_property": "opacity",
+          "cue_binding": {
+            "word_id": "word_001",
+            "offset_frames": 0
+          },
+          "phases": [
+            {
+              "phase_id": "phase_01_1",
+              "kind": "enter",
+              "start_offset_frames": 0,
+              "duration_frames": 30,
+              "depends_on_phase_ids": []
+            }
+          ],
+          "motion_space": "layer_local",
+          "affected_layer_ids": [
+            "layer_01_place_head"
+          ],
+          "stagger": null,
+          "depth_parallax": null
+        }
+      ],
+      "camera": {
+        "mode": "push_in",
+        "keyframes": [
+          {
+            "at_frame": 0,
+            "x_px": 0,
+            "y_px": 0,
+            "scale": 1,
+            "rotation_deg": 0,
+            "opacity": 1,
+            "easing": "linear"
+          },
+          {
+            "at_frame": 179,
+            "x_px": -10,
+            "y_px": -3,
+            "scale": 1.04,
+            "rotation_deg": 0,
+            "opacity": 1,
+            "easing": "ease_in_out"
+          }
+        ],
+        "focus_entity_id": null,
+        "clamp_to_content": true,
+        "focus_path": [
+          {
+            "at_frame": 0,
+            "focus_layer_id": "layer_01_map_main",
+            "focus_geo_feature_id": null,
+            "framing": "subject_center"
+          },
+          {
+            "at_frame": 120,
+            "focus_layer_id": "layer_01_feature_note",
+            "focus_geo_feature_id": null,
+            "framing": "subject_center"
+          }
+        ],
+        "transform_order": "layer_then_group_then_camera"
+      },
+      "transition_out": {
+        "type": "hard_cut",
+        "duration_frames": 0
+      },
+      "story_cue_span": {
+        "first_word_id": "word_001",
+        "last_word_id": "word_002"
+      },
+      "staging": {
+        "composition_graph": {
+          "group_ids": [
+            "render_group_01"
+          ],
+          "edges": []
+        },
+        "beat_sequence": [
+          {
+            "beat_id": "beat_01_0",
+            "local_start_frame": 0,
+            "local_end_frame": 60,
+            "focus_layer_id": "layer_01_map_main",
+            "activated_layer_ids": [
+              "layer_01_map_main",
+              "layer_01_place_head"
+            ],
+            "hidden_layer_ids": []
+          },
+          {
+            "beat_id": "beat_01_1",
+            "local_start_frame": 60,
+            "local_end_frame": 120,
+            "focus_layer_id": "layer_01_place_head",
+            "activated_layer_ids": [
+              "layer_01_map_main",
+              "layer_01_place_head",
+              "layer_01_feature_note"
+            ],
+            "hidden_layer_ids": []
+          },
+          {
+            "beat_id": "beat_01_2",
+            "local_start_frame": 120,
+            "local_end_frame": 180,
+            "focus_layer_id": "layer_01_feature_note",
+            "activated_layer_ids": [
+              "layer_01_map_main",
+              "layer_01_place_head",
+              "layer_01_feature_note"
+            ],
+            "hidden_layer_ids": []
+          }
+        ],
+        "continuity_group_id": "group_01",
+        "carry_layer_ids": [],
+        "entry_focus_layer_id": "layer_01_map_main",
+        "exit_focus_layer_id": "layer_01_feature_note"
+      }
+    },
+    {
+      "scene_id": "scene_02",
+      "setup_id": "setup_02",
+      "template_id": "T02",
+      "variant_id": "A",
+      "start_frame": 180,
+      "duration_frames": 180,
+      "asset_ids": [
+        "asset_02_portrait_main"
+      ],
+      "layers": [
+        {
+          "layer_id": "layer_02_portrait_main",
+          "layer_kind": "portrait",
+          "asset_id": "asset_02_portrait_main",
+          "text": null,
+          "source_claim_id": "claim_02",
+          "z_index": 0,
+          "rect_px": {
+            "x": 173,
+            "y": 108,
+            "w": 883,
+            "h": 864
+          },
+          "anchor": "center",
+          "crop_normalized": {
+            "x": 0,
+            "y": 0,
+            "w": 1,
+            "h": 1
+          },
+          "object_fit": "cover",
+          "mask": {
+            "kind": "none",
+            "asset_id": null,
+            "feather_px": 0
+          },
+          "style": {
+            "font_token": null,
+            "color_token": null,
+            "stroke_token": null,
+            "max_lines": 1
+          },
+          "map_binding": null,
+          "parent_layer_id": null,
+          "group_id": "render_group_02",
+          "transform_origin": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "depth_order": 0,
+          "treatment": {
+            "kind": "source_photo_card",
+            "source_preserving": true,
+            "evidence_badge": "archival"
+          },
+          "path_geometry_ref": null,
+          "text_layout": null
+        },
+        {
+          "layer_id": "layer_02_person_name",
+          "layer_kind": "headline",
+          "asset_id": null,
+          "text": "UNVERIFIED",
+          "source_claim_id": "claim_02",
+          "z_index": 1,
+          "rect_px": {
+            "x": 1114,
+            "y": 238,
+            "w": 653,
+            "h": 238
+          },
+          "anchor": "center",
+          "crop_normalized": {
+            "x": 0,
+            "y": 0,
+            "w": 1,
+            "h": 1
+          },
+          "object_fit": "contain",
+          "mask": {
+            "kind": "none",
+            "asset_id": null,
+            "feather_px": 0
+          },
+          "style": {
+            "font_token": null,
+            "color_token": null,
+            "stroke_token": null,
+            "max_lines": 3
+          },
+          "map_binding": null,
+          "parent_layer_id": null,
+          "group_id": "render_group_02",
+          "transform_origin": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "depth_order": 1,
+          "treatment": {
+            "kind": "headline_text",
+            "source_preserving": true,
+            "evidence_badge": "none"
+          },
+          "path_geometry_ref": null,
+          "text_layout": {
+            "font_token": "headline_sans",
+            "font_size_px": 48,
+            "line_height": 1.2,
+            "letter_spacing_px": 0,
+            "horizontal_align": "left",
+            "vertical_align": "center",
+            "max_lines": 3,
+            "overflow": "block"
+          }
+        },
+        {
+          "layer_id": "layer_02_person_role",
+          "layer_kind": "text",
+          "asset_id": null,
+          "text": "UNVERIFIED",
+          "source_claim_id": "claim_02",
+          "z_index": 2,
+          "rect_px": {
+            "x": 1133,
+            "y": 562,
+            "w": 614,
+            "h": 238
+          },
+          "anchor": "center",
+          "crop_normalized": {
+            "x": 0,
+            "y": 0,
+            "w": 1,
+            "h": 1
+          },
+          "object_fit": "contain",
+          "mask": {
+            "kind": "none",
+            "asset_id": null,
+            "feather_px": 0
+          },
+          "style": {
+            "font_token": null,
+            "color_token": null,
+            "stroke_token": null,
+            "max_lines": 3
+          },
+          "map_binding": null,
+          "parent_layer_id": null,
+          "group_id": "render_group_02",
+          "transform_origin": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "depth_order": 2,
+          "treatment": {
+            "kind": "none",
+            "source_preserving": true,
+            "evidence_badge": "none"
+          },
+          "path_geometry_ref": null,
+          "text_layout": {
+            "font_token": "headline_sans",
+            "font_size_px": 48,
+            "line_height": 1.2,
+            "letter_spacing_px": 0,
+            "horizontal_align": "left",
+            "vertical_align": "center",
+            "max_lines": 3,
+            "overflow": "block"
+          }
+        },
+        {
+          "layer_id": "layer_02_date_badge",
+          "layer_kind": "date",
+          "asset_id": null,
+          "text": "UNVERIFIED",
+          "source_claim_id": "claim_02",
+          "z_index": 3,
+          "rect_px": {
+            "x": 1152,
+            "y": 821,
+            "w": 384,
+            "h": 130
+          },
+          "anchor": "center",
+          "crop_normalized": {
+            "x": 0,
+            "y": 0,
+            "w": 1,
+            "h": 1
+          },
+          "object_fit": "contain",
+          "mask": {
+            "kind": "none",
+            "asset_id": null,
+            "feather_px": 0
+          },
+          "style": {
+            "font_token": null,
+            "color_token": null,
+            "stroke_token": null,
+            "max_lines": 1
+          },
+          "map_binding": null,
+          "parent_layer_id": null,
+          "group_id": "render_group_02",
+          "transform_origin": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "depth_order": 3,
+          "treatment": {
+            "kind": "none",
+            "source_preserving": true,
+            "evidence_badge": "none"
+          },
+          "path_geometry_ref": null,
+          "text_layout": {
+            "font_token": "headline_sans",
+            "font_size_px": 48,
+            "line_height": 1.2,
+            "letter_spacing_px": 0,
+            "horizontal_align": "left",
+            "vertical_align": "center",
+            "max_lines": 1,
+            "overflow": "block"
+          }
+        }
+      ],
+      "events": [
+        {
+          "event_id": "event_02_0",
+          "layer_id": "layer_02_portrait_main",
+          "preset_id": "photo-card-enter",
+          "start_frame": 8,
+          "duration_frames": 30,
+          "cue_word_id": "word_001",
+          "params": {
+            "border_px": 9,
+            "shadow_px": 18,
+            "start_rotation_deg": -2,
+            "end_rotation_deg": 0,
+            "source_original_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          },
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 0,
+              "easing": "ease_out"
+            },
+            {
+              "frame": 30,
+              "value": 1,
+              "easing": "ease_out"
+            }
+          ],
+          "animated_property": "opacity",
+          "cue_binding": {
+            "word_id": "word_001",
+            "offset_frames": 0
+          },
+          "phases": [
+            {
+              "phase_id": "phase_02_0",
+              "kind": "enter",
+              "start_offset_frames": 0,
+              "duration_frames": 30,
+              "depends_on_phase_ids": []
+            }
+          ],
+          "motion_space": "layer_local",
+          "affected_layer_ids": [
+            "layer_02_portrait_main"
+          ],
+          "stagger": null,
+          "depth_parallax": null
+        },
+        {
+          "event_id": "event_02_1",
+          "layer_id": "layer_02_person_name",
+          "preset_id": "title-mask-reveal",
+          "start_frame": 48,
+          "duration_frames": 30,
+          "cue_word_id": "word_001",
+          "params": {
+            "direction": "up",
+            "distance_px": 30,
+            "feather_px": 4
+          },
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 0,
+              "easing": "ease_out"
+            },
+            {
+              "frame": 30,
+              "value": 1,
+              "easing": "ease_out"
+            }
+          ],
+          "animated_property": "opacity",
+          "cue_binding": {
+            "word_id": "word_001",
+            "offset_frames": 0
+          },
+          "phases": [
+            {
+              "phase_id": "phase_02_1",
+              "kind": "enter",
+              "start_offset_frames": 0,
+              "duration_frames": 30,
+              "depends_on_phase_ids": []
+            }
+          ],
+          "motion_space": "layer_local",
+          "affected_layer_ids": [
+            "layer_02_person_name"
+          ],
+          "stagger": null,
+          "depth_parallax": null
+        }
+      ],
+      "camera": {
+        "mode": "push_in",
+        "keyframes": [
+          {
+            "at_frame": 0,
+            "x_px": 0,
+            "y_px": 0,
+            "scale": 1,
+            "rotation_deg": 0,
+            "opacity": 1,
+            "easing": "linear"
+          },
+          {
+            "at_frame": 179,
+            "x_px": -10,
+            "y_px": -3,
+            "scale": 1.04,
+            "rotation_deg": 0,
+            "opacity": 1,
+            "easing": "ease_in_out"
+          }
+        ],
+        "focus_entity_id": null,
+        "clamp_to_content": true,
+        "focus_path": [
+          {
+            "at_frame": 0,
+            "focus_layer_id": "layer_02_portrait_main",
+            "focus_geo_feature_id": null,
+            "framing": "subject_center"
+          },
+          {
+            "at_frame": 120,
+            "focus_layer_id": "layer_02_date_badge",
+            "focus_geo_feature_id": null,
+            "framing": "subject_center"
+          }
+        ],
+        "transform_order": "layer_then_group_then_camera"
+      },
+      "transition_out": {
+        "type": "hard_cut",
+        "duration_frames": 0
+      },
+      "story_cue_span": {
+        "first_word_id": "word_001",
+        "last_word_id": "word_002"
+      },
+      "staging": {
+        "composition_graph": {
+          "group_ids": [
+            "render_group_02"
+          ],
+          "edges": []
+        },
+        "beat_sequence": [
+          {
+            "beat_id": "beat_02_0",
+            "local_start_frame": 0,
+            "local_end_frame": 60,
+            "focus_layer_id": "layer_02_portrait_main",
+            "activated_layer_ids": [
+              "layer_02_portrait_main",
+              "layer_02_person_name"
+            ],
+            "hidden_layer_ids": []
+          },
+          {
+            "beat_id": "beat_02_1",
+            "local_start_frame": 60,
+            "local_end_frame": 120,
+            "focus_layer_id": "layer_02_person_name",
+            "activated_layer_ids": [
+              "layer_02_portrait_main",
+              "layer_02_person_name",
+              "layer_02_person_role"
+            ],
+            "hidden_layer_ids": []
+          },
+          {
+            "beat_id": "beat_02_2",
+            "local_start_frame": 120,
+            "local_end_frame": 180,
+            "focus_layer_id": "layer_02_person_role",
+            "activated_layer_ids": [
+              "layer_02_portrait_main",
+              "layer_02_person_name",
+              "layer_02_person_role",
+              "layer_02_date_badge"
+            ],
+            "hidden_layer_ids": []
+          }
+        ],
+        "continuity_group_id": "group_02",
+        "carry_layer_ids": [],
+        "entry_focus_layer_id": "layer_02_portrait_main",
+        "exit_focus_layer_id": "layer_02_date_badge"
+      }
+    },
+    {
+      "scene_id": "scene_03",
+      "setup_id": "setup_03",
+      "template_id": "T03",
+      "variant_id": "A",
+      "start_frame": 360,
+      "duration_frames": 180,
+      "asset_ids": [
+        "asset_03_hero_card",
+        "asset_03_support_card",
+        "asset_03_detail_card"
+      ],
+      "layers": [
+        {
+          "layer_id": "layer_03_hero_card",
+          "layer_kind": "archival_photo",
+          "asset_id": "asset_03_hero_card",
+          "text": null,
+          "source_claim_id": "claim_03",
+          "z_index": 0,
+          "rect_px": {
+            "x": 134,
+            "y": 140,
+            "w": 941,
+            "h": 778
+          },
+          "anchor": "center",
+          "crop_normalized": {
+            "x": 0,
+            "y": 0,
+            "w": 1,
+            "h": 1
+          },
+          "object_fit": "cover",
+          "mask": {
+            "kind": "none",
+            "asset_id": null,
+            "feather_px": 0
+          },
+          "style": {
+            "font_token": null,
+            "color_token": null,
+            "stroke_token": null,
+            "max_lines": 1
+          },
+          "map_binding": null,
+          "parent_layer_id": null,
+          "group_id": "render_group_03",
+          "transform_origin": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "depth_order": 0,
+          "treatment": {
+            "kind": "source_photo_card",
+            "source_preserving": true,
+            "evidence_badge": "archival"
+          },
+          "path_geometry_ref": null,
+          "text_layout": null
+        },
+        {
+          "layer_id": "layer_03_support_card",
+          "layer_kind": "archival_photo",
+          "asset_id": "asset_03_support_card",
+          "text": null,
+          "source_claim_id": "claim_03",
+          "z_index": 1,
+          "rect_px": {
+            "x": 998,
+            "y": 86,
+            "w": 595,
+            "h": 410
+          },
+          "anchor": "center",
+          "crop_normalized": {
+            "x": 0,
+            "y": 0,
+            "w": 1,
+            "h": 1
+          },
+          "object_fit": "cover",
+          "mask": {
+            "kind": "none",
+            "asset_id": null,
+            "feather_px": 0
+          },
+          "style": {
+            "font_token": null,
+            "color_token": null,
+            "stroke_token": null,
+            "max_lines": 1
+          },
+          "map_binding": null,
+          "parent_layer_id": null,
+          "group_id": "render_group_03",
+          "transform_origin": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "depth_order": 1,
+          "treatment": {
+            "kind": "source_photo_card",
+            "source_preserving": true,
+            "evidence_badge": "archival"
+          },
+          "path_geometry_ref": null,
+          "text_layout": null
+        },
+        {
+          "layer_id": "layer_03_detail_card",
+          "layer_kind": "archival_photo",
+          "asset_id": "asset_03_detail_card",
+          "text": null,
+          "source_claim_id": "claim_03",
+          "z_index": 2,
+          "rect_px": {
+            "x": 1056,
+            "y": 540,
+            "w": 653,
+            "h": 410
+          },
+          "anchor": "center",
+          "crop_normalized": {
+            "x": 0,
+            "y": 0,
+            "w": 1,
+            "h": 1
+          },
+          "object_fit": "cover",
+          "mask": {
+            "kind": "none",
+            "asset_id": null,
+            "feather_px": 0
+          },
+          "style": {
+            "font_token": null,
+            "color_token": null,
+            "stroke_token": null,
+            "max_lines": 1
+          },
+          "map_binding": null,
+          "parent_layer_id": null,
+          "group_id": "render_group_03",
+          "transform_origin": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "depth_order": 2,
+          "treatment": {
+            "kind": "source_photo_card",
+            "source_preserving": true,
+            "evidence_badge": "archival"
+          },
+          "path_geometry_ref": null,
+          "text_layout": null
+        },
+        {
+          "layer_id": "layer_03_caption",
+          "layer_kind": "text",
+          "asset_id": null,
+          "text": "UNVERIFIED",
+          "source_claim_id": "claim_03",
+          "z_index": 3,
+          "rect_px": {
+            "x": 173,
+            "y": 918,
+            "w": 787,
+            "h": 108
+          },
+          "anchor": "center",
+          "crop_normalized": {
+            "x": 0,
+            "y": 0,
+            "w": 1,
+            "h": 1
+          },
+          "object_fit": "contain",
+          "mask": {
+            "kind": "none",
+            "asset_id": null,
+            "feather_px": 0
+          },
+          "style": {
+            "font_token": null,
+            "color_token": null,
+            "stroke_token": null,
+            "max_lines": 3
+          },
+          "map_binding": null,
+          "parent_layer_id": null,
+          "group_id": "render_group_03",
+          "transform_origin": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "depth_order": 3,
+          "treatment": {
+            "kind": "none",
+            "source_preserving": true,
+            "evidence_badge": "none"
+          },
+          "path_geometry_ref": null,
+          "text_layout": {
+            "font_token": "headline_sans",
+            "font_size_px": 48,
+            "line_height": 1.2,
+            "letter_spacing_px": 0,
+            "horizontal_align": "left",
+            "vertical_align": "center",
+            "max_lines": 3,
+            "overflow": "block"
+          }
+        }
+      ],
+      "events": [
+        {
+          "event_id": "event_03_0",
+          "layer_id": "layer_03_hero_card",
+          "preset_id": "photo-card-enter",
+          "start_frame": 8,
+          "duration_frames": 30,
+          "cue_word_id": "word_001",
+          "params": {
+            "border_px": 9,
+            "shadow_px": 18,
+            "start_rotation_deg": -2,
+            "end_rotation_deg": 0,
+            "source_original_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          },
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 0,
+              "easing": "ease_out"
+            },
+            {
+              "frame": 30,
+              "value": 1,
+              "easing": "ease_out"
+            }
+          ],
+          "animated_property": "opacity",
+          "cue_binding": {
+            "word_id": "word_001",
+            "offset_frames": 0
+          },
+          "phases": [
+            {
+              "phase_id": "phase_03_0",
+              "kind": "enter",
+              "start_offset_frames": 0,
+              "duration_frames": 30,
+              "depends_on_phase_ids": []
+            }
+          ],
+          "motion_space": "layer_local",
+          "affected_layer_ids": [
+            "layer_03_hero_card"
+          ],
+          "stagger": null,
+          "depth_parallax": null
+        },
+        {
+          "event_id": "event_03_1",
+          "layer_id": "layer_03_support_card",
+          "preset_id": "stagger-reveal",
+          "start_frame": 48,
+          "duration_frames": 30,
+          "cue_word_id": "word_001",
+          "params": {
+            "ordered_layer_ids": [
+              "layer_03_hero_card",
+              "layer_03_support_card"
+            ],
+            "gap_frames": 6,
+            "direction": "evidence_order"
+          },
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 0,
+              "easing": "ease_out"
+            },
+            {
+              "frame": 30,
+              "value": 1,
+              "easing": "ease_out"
+            }
+          ],
+          "animated_property": "opacity",
+          "cue_binding": {
+            "word_id": "word_001",
+            "offset_frames": 0
+          },
+          "phases": [
+            {
+              "phase_id": "phase_03_1",
+              "kind": "enter",
+              "start_offset_frames": 0,
+              "duration_frames": 30,
+              "depends_on_phase_ids": []
+            }
+          ],
+          "motion_space": "group_local",
+          "affected_layer_ids": [
+            "layer_03_support_card"
+          ],
+          "stagger": {
+            "order": [
+              "layer_03_hero_card",
+              "layer_03_support_card"
+            ],
+            "offset_frames": 6
+          },
+          "depth_parallax": null
+        },
+        {
+          "event_id": "event_03_2",
+          "layer_id": "layer_03_detail_card",
+          "preset_id": "parallax-layers",
+          "start_frame": 88,
+          "duration_frames": 30,
+          "cue_word_id": "word_001",
+          "params": {
+            "near_layer_ids": [
+              "layer_03_hero_card"
+            ],
+            "far_layer_ids": [
+              "layer_03_detail_card"
+            ],
+            "near_strength": 0.8,
+            "far_strength": 0.25,
+            "max_drift_px": 55
+          },
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 0,
+              "easing": "ease_out"
+            },
+            {
+              "frame": 30,
+              "value": 1,
+              "easing": "ease_out"
+            }
+          ],
+          "animated_property": "translate_x_px",
+          "cue_binding": {
+            "word_id": "word_001",
+            "offset_frames": 0
+          },
+          "phases": [
+            {
+              "phase_id": "phase_03_2",
+              "kind": "enter",
+              "start_offset_frames": 0,
+              "duration_frames": 30,
+              "depends_on_phase_ids": []
+            }
+          ],
+          "motion_space": "group_local",
+          "affected_layer_ids": [
+            "layer_03_detail_card"
+          ],
+          "stagger": null,
+          "depth_parallax": {
+            "near_layer_ids": [
+              "layer_03_hero_card"
+            ],
+            "far_layer_ids": [
+              "layer_03_detail_card"
+            ],
+            "strength": 0.6
+          }
+        }
+      ],
+      "camera": {
+        "mode": "push_in",
+        "keyframes": [
+          {
+            "at_frame": 0,
+            "x_px": 0,
+            "y_px": 0,
+            "scale": 1,
+            "rotation_deg": 0,
+            "opacity": 1,
+            "easing": "linear"
+          },
+          {
+            "at_frame": 179,
+            "x_px": -10,
+            "y_px": -3,
+            "scale": 1.04,
+            "rotation_deg": 0,
+            "opacity": 1,
+            "easing": "ease_in_out"
+          }
+        ],
+        "focus_entity_id": null,
+        "clamp_to_content": true,
+        "focus_path": [
+          {
+            "at_frame": 0,
+            "focus_layer_id": "layer_03_hero_card",
+            "focus_geo_feature_id": null,
+            "framing": "subject_center"
+          },
+          {
+            "at_frame": 120,
+            "focus_layer_id": "layer_03_caption",
+            "focus_geo_feature_id": null,
+            "framing": "subject_center"
+          }
+        ],
+        "transform_order": "layer_then_group_then_camera"
+      },
+      "transition_out": {
+        "type": "hard_cut",
+        "duration_frames": 0
+      },
+      "story_cue_span": {
+        "first_word_id": "word_001",
+        "last_word_id": "word_002"
+      },
+      "staging": {
+        "composition_graph": {
+          "group_ids": [
+            "render_group_03"
+          ],
+          "edges": [
+            {
+              "from_id": "layer_03_support_card",
+              "to_id": "layer_03_hero_card",
+              "relation": "foreground_of"
+            }
+          ]
+        },
+        "beat_sequence": [
+          {
+            "beat_id": "beat_03_0",
+            "local_start_frame": 0,
+            "local_end_frame": 60,
+            "focus_layer_id": "layer_03_hero_card",
+            "activated_layer_ids": [
+              "layer_03_hero_card",
+              "layer_03_support_card"
+            ],
+            "hidden_layer_ids": []
+          },
+          {
+            "beat_id": "beat_03_1",
+            "local_start_frame": 60,
+            "local_end_frame": 120,
+            "focus_layer_id": "layer_03_support_card",
+            "activated_layer_ids": [
+              "layer_03_hero_card",
+              "layer_03_support_card",
+              "layer_03_detail_card"
+            ],
+            "hidden_layer_ids": []
+          },
+          {
+            "beat_id": "beat_03_2",
+            "local_start_frame": 120,
+            "local_end_frame": 180,
+            "focus_layer_id": "layer_03_detail_card",
+            "activated_layer_ids": [
+              "layer_03_hero_card",
+              "layer_03_support_card",
+              "layer_03_detail_card",
+              "layer_03_caption"
+            ],
+            "hidden_layer_ids": []
+          }
+        ],
+        "continuity_group_id": "group_03",
+        "carry_layer_ids": [],
+        "entry_focus_layer_id": "layer_03_hero_card",
+        "exit_focus_layer_id": "layer_03_caption"
+      }
+    },
+    {
+      "scene_id": "scene_04",
+      "setup_id": "setup_04",
+      "template_id": "T04",
+      "variant_id": "A",
+      "start_frame": 540,
+      "duration_frames": 180,
+      "asset_ids": [
+        "asset_04_map_backdrop"
+      ],
+      "layers": [
+        {
+          "layer_id": "layer_04_map_backdrop",
+          "layer_kind": "map",
+          "asset_id": "asset_04_map_backdrop",
+          "text": null,
+          "source_claim_id": "claim_04",
+          "z_index": 0,
+          "rect_px": {
+            "x": 154,
+            "y": 97,
+            "w": 1517,
+            "h": 853
+          },
+          "anchor": "center",
+          "crop_normalized": {
+            "x": 0,
+            "y": 0,
+            "w": 1,
+            "h": 1
+          },
+          "object_fit": "contain",
+          "mask": {
+            "kind": "none",
+            "asset_id": null,
+            "feather_px": 0
+          },
+          "style": {
+            "font_token": null,
+            "color_token": null,
+            "stroke_token": null,
+            "max_lines": 1
+          },
+          "map_binding": {
+            "historical_map_id": "map_fixture_04",
+            "feature_id": null,
+            "coordinate_kind": "geo_wgs84",
+            "anchor_latlon": null
+          },
+          "parent_layer_id": null,
+          "group_id": "render_group_04",
+          "transform_origin": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "depth_order": 0,
+          "treatment": {
+            "kind": "ink_map",
+            "source_preserving": true,
+            "evidence_badge": "archival"
+          },
+          "path_geometry_ref": null,
+          "text_layout": null
+        },
+        {
+          "layer_id": "layer_04_route_overlay",
+          "layer_kind": "route",
+          "asset_id": null,
+          "text": null,
+          "source_claim_id": "claim_04",
+          "z_index": 1,
+          "rect_px": {
+            "x": 154,
+            "y": 97,
+            "w": 1517,
+            "h": 853
+          },
+          "anchor": "center",
+          "crop_normalized": {
+            "x": 0,
+            "y": 0,
+            "w": 1,
+            "h": 1
+          },
+          "object_fit": "contain",
+          "mask": {
+            "kind": "none",
+            "asset_id": null,
+            "feather_px": 0
+          },
+          "style": {
+            "font_token": null,
+            "color_token": null,
+            "stroke_token": null,
+            "max_lines": 1
+          },
+          "map_binding": null,
+          "parent_layer_id": null,
+          "group_id": "render_group_04",
+          "transform_origin": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "depth_order": 1,
+          "treatment": {
+            "kind": "none",
+            "source_preserving": true,
+            "evidence_badge": "none"
+          },
+          "path_geometry_ref": "geometry_route_001",
+          "text_layout": null
+        },
+        {
+          "layer_id": "layer_04_waypoint_callout",
+          "layer_kind": "callout",
+          "asset_id": null,
+          "text": "UNVERIFIED",
+          "source_claim_id": "claim_04",
+          "z_index": 2,
+          "rect_px": {
+            "x": 1286,
+            "y": 659,
+            "w": 480,
+            "h": 227
+          },
+          "anchor": "center",
+          "crop_normalized": {
+            "x": 0,
+            "y": 0,
+            "w": 1,
+            "h": 1
+          },
+          "object_fit": "contain",
+          "mask": {
+            "kind": "none",
+            "asset_id": null,
+            "feather_px": 0
+          },
+          "style": {
+            "font_token": null,
+            "color_token": null,
+            "stroke_token": null,
+            "max_lines": 3
+          },
+          "map_binding": null,
+          "parent_layer_id": null,
+          "group_id": "render_group_04",
+          "transform_origin": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "depth_order": 2,
+          "treatment": {
+            "kind": "none",
+            "source_preserving": true,
+            "evidence_badge": "none"
+          },
+          "path_geometry_ref": null,
+          "text_layout": {
+            "font_token": "headline_sans",
+            "font_size_px": 48,
+            "line_height": 1.2,
+            "letter_spacing_px": 0,
+            "horizontal_align": "left",
+            "vertical_align": "center",
+            "max_lines": 3,
+            "overflow": "block"
+          }
+        },
+        {
+          "layer_id": "layer_04_route_title",
+          "layer_kind": "headline",
+          "asset_id": null,
+          "text": "UNVERIFIED",
+          "source_claim_id": "claim_04",
+          "z_index": 3,
+          "rect_px": {
+            "x": 211,
+            "y": 108,
+            "w": 787,
+            "h": 151
+          },
+          "anchor": "center",
+          "crop_normalized": {
+            "x": 0,
+            "y": 0,
+            "w": 1,
+            "h": 1
+          },
+          "object_fit": "contain",
+          "mask": {
+            "kind": "none",
+            "asset_id": null,
+            "feather_px": 0
+          },
+          "style": {
+            "font_token": null,
+            "color_token": null,
+            "stroke_token": null,
+            "max_lines": 3
+          },
+          "map_binding": null,
+          "parent_layer_id": null,
+          "group_id": "render_group_04",
+          "transform_origin": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "depth_order": 3,
+          "treatment": {
+            "kind": "headline_text",
+            "source_preserving": true,
+            "evidence_badge": "none"
+          },
+          "path_geometry_ref": null,
+          "text_layout": {
+            "font_token": "headline_sans",
+            "font_size_px": 48,
+            "line_height": 1.2,
+            "letter_spacing_px": 0,
+            "horizontal_align": "left",
+            "vertical_align": "center",
+            "max_lines": 3,
+            "overflow": "block"
+          }
+        }
+      ],
+      "events": [
+        {
+          "event_id": "event_04_0",
+          "layer_id": "layer_04_route_overlay",
+          "preset_id": "route-line-draw",
+          "start_frame": 8,
+          "duration_frames": 30,
+          "cue_word_id": "word_001",
+          "params": {
+            "route_geometry_ref": "geometry_001",
+            "start_progress": 0,
+            "end_progress": 1,
+            "follow_marker_layer_id": null
+          },
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 0,
+              "easing": "ease_out"
+            },
+            {
+              "frame": 30,
+              "value": 1,
+              "easing": "ease_out"
+            }
+          ],
+          "animated_property": "path_progress",
+          "cue_binding": {
+            "word_id": "word_001",
+            "offset_frames": 0
+          },
+          "phases": [
+            {
+              "phase_id": "phase_04_0",
+              "kind": "enter",
+              "start_offset_frames": 0,
+              "duration_frames": 30,
+              "depends_on_phase_ids": []
+            }
+          ],
+          "motion_space": "map_world",
+          "affected_layer_ids": [
+            "layer_04_route_overlay"
+          ],
+          "stagger": null,
+          "depth_parallax": null
+        },
+        {
+          "event_id": "event_04_1",
+          "layer_id": "layer_04_map_backdrop",
+          "preset_id": "camera-pan",
+          "start_frame": 48,
+          "duration_frames": 30,
+          "cue_word_id": "word_001",
+          "params": {
+            "start_target_layer_id": "layer_04_map_backdrop",
+            "end_target_layer_id": "layer_04_route_overlay",
+            "max_translate_px": 150,
+            "keep_context_visible": true
+          },
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 0,
+              "easing": "ease_out"
+            },
+            {
+              "frame": 30,
+              "value": 1,
+              "easing": "ease_out"
+            }
+          ],
+          "animated_property": "opacity",
+          "cue_binding": {
+            "word_id": "word_001",
+            "offset_frames": 0
+          },
+          "phases": [
+            {
+              "phase_id": "phase_04_1",
+              "kind": "enter",
+              "start_offset_frames": 0,
+              "duration_frames": 30,
+              "depends_on_phase_ids": []
+            }
+          ],
+          "motion_space": "screen",
+          "affected_layer_ids": [
+            "layer_04_map_backdrop"
+          ],
+          "stagger": null,
+          "depth_parallax": null
+        }
+      ],
+      "camera": {
+        "mode": "track_route",
+        "keyframes": [
+          {
+            "at_frame": 0,
+            "x_px": 0,
+            "y_px": 0,
+            "scale": 1,
+            "rotation_deg": 0,
+            "opacity": 1,
+            "easing": "linear"
+          },
+          {
+            "at_frame": 179,
+            "x_px": -10,
+            "y_px": -3,
+            "scale": 1.04,
+            "rotation_deg": 0,
+            "opacity": 1,
+            "easing": "ease_in_out"
+          }
+        ],
+        "focus_entity_id": null,
+        "clamp_to_content": true,
+        "focus_path": [
+          {
+            "at_frame": 0,
+            "focus_layer_id": "layer_04_map_backdrop",
+            "focus_geo_feature_id": null,
+            "framing": "subject_center"
+          },
+          {
+            "at_frame": 120,
+            "focus_layer_id": "layer_04_route_title",
+            "focus_geo_feature_id": null,
+            "framing": "subject_center"
+          }
+        ],
+        "transform_order": "layer_then_group_then_camera"
+      },
+      "transition_out": {
+        "type": "hard_cut",
+        "duration_frames": 0
+      },
+      "story_cue_span": {
+        "first_word_id": "word_001",
+        "last_word_id": "word_002"
+      },
+      "staging": {
+        "composition_graph": {
+          "group_ids": [
+            "render_group_04"
+          ],
+          "edges": [
+            {
+              "from_id": "layer_04_route_overlay",
+              "to_id": "layer_04_map_backdrop",
+              "relation": "foreground_of"
+            }
+          ]
+        },
+        "beat_sequence": [
+          {
+            "beat_id": "beat_04_0",
+            "local_start_frame": 0,
+            "local_end_frame": 60,
+            "focus_layer_id": "layer_04_map_backdrop",
+            "activated_layer_ids": [
+              "layer_04_map_backdrop",
+              "layer_04_route_overlay"
+            ],
+            "hidden_layer_ids": []
+          },
+          {
+            "beat_id": "beat_04_1",
+            "local_start_frame": 60,
+            "local_end_frame": 120,
+            "focus_layer_id": "layer_04_route_overlay",
+            "activated_layer_ids": [
+              "layer_04_map_backdrop",
+              "layer_04_route_overlay",
+              "layer_04_waypoint_callout"
+            ],
+            "hidden_layer_ids": []
+          },
+          {
+            "beat_id": "beat_04_2",
+            "local_start_frame": 120,
+            "local_end_frame": 180,
+            "focus_layer_id": "layer_04_waypoint_callout",
+            "activated_layer_ids": [
+              "layer_04_map_backdrop",
+              "layer_04_route_overlay",
+              "layer_04_waypoint_callout",
+              "layer_04_route_title"
+            ],
+            "hidden_layer_ids": []
+          }
+        ],
+        "continuity_group_id": "group_04",
+        "carry_layer_ids": [],
+        "entry_focus_layer_id": "layer_04_map_backdrop",
+        "exit_focus_layer_id": "layer_04_route_title"
+      }
+    },
+    {
+      "scene_id": "scene_05",
+      "setup_id": "setup_05",
+      "template_id": "T05",
+      "variant_id": "A",
+      "start_frame": 720,
+      "duration_frames": 180,
+      "asset_ids": [],
+      "layers": [
+        {
+          "layer_id": "layer_05_date_early",
+          "layer_kind": "date",
+          "asset_id": null,
+          "text": "UNVERIFIED",
+          "source_claim_id": "claim_05",
+          "z_index": 0,
+          "rect_px": {
+            "x": 173,
+            "y": 400,
+            "w": 518,
+            "h": 259
+          },
+          "anchor": "center",
+          "crop_normalized": {
+            "x": 0,
+            "y": 0,
+            "w": 1,
+            "h": 1
+          },
+          "object_fit": "contain",
+          "mask": {
+            "kind": "none",
+            "asset_id": null,
+            "feather_px": 0
+          },
+          "style": {
+            "font_token": null,
+            "color_token": null,
+            "stroke_token": null,
+            "max_lines": 1
+          },
+          "map_binding": null,
+          "parent_layer_id": null,
+          "group_id": "render_group_05",
+          "transform_origin": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "depth_order": 0,
+          "treatment": {
+            "kind": "none",
+            "source_preserving": true,
+            "evidence_badge": "none"
+          },
+          "path_geometry_ref": null,
+          "text_layout": {
+            "font_token": "headline_sans",
+            "font_size_px": 48,
+            "line_height": 1.2,
+            "letter_spacing_px": 0,
+            "horizontal_align": "left",
+            "vertical_align": "center",
+            "max_lines": 1,
+            "overflow": "block"
+          }
+        },
+        {
+          "layer_id": "layer_05_date_late",
+          "layer_kind": "date",
+          "asset_id": null,
+          "text": "UNVERIFIED",
+          "source_claim_id": "claim_05",
+          "z_index": 1,
+          "rect_px": {
+            "x": 1229,
+            "y": 400,
+            "w": 518,
+            "h": 259
+          },
+          "anchor": "center",
+          "crop_normalized": {
+            "x": 0,
+            "y": 0,
+            "w": 1,
+            "h": 1
+          },
+          "object_fit": "contain",
+          "mask": {
+            "kind": "none",
+            "asset_id": null,
+            "feather_px": 0
+          },
+          "style": {
+            "font_token": null,
+            "color_token": null,
+            "stroke_token": null,
+            "max_lines": 1
+          },
+          "map_binding": null,
+          "parent_layer_id": null,
+          "group_id": "render_group_05",
+          "transform_origin": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "depth_order": 1,
+          "treatment": {
+            "kind": "none",
+            "source_preserving": true,
+            "evidence_badge": "none"
+          },
+          "path_geometry_ref": null,
+          "text_layout": {
+            "font_token": "headline_sans",
+            "font_size_px": 48,
+            "line_height": 1.2,
+            "letter_spacing_px": 0,
+            "horizontal_align": "left",
+            "vertical_align": "center",
+            "max_lines": 1,
+            "overflow": "block"
+          }
+        },
+        {
+          "layer_id": "layer_05_event_rail",
+          "layer_kind": "route",
+          "asset_id": null,
+          "text": null,
+          "source_claim_id": "claim_05",
+          "z_index": 2,
+          "rect_px": {
+            "x": 307,
+            "y": 648,
+            "w": 1344,
+            "h": 86
+          },
+          "anchor": "center",
+          "crop_normalized": {
+            "x": 0,
+            "y": 0,
+            "w": 1,
+            "h": 1
+          },
+          "object_fit": "contain",
+          "mask": {
+            "kind": "none",
+            "asset_id": null,
+            "feather_px": 0
+          },
+          "style": {
+            "font_token": null,
+            "color_token": null,
+            "stroke_token": null,
+            "max_lines": 1
+          },
+          "map_binding": null,
+          "parent_layer_id": null,
+          "group_id": "render_group_05",
+          "transform_origin": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "depth_order": 2,
+          "treatment": {
+            "kind": "none",
+            "source_preserving": true,
+            "evidence_badge": "none"
+          },
+          "path_geometry_ref": "geometry_route_001",
+          "text_layout": null
+        },
+        {
+          "layer_id": "layer_05_event_title",
+          "layer_kind": "headline",
+          "asset_id": null,
+          "text": "UNVERIFIED",
+          "source_claim_id": "claim_05",
+          "z_index": 3,
+          "rect_px": {
+            "x": 346,
+            "y": 130,
+            "w": 1229,
+            "h": 184
+          },
+          "anchor": "center",
+          "crop_normalized": {
+            "x": 0,
+            "y": 0,
+            "w": 1,
+            "h": 1
+          },
+          "object_fit": "contain",
+          "mask": {
+            "kind": "none",
+            "asset_id": null,
+            "feather_px": 0
+          },
+          "style": {
+            "font_token": null,
+            "color_token": null,
+            "stroke_token": null,
+            "max_lines": 3
+          },
+          "map_binding": null,
+          "parent_layer_id": null,
+          "group_id": "render_group_05",
+          "transform_origin": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "depth_order": 3,
+          "treatment": {
+            "kind": "headline_text",
+            "source_preserving": true,
+            "evidence_badge": "none"
+          },
+          "path_geometry_ref": null,
+          "text_layout": {
+            "font_token": "headline_sans",
+            "font_size_px": 48,
+            "line_height": 1.2,
+            "letter_spacing_px": 0,
+            "horizontal_align": "left",
+            "vertical_align": "center",
+            "max_lines": 3,
+            "overflow": "block"
+          }
+        }
+      ],
+      "events": [
+        {
+          "event_id": "event_05_0",
+          "layer_id": "layer_05_date_early",
+          "preset_id": "stagger-reveal",
+          "start_frame": 8,
+          "duration_frames": 30,
+          "cue_word_id": "word_001",
+          "params": {
+            "ordered_layer_ids": [
+              "layer_05_date_early",
+              "layer_05_date_late"
+            ],
+            "gap_frames": 6,
+            "direction": "evidence_order"
+          },
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 0,
+              "easing": "ease_out"
+            },
+            {
+              "frame": 30,
+              "value": 1,
+              "easing": "ease_out"
+            }
+          ],
+          "animated_property": "opacity",
+          "cue_binding": {
+            "word_id": "word_001",
+            "offset_frames": 0
+          },
+          "phases": [
+            {
+              "phase_id": "phase_05_0",
+              "kind": "enter",
+              "start_offset_frames": 0,
+              "duration_frames": 30,
+              "depends_on_phase_ids": []
+            }
+          ],
+          "motion_space": "group_local",
+          "affected_layer_ids": [
+            "layer_05_date_early"
+          ],
+          "stagger": {
+            "order": [
+              "layer_05_date_early",
+              "layer_05_date_late"
+            ],
+            "offset_frames": 6
+          },
+          "depth_parallax": null
+        },
+        {
+          "event_id": "event_05_1",
+          "layer_id": "layer_05_event_rail",
+          "preset_id": "route-line-draw",
+          "start_frame": 48,
+          "duration_frames": 30,
+          "cue_word_id": "word_001",
+          "params": {
+            "route_geometry_ref": "geometry_001",
+            "start_progress": 0,
+            "end_progress": 1,
+            "follow_marker_layer_id": null
+          },
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 0,
+              "easing": "ease_out"
+            },
+            {
+              "frame": 30,
+              "value": 1,
+              "easing": "ease_out"
+            }
+          ],
+          "animated_property": "path_progress",
+          "cue_binding": {
+            "word_id": "word_001",
+            "offset_frames": 0
+          },
+          "phases": [
+            {
+              "phase_id": "phase_05_1",
+              "kind": "enter",
+              "start_offset_frames": 0,
+              "duration_frames": 30,
+              "depends_on_phase_ids": []
+            }
+          ],
+          "motion_space": "map_world",
+          "affected_layer_ids": [
+            "layer_05_event_rail"
+          ],
+          "stagger": null,
+          "depth_parallax": null
+        }
+      ],
+      "camera": {
+        "mode": "push_in",
+        "keyframes": [
+          {
+            "at_frame": 0,
+            "x_px": 0,
+            "y_px": 0,
+            "scale": 1,
+            "rotation_deg": 0,
+            "opacity": 1,
+            "easing": "linear"
+          },
+          {
+            "at_frame": 179,
+            "x_px": -10,
+            "y_px": -3,
+            "scale": 1.04,
+            "rotation_deg": 0,
+            "opacity": 1,
+            "easing": "ease_in_out"
+          }
+        ],
+        "focus_entity_id": null,
+        "clamp_to_content": true,
+        "focus_path": [
+          {
+            "at_frame": 0,
+            "focus_layer_id": "layer_05_date_early",
+            "focus_geo_feature_id": null,
+            "framing": "subject_center"
+          },
+          {
+            "at_frame": 120,
+            "focus_layer_id": "layer_05_event_title",
+            "focus_geo_feature_id": null,
+            "framing": "subject_center"
+          }
+        ],
+        "transform_order": "layer_then_group_then_camera"
+      },
+      "transition_out": {
+        "type": "hard_cut",
+        "duration_frames": 0
+      },
+      "story_cue_span": {
+        "first_word_id": "word_001",
+        "last_word_id": "word_002"
+      },
+      "staging": {
+        "composition_graph": {
+          "group_ids": [
+            "render_group_05"
+          ],
+          "edges": []
+        },
+        "beat_sequence": [
+          {
+            "beat_id": "beat_05_0",
+            "local_start_frame": 0,
+            "local_end_frame": 60,
+            "focus_layer_id": "layer_05_date_early",
+            "activated_layer_ids": [
+              "layer_05_date_early",
+              "layer_05_date_late"
+            ],
+            "hidden_layer_ids": []
+          },
+          {
+            "beat_id": "beat_05_1",
+            "local_start_frame": 60,
+            "local_end_frame": 120,
+            "focus_layer_id": "layer_05_date_late",
+            "activated_layer_ids": [
+              "layer_05_date_early",
+              "layer_05_date_late",
+              "layer_05_event_rail"
+            ],
+            "hidden_layer_ids": []
+          },
+          {
+            "beat_id": "beat_05_2",
+            "local_start_frame": 120,
+            "local_end_frame": 180,
+            "focus_layer_id": "layer_05_event_rail",
+            "activated_layer_ids": [
+              "layer_05_date_early",
+              "layer_05_date_late",
+              "layer_05_event_rail",
+              "layer_05_event_title"
+            ],
+            "hidden_layer_ids": []
+          }
+        ],
+        "continuity_group_id": "group_05",
+        "carry_layer_ids": [],
+        "entry_focus_layer_id": "layer_05_date_early",
+        "exit_focus_layer_id": "layer_05_event_title"
+      }
+    },
+    {
+      "scene_id": "scene_06",
+      "setup_id": "setup_06",
+      "template_id": "T06",
+      "variant_id": "A",
+      "start_frame": 900,
+      "duration_frames": 180,
+      "asset_ids": [
+        "asset_06_document_main"
+      ],
+      "layers": [
+        {
+          "layer_id": "layer_06_document_main",
+          "layer_kind": "document",
+          "asset_id": "asset_06_document_main",
+          "text": null,
+          "source_claim_id": "claim_06",
+          "z_index": 0,
+          "rect_px": {
+            "x": 154,
+            "y": 76,
+            "w": 1094,
+            "h": 929
+          },
+          "anchor": "center",
+          "crop_normalized": {
+            "x": 0,
+            "y": 0,
+            "w": 1,
+            "h": 1
+          },
+          "object_fit": "contain",
+          "mask": {
+            "kind": "none",
+            "asset_id": null,
+            "feather_px": 0
+          },
+          "style": {
+            "font_token": null,
+            "color_token": null,
+            "stroke_token": null,
+            "max_lines": 1
+          },
+          "map_binding": null,
+          "parent_layer_id": null,
+          "group_id": "render_group_06",
+          "transform_origin": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "depth_order": 0,
+          "treatment": {
+            "kind": "paper_document",
+            "source_preserving": true,
+            "evidence_badge": "archival"
+          },
+          "path_geometry_ref": null,
+          "text_layout": null
+        },
+        {
+          "layer_id": "layer_06_verified_excerpt",
+          "layer_kind": "text",
+          "asset_id": null,
+          "text": "UNVERIFIED",
+          "source_claim_id": "claim_06",
+          "z_index": 1,
+          "rect_px": {
+            "x": 1286,
+            "y": 227,
+            "w": 480,
+            "h": 378
+          },
+          "anchor": "center",
+          "crop_normalized": {
+            "x": 0,
+            "y": 0,
+            "w": 1,
+            "h": 1
+          },
+          "object_fit": "contain",
+          "mask": {
+            "kind": "none",
+            "asset_id": null,
+            "feather_px": 0
+          },
+          "style": {
+            "font_token": null,
+            "color_token": null,
+            "stroke_token": null,
+            "max_lines": 3
+          },
+          "map_binding": null,
+          "parent_layer_id": null,
+          "group_id": "render_group_06",
+          "transform_origin": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "depth_order": 1,
+          "treatment": {
+            "kind": "none",
+            "source_preserving": true,
+            "evidence_badge": "none"
+          },
+          "path_geometry_ref": null,
+          "text_layout": {
+            "font_token": "headline_sans",
+            "font_size_px": 48,
+            "line_height": 1.2,
+            "letter_spacing_px": 0,
+            "horizontal_align": "left",
+            "vertical_align": "center",
+            "max_lines": 3,
+            "overflow": "block"
+          }
+        },
+        {
+          "layer_id": "layer_06_citation",
+          "layer_kind": "text",
+          "asset_id": null,
+          "text": "UNVERIFIED",
+          "source_claim_id": "claim_06",
+          "z_index": 2,
+          "rect_px": {
+            "x": 1267,
+            "y": 788,
+            "w": 518,
+            "h": 162
+          },
+          "anchor": "center",
+          "crop_normalized": {
+            "x": 0,
+            "y": 0,
+            "w": 1,
+            "h": 1
+          },
+          "object_fit": "contain",
+          "mask": {
+            "kind": "none",
+            "asset_id": null,
+            "feather_px": 0
+          },
+          "style": {
+            "font_token": null,
+            "color_token": null,
+            "stroke_token": null,
+            "max_lines": 3
+          },
+          "map_binding": null,
+          "parent_layer_id": null,
+          "group_id": "render_group_06",
+          "transform_origin": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "depth_order": 2,
+          "treatment": {
+            "kind": "none",
+            "source_preserving": true,
+            "evidence_badge": "none"
+          },
+          "path_geometry_ref": null,
+          "text_layout": {
+            "font_token": "headline_sans",
+            "font_size_px": 48,
+            "line_height": 1.2,
+            "letter_spacing_px": 0,
+            "horizontal_align": "left",
+            "vertical_align": "center",
+            "max_lines": 3,
+            "overflow": "block"
+          }
+        }
+      ],
+      "events": [
+        {
+          "event_id": "event_06_0",
+          "layer_id": "layer_06_document_main",
+          "preset_id": "camera-push",
+          "start_frame": 8,
+          "duration_frames": 30,
+          "cue_word_id": "word_001",
+          "params": {
+            "focus_layer_id": "layer_06_document_main",
+            "from_scale": 1,
+            "to_scale": 1.08,
+            "max_drift_px": 60
+          },
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 0,
+              "easing": "ease_out"
+            },
+            {
+              "frame": 30,
+              "value": 1,
+              "easing": "ease_out"
+            }
+          ],
+          "animated_property": "opacity",
+          "cue_binding": {
+            "word_id": "word_001",
+            "offset_frames": 0
+          },
+          "phases": [
+            {
+              "phase_id": "phase_06_0",
+              "kind": "enter",
+              "start_offset_frames": 0,
+              "duration_frames": 30,
+              "depends_on_phase_ids": []
+            }
+          ],
+          "motion_space": "screen",
+          "affected_layer_ids": [
+            "layer_06_document_main"
+          ],
+          "stagger": null,
+          "depth_parallax": null
+        },
+        {
+          "event_id": "event_06_1",
+          "layer_id": "layer_06_verified_excerpt",
+          "preset_id": "text-highlight",
+          "start_frame": 48,
+          "duration_frames": 30,
+          "cue_word_id": "word_001",
+          "params": {
+            "source_word_ids": [
+              "word_001"
+            ],
+            "highlight_color_token": "gold",
+            "hold_after_frames": 15
+          },
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 0,
+              "easing": "ease_out"
+            },
+            {
+              "frame": 30,
+              "value": 1,
+              "easing": "ease_out"
+            }
+          ],
+          "animated_property": "highlight_progress",
+          "cue_binding": {
+            "word_id": "word_001",
+            "offset_frames": 0
+          },
+          "phases": [
+            {
+              "phase_id": "phase_06_1",
+              "kind": "enter",
+              "start_offset_frames": 0,
+              "duration_frames": 30,
+              "depends_on_phase_ids": []
+            }
+          ],
+          "motion_space": "layer_local",
+          "affected_layer_ids": [
+            "layer_06_verified_excerpt"
+          ],
+          "stagger": null,
+          "depth_parallax": null
+        }
+      ],
+      "camera": {
+        "mode": "push_in",
+        "keyframes": [
+          {
+            "at_frame": 0,
+            "x_px": 0,
+            "y_px": 0,
+            "scale": 1,
+            "rotation_deg": 0,
+            "opacity": 1,
+            "easing": "linear"
+          },
+          {
+            "at_frame": 179,
+            "x_px": -10,
+            "y_px": -3,
+            "scale": 1.04,
+            "rotation_deg": 0,
+            "opacity": 1,
+            "easing": "ease_in_out"
+          }
+        ],
+        "focus_entity_id": null,
+        "clamp_to_content": true,
+        "focus_path": [
+          {
+            "at_frame": 0,
+            "focus_layer_id": "layer_06_document_main",
+            "focus_geo_feature_id": null,
+            "framing": "subject_center"
+          },
+          {
+            "at_frame": 120,
+            "focus_layer_id": "layer_06_citation",
+            "focus_geo_feature_id": null,
+            "framing": "subject_center"
+          }
+        ],
+        "transform_order": "layer_then_group_then_camera"
+      },
+      "transition_out": {
+        "type": "hard_cut",
+        "duration_frames": 0
+      },
+      "story_cue_span": {
+        "first_word_id": "word_001",
+        "last_word_id": "word_002"
+      },
+      "staging": {
+        "composition_graph": {
+          "group_ids": [
+            "render_group_06"
+          ],
+          "edges": []
+        },
+        "beat_sequence": [
+          {
+            "beat_id": "beat_06_0",
+            "local_start_frame": 0,
+            "local_end_frame": 60,
+            "focus_layer_id": "layer_06_document_main",
+            "activated_layer_ids": [
+              "layer_06_document_main",
+              "layer_06_verified_excerpt"
+            ],
+            "hidden_layer_ids": []
+          },
+          {
+            "beat_id": "beat_06_1",
+            "local_start_frame": 60,
+            "local_end_frame": 120,
+            "focus_layer_id": "layer_06_verified_excerpt",
+            "activated_layer_ids": [
+              "layer_06_document_main",
+              "layer_06_verified_excerpt",
+              "layer_06_citation"
+            ],
+            "hidden_layer_ids": []
+          },
+          {
+            "beat_id": "beat_06_2",
+            "local_start_frame": 120,
+            "local_end_frame": 180,
+            "focus_layer_id": "layer_06_citation",
+            "activated_layer_ids": [
+              "layer_06_document_main",
+              "layer_06_verified_excerpt",
+              "layer_06_citation"
+            ],
+            "hidden_layer_ids": []
+          }
+        ],
+        "continuity_group_id": "group_06",
+        "carry_layer_ids": [],
+        "entry_focus_layer_id": "layer_06_document_main",
+        "exit_focus_layer_id": "layer_06_citation"
+      }
+    },
+    {
+      "scene_id": "scene_07",
+      "setup_id": "setup_07",
+      "template_id": "T07",
+      "variant_id": "A",
+      "start_frame": 1080,
+      "duration_frames": 180,
+      "asset_ids": [
+        "asset_07_map_before",
+        "asset_07_map_after"
+      ],
+      "layers": [
+        {
+          "layer_id": "layer_07_map_before",
+          "layer_kind": "map",
+          "asset_id": "asset_07_map_before",
+          "text": null,
+          "source_claim_id": "claim_07",
+          "z_index": 0,
+          "rect_px": {
+            "x": 115,
+            "y": 194,
+            "w": 806,
+            "h": 724
+          },
+          "anchor": "center",
+          "crop_normalized": {
+            "x": 0,
+            "y": 0,
+            "w": 1,
+            "h": 1
+          },
+          "object_fit": "contain",
+          "mask": {
+            "kind": "none",
+            "asset_id": null,
+            "feather_px": 0
+          },
+          "style": {
+            "font_token": null,
+            "color_token": null,
+            "stroke_token": null,
+            "max_lines": 1
+          },
+          "map_binding": {
+            "historical_map_id": "map_fixture_07",
+            "feature_id": null,
+            "coordinate_kind": "geo_wgs84",
+            "anchor_latlon": null
+          },
+          "parent_layer_id": null,
+          "group_id": "render_group_07",
+          "transform_origin": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "depth_order": 0,
+          "treatment": {
+            "kind": "ink_map",
+            "source_preserving": true,
+            "evidence_badge": "archival"
+          },
+          "path_geometry_ref": null,
+          "text_layout": null
+        },
+        {
+          "layer_id": "layer_07_map_after",
+          "layer_kind": "map",
+          "asset_id": "asset_07_map_after",
+          "text": null,
+          "source_claim_id": "claim_07",
+          "z_index": 1,
+          "rect_px": {
+            "x": 998,
+            "y": 194,
+            "w": 806,
+            "h": 724
+          },
+          "anchor": "center",
+          "crop_normalized": {
+            "x": 0,
+            "y": 0,
+            "w": 1,
+            "h": 1
+          },
+          "object_fit": "contain",
+          "mask": {
+            "kind": "none",
+            "asset_id": null,
+            "feather_px": 0
+          },
+          "style": {
+            "font_token": null,
+            "color_token": null,
+            "stroke_token": null,
+            "max_lines": 1
+          },
+          "map_binding": {
+            "historical_map_id": "map_fixture_07",
+            "feature_id": null,
+            "coordinate_kind": "geo_wgs84",
+            "anchor_latlon": null
+          },
+          "parent_layer_id": null,
+          "group_id": "render_group_07",
+          "transform_origin": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "depth_order": 1,
+          "treatment": {
+            "kind": "ink_map",
+            "source_preserving": true,
+            "evidence_badge": "archival"
+          },
+          "path_geometry_ref": null,
+          "text_layout": null
+        },
+        {
+          "layer_id": "layer_07_date_before",
+          "layer_kind": "date",
+          "asset_id": null,
+          "text": "UNVERIFIED",
+          "source_claim_id": "claim_07",
+          "z_index": 2,
+          "rect_px": {
+            "x": 269,
+            "y": 76,
+            "w": 518,
+            "h": 119
+          },
+          "anchor": "center",
+          "crop_normalized": {
+            "x": 0,
+            "y": 0,
+            "w": 1,
+            "h": 1
+          },
+          "object_fit": "contain",
+          "mask": {
+            "kind": "none",
+            "asset_id": null,
+            "feather_px": 0
+          },
+          "style": {
+            "font_token": null,
+            "color_token": null,
+            "stroke_token": null,
+            "max_lines": 1
+          },
+          "map_binding": null,
+          "parent_layer_id": null,
+          "group_id": "render_group_07",
+          "transform_origin": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "depth_order": 2,
+          "treatment": {
+            "kind": "none",
+            "source_preserving": true,
+            "evidence_badge": "none"
+          },
+          "path_geometry_ref": null,
+          "text_layout": {
+            "font_token": "headline_sans",
+            "font_size_px": 48,
+            "line_height": 1.2,
+            "letter_spacing_px": 0,
+            "horizontal_align": "left",
+            "vertical_align": "center",
+            "max_lines": 1,
+            "overflow": "block"
+          }
+        },
+        {
+          "layer_id": "layer_07_date_after",
+          "layer_kind": "date",
+          "asset_id": null,
+          "text": "UNVERIFIED",
+          "source_claim_id": "claim_07",
+          "z_index": 3,
+          "rect_px": {
+            "x": 1171,
+            "y": 76,
+            "w": 518,
+            "h": 119
+          },
+          "anchor": "center",
+          "crop_normalized": {
+            "x": 0,
+            "y": 0,
+            "w": 1,
+            "h": 1
+          },
+          "object_fit": "contain",
+          "mask": {
+            "kind": "none",
+            "asset_id": null,
+            "feather_px": 0
+          },
+          "style": {
+            "font_token": null,
+            "color_token": null,
+            "stroke_token": null,
+            "max_lines": 1
+          },
+          "map_binding": null,
+          "parent_layer_id": null,
+          "group_id": "render_group_07",
+          "transform_origin": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "depth_order": 3,
+          "treatment": {
+            "kind": "none",
+            "source_preserving": true,
+            "evidence_badge": "none"
+          },
+          "path_geometry_ref": null,
+          "text_layout": {
+            "font_token": "headline_sans",
+            "font_size_px": 48,
+            "line_height": 1.2,
+            "letter_spacing_px": 0,
+            "horizontal_align": "left",
+            "vertical_align": "center",
+            "max_lines": 1,
+            "overflow": "block"
+          }
+        },
+        {
+          "layer_id": "layer_07_delta_note",
+          "layer_kind": "callout",
+          "asset_id": null,
+          "text": "UNVERIFIED",
+          "source_claim_id": "claim_07",
+          "z_index": 4,
+          "rect_px": {
+            "x": 768,
+            "y": 886,
+            "w": 384,
+            "h": 108
+          },
+          "anchor": "center",
+          "crop_normalized": {
+            "x": 0,
+            "y": 0,
+            "w": 1,
+            "h": 1
+          },
+          "object_fit": "contain",
+          "mask": {
+            "kind": "none",
+            "asset_id": null,
+            "feather_px": 0
+          },
+          "style": {
+            "font_token": null,
+            "color_token": null,
+            "stroke_token": null,
+            "max_lines": 3
+          },
+          "map_binding": null,
+          "parent_layer_id": null,
+          "group_id": "render_group_07",
+          "transform_origin": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "depth_order": 4,
+          "treatment": {
+            "kind": "none",
+            "source_preserving": true,
+            "evidence_badge": "none"
+          },
+          "path_geometry_ref": null,
+          "text_layout": {
+            "font_token": "headline_sans",
+            "font_size_px": 48,
+            "line_height": 1.2,
+            "letter_spacing_px": 0,
+            "horizontal_align": "left",
+            "vertical_align": "center",
+            "max_lines": 3,
+            "overflow": "block"
+          }
+        }
+      ],
+      "events": [
+        {
+          "event_id": "event_07_0",
+          "layer_id": "layer_07_map_after",
+          "preset_id": "map-region-wipe",
+          "start_frame": 8,
+          "duration_frames": 30,
+          "cue_word_id": "word_001",
+          "params": {
+            "historical_map_id": "map_fixture_07",
+            "approved_feature_ids": [
+              "feature_001"
+            ],
+            "wipe_direction": "center_out",
+            "era_year": 1914
+          },
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 0,
+              "easing": "ease_out"
+            },
+            {
+              "frame": 30,
+              "value": 1,
+              "easing": "ease_out"
+            }
+          ],
+          "animated_property": "mask_progress",
+          "cue_binding": {
+            "word_id": "word_001",
+            "offset_frames": 0
+          },
+          "phases": [
+            {
+              "phase_id": "phase_07_0",
+              "kind": "enter",
+              "start_offset_frames": 0,
+              "duration_frames": 30,
+              "depends_on_phase_ids": []
+            }
+          ],
+          "motion_space": "map_world",
+          "affected_layer_ids": [
+            "layer_07_map_after"
+          ],
+          "stagger": null,
+          "depth_parallax": null
+        },
+        {
+          "event_id": "event_07_1",
+          "layer_id": "layer_07_date_after",
+          "preset_id": "text-highlight",
+          "start_frame": 48,
+          "duration_frames": 30,
+          "cue_word_id": "word_001",
+          "params": {
+            "source_word_ids": [
+              "word_001"
+            ],
+            "highlight_color_token": "gold",
+            "hold_after_frames": 15
+          },
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 0,
+              "easing": "ease_out"
+            },
+            {
+              "frame": 30,
+              "value": 1,
+              "easing": "ease_out"
+            }
+          ],
+          "animated_property": "highlight_progress",
+          "cue_binding": {
+            "word_id": "word_001",
+            "offset_frames": 0
+          },
+          "phases": [
+            {
+              "phase_id": "phase_07_1",
+              "kind": "enter",
+              "start_offset_frames": 0,
+              "duration_frames": 30,
+              "depends_on_phase_ids": []
+            }
+          ],
+          "motion_space": "layer_local",
+          "affected_layer_ids": [
+            "layer_07_date_after"
+          ],
+          "stagger": null,
+          "depth_parallax": null
+        }
+      ],
+      "camera": {
+        "mode": "compare_locked",
+        "keyframes": [
+          {
+            "at_frame": 0,
+            "x_px": 0,
+            "y_px": 0,
+            "scale": 1,
+            "rotation_deg": 0,
+            "opacity": 1,
+            "easing": "linear"
+          },
+          {
+            "at_frame": 179,
+            "x_px": -10,
+            "y_px": -3,
+            "scale": 1.04,
+            "rotation_deg": 0,
+            "opacity": 1,
+            "easing": "ease_in_out"
+          }
+        ],
+        "focus_entity_id": null,
+        "clamp_to_content": true,
+        "focus_path": [
+          {
+            "at_frame": 0,
+            "focus_layer_id": "layer_07_map_before",
+            "focus_geo_feature_id": null,
+            "framing": "subject_center"
+          },
+          {
+            "at_frame": 120,
+            "focus_layer_id": "layer_07_delta_note",
+            "focus_geo_feature_id": null,
+            "framing": "subject_center"
+          }
+        ],
+        "transform_order": "layer_then_group_then_camera"
+      },
+      "transition_out": {
+        "type": "hard_cut",
+        "duration_frames": 0
+      },
+      "story_cue_span": {
+        "first_word_id": "word_001",
+        "last_word_id": "word_002"
+      },
+      "staging": {
+        "composition_graph": {
+          "group_ids": [
+            "render_group_07"
+          ],
+          "edges": [
+            {
+              "from_id": "layer_07_map_before",
+              "to_id": "layer_07_map_after",
+              "relation": "compares_to"
+            }
+          ]
+        },
+        "beat_sequence": [
+          {
+            "beat_id": "beat_07_0",
+            "local_start_frame": 0,
+            "local_end_frame": 60,
+            "focus_layer_id": "layer_07_map_before",
+            "activated_layer_ids": [
+              "layer_07_map_before",
+              "layer_07_map_after"
+            ],
+            "hidden_layer_ids": []
+          },
+          {
+            "beat_id": "beat_07_1",
+            "local_start_frame": 60,
+            "local_end_frame": 120,
+            "focus_layer_id": "layer_07_map_after",
+            "activated_layer_ids": [
+              "layer_07_map_before",
+              "layer_07_map_after",
+              "layer_07_date_before"
+            ],
+            "hidden_layer_ids": []
+          },
+          {
+            "beat_id": "beat_07_2",
+            "local_start_frame": 120,
+            "local_end_frame": 180,
+            "focus_layer_id": "layer_07_date_before",
+            "activated_layer_ids": [
+              "layer_07_map_before",
+              "layer_07_map_after",
+              "layer_07_date_before",
+              "layer_07_date_after"
+            ],
+            "hidden_layer_ids": []
+          }
+        ],
+        "continuity_group_id": "group_07",
+        "carry_layer_ids": [],
+        "entry_focus_layer_id": "layer_07_map_before",
+        "exit_focus_layer_id": "layer_07_delta_note"
+      }
+    },
+    {
+      "scene_id": "scene_08",
+      "setup_id": "setup_08",
+      "template_id": "T08",
+      "variant_id": "A",
+      "start_frame": 1260,
+      "duration_frames": 180,
+      "asset_ids": [],
+      "layers": [
+        {
+          "layer_id": "layer_08_fact_value",
+          "layer_kind": "date",
+          "asset_id": null,
+          "text": "UNVERIFIED",
+          "source_claim_id": "claim_08",
+          "z_index": 0,
+          "rect_px": {
+            "x": 326,
+            "y": 259,
+            "w": 1267,
+            "h": 400
+          },
+          "anchor": "center",
+          "crop_normalized": {
+            "x": 0,
+            "y": 0,
+            "w": 1,
+            "h": 1
+          },
+          "object_fit": "contain",
+          "mask": {
+            "kind": "none",
+            "asset_id": null,
+            "feather_px": 0
+          },
+          "style": {
+            "font_token": null,
+            "color_token": null,
+            "stroke_token": null,
+            "max_lines": 1
+          },
+          "map_binding": null,
+          "parent_layer_id": null,
+          "group_id": "render_group_08",
+          "transform_origin": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "depth_order": 0,
+          "treatment": {
+            "kind": "none",
+            "source_preserving": true,
+            "evidence_badge": "none"
+          },
+          "path_geometry_ref": null,
+          "text_layout": {
+            "font_token": "headline_sans",
+            "font_size_px": 48,
+            "line_height": 1.2,
+            "letter_spacing_px": 0,
+            "horizontal_align": "left",
+            "vertical_align": "center",
+            "max_lines": 1,
+            "overflow": "block"
+          }
+        },
+        {
+          "layer_id": "layer_08_fact_label",
+          "layer_kind": "headline",
+          "asset_id": null,
+          "text": "UNVERIFIED",
+          "source_claim_id": "claim_08",
+          "z_index": 1,
+          "rect_px": {
+            "x": 384,
+            "y": 691,
+            "w": 1152,
+            "h": 205
+          },
+          "anchor": "center",
+          "crop_normalized": {
+            "x": 0,
+            "y": 0,
+            "w": 1,
+            "h": 1
+          },
+          "object_fit": "contain",
+          "mask": {
+            "kind": "none",
+            "asset_id": null,
+            "feather_px": 0
+          },
+          "style": {
+            "font_token": null,
+            "color_token": null,
+            "stroke_token": null,
+            "max_lines": 3
+          },
+          "map_binding": null,
+          "parent_layer_id": null,
+          "group_id": "render_group_08",
+          "transform_origin": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "depth_order": 1,
+          "treatment": {
+            "kind": "headline_text",
+            "source_preserving": true,
+            "evidence_badge": "none"
+          },
+          "path_geometry_ref": null,
+          "text_layout": {
+            "font_token": "headline_sans",
+            "font_size_px": 48,
+            "line_height": 1.2,
+            "letter_spacing_px": 0,
+            "horizontal_align": "left",
+            "vertical_align": "center",
+            "max_lines": 3,
+            "overflow": "block"
+          }
+        },
+        {
+          "layer_id": "layer_08_source_note",
+          "layer_kind": "text",
+          "asset_id": null,
+          "text": "UNVERIFIED",
+          "source_claim_id": "claim_08",
+          "z_index": 2,
+          "rect_px": {
+            "x": 250,
+            "y": 929,
+            "w": 1421,
+            "h": 86
+          },
+          "anchor": "center",
+          "crop_normalized": {
+            "x": 0,
+            "y": 0,
+            "w": 1,
+            "h": 1
+          },
+          "object_fit": "contain",
+          "mask": {
+            "kind": "none",
+            "asset_id": null,
+            "feather_px": 0
+          },
+          "style": {
+            "font_token": null,
+            "color_token": null,
+            "stroke_token": null,
+            "max_lines": 3
+          },
+          "map_binding": null,
+          "parent_layer_id": null,
+          "group_id": "render_group_08",
+          "transform_origin": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "depth_order": 2,
+          "treatment": {
+            "kind": "none",
+            "source_preserving": true,
+            "evidence_badge": "none"
+          },
+          "path_geometry_ref": null,
+          "text_layout": {
+            "font_token": "headline_sans",
+            "font_size_px": 48,
+            "line_height": 1.2,
+            "letter_spacing_px": 0,
+            "horizontal_align": "left",
+            "vertical_align": "center",
+            "max_lines": 3,
+            "overflow": "block"
+          }
+        }
+      ],
+      "events": [
+        {
+          "event_id": "event_08_0",
+          "layer_id": "layer_08_fact_value",
+          "preset_id": "title-mask-reveal",
+          "start_frame": 8,
+          "duration_frames": 30,
+          "cue_word_id": "word_001",
+          "params": {
+            "direction": "up",
+            "distance_px": 30,
+            "feather_px": 4
+          },
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 0,
+              "easing": "ease_out"
+            },
+            {
+              "frame": 30,
+              "value": 1,
+              "easing": "ease_out"
+            }
+          ],
+          "animated_property": "opacity",
+          "cue_binding": {
+            "word_id": "word_001",
+            "offset_frames": 0
+          },
+          "phases": [
+            {
+              "phase_id": "phase_08_0",
+              "kind": "enter",
+              "start_offset_frames": 0,
+              "duration_frames": 30,
+              "depends_on_phase_ids": []
+            }
+          ],
+          "motion_space": "layer_local",
+          "affected_layer_ids": [
+            "layer_08_fact_value"
+          ],
+          "stagger": null,
+          "depth_parallax": null
+        },
+        {
+          "event_id": "event_08_1",
+          "layer_id": "layer_08_fact_label",
+          "preset_id": "text-highlight",
+          "start_frame": 48,
+          "duration_frames": 30,
+          "cue_word_id": "word_001",
+          "params": {
+            "source_word_ids": [
+              "word_001"
+            ],
+            "highlight_color_token": "gold",
+            "hold_after_frames": 15
+          },
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 0,
+              "easing": "ease_out"
+            },
+            {
+              "frame": 30,
+              "value": 1,
+              "easing": "ease_out"
+            }
+          ],
+          "animated_property": "highlight_progress",
+          "cue_binding": {
+            "word_id": "word_001",
+            "offset_frames": 0
+          },
+          "phases": [
+            {
+              "phase_id": "phase_08_1",
+              "kind": "enter",
+              "start_offset_frames": 0,
+              "duration_frames": 30,
+              "depends_on_phase_ids": []
+            }
+          ],
+          "motion_space": "layer_local",
+          "affected_layer_ids": [
+            "layer_08_fact_label"
+          ],
+          "stagger": null,
+          "depth_parallax": null
+        }
+      ],
+      "camera": {
+        "mode": "push_in",
+        "keyframes": [
+          {
+            "at_frame": 0,
+            "x_px": 0,
+            "y_px": 0,
+            "scale": 1,
+            "rotation_deg": 0,
+            "opacity": 1,
+            "easing": "linear"
+          },
+          {
+            "at_frame": 179,
+            "x_px": -10,
+            "y_px": -3,
+            "scale": 1.04,
+            "rotation_deg": 0,
+            "opacity": 1,
+            "easing": "ease_in_out"
+          }
+        ],
+        "focus_entity_id": null,
+        "clamp_to_content": true,
+        "focus_path": [
+          {
+            "at_frame": 0,
+            "focus_layer_id": "layer_08_fact_value",
+            "focus_geo_feature_id": null,
+            "framing": "subject_center"
+          },
+          {
+            "at_frame": 120,
+            "focus_layer_id": "layer_08_source_note",
+            "focus_geo_feature_id": null,
+            "framing": "subject_center"
+          }
+        ],
+        "transform_order": "layer_then_group_then_camera"
+      },
+      "transition_out": {
+        "type": "hard_cut",
+        "duration_frames": 0
+      },
+      "story_cue_span": {
+        "first_word_id": "word_001",
+        "last_word_id": "word_002"
+      },
+      "staging": {
+        "composition_graph": {
+          "group_ids": [
+            "render_group_08"
+          ],
+          "edges": []
+        },
+        "beat_sequence": [
+          {
+            "beat_id": "beat_08_0",
+            "local_start_frame": 0,
+            "local_end_frame": 60,
+            "focus_layer_id": "layer_08_fact_value",
+            "activated_layer_ids": [
+              "layer_08_fact_value",
+              "layer_08_fact_label"
+            ],
+            "hidden_layer_ids": []
+          },
+          {
+            "beat_id": "beat_08_1",
+            "local_start_frame": 60,
+            "local_end_frame": 120,
+            "focus_layer_id": "layer_08_fact_label",
+            "activated_layer_ids": [
+              "layer_08_fact_value",
+              "layer_08_fact_label",
+              "layer_08_source_note"
+            ],
+            "hidden_layer_ids": []
+          },
+          {
+            "beat_id": "beat_08_2",
+            "local_start_frame": 120,
+            "local_end_frame": 180,
+            "focus_layer_id": "layer_08_source_note",
+            "activated_layer_ids": [
+              "layer_08_fact_value",
+              "layer_08_fact_label",
+              "layer_08_source_note"
+            ],
+            "hidden_layer_ids": []
+          }
+        ],
+        "continuity_group_id": "group_08",
+        "carry_layer_ids": [],
+        "entry_focus_layer_id": "layer_08_fact_value",
+        "exit_focus_layer_id": "layer_08_source_note"
+      }
+    },
+    {
+      "scene_id": "scene_09",
+      "setup_id": "setup_09",
+      "template_id": "T09",
+      "variant_id": "A",
+      "start_frame": 1440,
+      "duration_frames": 180,
+      "asset_ids": [
+        "asset_09_source_page"
+      ],
+      "layers": [
+        {
+          "layer_id": "layer_09_quote_text",
+          "layer_kind": "headline",
+          "asset_id": null,
+          "text": "UNVERIFIED",
+          "source_claim_id": "claim_09",
+          "z_index": 0,
+          "rect_px": {
+            "x": 230,
+            "y": 194,
+            "w": 1459,
+            "h": 454
+          },
+          "anchor": "center",
+          "crop_normalized": {
+            "x": 0,
+            "y": 0,
+            "w": 1,
+            "h": 1
+          },
+          "object_fit": "contain",
+          "mask": {
+            "kind": "none",
+            "asset_id": null,
+            "feather_px": 0
+          },
+          "style": {
+            "font_token": null,
+            "color_token": null,
+            "stroke_token": null,
+            "max_lines": 3
+          },
+          "map_binding": null,
+          "parent_layer_id": null,
+          "group_id": "render_group_09",
+          "transform_origin": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "depth_order": 0,
+          "treatment": {
+            "kind": "headline_text",
+            "source_preserving": true,
+            "evidence_badge": "none"
+          },
+          "path_geometry_ref": null,
+          "text_layout": {
+            "font_token": "headline_sans",
+            "font_size_px": 48,
+            "line_height": 1.2,
+            "letter_spacing_px": 0,
+            "horizontal_align": "left",
+            "vertical_align": "center",
+            "max_lines": 3,
+            "overflow": "block"
+          }
+        },
+        {
+          "layer_id": "layer_09_attribution",
+          "layer_kind": "text",
+          "asset_id": null,
+          "text": "UNVERIFIED",
+          "source_claim_id": "claim_09",
+          "z_index": 1,
+          "rect_px": {
+            "x": 902,
+            "y": 778,
+            "w": 787,
+            "h": 130
+          },
+          "anchor": "center",
+          "crop_normalized": {
+            "x": 0,
+            "y": 0,
+            "w": 1,
+            "h": 1
+          },
+          "object_fit": "contain",
+          "mask": {
+            "kind": "none",
+            "asset_id": null,
+            "feather_px": 0
+          },
+          "style": {
+            "font_token": null,
+            "color_token": null,
+            "stroke_token": null,
+            "max_lines": 3
+          },
+          "map_binding": null,
+          "parent_layer_id": null,
+          "group_id": "render_group_09",
+          "transform_origin": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "depth_order": 1,
+          "treatment": {
+            "kind": "none",
+            "source_preserving": true,
+            "evidence_badge": "none"
+          },
+          "path_geometry_ref": null,
+          "text_layout": {
+            "font_token": "headline_sans",
+            "font_size_px": 48,
+            "line_height": 1.2,
+            "letter_spacing_px": 0,
+            "horizontal_align": "left",
+            "vertical_align": "center",
+            "max_lines": 3,
+            "overflow": "block"
+          }
+        },
+        {
+          "layer_id": "layer_09_source_page",
+          "layer_kind": "document",
+          "asset_id": "asset_09_source_page",
+          "text": null,
+          "source_claim_id": "claim_09",
+          "z_index": 2,
+          "rect_px": {
+            "x": 115,
+            "y": 788,
+            "w": 576,
+            "h": 194
+          },
+          "anchor": "center",
+          "crop_normalized": {
+            "x": 0,
+            "y": 0,
+            "w": 1,
+            "h": 1
+          },
+          "object_fit": "contain",
+          "mask": {
+            "kind": "none",
+            "asset_id": null,
+            "feather_px": 0
+          },
+          "style": {
+            "font_token": null,
+            "color_token": null,
+            "stroke_token": null,
+            "max_lines": 1
+          },
+          "map_binding": null,
+          "parent_layer_id": null,
+          "group_id": "render_group_09",
+          "transform_origin": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "depth_order": 2,
+          "treatment": {
+            "kind": "paper_document",
+            "source_preserving": true,
+            "evidence_badge": "archival"
+          },
+          "path_geometry_ref": null,
+          "text_layout": null
+        }
+      ],
+      "events": [
+        {
+          "event_id": "event_09_0",
+          "layer_id": "layer_09_quote_text",
+          "preset_id": "title-mask-reveal",
+          "start_frame": 8,
+          "duration_frames": 30,
+          "cue_word_id": "word_001",
+          "params": {
+            "direction": "up",
+            "distance_px": 30,
+            "feather_px": 4
+          },
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 0,
+              "easing": "ease_out"
+            },
+            {
+              "frame": 30,
+              "value": 1,
+              "easing": "ease_out"
+            }
+          ],
+          "animated_property": "opacity",
+          "cue_binding": {
+            "word_id": "word_001",
+            "offset_frames": 0
+          },
+          "phases": [
+            {
+              "phase_id": "phase_09_0",
+              "kind": "enter",
+              "start_offset_frames": 0,
+              "duration_frames": 30,
+              "depends_on_phase_ids": []
+            }
+          ],
+          "motion_space": "layer_local",
+          "affected_layer_ids": [
+            "layer_09_quote_text"
+          ],
+          "stagger": null,
+          "depth_parallax": null
+        },
+        {
+          "event_id": "event_09_1",
+          "layer_id": "layer_09_attribution",
+          "preset_id": "text-highlight",
+          "start_frame": 48,
+          "duration_frames": 30,
+          "cue_word_id": "word_001",
+          "params": {
+            "source_word_ids": [
+              "word_001"
+            ],
+            "highlight_color_token": "gold",
+            "hold_after_frames": 15
+          },
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 0,
+              "easing": "ease_out"
+            },
+            {
+              "frame": 30,
+              "value": 1,
+              "easing": "ease_out"
+            }
+          ],
+          "animated_property": "highlight_progress",
+          "cue_binding": {
+            "word_id": "word_001",
+            "offset_frames": 0
+          },
+          "phases": [
+            {
+              "phase_id": "phase_09_1",
+              "kind": "enter",
+              "start_offset_frames": 0,
+              "duration_frames": 30,
+              "depends_on_phase_ids": []
+            }
+          ],
+          "motion_space": "layer_local",
+          "affected_layer_ids": [
+            "layer_09_attribution"
+          ],
+          "stagger": null,
+          "depth_parallax": null
+        }
+      ],
+      "camera": {
+        "mode": "push_in",
+        "keyframes": [
+          {
+            "at_frame": 0,
+            "x_px": 0,
+            "y_px": 0,
+            "scale": 1,
+            "rotation_deg": 0,
+            "opacity": 1,
+            "easing": "linear"
+          },
+          {
+            "at_frame": 179,
+            "x_px": -10,
+            "y_px": -3,
+            "scale": 1.04,
+            "rotation_deg": 0,
+            "opacity": 1,
+            "easing": "ease_in_out"
+          }
+        ],
+        "focus_entity_id": null,
+        "clamp_to_content": true,
+        "focus_path": [
+          {
+            "at_frame": 0,
+            "focus_layer_id": "layer_09_quote_text",
+            "focus_geo_feature_id": null,
+            "framing": "subject_center"
+          },
+          {
+            "at_frame": 120,
+            "focus_layer_id": "layer_09_source_page",
+            "focus_geo_feature_id": null,
+            "framing": "subject_center"
+          }
+        ],
+        "transform_order": "layer_then_group_then_camera"
+      },
+      "transition_out": {
+        "type": "hard_cut",
+        "duration_frames": 0
+      },
+      "story_cue_span": {
+        "first_word_id": "word_001",
+        "last_word_id": "word_002"
+      },
+      "staging": {
+        "composition_graph": {
+          "group_ids": [
+            "render_group_09"
+          ],
+          "edges": []
+        },
+        "beat_sequence": [
+          {
+            "beat_id": "beat_09_0",
+            "local_start_frame": 0,
+            "local_end_frame": 60,
+            "focus_layer_id": "layer_09_quote_text",
+            "activated_layer_ids": [
+              "layer_09_quote_text",
+              "layer_09_attribution"
+            ],
+            "hidden_layer_ids": []
+          },
+          {
+            "beat_id": "beat_09_1",
+            "local_start_frame": 60,
+            "local_end_frame": 120,
+            "focus_layer_id": "layer_09_attribution",
+            "activated_layer_ids": [
+              "layer_09_quote_text",
+              "layer_09_attribution",
+              "layer_09_source_page"
+            ],
+            "hidden_layer_ids": []
+          },
+          {
+            "beat_id": "beat_09_2",
+            "local_start_frame": 120,
+            "local_end_frame": 180,
+            "focus_layer_id": "layer_09_source_page",
+            "activated_layer_ids": [
+              "layer_09_quote_text",
+              "layer_09_attribution",
+              "layer_09_source_page"
+            ],
+            "hidden_layer_ids": []
+          }
+        ],
+        "continuity_group_id": "group_09",
+        "carry_layer_ids": [],
+        "entry_focus_layer_id": "layer_09_quote_text",
+        "exit_focus_layer_id": "layer_09_source_page"
+      }
+    },
+    {
+      "scene_id": "scene_10",
+      "setup_id": "setup_10",
+      "template_id": "T10",
+      "variant_id": "A",
+      "start_frame": 1620,
+      "duration_frames": 180,
+      "asset_ids": [
+        "asset_10_region_overview"
+      ],
+      "layers": [
+        {
+          "layer_id": "layer_10_region_overview",
+          "layer_kind": "map",
+          "asset_id": "asset_10_region_overview",
+          "text": null,
+          "source_claim_id": "claim_10",
+          "z_index": 0,
+          "rect_px": {
+            "x": 134,
+            "y": 97,
+            "w": 1325,
+            "h": 875
+          },
+          "anchor": "center",
+          "crop_normalized": {
+            "x": 0,
+            "y": 0,
+            "w": 1,
+            "h": 1
+          },
+          "object_fit": "contain",
+          "mask": {
+            "kind": "none",
+            "asset_id": null,
+            "feather_px": 0
+          },
+          "style": {
+            "font_token": null,
+            "color_token": null,
+            "stroke_token": null,
+            "max_lines": 1
+          },
+          "map_binding": {
+            "historical_map_id": "map_fixture_10",
+            "feature_id": null,
+            "coordinate_kind": "geo_wgs84",
+            "anchor_latlon": null
+          },
+          "parent_layer_id": null,
+          "group_id": "render_group_10",
+          "transform_origin": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "depth_order": 0,
+          "treatment": {
+            "kind": "ink_map",
+            "source_preserving": true,
+            "evidence_badge": "archival"
+          },
+          "path_geometry_ref": null,
+          "text_layout": null
+        },
+        {
+          "layer_id": "layer_10_entity_a",
+          "layer_kind": "callout",
+          "asset_id": null,
+          "text": "UNVERIFIED",
+          "source_claim_id": "claim_10",
+          "z_index": 1,
+          "rect_px": {
+            "x": 211,
+            "y": 205,
+            "w": 557,
+            "h": 259
+          },
+          "anchor": "center",
+          "crop_normalized": {
+            "x": 0,
+            "y": 0,
+            "w": 1,
+            "h": 1
+          },
+          "object_fit": "contain",
+          "mask": {
+            "kind": "none",
+            "asset_id": null,
+            "feather_px": 0
+          },
+          "style": {
+            "font_token": null,
+            "color_token": null,
+            "stroke_token": null,
+            "max_lines": 3
+          },
+          "map_binding": null,
+          "parent_layer_id": null,
+          "group_id": "render_group_10",
+          "transform_origin": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "depth_order": 1,
+          "treatment": {
+            "kind": "none",
+            "source_preserving": true,
+            "evidence_badge": "none"
+          },
+          "path_geometry_ref": null,
+          "text_layout": {
+            "font_token": "headline_sans",
+            "font_size_px": 48,
+            "line_height": 1.2,
+            "letter_spacing_px": 0,
+            "horizontal_align": "left",
+            "vertical_align": "center",
+            "max_lines": 3,
+            "overflow": "block"
+          }
+        },
+        {
+          "layer_id": "layer_10_entity_b",
+          "layer_kind": "callout",
+          "asset_id": null,
+          "text": "UNVERIFIED",
+          "source_claim_id": "claim_10",
+          "z_index": 2,
+          "rect_px": {
+            "x": 1094,
+            "y": 529,
+            "w": 557,
+            "h": 248
+          },
+          "anchor": "center",
+          "crop_normalized": {
+            "x": 0,
+            "y": 0,
+            "w": 1,
+            "h": 1
+          },
+          "object_fit": "contain",
+          "mask": {
+            "kind": "none",
+            "asset_id": null,
+            "feather_px": 0
+          },
+          "style": {
+            "font_token": null,
+            "color_token": null,
+            "stroke_token": null,
+            "max_lines": 3
+          },
+          "map_binding": null,
+          "parent_layer_id": null,
+          "group_id": "render_group_10",
+          "transform_origin": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "depth_order": 2,
+          "treatment": {
+            "kind": "none",
+            "source_preserving": true,
+            "evidence_badge": "none"
+          },
+          "path_geometry_ref": null,
+          "text_layout": {
+            "font_token": "headline_sans",
+            "font_size_px": 48,
+            "line_height": 1.2,
+            "letter_spacing_px": 0,
+            "horizontal_align": "left",
+            "vertical_align": "center",
+            "max_lines": 3,
+            "overflow": "block"
+          }
+        },
+        {
+          "layer_id": "layer_10_causal_path",
+          "layer_kind": "route",
+          "asset_id": null,
+          "text": null,
+          "source_claim_id": "claim_10",
+          "z_index": 3,
+          "rect_px": {
+            "x": 730,
+            "y": 356,
+            "w": 442,
+            "h": 270
+          },
+          "anchor": "center",
+          "crop_normalized": {
+            "x": 0,
+            "y": 0,
+            "w": 1,
+            "h": 1
+          },
+          "object_fit": "contain",
+          "mask": {
+            "kind": "none",
+            "asset_id": null,
+            "feather_px": 0
+          },
+          "style": {
+            "font_token": null,
+            "color_token": null,
+            "stroke_token": null,
+            "max_lines": 1
+          },
+          "map_binding": null,
+          "parent_layer_id": null,
+          "group_id": "render_group_10",
+          "transform_origin": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "depth_order": 3,
+          "treatment": {
+            "kind": "none",
+            "source_preserving": true,
+            "evidence_badge": "none"
+          },
+          "path_geometry_ref": "geometry_route_001",
+          "text_layout": null
+        }
+      ],
+      "events": [
+        {
+          "event_id": "event_10_0",
+          "layer_id": "layer_10_entity_a",
+          "preset_id": "stagger-reveal",
+          "start_frame": 8,
+          "duration_frames": 30,
+          "cue_word_id": "word_001",
+          "params": {
+            "ordered_layer_ids": [
+              "layer_10_region_overview",
+              "layer_10_entity_a"
+            ],
+            "gap_frames": 6,
+            "direction": "evidence_order"
+          },
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 0,
+              "easing": "ease_out"
+            },
+            {
+              "frame": 30,
+              "value": 1,
+              "easing": "ease_out"
+            }
+          ],
+          "animated_property": "opacity",
+          "cue_binding": {
+            "word_id": "word_001",
+            "offset_frames": 0
+          },
+          "phases": [
+            {
+              "phase_id": "phase_10_0",
+              "kind": "enter",
+              "start_offset_frames": 0,
+              "duration_frames": 30,
+              "depends_on_phase_ids": []
+            }
+          ],
+          "motion_space": "group_local",
+          "affected_layer_ids": [
+            "layer_10_entity_a"
+          ],
+          "stagger": {
+            "order": [
+              "layer_10_region_overview",
+              "layer_10_entity_a"
+            ],
+            "offset_frames": 6
+          },
+          "depth_parallax": null
+        },
+        {
+          "event_id": "event_10_1",
+          "layer_id": "layer_10_causal_path",
+          "preset_id": "route-line-draw",
+          "start_frame": 48,
+          "duration_frames": 30,
+          "cue_word_id": "word_001",
+          "params": {
+            "route_geometry_ref": "geometry_001",
+            "start_progress": 0,
+            "end_progress": 1,
+            "follow_marker_layer_id": null
+          },
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 0,
+              "easing": "ease_out"
+            },
+            {
+              "frame": 30,
+              "value": 1,
+              "easing": "ease_out"
+            }
+          ],
+          "animated_property": "path_progress",
+          "cue_binding": {
+            "word_id": "word_001",
+            "offset_frames": 0
+          },
+          "phases": [
+            {
+              "phase_id": "phase_10_1",
+              "kind": "enter",
+              "start_offset_frames": 0,
+              "duration_frames": 30,
+              "depends_on_phase_ids": []
+            }
+          ],
+          "motion_space": "map_world",
+          "affected_layer_ids": [
+            "layer_10_causal_path"
+          ],
+          "stagger": null,
+          "depth_parallax": null
+        }
+      ],
+      "camera": {
+        "mode": "push_in",
+        "keyframes": [
+          {
+            "at_frame": 0,
+            "x_px": 0,
+            "y_px": 0,
+            "scale": 1,
+            "rotation_deg": 0,
+            "opacity": 1,
+            "easing": "linear"
+          },
+          {
+            "at_frame": 179,
+            "x_px": -10,
+            "y_px": -3,
+            "scale": 1.04,
+            "rotation_deg": 0,
+            "opacity": 1,
+            "easing": "ease_in_out"
+          }
+        ],
+        "focus_entity_id": null,
+        "clamp_to_content": true,
+        "focus_path": [
+          {
+            "at_frame": 0,
+            "focus_layer_id": "layer_10_region_overview",
+            "focus_geo_feature_id": null,
+            "framing": "subject_center"
+          },
+          {
+            "at_frame": 120,
+            "focus_layer_id": "layer_10_causal_path",
+            "focus_geo_feature_id": null,
+            "framing": "subject_center"
+          }
+        ],
+        "transform_order": "layer_then_group_then_camera"
+      },
+      "transition_out": {
+        "type": "hard_cut",
+        "duration_frames": 0
+      },
+      "story_cue_span": {
+        "first_word_id": "word_001",
+        "last_word_id": "word_002"
+      },
+      "staging": {
+        "composition_graph": {
+          "group_ids": [
+            "render_group_10"
+          ],
+          "edges": []
+        },
+        "beat_sequence": [
+          {
+            "beat_id": "beat_10_0",
+            "local_start_frame": 0,
+            "local_end_frame": 60,
+            "focus_layer_id": "layer_10_region_overview",
+            "activated_layer_ids": [
+              "layer_10_region_overview",
+              "layer_10_entity_a"
+            ],
+            "hidden_layer_ids": []
+          },
+          {
+            "beat_id": "beat_10_1",
+            "local_start_frame": 60,
+            "local_end_frame": 120,
+            "focus_layer_id": "layer_10_entity_a",
+            "activated_layer_ids": [
+              "layer_10_region_overview",
+              "layer_10_entity_a",
+              "layer_10_entity_b"
+            ],
+            "hidden_layer_ids": []
+          },
+          {
+            "beat_id": "beat_10_2",
+            "local_start_frame": 120,
+            "local_end_frame": 180,
+            "focus_layer_id": "layer_10_entity_b",
+            "activated_layer_ids": [
+              "layer_10_region_overview",
+              "layer_10_entity_a",
+              "layer_10_entity_b",
+              "layer_10_causal_path"
+            ],
+            "hidden_layer_ids": []
+          }
+        ],
+        "continuity_group_id": "group_10",
+        "carry_layer_ids": [],
+        "entry_focus_layer_id": "layer_10_region_overview",
+        "exit_focus_layer_id": "layer_10_causal_path"
+      }
+    }
+  ]
+}

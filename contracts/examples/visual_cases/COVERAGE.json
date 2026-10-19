@@ -1,0 +1,77 @@
+{
+  "schema_version": "VisualCaseCoverage.v1",
+  "historical_evidence": "SYNTHETIC_UNVERIFIED",
+  "no_approval": true,
+  "scenarios": [
+    {
+      "template_id": "T01",
+      "layer_count": 3,
+      "visual_beats": 3,
+      "events": 2,
+      "notes": "multi-layer semantic staging"
+    },
+    {
+      "template_id": "T02",
+      "layer_count": 4,
+      "visual_beats": 3,
+      "events": 2,
+      "notes": "multi-layer semantic staging"
+    },
+    {
+      "template_id": "T03",
+      "layer_count": 4,
+      "visual_beats": 3,
+      "events": 3,
+      "notes": "three separate archival cards + depth"
+    },
+    {
+      "template_id": "T04",
+      "layer_count": 4,
+      "visual_beats": 3,
+      "events": 2,
+      "notes": "route, map, 3 waypoints"
+    },
+    {
+      "template_id": "T05",
+      "layer_count": 4,
+      "visual_beats": 3,
+      "events": 2,
+      "notes": "multi-layer semantic staging"
+    },
+    {
+      "template_id": "T06",
+      "layer_count": 3,
+      "visual_beats": 3,
+      "events": 2,
+      "notes": "multi-layer semantic staging"
+    },
+    {
+      "template_id": "T07",
+      "layer_count": 5,
+      "visual_beats": 3,
+      "events": 2,
+      "notes": "two period maps + evidence labels"
+    },
+    {
+      "template_id": "T08",
+      "layer_count": 3,
+      "visual_beats": 3,
+      "events": 2,
+      "notes": "multi-layer semantic staging"
+    },
+    {
+      "template_id": "T09",
+      "layer_count": 3,
+      "visual_beats": 3,
+      "events": 2,
+      "notes": "multi-layer semantic staging"
+    },
+    {
+      "template_id": "T10",
+      "layer_count": 4,
+      "visual_beats": 3,
+      "events": 2,
+      "notes": "multi-layer semantic staging"
+    }
+  ]
+}
