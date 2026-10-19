@@ -266,7 +266,7 @@
           {
             "text_id": "text_02_person_role",
             "text": "UNVERIFIED person_role",
-            "role": "text",
+            "role": "caption",
             "claim_ref": "claim_02",
             "max_lines": 3
           },
@@ -490,7 +490,7 @@
           {
             "text_id": "text_03_caption",
             "text": "UNVERIFIED caption",
-            "role": "text",
+            "role": "caption",
             "claim_ref": "claim_03",
             "max_lines": 3
           }
@@ -1236,14 +1236,14 @@
           {
             "text_id": "text_06_verified_excerpt",
             "text": "UNVERIFIED verified_excerpt",
-            "role": "text",
+            "role": "caption",
             "claim_ref": "claim_06",
             "max_lines": 3
           },
           {
             "text_id": "text_06_citation",
             "text": "UNVERIFIED citation",
-            "role": "text",
+            "role": "caption",
             "claim_ref": "claim_06",
             "max_lines": 3
           }
@@ -1733,7 +1733,7 @@
           {
             "text_id": "text_08_source_note",
             "text": "UNVERIFIED source_note",
-            "role": "text",
+            "role": "caption",
             "claim_ref": "claim_08",
             "max_lines": 3
           }
@@ -1938,7 +1938,7 @@
           {
             "text_id": "text_09_attribution",
             "text": "UNVERIFIED attribution",
-            "role": "text",
+            "role": "caption",
             "claim_ref": "claim_09",
             "max_lines": 3
           }
