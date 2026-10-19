@@ -616,10 +616,31 @@
                   "type": "object",
                   "maxProperties": 12,
                   "additionalProperties": {
-                    "type": [
-                      "string",
-                      "number",
-                      "boolean"
+                    "oneOf": [
+                      {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 250
+                      },
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "type": "null"
+                      },
+                      {
+                        "type": "array",
+                        "minItems": 1,
+                        "maxItems": 25,
+                        "uniqueItems": true,
+                        "items": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+                        }
+                      }
                     ]
                   }
                 },
@@ -1222,5 +1243,5 @@
     "scenes"
   ],
   "additionalProperties": false,
-  "description": "Fully resolved frame-addressed Remotion input. All layer geometry/crop/style/mask/camera parameters explicit; renderer may not choose semantics or request providers at render time."
+  "description": "Fully resolved frame-addressed Remotion input. All layer geometry/crop/style/mask/camera parameters explicit; renderer may not choose semantics or request providers at render time. Event params permit primitive values and bounded ID arrays; actual fields/typed constraints are enforced by the per-preset registry parameter_schema."
 }
