@@ -330,12 +330,17 @@
                       "type": "integer",
                       "minimum": 1,
                       "maximum": 5
+                    },
+                    "text_id": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
                     }
                   },
                   "required": [
                     "text",
                     "role",
-                    "claim_ref"
+                    "claim_ref",
+                    "text_id"
                   ]
                 },
                 "minItems": 0
@@ -529,6 +534,273 @@
                     "type": "null"
                   }
                 ]
+              },
+              "visual_beats": {
+                "type": "array",
+                "minItems": 1,
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "beat_id": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+                    },
+                    "section_ref": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+                    },
+                    "cue": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {
+                        "section_id": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+                        },
+                        "phrase": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 200
+                        },
+                        "occurrence": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 100
+                        }
+                      },
+                      "required": [
+                        "section_id",
+                        "phrase",
+                        "occurrence"
+                      ]
+                    },
+                    "action": {
+                      "type": "string",
+                      "enum": [
+                        "establish",
+                        "introduce",
+                        "compare",
+                        "trace",
+                        "annotate",
+                        "reveal",
+                        "reframe",
+                        "hold",
+                        "consequence"
+                      ]
+                    },
+                    "focus_ref": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+                    },
+                    "shot_goal": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 350
+                    },
+                    "source_claim_refs": {
+                      "type": "array",
+                      "minItems": 0,
+                      "items": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+                      }
+                    },
+                    "relationships": {
+                      "type": "array",
+                      "minItems": 0,
+                      "items": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                          "from_ref": {
+                            "type": "string",
+                            "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+                          },
+                          "to_ref": {
+                            "type": "string",
+                            "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+                          },
+                          "relation": {
+                            "type": "string",
+                            "enum": [
+                              "left_of",
+                              "right_of",
+                              "foreground_of",
+                              "background_of",
+                              "inside",
+                              "overlaps",
+                              "points_to",
+                              "follows",
+                              "compares_to",
+                              "same_subject_as"
+                            ]
+                          }
+                        },
+                        "required": [
+                          "from_ref",
+                          "to_ref",
+                          "relation"
+                        ]
+                      }
+                    },
+                    "staging": {
+                      "type": "array",
+                      "minItems": 1,
+                      "items": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                          "ref": {
+                            "type": "string",
+                            "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+                          },
+                          "operation": {
+                            "type": "string",
+                            "enum": [
+                              "enter",
+                              "hold",
+                              "highlight",
+                              "exit",
+                              "reposition",
+                              "focus",
+                              "draw_path",
+                              "reveal_mask"
+                            ]
+                          },
+                          "after_ref": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "motion_hint": {
+                            "type": "string",
+                            "enum": [
+                              "none",
+                              "subtle_push",
+                              "parallax",
+                              "stagger",
+                              "line_draw",
+                              "wipe",
+                              "cut",
+                              "track",
+                              "zoom"
+                            ]
+                          },
+                          "priority": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "maximum": 20
+                          }
+                        },
+                        "required": [
+                          "ref",
+                          "operation",
+                          "after_ref",
+                          "motion_hint",
+                          "priority"
+                        ]
+                      }
+                    },
+                    "focus_move": {
+                      "type": "string",
+                      "enum": [
+                        "none",
+                        "subject_to_subject",
+                        "detail_to_overview",
+                        "overview_to_detail",
+                        "follow_path",
+                        "static"
+                      ]
+                    },
+                    "hold_policy": {
+                      "type": "string",
+                      "enum": [
+                        "readable",
+                        "narration_aligned",
+                        "editorial_pause"
+                      ]
+                    },
+                    "continuity": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {
+                        "group_id": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+                        },
+                        "carry_refs": {
+                          "type": "array",
+                          "minItems": 0,
+                          "items": {
+                            "type": "string",
+                            "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+                          }
+                        },
+                        "entry": {
+                          "type": "string",
+                          "enum": [
+                            "new_setup",
+                            "carry_forward",
+                            "reveal_from_prior"
+                          ]
+                        },
+                        "exit": {
+                          "type": "string",
+                          "enum": [
+                            "hard_cut",
+                            "match_focus",
+                            "same_canvas",
+                            "dissolve"
+                          ]
+                        },
+                        "reason": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 350
+                        }
+                      },
+                      "required": [
+                        "group_id",
+                        "carry_refs",
+                        "entry",
+                        "exit",
+                        "reason"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "beat_id",
+                    "section_ref",
+                    "cue",
+                    "action",
+                    "focus_ref",
+                    "shot_goal",
+                    "source_claim_refs",
+                    "relationships",
+                    "staging",
+                    "focus_move",
+                    "hold_policy",
+                    "continuity"
+                  ]
+                }
+              },
+              "reuse_setup_id": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
               }
             },
             "required": [
@@ -543,7 +815,9 @@
               "layout_variant_hint",
               "duration_policy",
               "transition_intent",
-              "historical_map_requirement_id"
+              "historical_map_requirement_id",
+              "visual_beats",
+              "reuse_setup_id"
             ]
           }
         },

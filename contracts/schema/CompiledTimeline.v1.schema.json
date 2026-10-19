@@ -371,6 +371,172 @@
                       "type": "null"
                     }
                   ]
+                },
+                "parent_layer_id": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "group_id": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "transform_origin": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "x": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 1
+                    },
+                    "y": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 1
+                    }
+                  },
+                  "required": [
+                    "x",
+                    "y"
+                  ]
+                },
+                "depth_order": {
+                  "type": "integer",
+                  "minimum": -20,
+                  "maximum": 20
+                },
+                "treatment": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "kind": {
+                      "type": "string",
+                      "enum": [
+                        "none",
+                        "source_photo_card",
+                        "cutout_reviewed",
+                        "ink_map",
+                        "paper_document",
+                        "parallax_foreground",
+                        "parallax_background",
+                        "headline_text"
+                      ]
+                    },
+                    "source_preserving": {
+                      "const": true
+                    },
+                    "evidence_badge": {
+                      "type": "string",
+                      "enum": [
+                        "none",
+                        "archival",
+                        "AI_illustration",
+                        "schematic",
+                        "modern_reconstruction"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "source_preserving",
+                    "evidence_badge"
+                  ]
+                },
+                "path_geometry_ref": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "text_layout": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {
+                        "font_token": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 100
+                        },
+                        "font_size_px": {
+                          "type": "integer",
+                          "minimum": 20,
+                          "maximum": 160
+                        },
+                        "line_height": {
+                          "type": "number",
+                          "minimum": 1,
+                          "maximum": 2.5
+                        },
+                        "letter_spacing_px": {
+                          "type": "number",
+                          "minimum": -6,
+                          "maximum": 10
+                        },
+                        "horizontal_align": {
+                          "type": "string",
+                          "enum": [
+                            "left",
+                            "center",
+                            "right"
+                          ]
+                        },
+                        "vertical_align": {
+                          "type": "string",
+                          "enum": [
+                            "top",
+                            "center",
+                            "bottom"
+                          ]
+                        },
+                        "max_lines": {
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 8
+                        },
+                        "overflow": {
+                          "type": "string",
+                          "enum": [
+                            "block",
+                            "approved_split"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "font_token",
+                        "font_size_px",
+                        "line_height",
+                        "letter_spacing_px",
+                        "horizontal_align",
+                        "vertical_align",
+                        "max_lines",
+                        "overflow"
+                      ]
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
                 }
               },
               "required": [
@@ -383,7 +549,14 @@
                 "object_fit",
                 "mask",
                 "style",
-                "map_binding"
+                "map_binding",
+                "parent_layer_id",
+                "group_id",
+                "transform_origin",
+                "depth_order",
+                "treatment",
+                "path_geometry_ref",
+                "text_layout"
               ],
               "additionalProperties": false
             },
@@ -524,6 +697,141 @@
                     "word_id",
                     "offset_frames"
                   ]
+                },
+                "phases": {
+                  "type": "array",
+                  "minItems": 1,
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "phase_id": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+                      },
+                      "kind": {
+                        "type": "string",
+                        "enum": [
+                          "enter",
+                          "emphasize",
+                          "track",
+                          "hold",
+                          "exit"
+                        ]
+                      },
+                      "start_offset_frames": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 1000000
+                      },
+                      "duration_frames": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 1000000
+                      },
+                      "depends_on_phase_ids": {
+                        "type": "array",
+                        "minItems": 0,
+                        "items": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+                        }
+                      }
+                    },
+                    "required": [
+                      "phase_id",
+                      "kind",
+                      "start_offset_frames",
+                      "duration_frames",
+                      "depends_on_phase_ids"
+                    ]
+                  }
+                },
+                "motion_space": {
+                  "type": "string",
+                  "enum": [
+                    "layer_local",
+                    "group_local",
+                    "map_world",
+                    "screen"
+                  ]
+                },
+                "affected_layer_ids": {
+                  "type": "array",
+                  "minItems": 1,
+                  "items": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+                  }
+                },
+                "stagger": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {
+                        "order": {
+                          "type": "array",
+                          "minItems": 2,
+                          "items": {
+                            "type": "string",
+                            "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+                          }
+                        },
+                        "offset_frames": {
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 100
+                        }
+                      },
+                      "required": [
+                        "order",
+                        "offset_frames"
+                      ]
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "depth_parallax": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {
+                        "near_layer_ids": {
+                          "type": "array",
+                          "minItems": 1,
+                          "items": {
+                            "type": "string",
+                            "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+                          }
+                        },
+                        "far_layer_ids": {
+                          "type": "array",
+                          "minItems": 1,
+                          "items": {
+                            "type": "string",
+                            "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+                          }
+                        },
+                        "strength": {
+                          "type": "number",
+                          "minimum": 0.01,
+                          "maximum": 1
+                        }
+                      },
+                      "required": [
+                        "near_layer_ids",
+                        "far_layer_ids",
+                        "strength"
+                      ]
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
                 }
               },
               "required": [
@@ -534,7 +842,12 @@
                 "duration_frames",
                 "animated_property",
                 "keyframes",
-                "cue_binding"
+                "cue_binding",
+                "phases",
+                "motion_space",
+                "affected_layer_ids",
+                "stagger",
+                "depth_parallax"
               ],
               "additionalProperties": false
             },
@@ -628,13 +941,64 @@
               },
               "clamp_to_content": {
                 "type": "boolean"
+              },
+              "focus_path": {
+                "type": "array",
+                "minItems": 1,
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "at_frame": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 1000000
+                    },
+                    "focus_layer_id": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+                    },
+                    "focus_geo_feature_id": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "framing": {
+                      "type": "string",
+                      "enum": [
+                        "subject_center",
+                        "rule_of_thirds_left",
+                        "rule_of_thirds_right",
+                        "overview",
+                        "follow_route"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "at_frame",
+                    "focus_layer_id",
+                    "focus_geo_feature_id",
+                    "framing"
+                  ]
+                }
+              },
+              "transform_order": {
+                "const": "layer_then_group_then_camera"
               }
             },
             "required": [
               "mode",
               "keyframes",
               "focus_entity_id",
-              "clamp_to_content"
+              "clamp_to_content",
+              "focus_path",
+              "transform_order"
             ]
           },
           "transition_out": {
@@ -678,6 +1042,146 @@
               "first_word_id",
               "last_word_id"
             ]
+          },
+          "staging": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "composition_graph": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "group_ids": {
+                    "type": "array",
+                    "minItems": 0,
+                    "items": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+                    }
+                  },
+                  "edges": {
+                    "type": "array",
+                    "minItems": 0,
+                    "items": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {
+                        "from_id": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+                        },
+                        "to_id": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+                        },
+                        "relation": {
+                          "type": "string",
+                          "enum": [
+                            "foreground_of",
+                            "inside",
+                            "follows",
+                            "clips",
+                            "tracks",
+                            "aligns_with",
+                            "evidence_for",
+                            "compares_to"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "from_id",
+                        "to_id",
+                        "relation"
+                      ]
+                    }
+                  }
+                },
+                "required": [
+                  "group_ids",
+                  "edges"
+                ]
+              },
+              "beat_sequence": {
+                "type": "array",
+                "minItems": 1,
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "beat_id": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+                    },
+                    "local_start_frame": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 1000000
+                    },
+                    "local_end_frame": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 1000000
+                    },
+                    "focus_layer_id": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+                    },
+                    "activated_layer_ids": {
+                      "type": "array",
+                      "minItems": 0,
+                      "items": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+                      }
+                    },
+                    "hidden_layer_ids": {
+                      "type": "array",
+                      "minItems": 0,
+                      "items": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+                      }
+                    }
+                  },
+                  "required": [
+                    "beat_id",
+                    "local_start_frame",
+                    "local_end_frame",
+                    "focus_layer_id",
+                    "activated_layer_ids",
+                    "hidden_layer_ids"
+                  ]
+                }
+              },
+              "continuity_group_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+              },
+              "carry_layer_ids": {
+                "type": "array",
+                "minItems": 0,
+                "items": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+                }
+              },
+              "entry_focus_layer_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+              },
+              "exit_focus_layer_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+              }
+            },
+            "required": [
+              "composition_graph",
+              "beat_sequence",
+              "continuity_group_id",
+              "carry_layer_ids",
+              "entry_focus_layer_id",
+              "exit_focus_layer_id"
+            ]
           }
         },
         "required": [
@@ -692,7 +1196,8 @@
           "events",
           "camera",
           "transition_out",
-          "story_cue_span"
+          "story_cue_span",
+          "staging"
         ],
         "additionalProperties": false
       },

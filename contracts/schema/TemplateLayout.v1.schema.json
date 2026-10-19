@@ -16,7 +16,11 @@
     "camera_limits",
     "transition_limits",
     "overflow_policy",
-    "fallback_policy"
+    "fallback_policy",
+    "layout_family",
+    "composition_rules",
+    "layer_relations",
+    "visual_variation_signature"
   ],
   "properties": {
     "schema_version": {
@@ -280,6 +284,129 @@
     },
     "fallback_policy": {
       "const": "SAME_APPROVED_ASSET_ONLY"
+    },
+    "layout_family": {
+      "type": "string",
+      "enum": [
+        "map_full",
+        "portrait_split",
+        "collage_multi_card",
+        "route_geo",
+        "timeline_rail",
+        "document_focus",
+        "two_map_comparison",
+        "fact_hero",
+        "quote_newspaper",
+        "causal_network"
+      ]
+    },
+    "composition_rules": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "required_role_counts": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "role": {
+                "type": "string",
+                "enum": [
+                  "map",
+                  "territory",
+                  "route",
+                  "portrait",
+                  "archival_photo",
+                  "document",
+                  "headline",
+                  "date",
+                  "text",
+                  "callout",
+                  "camera",
+                  "decorative_paper"
+                ]
+              },
+              "min_count": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 10
+              },
+              "max_count": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 20
+              }
+            },
+            "required": [
+              "role",
+              "min_count",
+              "max_count"
+            ]
+          }
+        },
+        "max_simultaneous_labels": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 20
+        },
+        "requires_contextual_source_caption": {
+          "type": "boolean"
+        },
+        "overflow_action": {
+          "type": "string",
+          "enum": [
+            "variant_then_G4_block",
+            "split_setup_G4_review"
+          ]
+        }
+      },
+      "required": [
+        "required_role_counts",
+        "max_simultaneous_labels",
+        "requires_contextual_source_caption",
+        "overflow_action"
+      ]
+    },
+    "layer_relations": {
+      "type": "array",
+      "minItems": 0,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "from_slot": {
+            "type": "string",
+            "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+          },
+          "to_slot": {
+            "type": "string",
+            "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "foreground_of",
+              "inside",
+              "aligned_with",
+              "follow_path",
+              "paired_map",
+              "revealed_after"
+            ]
+          }
+        },
+        "required": [
+          "from_slot",
+          "to_slot",
+          "kind"
+        ]
+      }
+    },
+    "visual_variation_signature": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 120
     }
   },
   "description": "Machine-readable per-template variant layout; deterministic pixels resolved in CompiledTimeline. No historical asset substitution."

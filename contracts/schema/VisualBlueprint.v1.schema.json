@@ -145,12 +145,17 @@
                       "type": "integer",
                       "minimum": 1,
                       "maximum": 5
+                    },
+                    "text_id": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
                     }
                   },
                   "required": [
                     "text",
                     "role",
-                    "claim_ref"
+                    "claim_ref",
+                    "text_id"
                   ]
                 },
                 "minItems": 0
@@ -344,6 +349,273 @@
                     "type": "null"
                   }
                 ]
+              },
+              "visual_beats": {
+                "type": "array",
+                "minItems": 1,
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "beat_id": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+                    },
+                    "section_ref": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+                    },
+                    "cue": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {
+                        "section_id": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+                        },
+                        "phrase": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 200
+                        },
+                        "occurrence": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 100
+                        }
+                      },
+                      "required": [
+                        "section_id",
+                        "phrase",
+                        "occurrence"
+                      ]
+                    },
+                    "action": {
+                      "type": "string",
+                      "enum": [
+                        "establish",
+                        "introduce",
+                        "compare",
+                        "trace",
+                        "annotate",
+                        "reveal",
+                        "reframe",
+                        "hold",
+                        "consequence"
+                      ]
+                    },
+                    "focus_ref": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+                    },
+                    "shot_goal": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 350
+                    },
+                    "source_claim_refs": {
+                      "type": "array",
+                      "minItems": 0,
+                      "items": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+                      }
+                    },
+                    "relationships": {
+                      "type": "array",
+                      "minItems": 0,
+                      "items": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                          "from_ref": {
+                            "type": "string",
+                            "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+                          },
+                          "to_ref": {
+                            "type": "string",
+                            "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+                          },
+                          "relation": {
+                            "type": "string",
+                            "enum": [
+                              "left_of",
+                              "right_of",
+                              "foreground_of",
+                              "background_of",
+                              "inside",
+                              "overlaps",
+                              "points_to",
+                              "follows",
+                              "compares_to",
+                              "same_subject_as"
+                            ]
+                          }
+                        },
+                        "required": [
+                          "from_ref",
+                          "to_ref",
+                          "relation"
+                        ]
+                      }
+                    },
+                    "staging": {
+                      "type": "array",
+                      "minItems": 1,
+                      "items": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                          "ref": {
+                            "type": "string",
+                            "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+                          },
+                          "operation": {
+                            "type": "string",
+                            "enum": [
+                              "enter",
+                              "hold",
+                              "highlight",
+                              "exit",
+                              "reposition",
+                              "focus",
+                              "draw_path",
+                              "reveal_mask"
+                            ]
+                          },
+                          "after_ref": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "motion_hint": {
+                            "type": "string",
+                            "enum": [
+                              "none",
+                              "subtle_push",
+                              "parallax",
+                              "stagger",
+                              "line_draw",
+                              "wipe",
+                              "cut",
+                              "track",
+                              "zoom"
+                            ]
+                          },
+                          "priority": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "maximum": 20
+                          }
+                        },
+                        "required": [
+                          "ref",
+                          "operation",
+                          "after_ref",
+                          "motion_hint",
+                          "priority"
+                        ]
+                      }
+                    },
+                    "focus_move": {
+                      "type": "string",
+                      "enum": [
+                        "none",
+                        "subject_to_subject",
+                        "detail_to_overview",
+                        "overview_to_detail",
+                        "follow_path",
+                        "static"
+                      ]
+                    },
+                    "hold_policy": {
+                      "type": "string",
+                      "enum": [
+                        "readable",
+                        "narration_aligned",
+                        "editorial_pause"
+                      ]
+                    },
+                    "continuity": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {
+                        "group_id": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+                        },
+                        "carry_refs": {
+                          "type": "array",
+                          "minItems": 0,
+                          "items": {
+                            "type": "string",
+                            "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+                          }
+                        },
+                        "entry": {
+                          "type": "string",
+                          "enum": [
+                            "new_setup",
+                            "carry_forward",
+                            "reveal_from_prior"
+                          ]
+                        },
+                        "exit": {
+                          "type": "string",
+                          "enum": [
+                            "hard_cut",
+                            "match_focus",
+                            "same_canvas",
+                            "dissolve"
+                          ]
+                        },
+                        "reason": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 350
+                        }
+                      },
+                      "required": [
+                        "group_id",
+                        "carry_refs",
+                        "entry",
+                        "exit",
+                        "reason"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "beat_id",
+                    "section_ref",
+                    "cue",
+                    "action",
+                    "focus_ref",
+                    "shot_goal",
+                    "source_claim_refs",
+                    "relationships",
+                    "staging",
+                    "focus_move",
+                    "hold_policy",
+                    "continuity"
+                  ]
+                }
+              },
+              "reuse_setup_id": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
               }
             },
             "required": [
@@ -358,7 +630,9 @@
               "layout_variant_hint",
               "duration_policy",
               "transition_intent",
-              "historical_map_requirement_id"
+              "historical_map_requirement_id",
+              "visual_beats",
+              "reuse_setup_id"
             ]
           },
           "asset_slot_bindings": {
@@ -474,6 +748,899 @@
               "text_density",
               "focal_point"
             ]
+          },
+          "template_payload": {
+            "oneOf": [
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "template_id": {
+                    "const": "T01"
+                  },
+                  "map": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "map_requirement_id": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+                      },
+                      "year": {
+                        "type": "integer",
+                        "minimum": -10000,
+                        "maximum": 3000
+                      },
+                      "approved_feature_refs": {
+                        "type": "array",
+                        "minItems": 0,
+                        "items": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+                        }
+                      },
+                      "label_source_claim_refs": {
+                        "type": "array",
+                        "minItems": 0,
+                        "items": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+                        }
+                      }
+                    },
+                    "required": [
+                      "map_requirement_id",
+                      "year",
+                      "approved_feature_refs",
+                      "label_source_claim_refs"
+                    ]
+                  },
+                  "focus_region_ref": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+                  },
+                  "location_labels": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {
+                        "source_claim_id": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+                        },
+                        "text": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 220
+                        }
+                      },
+                      "required": [
+                        "source_claim_id",
+                        "text"
+                      ]
+                    }
+                  },
+                  "highlight_feature_ids": {
+                    "type": "array",
+                    "minItems": 0,
+                    "items": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+                    }
+                  }
+                },
+                "required": [
+                  "template_id",
+                  "map",
+                  "focus_region_ref",
+                  "location_labels",
+                  "highlight_feature_ids"
+                ]
+              },
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "template_id": {
+                    "const": "T02"
+                  },
+                  "portrait_slot_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+                  },
+                  "person_entity_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+                  },
+                  "identity_claim_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+                  },
+                  "name_text_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+                  },
+                  "role_text_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+                  },
+                  "secondary_evidence_slot_id": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "cutout_policy": {
+                    "type": "string",
+                    "enum": [
+                      "use_reviewed_mask",
+                      "frame_original_if_mask_bad",
+                      "frame_original"
+                    ]
+                  }
+                },
+                "required": [
+                  "template_id",
+                  "portrait_slot_id",
+                  "person_entity_id",
+                  "identity_claim_id",
+                  "name_text_id",
+                  "role_text_id",
+                  "secondary_evidence_slot_id",
+                  "cutout_policy"
+                ]
+              },
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "template_id": {
+                    "const": "T03"
+                  },
+                  "cards": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {
+                        "card_id": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+                        },
+                        "asset_slot_id": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+                        },
+                        "evidence_claim_id": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+                        },
+                        "card_role": {
+                          "type": "string",
+                          "enum": [
+                            "hero",
+                            "supporting",
+                            "detail"
+                          ]
+                        },
+                        "caption_text_id": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                              "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "crop_focus": {
+                          "type": "string",
+                          "enum": [
+                            "subject",
+                            "document_detail",
+                            "full_frame"
+                          ]
+                        },
+                        "depth_plane": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 8
+                        }
+                      },
+                      "required": [
+                        "card_id",
+                        "asset_slot_id",
+                        "evidence_claim_id",
+                        "card_role",
+                        "caption_text_id",
+                        "crop_focus",
+                        "depth_plane"
+                      ]
+                    }
+                  },
+                  "card_reveal_order": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+                    }
+                  },
+                  "focus_card_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+                  },
+                  "occlusion_policy": {
+                    "type": "string",
+                    "enum": [
+                      "never_hide_hero",
+                      "allow_supporting_overlap"
+                    ]
+                  }
+                },
+                "required": [
+                  "template_id",
+                  "cards",
+                  "card_reveal_order",
+                  "focus_card_id",
+                  "occlusion_policy"
+                ]
+              },
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "template_id": {
+                    "const": "T04"
+                  },
+                  "map": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "map_requirement_id": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+                      },
+                      "year": {
+                        "type": "integer",
+                        "minimum": -10000,
+                        "maximum": 3000
+                      },
+                      "approved_feature_refs": {
+                        "type": "array",
+                        "minItems": 0,
+                        "items": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+                        }
+                      },
+                      "label_source_claim_refs": {
+                        "type": "array",
+                        "minItems": 0,
+                        "items": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+                        }
+                      }
+                    },
+                    "required": [
+                      "map_requirement_id",
+                      "year",
+                      "approved_feature_refs",
+                      "label_source_claim_refs"
+                    ]
+                  },
+                  "route_geometry_ref": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+                  },
+                  "route_provenance_claim_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+                  },
+                  "waypoints": {
+                    "type": "array",
+                    "minItems": 2,
+                    "items": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {
+                        "waypoint_id": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+                        },
+                        "label": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 80
+                        },
+                        "cue_beat_id": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+                        },
+                        "coordinate_ref": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+                        },
+                        "source_claim_id": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+                        }
+                      },
+                      "required": [
+                        "waypoint_id",
+                        "label",
+                        "cue_beat_id",
+                        "coordinate_ref",
+                        "source_claim_id"
+                      ]
+                    }
+                  },
+                  "moving_marker_slot_id": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "route_truthfulness": {
+                    "type": "string",
+                    "enum": [
+                      "source_exact",
+                      "approved_schematic_disclosed"
+                    ]
+                  }
+                },
+                "required": [
+                  "template_id",
+                  "map",
+                  "route_geometry_ref",
+                  "route_provenance_claim_id",
+                  "waypoints",
+                  "moving_marker_slot_id",
+                  "route_truthfulness"
+                ]
+              },
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "template_id": {
+                    "const": "T05"
+                  },
+                  "timeline_events": {
+                    "type": "array",
+                    "minItems": 2,
+                    "items": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {
+                        "event_id": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+                        },
+                        "date_iso_or_year": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 40
+                        },
+                        "chronology_order": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 100
+                        },
+                        "source_claim_id": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+                        },
+                        "label_text_id": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+                        },
+                        "cue_beat_id": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+                        },
+                        "optional_asset_slot_id": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                              "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        }
+                      },
+                      "required": [
+                        "event_id",
+                        "date_iso_or_year",
+                        "chronology_order",
+                        "source_claim_id",
+                        "label_text_id",
+                        "cue_beat_id",
+                        "optional_asset_slot_id"
+                      ]
+                    }
+                  },
+                  "orientation": {
+                    "type": "string",
+                    "enum": [
+                      "horizontal",
+                      "vertical",
+                      "page_focus"
+                    ]
+                  },
+                  "active_event_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+                  }
+                },
+                "required": [
+                  "template_id",
+                  "timeline_events",
+                  "orientation",
+                  "active_event_id"
+                ]
+              },
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "template_id": {
+                    "const": "T06"
+                  },
+                  "document_slot_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+                  },
+                  "document_claim_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+                  },
+                  "page_reference": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 80
+                  },
+                  "excerpt_text_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+                  },
+                  "excerpt_kind": {
+                    "type": "string",
+                    "enum": [
+                      "verbatim_verified",
+                      "paraphrase_disclosed"
+                    ]
+                  },
+                  "focus_region_uv": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "x": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 1
+                      },
+                      "y": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 1
+                      },
+                      "w": {
+                        "type": "number",
+                        "minimum": 0.01,
+                        "maximum": 1
+                      },
+                      "h": {
+                        "type": "number",
+                        "minimum": 0.01,
+                        "maximum": 1
+                      }
+                    },
+                    "required": [
+                      "x",
+                      "y",
+                      "w",
+                      "h"
+                    ]
+                  },
+                  "annotation_beat_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+                  },
+                  "attribution_text_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+                  }
+                },
+                "required": [
+                  "template_id",
+                  "document_slot_id",
+                  "document_claim_id",
+                  "page_reference",
+                  "excerpt_text_id",
+                  "excerpt_kind",
+                  "focus_region_uv",
+                  "annotation_beat_id",
+                  "attribution_text_id"
+                ]
+              },
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "template_id": {
+                    "const": "T07"
+                  },
+                  "before_map": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "map_requirement_id": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+                      },
+                      "year": {
+                        "type": "integer",
+                        "minimum": -10000,
+                        "maximum": 3000
+                      },
+                      "approved_feature_refs": {
+                        "type": "array",
+                        "minItems": 0,
+                        "items": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+                        }
+                      },
+                      "label_source_claim_refs": {
+                        "type": "array",
+                        "minItems": 0,
+                        "items": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+                        }
+                      }
+                    },
+                    "required": [
+                      "map_requirement_id",
+                      "year",
+                      "approved_feature_refs",
+                      "label_source_claim_refs"
+                    ]
+                  },
+                  "after_map": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "map_requirement_id": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+                      },
+                      "year": {
+                        "type": "integer",
+                        "minimum": -10000,
+                        "maximum": 3000
+                      },
+                      "approved_feature_refs": {
+                        "type": "array",
+                        "minItems": 0,
+                        "items": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+                        }
+                      },
+                      "label_source_claim_refs": {
+                        "type": "array",
+                        "minItems": 0,
+                        "items": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+                        }
+                      }
+                    },
+                    "required": [
+                      "map_requirement_id",
+                      "year",
+                      "approved_feature_refs",
+                      "label_source_claim_refs"
+                    ]
+                  },
+                  "comparison_claim_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+                  },
+                  "projection_policy": {
+                    "const": "same_projection_same_viewport"
+                  },
+                  "date_before_text_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+                  },
+                  "date_after_text_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+                  },
+                  "comparison_mode": {
+                    "type": "string",
+                    "enum": [
+                      "side_by_side",
+                      "wipe_same_projection",
+                      "double_inset"
+                    ]
+                  }
+                },
+                "required": [
+                  "template_id",
+                  "before_map",
+                  "after_map",
+                  "comparison_claim_id",
+                  "projection_policy",
+                  "date_before_text_id",
+                  "date_after_text_id",
+                  "comparison_mode"
+                ]
+              },
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "template_id": {
+                    "const": "T08"
+                  },
+                  "fact_claim_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+                  },
+                  "fact_text_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+                  },
+                  "display_value": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100
+                  },
+                  "unit_text_id": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "animation_rule": {
+                    "type": "string",
+                    "enum": [
+                      "reveal_exact",
+                      "count_if_intermediates_truthful",
+                      "stamp"
+                    ]
+                  },
+                  "source_text_id": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "template_id",
+                  "fact_claim_id",
+                  "fact_text_id",
+                  "display_value",
+                  "unit_text_id",
+                  "animation_rule",
+                  "source_text_id"
+                ]
+              },
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "template_id": {
+                    "const": "T09"
+                  },
+                  "headline_text_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+                  },
+                  "quote_kind": {
+                    "type": "string",
+                    "enum": [
+                      "verbatim_verified",
+                      "paraphrase_disclosed",
+                      "editorial_headline"
+                    ]
+                  },
+                  "attributed_claim_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+                  },
+                  "attribution_text_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+                  },
+                  "document_slot_id": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "emphasis_text_ids": {
+                    "type": "array",
+                    "minItems": 0,
+                    "items": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+                    }
+                  }
+                },
+                "required": [
+                  "template_id",
+                  "headline_text_id",
+                  "quote_kind",
+                  "attributed_claim_id",
+                  "attribution_text_id",
+                  "document_slot_id",
+                  "emphasis_text_ids"
+                ]
+              },
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "template_id": {
+                    "const": "T10"
+                  },
+                  "origin_claim_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+                  },
+                  "entities": {
+                    "type": "array",
+                    "minItems": 2,
+                    "items": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {
+                        "entity_id": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+                        },
+                        "name_text_id": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+                        },
+                        "region_ref": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                              "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "source_claim_id": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+                        }
+                      },
+                      "required": [
+                        "entity_id",
+                        "name_text_id",
+                        "region_ref",
+                        "source_claim_id"
+                      ]
+                    }
+                  },
+                  "causal_links": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {
+                        "from_entity_id": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+                        },
+                        "to_entity_id": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+                        },
+                        "relationship_claim_id": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+                        },
+                        "relation": {
+                          "type": "string",
+                          "enum": [
+                            "causes",
+                            "contributes",
+                            "context",
+                            "follows"
+                          ]
+                        },
+                        "certainty": {
+                          "type": "string",
+                          "enum": [
+                            "documented",
+                            "attributed",
+                            "uncertain"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "from_entity_id",
+                        "to_entity_id",
+                        "relationship_claim_id",
+                        "relation",
+                        "certainty"
+                      ]
+                    }
+                  },
+                  "scope_change": {
+                    "type": "string",
+                    "enum": [
+                      "local_to_regional",
+                      "regional_to_global",
+                      "same_scale_network"
+                    ]
+                  },
+                  "map_requirement_id": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "template_id",
+                  "origin_claim_id",
+                  "entities",
+                  "causal_links",
+                  "scope_change",
+                  "map_requirement_id"
+                ]
+              }
+            ]
           }
         },
         "required": [
@@ -485,7 +1652,8 @@
           "layer_roles",
           "editorial_direction",
           "asset_slot_bindings",
-          "layout_control"
+          "layout_control",
+          "template_payload"
         ]
       },
       "minItems": 1
@@ -497,5 +1665,5 @@
     "story_revision_sha256",
     "setup_plans"
   ],
-  "description": "Approved-story normalized editorial direction. No absolute render frame time or word_id until final WAV alignment. approved_asset_id null until G3."
+  "description": "Approved-story normalized editorial direction. No absolute render frame time or word_id until final WAV alignment. approved_asset_id null until G3. Template-specific payload is a strict discriminated oneOf for all ten templates; no generic role-only fallback."
 }
