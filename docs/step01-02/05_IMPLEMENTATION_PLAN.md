@@ -1,80 +1,73 @@
-# 05 — IMPLEMENTATION PLAN · Step 03 and Step 04
-**Status:** Step 01–02 design plan; coding has not started. **Target platform:** Windows 10/11 local, Python 3.12, Node 22, TypeScript/React/Remotion. **Repository:** clean Historical-Video-Studio, no history repo migration. **Milestone model:** ONLY 4 product steps: (01) Product/Architecture, (02) Visual Specs, (03) End-to-End PoC, (04) Full Application.
+# 05 — FULL-FLOW IMPLEMENTATION PLAN · HISTORICAL VIDEO STUDIO V1
 
-## 1. Scope boundary — no phase proliferation
-Step 01 + 02 deliver the 5 design documents, ten JSON Schemas, contract fixtures/tests, API surface, UI interactive design mockup, 10 template sheets with top five pilot ready, and six-role design audit. **Step 03 must deliver a real MP4 before Step 04 begins**. Step 04 adds production UI/features; there are no hidden prerequisite P0–P12 mini-projects.
+**Supersedes:** all Step 03 Pilot / Step 04 pilot-first implementation sequencing in prior versions. **Scope:** implement the complete Windows-only application directly on the new repo; no disposable pilot app, no separate PoC gate, no old Historical-Motion-Graphics-Studio runtime or data migration.
+**Product:** English-first 5–10 minute historical motion documentaries from one imported external ChatGPT StoryPackage JSON, with G1–G5 human review, real archive search, G-Labs, TTS+alignment, 10 templates, real Remotion visual editor, MP4 and attribution. One operator Windows-local. No runtime LLM API/Codex agent.
 
-Implementation coding agent/developer MAY write application code to build the tool. **Production use of the completed tool MUST NOT require a coding agent.** External ChatGPT authoring is a manual JSON import.
+## 1. Engineering rules — one production codebase
+- Build exactly once with Python 3.12 FastAPI+SQLite durable jobs and immutable file hashes, React/TS frontend and registered Remotion shared Composition, FFmpeg/ffprobe for audio and QC. Lock Node 22, package manager, Python deps, fonts and renderer versions in checked-in lockfiles before coding.
+- All provider calls are via adapters. Every API/UX action must reference a declared OpenAPI operation and typed error. No inert buttons; no generated JSX or raw CSS from imported ChatGPT JSON. Do not regress into hardcoded video-specific code.
+- Full V1 feature breadth cannot be passed on mocks: adapters require contract+offline tests, real provider operations need operator credentials and must be reported separately if unavailable. No live G-Labs account test required before coding from provided original webhook; final integration acceptance is user-led after full flow is implemented.
+- Keep **one coherent implementation branch/PR** unless user explicitly asks otherwise; incremental exact-SHA Windows test gates, self-review once per major workstream, no merge/push main without approval. Only implementation of the user-agreed scope; no multi-tenant accounts, Ubuntu build, arbitrary extra phase count or old data compatibility.
 
-## 2. Technical skeleton to create in Step 03
-~~~
-backend/app/
-  api/   projects/   revisions/   gates/   orchestrator/
-  voice/{adapters,assembly,alignment,qc}/
-  assets/{sources,identity,rights,variants,binding,glabs}/
-  director/{templates,semantic_resolver,compiler,qa}/
-  render/{jobs,qc,attribution}/
-frontend/src/{routes,components,features,player}/
-runtime/remotion/src/{HistoryComposition,scenes,templates,presets,styles}/
-contracts/schema/    contracts/examples/   contracts/openapi.yaml
-tests/{contracts,voice,assets,gates,compiler,ui,e2e}/
-start.bat
-~~~
-Keep schema files, the motion registry and style versions as explicit build artifacts. Shared component entrypoint used in @remotion/player and renderMedia; no CSS-preview substitute. Keep project bytes in SQLite + hash-addressed storage, not transient provider URLs.
+## 2. Target package layout (implementation, not current code)
+backend/app/api/ — OpenAPI FastAPI route handlers, revision checks, contracts, error model
+backend/app/projects/ — project state, import, G1–G5 transactions, audit ledger
+backend/app/jobs/ — persistent local queue, retry, idempotency, cancel, crash recovery
+backend/app/voice/ — Kokoro/ElevenLabs TTS, section attempts, correction, WAV assembly, ElevenLabs Forced Alignment
+backend/app/archives/ — Wikimedia Commons / LOC / Europeana search/hydrate/download
+backend/app/assets/ — original storage, provenance, G3 rights, manual upload, G-Labs provider, fallback candidates, treatments
+backend/app/maps/ — period map ingestion/CRS conversion/verified geometry/label layout
+backend/app/director/ — StoryPackage→VisualBlueprint→CompiledTimeline compiler with layout/motion registries
+backend/app/render/ — Remotion render jobs, FFmpeg mux/QC, credits, G5 export
+frontend/src/ — six real workspaces with shared client contracts, job feedback, Remotion Player and scene/asset editor
+renderer/remotion/ — shared pinned HistoryComposition and T01–T10 scene components with 30 variants
+contracts/ — 12 schema shapes, sample inputs, full-flow API, original G-Labs doc, archive provider specs, registries
+tests/ — Windows-only contract/unit/API/functional/browser/e2e (no dummy success assertions)
 
-## 3. Step 03 — End-to-End PoC (five acceptance work packages)
-**Goal:** one 60–90 s English historical video rendered by the new stack, and a second 60–90 s **different** historical story without scene-specific code changes. Use approved manual archival assets in the very first render. No forced G-Labs live test as early blocker; its interface can be implemented and mocked per supplied contract, with live proof deferred to operator testing.
+## 3. Dependency topology and parallel work
+**Foundation lane** schema+DB+jobs+gate transitions → API and frontend shell. **Media lane** TTS adapters+WAV/align and archives+G-Labs/manual upload can run in parallel *after* foundation artifact interfaces exist. **Visual lane** template registry, historical maps and deterministic compiler can be built in parallel from frozen contracts; integration requires final audio/approved source artifacts. **Delivery lane** Remotion Player/render shared composition, QC/credits and Windows packaging depend on validated timeline; start UI design earlier using typed mock fixtures, replace mocked services before acceptance.
+User review ordering: G1 → [G2 voice, G3 assets parallel] → G2 approval triggers assemble+align → aligned/G3 exact approved inputs → G4 editor/approve → render+QC → G5 approved export. No provider task auto-approves.
 
-### 03.A Contracts + project/approval core
-Implement Draft 2020–12 JSON Schema validator and semantic cross-reference checks; strict StoryPackage.v1 import; canonical hashes; revision service; five gates with approval concurrency rules; durable queue/idempotency and one source of error codes. Real DB tests for retry and stale approvals. **Acceptance:** valid fixture imported, negative fixtures blocked with stable error codes; G4 cannot run until G2-aligned + G3-approved.
+## 4. Two engineering phases, four parallel workstreams — not a disposable pilot
+### Phase A — Complete foundational production workflow
+**A1 Story/DB/jobs/Gates:** strict 12 JSON Schema+semantic validators, SQLite migrations only for this fresh V1 state, all tables and revision hashes, G1–G5 transactional state and selective invalidation; durable queue, idempotency, scoped cancel and resume after worker crash; typed problem error catalog. Implement all declared API endpoints and active six-workspace frontend skeleton. No hidden separate G2 alignment button.
+**A2 Audio:** Kokoro and ElevenLabs TTS adapters, section regenerate/correction/select past attempt, audio attempt provenance, playable preview, FFmpeg final WAV assembly with sample offsets, ElevenLabs forced alignment over exact final audio and transcript (English), word-level QC + failure/retry, G2 approval auto-assembly/alignment. All failed tasks remain recoverable without lying about success.
+**A3 Archive+G-Labs:** Wikimedia Commons, LOC, Europeana provider adapters including search/page/record details, rights normalization, provenance and immutable original file download. G-Labs from verbatim 1148-line supplied webhook: 202 job, X-API-Key, poll 3–5 s, result download, cancel task_id, error taxonomy, MAX/provider health; account credentials handled via UI. Manual Search+Upload vs Managed Fallback+mandatory later review implemented in G3. No AI-generated reconstruction reclassified archival.
+**Phase A exit:** all real screens/actions and provider connectors are implemented to the agreed contract; Windows mock/contract tests green. No claim of whole production PASS yet.
 
-### 03.B Voice vertical slice
-KokoroTTSAdapter and ElevenLabsTTSAdapter obey same TTS interface; quality checks and per-section attempts, section playback/approval, assembled immutable final WAV. Separate ElevenLabsForcedAlignmentAdapter over final WAV and exact transcript; normalized word map and timestamp QC; English-first. **Acceptance:** representative English 60–90 s audio generated/imported, G2 approved, alignment succeeds on real audio for Step03 pilot, cue checks run; provider failure is visible/recoverable. Offline adapter contract tests before provider access. Direct live ElevenLabs use needs user's configured credentials.
+### Phase B — Complete full visual production and shipping
+**B1 Storyboard compiler:** one imported StoryPackage with full semantic direction; normalized VisualBlueprint; pinned 30 template layouts, 18 presets, validated historical maps/GeoJSON, exact asset/cue binding, all layer pixel rectangles/crops/masks/fonts/z-order, deterministic motion and camera keyframes, scene transitions and SHA-based revision; no historical data invented by renderer.
+**B2 Full renderer/editor:** all 10 T01–T10 React templates, A/B/C variants, map routes/territory overlays, archival document zoom/cutout/typography, composited motion, reading time and overflow diagnostics. Real @remotion/player G4 editor supports editable scene layout, crop, asset switching to approved only, cue retiming, compare attempts and selective recompute. Node Remotion render uses same HistoryComposition, frozen fonts and media bytes.
+**B3 QC/delivery:** MP4 H.264/AAC 1920×1080 30fps, audio waveform continuity, timestamps from alignment, frame parity, visual collision/black-frame checks, attribution manifest, source/AI disclosure, render attempts, G5 operator preview/sign-off and export bundle. UI job queue, bulk asset review, crash resume, Windows one-click start, docs and backup.
+**Phase B exit:** fully integrated 5–10min real English historical documentary and second different-topic package through same engine+template code, with actual approved media, source provenance, complete gate history, restart and negative regression tests, Windows packaged launcher. No separate 60–90s pilot phase; small engineering render smoke tests are allowed and do not count as product milestone.
 
-### 03.C Archival assets / limited G3
-Implement manual approved local archival assets and a minimal G3 review board with provenance+rights fields, scene bindings, non-destructive variants, cutout/photo-card choice. Missing asset shows Manual Upload vs Managed Fallback modes, with the latter blocked from becoming approved unless reviewed. Archive adapters/G-Labs full integration may await Step 04; avoid fake auto-source selection. **Acceptance:** no unapproved archival image used; replacement updates only dependent scene.
+## 5. Acceptance gates (strict)
+**Contract & backend:** schema parsing + semantic, 24-section/48-scene synthetic long-form fixture, cross-stage content identity, cue occurrence, approval SHA CAS, false gate transitions rejected, selective invalidation, real durable job persistence/crash recovery. Negative fixtures for untrusted code, wrong map years, invalid geometry and unknown presets. No migration of old studio data.
+**Voice:** both TTS adapters interface-tested; real English synthesis and ElevenLabs alignment (when credentials supplied), section regeneration/reuse of approved attempts, final WAV checks exact duration and monotonic word samples, alignment failure blocks G4 not G2 decision history.
+**Archives/G-Labs:** all three adapters mock pagination/hydration/media/rights/429 and live sample where access allowed; G-Labs mock 202/status/completed/result/failed/stop and user-led live check when available. Unknown rights never marked eligible, candidate never auto-approved, 2-path missing resolution tested end-to-end. User can still use manually approved materials if API offline; never claim auto archive source succeeded.
+**Historical map:** reproject sourced geometry into WGS84, checked 1914/1871 validity, GeoJSON label anchors and route, exact vs schematic disclosure, compare in same projected viewport. Negative wrong era / modern borders / CRS mismatch / unknown feature ids.
+**Visual/Editor:** all T01–T10 template variants fixture tested, text collision and mask/card fallback same source, no hidden missing asset substitutions, 60+ scenes load with responsive editor, one asset/crop update recomputes affected scene only, Player and video use identical composition.
+**Video/G5:** actual full-length MP4 output, FFprobe 1080p/30fps/audio duration, no unexplained dropped frames/black frames, attribution/report, user review G1–G5. Final G5 approve of stale render must fail. Second unrelated historical package proves reuse without modifying template JSX.
+**Windows:** run native Windows 10/11 Python 3.12/Node 22/FFmpeg; one-click launcher, local 127.0.0.1, no Ubuntu requirement, no Docker/cloud dependency, restarts preserve jobs and approvals. Provider secrets redacted.
 
-### 03.D Five production scene templates and Remotion
-Build T01 map focus, T02 portrait, T03 archival collage, T04 route reconstruction, T08 fact impact. Implement core motion registry (photo-card-enter, title-mask-reveal, route-line-draw, camera-pan, camera-push, stagger-reveal, freeze-hold, text-highlight) with bounded params. Compiler produces frame-indexed timeline from English WordTimingMap and G3 exact assets, with no generated JSX. Use same composition in browser and renderer. **Acceptance:** five templates work in both sample topics with fixture evidence, text/geometry safe-area checks and byte-identical deterministic timeline on repeat.
+## 6. Test matrix and reporting
+Contract fixtures: schema (positive/negative), long-form relationships, OpenAPI spec semantic sanity.
+Unit: template registry, camera interpolation, source metadata normalization, historical map transform, voice sample offsets.
+API: all G1–G5 operations, invalid revision/race, idempotent retry, remove/regenerate/crop/export, missing asset choice.
+Windows integration: real SQLite/local filesystem/restart; FFmpeg installed; Remotion Player and renderer same input; provider call errors.
+Browser: six workspaces and all clickable actions, async feedback, correct gate blockers and batch G3 decisions.
+Visual: at least two editorial topics with different maps, people and evidentiary assets; six-role quality review not checklist-only.
+Reports: exact branch/commit SHA, commands + OS, PASS/FAIL/SKIP separated by mocks and live provider, artifacts/hashes/screenshots, unresolved issues categorized by blocking scope. No fake live pass.
 
-### 03.E Pilot / six-role visual review / exit
-Test A: a reference-style Sarajevo 1914 60–90s fragment (not copying footage/assets unlawfully). Test B: German Unification 1871 60–90s using exact same template registry code without JSX additions. Produce MP4, word map, approved source sheet, screenshots/stills, frame parity comparisons and QC reports; G4/G5 approval UI at least minimal. Test on Windows. **Hard exit:** both MP4s produced end-to-end with explicit approvals and audit; no frame blackouts/audio gaps, source mismatches or silent fallback. If only fixtures/mocks, Step 03 remains PARTIAL.
+## 7. Build-stop rules
+No staging a demo as full app, no additional pilot PR, no elaborate multi-tenant/security/network stack, no source-by-source video hardcoding, no G-Labs runtime live account dependency before adapter coding, no untested asset rights approvals. Blocking technical failure must be fixed in owning full-flow workstream; optional polish can be documented without reopening prior architecture continuously.
 
-## 4. Step 04 — Full Application Implementation (grouped deliveries)
-**04.A Archives and evidence production:** Wikimedia Commons, Library of Congress, Europeana source adapters; metadata/relevance/rights handling, provenance report, context distinction, batch G3 review, source dedupe and attribution.
-**04.B G-Labs production image adapter:** implement documented HTTP 202 submit → poll → download, task cancellation by ID, MAX/health/key/status errors, 429 backoff, retries, offline mock tests; managed fallback candidate generation and explicit later review; derivative processing and source vs AI label. No requirement for live user-account test before writing code; actual operability remains unverified until user test.
-**04.C Motion/editor completion:** full ten templates T01–T10, layout A/B/C, preset registry/reduced motion, real Remotion Storyboard Player with virtualized scene and asset panels, detailed layer/track inspector, local draft undo/redo, source-linked captions, targeted compile/revision.
-**04.D Operator UX/durable background:** all 6 workspaces, batch approvals, provider settings, local credentials, job queue, crash recovery, cancellation and error repair, English narration presets, reproducible exports and backup.
-**04.E Production/hardening:** 4–6 minute full-length video plus second topic, Windows start.bat and one-click packaged guide, performance and disk quotas, source/copyright review report, crash/restart tests, font/media snapshots, no inactive controls. No old data migration.
+## 8. Handoff reference order
+1. docs/design/DESIGN_DECISIONS_2026-10-19.md for user overrides (English-first, G-Labs contract-first, five gates).
+2. docs/step01-02/FULL_FLOW_VISUAL_COMPILER_CONTRACT.md + HISTORICAL_MAP_ENGINE.md + 01–04 independent docs.
+3. contracts/schema/ twelve schema files; contracts/registries/ 30 layouts and 18 presets; contracts/openapi.yaml.
+4. contracts/providers/reference/WEBHOOK_INTEGRATION.vi(1).md verbatim; three archive adapters and ElevenLabs alignment docs.
+5. ui/mockups/index.html as interaction UX design reference only, not real frontend.
+6. This implementation plan as **sole current execution roadmap**. Earlier Master Spec M0–M4 and pilot descriptions are historical, not implementation milestones.
 
-## 5. Dependencies and release-critical path
-~~~
-Schemas/API/approvals ─┐
-Voice adapters + alignment ─┼→ Compiler + 5 templates → 2 real pilots (Step 03 PASS)
-Manual G3 evidence ────────┘
-                ↓
-Archive adapters + G-Labs contract integration → complete G3
-Full 10 templates + editor → robust workflow → long video → Windows release (Step 04 PASS)
-~~~
-Step 03 should use genuine voice/alignment as soon as credentials permit; do not fake successful timing. G-Labs live test deliberately deferred per user, not forever asserted successful. If provider unavailable, report incomplete milestone rather than bypass human gates.
-
-## 6. Acceptance gates and negative matrix
-**Design Step 01/02:** five docs and testable schema/API/UI contracts, 5 templates specified for pilot and 10 for V1, six-role audit with explicit findings and fixes; design status PASS only for scope frozen (not production).
-**Step 03:** tests for JSON syntax+crossrefs, word sample monotonicity, stale SHA, approval illegal transition, asset fallback authorization, wrong map era, unsupported preset, layout overflow, preview/render still parity, audio/MP4 length, user G4/G5.
-**Step 04:** adapter 401/403/429/5xx/cancel/resume, archive rights-unknown, wrong-person photo, AI illustration labeling, simultaneous jobs, approve conflict, duplicate UI click, crash resume, 60+ scenes project load, source attribution completeness and short/long cases.
-Windows tests primary; don't substitute green Ubuntu CI for Windows acceptance. Separate mock PASS from live/provider/operator PASS in reports.
-
-## 7. Six-role review protocol per delivery
-Director: semantic visual choices, causal clarity, human emotional emphasis and no slideshow monotony.
-Editor: pace/hold/cut continuity, voice-aligned events, transition discipline and correction reuse.
-Motion Designer: scene slot fidelity, motion realism, clipping/overflow, map focus and reduced-motion mode.
-Architect: adapter separation, deterministic compiler, revision snapshots, no provider calls from render.
-QA: JSON/schema negative tests, evidence and rights, stale gates, provider failure and preview/parity tests.
-Operator: single-click workflows, batch selection, clear errors and no need for external code tool in production.
-Each role must submit evidence and tag blocker vs improvement; don't conflate checklist sign-off with real visual pilot.
-
-## 8. Stop/skip rules
-Do **not** implement every Motion Prompt sample, AI-video automation, SaaS permissions, multi-user accounts, vector map historical dataset from scratch or sophisticated non-linear editing as prerequisites for first MP4. Do not force archaeological/source evidence into AI illustrations beyond truth labeling. Do not invent licensing claims. Do not reopen Step 01/02 for improvements that demonstrably belong to Step 04 unless they block Step 03 contracts.
-
-## 9. Handoff checklist for developer
-Commit Step 01/02 docs+schemas+fixtures+mockup; tag design baseline. Implement Step 03 on a feature branch unless operator explicitly requests direct main writes for code. Keep root README links current. Record exact Windows toolchain/versions, provider capabilities and screenshots. Every deliverable lists code SHA, test command and factual test evidence. **Do not call Step 03 complete on design-only work.**
+**Final acceptance:** Full V1 flow delivered on Windows; no plan to require a sacrificial pilot first.
