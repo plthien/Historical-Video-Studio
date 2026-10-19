@@ -1,0 +1,2397 @@
+{
+  "registry_version": "2.0.0",
+  "authority": "replaces layouts.v1; variant positions are starting layouts requiring rendered verification",
+  "layouts": [
+    {
+      "schema_version": "TemplateLayout.v1",
+      "template_id": "T01",
+      "template_version": "2.0.0",
+      "variant_id": "A",
+      "canvas": {
+        "width": 1920,
+        "height": 1080,
+        "fps": 30
+      },
+      "safe_area_px": {
+        "left": 96,
+        "right": 96,
+        "top": 60,
+        "bottom": 60
+      },
+      "slots": [
+        {
+          "slot_id": "map_focus_1",
+          "role": "map",
+          "required": true,
+          "rect_normalized": {
+            "x": 0.05,
+            "y": 0.08,
+            "w": 0.62,
+            "h": 0.82
+          },
+          "z_index": 0,
+          "fit": "contain",
+          "max_lines": 3
+        },
+        {
+          "slot_id": "map_focus_2",
+          "role": "headline",
+          "required": false,
+          "rect_normalized": {
+            "x": 0.7,
+            "y": 0.16,
+            "w": 0.24,
+            "h": 0.28
+          },
+          "z_index": 1,
+          "fit": "contain",
+          "max_lines": 3
+        },
+        {
+          "slot_id": "map_focus_3",
+          "role": "callout",
+          "required": false,
+          "rect_normalized": {
+            "x": 0.7,
+            "y": 0.57,
+            "w": 0.24,
+            "h": 0.28
+          },
+          "z_index": 2,
+          "fit": "contain",
+          "max_lines": 3
+        }
+      ],
+      "allowed_presets": [
+        "title-mask-reveal",
+        "camera-push",
+        "stagger-reveal",
+        "freeze-hold"
+      ],
+      "camera_limits": {
+        "min_scale": 0.9,
+        "max_scale": 1.2,
+        "max_rotation_deg": 3,
+        "max_translation_px": 300
+      },
+      "transition_limits": {
+        "min_frames": 0,
+        "max_frames": 30
+      },
+      "overflow_policy": "try_variant_then_block",
+      "fallback_policy": "SAME_APPROVED_ASSET_ONLY",
+      "template_family": "MAP_FOCUS"
+    },
+    {
+      "schema_version": "TemplateLayout.v1",
+      "template_id": "T01",
+      "template_version": "2.0.0",
+      "variant_id": "B",
+      "canvas": {
+        "width": 1920,
+        "height": 1080,
+        "fps": 30
+      },
+      "safe_area_px": {
+        "left": 96,
+        "right": 96,
+        "top": 60,
+        "bottom": 60
+      },
+      "slots": [
+        {
+          "slot_id": "map_focus_1",
+          "role": "map",
+          "required": true,
+          "rect_normalized": {
+            "x": 0.39,
+            "y": 0.08,
+            "w": 0.55,
+            "h": 0.82
+          },
+          "z_index": 0,
+          "fit": "contain",
+          "max_lines": 3
+        },
+        {
+          "slot_id": "map_focus_2",
+          "role": "headline",
+          "required": false,
+          "rect_normalized": {
+            "x": 0.06,
+            "y": 0.17,
+            "w": 0.29,
+            "h": 0.27
+          },
+          "z_index": 1,
+          "fit": "contain",
+          "max_lines": 3
+        },
+        {
+          "slot_id": "map_focus_3",
+          "role": "callout",
+          "required": false,
+          "rect_normalized": {
+            "x": 0.06,
+            "y": 0.57,
+            "w": 0.29,
+            "h": 0.27
+          },
+          "z_index": 2,
+          "fit": "contain",
+          "max_lines": 3
+        }
+      ],
+      "allowed_presets": [
+        "title-mask-reveal",
+        "camera-push",
+        "stagger-reveal",
+        "freeze-hold"
+      ],
+      "camera_limits": {
+        "min_scale": 0.9,
+        "max_scale": 1.2,
+        "max_rotation_deg": 3,
+        "max_translation_px": 300
+      },
+      "transition_limits": {
+        "min_frames": 0,
+        "max_frames": 30
+      },
+      "overflow_policy": "try_variant_then_block",
+      "fallback_policy": "SAME_APPROVED_ASSET_ONLY",
+      "template_family": "MAP_FOCUS"
+    },
+    {
+      "schema_version": "TemplateLayout.v1",
+      "template_id": "T01",
+      "template_version": "2.0.0",
+      "variant_id": "C",
+      "canvas": {
+        "width": 1920,
+        "height": 1080,
+        "fps": 30
+      },
+      "safe_area_px": {
+        "left": 96,
+        "right": 96,
+        "top": 60,
+        "bottom": 60
+      },
+      "slots": [
+        {
+          "slot_id": "map_focus_1",
+          "role": "map",
+          "required": true,
+          "rect_normalized": {
+            "x": 0.06,
+            "y": 0.08,
+            "w": 0.86,
+            "h": 0.54
+          },
+          "z_index": 0,
+          "fit": "contain",
+          "max_lines": 3
+        },
+        {
+          "slot_id": "map_focus_2",
+          "role": "headline",
+          "required": false,
+          "rect_normalized": {
+            "x": 0.09,
+            "y": 0.69,
+            "w": 0.78,
+            "h": 0.22
+          },
+          "z_index": 1,
+          "fit": "contain",
+          "max_lines": 3
+        },
+        {
+          "slot_id": "map_focus_3",
+          "role": "callout",
+          "required": false,
+          "rect_normalized": {
+            "x": 0.61,
+            "y": 0.09,
+            "w": 0.3,
+            "h": 0.3
+          },
+          "z_index": 2,
+          "fit": "contain",
+          "max_lines": 3
+        }
+      ],
+      "allowed_presets": [
+        "title-mask-reveal",
+        "camera-push",
+        "stagger-reveal",
+        "freeze-hold"
+      ],
+      "camera_limits": {
+        "min_scale": 0.9,
+        "max_scale": 1.2,
+        "max_rotation_deg": 3,
+        "max_translation_px": 300
+      },
+      "transition_limits": {
+        "min_frames": 0,
+        "max_frames": 30
+      },
+      "overflow_policy": "try_variant_then_block",
+      "fallback_policy": "SAME_APPROVED_ASSET_ONLY",
+      "template_family": "MAP_FOCUS"
+    },
+    {
+      "schema_version": "TemplateLayout.v1",
+      "template_id": "T02",
+      "template_version": "2.0.0",
+      "variant_id": "A",
+      "canvas": {
+        "width": 1920,
+        "height": 1080,
+        "fps": 30
+      },
+      "safe_area_px": {
+        "left": 96,
+        "right": 96,
+        "top": 60,
+        "bottom": 60
+      },
+      "slots": [
+        {
+          "slot_id": "portrait_1",
+          "role": "portrait",
+          "required": true,
+          "rect_normalized": {
+            "x": 0.05,
+            "y": 0.08,
+            "w": 0.62,
+            "h": 0.82
+          },
+          "z_index": 0,
+          "fit": "cover",
+          "max_lines": 3
+        },
+        {
+          "slot_id": "portrait_2",
+          "role": "headline",
+          "required": false,
+          "rect_normalized": {
+            "x": 0.7,
+            "y": 0.16,
+            "w": 0.24,
+            "h": 0.28
+          },
+          "z_index": 1,
+          "fit": "contain",
+          "max_lines": 3
+        },
+        {
+          "slot_id": "portrait_3",
+          "role": "text",
+          "required": false,
+          "rect_normalized": {
+            "x": 0.7,
+            "y": 0.57,
+            "w": 0.24,
+            "h": 0.28
+          },
+          "z_index": 2,
+          "fit": "contain",
+          "max_lines": 5
+        }
+      ],
+      "allowed_presets": [
+        "title-mask-reveal",
+        "camera-push",
+        "stagger-reveal",
+        "freeze-hold"
+      ],
+      "camera_limits": {
+        "min_scale": 0.9,
+        "max_scale": 1.2,
+        "max_rotation_deg": 3,
+        "max_translation_px": 300
+      },
+      "transition_limits": {
+        "min_frames": 0,
+        "max_frames": 30
+      },
+      "overflow_policy": "try_variant_then_block",
+      "fallback_policy": "SAME_APPROVED_ASSET_ONLY",
+      "template_family": "PORTRAIT"
+    },
+    {
+      "schema_version": "TemplateLayout.v1",
+      "template_id": "T02",
+      "template_version": "2.0.0",
+      "variant_id": "B",
+      "canvas": {
+        "width": 1920,
+        "height": 1080,
+        "fps": 30
+      },
+      "safe_area_px": {
+        "left": 96,
+        "right": 96,
+        "top": 60,
+        "bottom": 60
+      },
+      "slots": [
+        {
+          "slot_id": "portrait_1",
+          "role": "portrait",
+          "required": true,
+          "rect_normalized": {
+            "x": 0.39,
+            "y": 0.08,
+            "w": 0.55,
+            "h": 0.82
+          },
+          "z_index": 0,
+          "fit": "cover",
+          "max_lines": 3
+        },
+        {
+          "slot_id": "portrait_2",
+          "role": "headline",
+          "required": false,
+          "rect_normalized": {
+            "x": 0.06,
+            "y": 0.17,
+            "w": 0.29,
+            "h": 0.27
+          },
+          "z_index": 1,
+          "fit": "contain",
+          "max_lines": 3
+        },
+        {
+          "slot_id": "portrait_3",
+          "role": "text",
+          "required": false,
+          "rect_normalized": {
+            "x": 0.06,
+            "y": 0.57,
+            "w": 0.29,
+            "h": 0.27
+          },
+          "z_index": 2,
+          "fit": "contain",
+          "max_lines": 5
+        }
+      ],
+      "allowed_presets": [
+        "title-mask-reveal",
+        "camera-push",
+        "stagger-reveal",
+        "freeze-hold"
+      ],
+      "camera_limits": {
+        "min_scale": 0.9,
+        "max_scale": 1.2,
+        "max_rotation_deg": 3,
+        "max_translation_px": 300
+      },
+      "transition_limits": {
+        "min_frames": 0,
+        "max_frames": 30
+      },
+      "overflow_policy": "try_variant_then_block",
+      "fallback_policy": "SAME_APPROVED_ASSET_ONLY",
+      "template_family": "PORTRAIT"
+    },
+    {
+      "schema_version": "TemplateLayout.v1",
+      "template_id": "T02",
+      "template_version": "2.0.0",
+      "variant_id": "C",
+      "canvas": {
+        "width": 1920,
+        "height": 1080,
+        "fps": 30
+      },
+      "safe_area_px": {
+        "left": 96,
+        "right": 96,
+        "top": 60,
+        "bottom": 60
+      },
+      "slots": [
+        {
+          "slot_id": "portrait_1",
+          "role": "portrait",
+          "required": true,
+          "rect_normalized": {
+            "x": 0.06,
+            "y": 0.08,
+            "w": 0.86,
+            "h": 0.54
+          },
+          "z_index": 0,
+          "fit": "cover",
+          "max_lines": 3
+        },
+        {
+          "slot_id": "portrait_2",
+          "role": "headline",
+          "required": false,
+          "rect_normalized": {
+            "x": 0.09,
+            "y": 0.69,
+            "w": 0.78,
+            "h": 0.22
+          },
+          "z_index": 1,
+          "fit": "contain",
+          "max_lines": 3
+        },
+        {
+          "slot_id": "portrait_3",
+          "role": "text",
+          "required": false,
+          "rect_normalized": {
+            "x": 0.61,
+            "y": 0.09,
+            "w": 0.3,
+            "h": 0.3
+          },
+          "z_index": 2,
+          "fit": "contain",
+          "max_lines": 5
+        }
+      ],
+      "allowed_presets": [
+        "title-mask-reveal",
+        "camera-push",
+        "stagger-reveal",
+        "freeze-hold"
+      ],
+      "camera_limits": {
+        "min_scale": 0.9,
+        "max_scale": 1.2,
+        "max_rotation_deg": 3,
+        "max_translation_px": 300
+      },
+      "transition_limits": {
+        "min_frames": 0,
+        "max_frames": 30
+      },
+      "overflow_policy": "try_variant_then_block",
+      "fallback_policy": "SAME_APPROVED_ASSET_ONLY",
+      "template_family": "PORTRAIT"
+    },
+    {
+      "schema_version": "TemplateLayout.v1",
+      "template_id": "T03",
+      "template_version": "2.0.0",
+      "variant_id": "A",
+      "canvas": {
+        "width": 1920,
+        "height": 1080,
+        "fps": 30
+      },
+      "safe_area_px": {
+        "left": 96,
+        "right": 96,
+        "top": 60,
+        "bottom": 60
+      },
+      "slots": [
+        {
+          "slot_id": "collage_1",
+          "role": "archival_photo",
+          "required": true,
+          "rect_normalized": {
+            "x": 0.05,
+            "y": 0.08,
+            "w": 0.62,
+            "h": 0.82
+          },
+          "z_index": 0,
+          "fit": "cover",
+          "max_lines": 3
+        },
+        {
+          "slot_id": "collage_2",
+          "role": "archival_photo",
+          "required": true,
+          "rect_normalized": {
+            "x": 0.7,
+            "y": 0.16,
+            "w": 0.24,
+            "h": 0.28
+          },
+          "z_index": 1,
+          "fit": "cover",
+          "max_lines": 3
+        },
+        {
+          "slot_id": "collage_3",
+          "role": "archival_photo",
+          "required": false,
+          "rect_normalized": {
+            "x": 0.7,
+            "y": 0.57,
+            "w": 0.24,
+            "h": 0.28
+          },
+          "z_index": 2,
+          "fit": "cover",
+          "max_lines": 3
+        },
+        {
+          "slot_id": "collage_4",
+          "role": "headline",
+          "required": false,
+          "rect_normalized": {
+            "x": 0.07,
+            "y": 0.83,
+            "w": 0.74,
+            "h": 0.11
+          },
+          "z_index": 3,
+          "fit": "contain",
+          "max_lines": 3
+        }
+      ],
+      "allowed_presets": [
+        "photo-card-enter",
+        "parallax-layers",
+        "stagger-reveal"
+      ],
+      "camera_limits": {
+        "min_scale": 0.9,
+        "max_scale": 1.2,
+        "max_rotation_deg": 3,
+        "max_translation_px": 300
+      },
+      "transition_limits": {
+        "min_frames": 0,
+        "max_frames": 30
+      },
+      "overflow_policy": "try_variant_then_block",
+      "fallback_policy": "SAME_APPROVED_ASSET_ONLY",
+      "template_family": "COLLAGE"
+    },
+    {
+      "schema_version": "TemplateLayout.v1",
+      "template_id": "T03",
+      "template_version": "2.0.0",
+      "variant_id": "B",
+      "canvas": {
+        "width": 1920,
+        "height": 1080,
+        "fps": 30
+      },
+      "safe_area_px": {
+        "left": 96,
+        "right": 96,
+        "top": 60,
+        "bottom": 60
+      },
+      "slots": [
+        {
+          "slot_id": "collage_1",
+          "role": "archival_photo",
+          "required": true,
+          "rect_normalized": {
+            "x": 0.39,
+            "y": 0.08,
+            "w": 0.55,
+            "h": 0.82
+          },
+          "z_index": 0,
+          "fit": "cover",
+          "max_lines": 3
+        },
+        {
+          "slot_id": "collage_2",
+          "role": "archival_photo",
+          "required": true,
+          "rect_normalized": {
+            "x": 0.06,
+            "y": 0.17,
+            "w": 0.29,
+            "h": 0.27
+          },
+          "z_index": 1,
+          "fit": "cover",
+          "max_lines": 3
+        },
+        {
+          "slot_id": "collage_3",
+          "role": "archival_photo",
+          "required": false,
+          "rect_normalized": {
+            "x": 0.06,
+            "y": 0.57,
+            "w": 0.29,
+            "h": 0.27
+          },
+          "z_index": 2,
+          "fit": "cover",
+          "max_lines": 3
+        },
+        {
+          "slot_id": "collage_4",
+          "role": "headline",
+          "required": false,
+          "rect_normalized": {
+            "x": 0.08,
+            "y": 0.85,
+            "w": 0.7,
+            "h": 0.1
+          },
+          "z_index": 3,
+          "fit": "contain",
+          "max_lines": 3
+        }
+      ],
+      "allowed_presets": [
+        "photo-card-enter",
+        "parallax-layers",
+        "stagger-reveal"
+      ],
+      "camera_limits": {
+        "min_scale": 0.9,
+        "max_scale": 1.2,
+        "max_rotation_deg": 3,
+        "max_translation_px": 300
+      },
+      "transition_limits": {
+        "min_frames": 0,
+        "max_frames": 30
+      },
+      "overflow_policy": "try_variant_then_block",
+      "fallback_policy": "SAME_APPROVED_ASSET_ONLY",
+      "template_family": "COLLAGE"
+    },
+    {
+      "schema_version": "TemplateLayout.v1",
+      "template_id": "T03",
+      "template_version": "2.0.0",
+      "variant_id": "C",
+      "canvas": {
+        "width": 1920,
+        "height": 1080,
+        "fps": 30
+      },
+      "safe_area_px": {
+        "left": 96,
+        "right": 96,
+        "top": 60,
+        "bottom": 60
+      },
+      "slots": [
+        {
+          "slot_id": "collage_1",
+          "role": "archival_photo",
+          "required": true,
+          "rect_normalized": {
+            "x": 0.06,
+            "y": 0.08,
+            "w": 0.86,
+            "h": 0.54
+          },
+          "z_index": 0,
+          "fit": "cover",
+          "max_lines": 3
+        },
+        {
+          "slot_id": "collage_2",
+          "role": "archival_photo",
+          "required": true,
+          "rect_normalized": {
+            "x": 0.09,
+            "y": 0.69,
+            "w": 0.78,
+            "h": 0.22
+          },
+          "z_index": 1,
+          "fit": "cover",
+          "max_lines": 3
+        },
+        {
+          "slot_id": "collage_3",
+          "role": "archival_photo",
+          "required": false,
+          "rect_normalized": {
+            "x": 0.61,
+            "y": 0.09,
+            "w": 0.3,
+            "h": 0.3
+          },
+          "z_index": 2,
+          "fit": "cover",
+          "max_lines": 3
+        },
+        {
+          "slot_id": "collage_4",
+          "role": "headline",
+          "required": false,
+          "rect_normalized": {
+            "x": 0.07,
+            "y": 0.83,
+            "w": 0.74,
+            "h": 0.11
+          },
+          "z_index": 3,
+          "fit": "contain",
+          "max_lines": 3
+        }
+      ],
+      "allowed_presets": [
+        "photo-card-enter",
+        "parallax-layers",
+        "stagger-reveal"
+      ],
+      "camera_limits": {
+        "min_scale": 0.9,
+        "max_scale": 1.2,
+        "max_rotation_deg": 3,
+        "max_translation_px": 300
+      },
+      "transition_limits": {
+        "min_frames": 0,
+        "max_frames": 30
+      },
+      "overflow_policy": "try_variant_then_block",
+      "fallback_policy": "SAME_APPROVED_ASSET_ONLY",
+      "template_family": "COLLAGE"
+    },
+    {
+      "schema_version": "TemplateLayout.v1",
+      "template_id": "T04",
+      "template_version": "2.0.0",
+      "variant_id": "A",
+      "canvas": {
+        "width": 1920,
+        "height": 1080,
+        "fps": 30
+      },
+      "safe_area_px": {
+        "left": 96,
+        "right": 96,
+        "top": 60,
+        "bottom": 60
+      },
+      "slots": [
+        {
+          "slot_id": "route_1",
+          "role": "map",
+          "required": true,
+          "rect_normalized": {
+            "x": 0.05,
+            "y": 0.08,
+            "w": 0.62,
+            "h": 0.82
+          },
+          "z_index": 0,
+          "fit": "contain",
+          "max_lines": 3
+        },
+        {
+          "slot_id": "route_2",
+          "role": "route",
+          "required": true,
+          "rect_normalized": {
+            "x": 0.7,
+            "y": 0.16,
+            "w": 0.24,
+            "h": 0.28
+          },
+          "z_index": 1,
+          "fit": "contain",
+          "max_lines": 3
+        },
+        {
+          "slot_id": "route_3",
+          "role": "callout",
+          "required": false,
+          "rect_normalized": {
+            "x": 0.7,
+            "y": 0.57,
+            "w": 0.24,
+            "h": 0.28
+          },
+          "z_index": 2,
+          "fit": "contain",
+          "max_lines": 3
+        }
+      ],
+      "allowed_presets": [
+        "route-line-draw",
+        "camera-pan",
+        "text-highlight"
+      ],
+      "camera_limits": {
+        "min_scale": 0.9,
+        "max_scale": 1.2,
+        "max_rotation_deg": 3,
+        "max_translation_px": 300
+      },
+      "transition_limits": {
+        "min_frames": 0,
+        "max_frames": 30
+      },
+      "overflow_policy": "try_variant_then_block",
+      "fallback_policy": "SAME_APPROVED_ASSET_ONLY",
+      "template_family": "ROUTE"
+    },
+    {
+      "schema_version": "TemplateLayout.v1",
+      "template_id": "T04",
+      "template_version": "2.0.0",
+      "variant_id": "B",
+      "canvas": {
+        "width": 1920,
+        "height": 1080,
+        "fps": 30
+      },
+      "safe_area_px": {
+        "left": 96,
+        "right": 96,
+        "top": 60,
+        "bottom": 60
+      },
+      "slots": [
+        {
+          "slot_id": "route_1",
+          "role": "map",
+          "required": true,
+          "rect_normalized": {
+            "x": 0.39,
+            "y": 0.08,
+            "w": 0.55,
+            "h": 0.82
+          },
+          "z_index": 0,
+          "fit": "contain",
+          "max_lines": 3
+        },
+        {
+          "slot_id": "route_2",
+          "role": "route",
+          "required": true,
+          "rect_normalized": {
+            "x": 0.06,
+            "y": 0.17,
+            "w": 0.29,
+            "h": 0.27
+          },
+          "z_index": 1,
+          "fit": "contain",
+          "max_lines": 3
+        },
+        {
+          "slot_id": "route_3",
+          "role": "callout",
+          "required": false,
+          "rect_normalized": {
+            "x": 0.06,
+            "y": 0.57,
+            "w": 0.29,
+            "h": 0.27
+          },
+          "z_index": 2,
+          "fit": "contain",
+          "max_lines": 3
+        }
+      ],
+      "allowed_presets": [
+        "route-line-draw",
+        "camera-pan",
+        "text-highlight"
+      ],
+      "camera_limits": {
+        "min_scale": 0.9,
+        "max_scale": 1.2,
+        "max_rotation_deg": 3,
+        "max_translation_px": 300
+      },
+      "transition_limits": {
+        "min_frames": 0,
+        "max_frames": 30
+      },
+      "overflow_policy": "try_variant_then_block",
+      "fallback_policy": "SAME_APPROVED_ASSET_ONLY",
+      "template_family": "ROUTE"
+    },
+    {
+      "schema_version": "TemplateLayout.v1",
+      "template_id": "T04",
+      "template_version": "2.0.0",
+      "variant_id": "C",
+      "canvas": {
+        "width": 1920,
+        "height": 1080,
+        "fps": 30
+      },
+      "safe_area_px": {
+        "left": 96,
+        "right": 96,
+        "top": 60,
+        "bottom": 60
+      },
+      "slots": [
+        {
+          "slot_id": "route_1",
+          "role": "map",
+          "required": true,
+          "rect_normalized": {
+            "x": 0.06,
+            "y": 0.08,
+            "w": 0.86,
+            "h": 0.54
+          },
+          "z_index": 0,
+          "fit": "contain",
+          "max_lines": 3
+        },
+        {
+          "slot_id": "route_2",
+          "role": "route",
+          "required": true,
+          "rect_normalized": {
+            "x": 0.09,
+            "y": 0.69,
+            "w": 0.78,
+            "h": 0.22
+          },
+          "z_index": 1,
+          "fit": "contain",
+          "max_lines": 3
+        },
+        {
+          "slot_id": "route_3",
+          "role": "callout",
+          "required": false,
+          "rect_normalized": {
+            "x": 0.61,
+            "y": 0.09,
+            "w": 0.3,
+            "h": 0.3
+          },
+          "z_index": 2,
+          "fit": "contain",
+          "max_lines": 3
+        }
+      ],
+      "allowed_presets": [
+        "route-line-draw",
+        "camera-pan",
+        "text-highlight"
+      ],
+      "camera_limits": {
+        "min_scale": 0.9,
+        "max_scale": 1.2,
+        "max_rotation_deg": 3,
+        "max_translation_px": 300
+      },
+      "transition_limits": {
+        "min_frames": 0,
+        "max_frames": 30
+      },
+      "overflow_policy": "try_variant_then_block",
+      "fallback_policy": "SAME_APPROVED_ASSET_ONLY",
+      "template_family": "ROUTE"
+    },
+    {
+      "schema_version": "TemplateLayout.v1",
+      "template_id": "T05",
+      "template_version": "2.0.0",
+      "variant_id": "A",
+      "canvas": {
+        "width": 1920,
+        "height": 1080,
+        "fps": 30
+      },
+      "safe_area_px": {
+        "left": 96,
+        "right": 96,
+        "top": 60,
+        "bottom": 60
+      },
+      "slots": [
+        {
+          "slot_id": "timeline_1",
+          "role": "date",
+          "required": true,
+          "rect_normalized": {
+            "x": 0.05,
+            "y": 0.08,
+            "w": 0.62,
+            "h": 0.82
+          },
+          "z_index": 0,
+          "fit": "contain",
+          "max_lines": 3
+        },
+        {
+          "slot_id": "timeline_2",
+          "role": "text",
+          "required": true,
+          "rect_normalized": {
+            "x": 0.7,
+            "y": 0.16,
+            "w": 0.24,
+            "h": 0.28
+          },
+          "z_index": 1,
+          "fit": "contain",
+          "max_lines": 5
+        },
+        {
+          "slot_id": "timeline_3",
+          "role": "headline",
+          "required": false,
+          "rect_normalized": {
+            "x": 0.7,
+            "y": 0.57,
+            "w": 0.24,
+            "h": 0.28
+          },
+          "z_index": 2,
+          "fit": "contain",
+          "max_lines": 3
+        }
+      ],
+      "allowed_presets": [
+        "title-mask-reveal",
+        "camera-push",
+        "stagger-reveal",
+        "freeze-hold"
+      ],
+      "camera_limits": {
+        "min_scale": 0.9,
+        "max_scale": 1.2,
+        "max_rotation_deg": 3,
+        "max_translation_px": 300
+      },
+      "transition_limits": {
+        "min_frames": 0,
+        "max_frames": 30
+      },
+      "overflow_policy": "try_variant_then_block",
+      "fallback_policy": "SAME_APPROVED_ASSET_ONLY",
+      "template_family": "TIMELINE"
+    },
+    {
+      "schema_version": "TemplateLayout.v1",
+      "template_id": "T05",
+      "template_version": "2.0.0",
+      "variant_id": "B",
+      "canvas": {
+        "width": 1920,
+        "height": 1080,
+        "fps": 30
+      },
+      "safe_area_px": {
+        "left": 96,
+        "right": 96,
+        "top": 60,
+        "bottom": 60
+      },
+      "slots": [
+        {
+          "slot_id": "timeline_1",
+          "role": "date",
+          "required": true,
+          "rect_normalized": {
+            "x": 0.39,
+            "y": 0.08,
+            "w": 0.55,
+            "h": 0.82
+          },
+          "z_index": 0,
+          "fit": "contain",
+          "max_lines": 3
+        },
+        {
+          "slot_id": "timeline_2",
+          "role": "text",
+          "required": true,
+          "rect_normalized": {
+            "x": 0.06,
+            "y": 0.17,
+            "w": 0.29,
+            "h": 0.27
+          },
+          "z_index": 1,
+          "fit": "contain",
+          "max_lines": 5
+        },
+        {
+          "slot_id": "timeline_3",
+          "role": "headline",
+          "required": false,
+          "rect_normalized": {
+            "x": 0.06,
+            "y": 0.57,
+            "w": 0.29,
+            "h": 0.27
+          },
+          "z_index": 2,
+          "fit": "contain",
+          "max_lines": 3
+        }
+      ],
+      "allowed_presets": [
+        "title-mask-reveal",
+        "camera-push",
+        "stagger-reveal",
+        "freeze-hold"
+      ],
+      "camera_limits": {
+        "min_scale": 0.9,
+        "max_scale": 1.2,
+        "max_rotation_deg": 3,
+        "max_translation_px": 300
+      },
+      "transition_limits": {
+        "min_frames": 0,
+        "max_frames": 30
+      },
+      "overflow_policy": "try_variant_then_block",
+      "fallback_policy": "SAME_APPROVED_ASSET_ONLY",
+      "template_family": "TIMELINE"
+    },
+    {
+      "schema_version": "TemplateLayout.v1",
+      "template_id": "T05",
+      "template_version": "2.0.0",
+      "variant_id": "C",
+      "canvas": {
+        "width": 1920,
+        "height": 1080,
+        "fps": 30
+      },
+      "safe_area_px": {
+        "left": 96,
+        "right": 96,
+        "top": 60,
+        "bottom": 60
+      },
+      "slots": [
+        {
+          "slot_id": "timeline_1",
+          "role": "date",
+          "required": true,
+          "rect_normalized": {
+            "x": 0.06,
+            "y": 0.08,
+            "w": 0.86,
+            "h": 0.54
+          },
+          "z_index": 0,
+          "fit": "contain",
+          "max_lines": 3
+        },
+        {
+          "slot_id": "timeline_2",
+          "role": "text",
+          "required": true,
+          "rect_normalized": {
+            "x": 0.09,
+            "y": 0.69,
+            "w": 0.78,
+            "h": 0.22
+          },
+          "z_index": 1,
+          "fit": "contain",
+          "max_lines": 5
+        },
+        {
+          "slot_id": "timeline_3",
+          "role": "headline",
+          "required": false,
+          "rect_normalized": {
+            "x": 0.61,
+            "y": 0.09,
+            "w": 0.3,
+            "h": 0.3
+          },
+          "z_index": 2,
+          "fit": "contain",
+          "max_lines": 3
+        }
+      ],
+      "allowed_presets": [
+        "title-mask-reveal",
+        "camera-push",
+        "stagger-reveal",
+        "freeze-hold"
+      ],
+      "camera_limits": {
+        "min_scale": 0.9,
+        "max_scale": 1.2,
+        "max_rotation_deg": 3,
+        "max_translation_px": 300
+      },
+      "transition_limits": {
+        "min_frames": 0,
+        "max_frames": 30
+      },
+      "overflow_policy": "try_variant_then_block",
+      "fallback_policy": "SAME_APPROVED_ASSET_ONLY",
+      "template_family": "TIMELINE"
+    },
+    {
+      "schema_version": "TemplateLayout.v1",
+      "template_id": "T06",
+      "template_version": "2.0.0",
+      "variant_id": "A",
+      "canvas": {
+        "width": 1920,
+        "height": 1080,
+        "fps": 30
+      },
+      "safe_area_px": {
+        "left": 96,
+        "right": 96,
+        "top": 60,
+        "bottom": 60
+      },
+      "slots": [
+        {
+          "slot_id": "document_1",
+          "role": "document",
+          "required": true,
+          "rect_normalized": {
+            "x": 0.05,
+            "y": 0.08,
+            "w": 0.62,
+            "h": 0.82
+          },
+          "z_index": 0,
+          "fit": "cover",
+          "max_lines": 3
+        },
+        {
+          "slot_id": "document_2",
+          "role": "text",
+          "required": false,
+          "rect_normalized": {
+            "x": 0.7,
+            "y": 0.16,
+            "w": 0.24,
+            "h": 0.28
+          },
+          "z_index": 1,
+          "fit": "contain",
+          "max_lines": 5
+        },
+        {
+          "slot_id": "document_3",
+          "role": "callout",
+          "required": false,
+          "rect_normalized": {
+            "x": 0.7,
+            "y": 0.57,
+            "w": 0.24,
+            "h": 0.28
+          },
+          "z_index": 2,
+          "fit": "contain",
+          "max_lines": 3
+        }
+      ],
+      "allowed_presets": [
+        "title-mask-reveal",
+        "camera-push",
+        "stagger-reveal",
+        "freeze-hold"
+      ],
+      "camera_limits": {
+        "min_scale": 0.9,
+        "max_scale": 1.2,
+        "max_rotation_deg": 3,
+        "max_translation_px": 300
+      },
+      "transition_limits": {
+        "min_frames": 0,
+        "max_frames": 30
+      },
+      "overflow_policy": "try_variant_then_block",
+      "fallback_policy": "SAME_APPROVED_ASSET_ONLY",
+      "template_family": "DOCUMENT"
+    },
+    {
+      "schema_version": "TemplateLayout.v1",
+      "template_id": "T06",
+      "template_version": "2.0.0",
+      "variant_id": "B",
+      "canvas": {
+        "width": 1920,
+        "height": 1080,
+        "fps": 30
+      },
+      "safe_area_px": {
+        "left": 96,
+        "right": 96,
+        "top": 60,
+        "bottom": 60
+      },
+      "slots": [
+        {
+          "slot_id": "document_1",
+          "role": "document",
+          "required": true,
+          "rect_normalized": {
+            "x": 0.39,
+            "y": 0.08,
+            "w": 0.55,
+            "h": 0.82
+          },
+          "z_index": 0,
+          "fit": "cover",
+          "max_lines": 3
+        },
+        {
+          "slot_id": "document_2",
+          "role": "text",
+          "required": false,
+          "rect_normalized": {
+            "x": 0.06,
+            "y": 0.17,
+            "w": 0.29,
+            "h": 0.27
+          },
+          "z_index": 1,
+          "fit": "contain",
+          "max_lines": 5
+        },
+        {
+          "slot_id": "document_3",
+          "role": "callout",
+          "required": false,
+          "rect_normalized": {
+            "x": 0.06,
+            "y": 0.57,
+            "w": 0.29,
+            "h": 0.27
+          },
+          "z_index": 2,
+          "fit": "contain",
+          "max_lines": 3
+        }
+      ],
+      "allowed_presets": [
+        "title-mask-reveal",
+        "camera-push",
+        "stagger-reveal",
+        "freeze-hold"
+      ],
+      "camera_limits": {
+        "min_scale": 0.9,
+        "max_scale": 1.2,
+        "max_rotation_deg": 3,
+        "max_translation_px": 300
+      },
+      "transition_limits": {
+        "min_frames": 0,
+        "max_frames": 30
+      },
+      "overflow_policy": "try_variant_then_block",
+      "fallback_policy": "SAME_APPROVED_ASSET_ONLY",
+      "template_family": "DOCUMENT"
+    },
+    {
+      "schema_version": "TemplateLayout.v1",
+      "template_id": "T06",
+      "template_version": "2.0.0",
+      "variant_id": "C",
+      "canvas": {
+        "width": 1920,
+        "height": 1080,
+        "fps": 30
+      },
+      "safe_area_px": {
+        "left": 96,
+        "right": 96,
+        "top": 60,
+        "bottom": 60
+      },
+      "slots": [
+        {
+          "slot_id": "document_1",
+          "role": "document",
+          "required": true,
+          "rect_normalized": {
+            "x": 0.06,
+            "y": 0.08,
+            "w": 0.86,
+            "h": 0.54
+          },
+          "z_index": 0,
+          "fit": "cover",
+          "max_lines": 3
+        },
+        {
+          "slot_id": "document_2",
+          "role": "text",
+          "required": false,
+          "rect_normalized": {
+            "x": 0.09,
+            "y": 0.69,
+            "w": 0.78,
+            "h": 0.22
+          },
+          "z_index": 1,
+          "fit": "contain",
+          "max_lines": 5
+        },
+        {
+          "slot_id": "document_3",
+          "role": "callout",
+          "required": false,
+          "rect_normalized": {
+            "x": 0.61,
+            "y": 0.09,
+            "w": 0.3,
+            "h": 0.3
+          },
+          "z_index": 2,
+          "fit": "contain",
+          "max_lines": 3
+        }
+      ],
+      "allowed_presets": [
+        "title-mask-reveal",
+        "camera-push",
+        "stagger-reveal",
+        "freeze-hold"
+      ],
+      "camera_limits": {
+        "min_scale": 0.9,
+        "max_scale": 1.2,
+        "max_rotation_deg": 3,
+        "max_translation_px": 300
+      },
+      "transition_limits": {
+        "min_frames": 0,
+        "max_frames": 30
+      },
+      "overflow_policy": "try_variant_then_block",
+      "fallback_policy": "SAME_APPROVED_ASSET_ONLY",
+      "template_family": "DOCUMENT"
+    },
+    {
+      "schema_version": "TemplateLayout.v1",
+      "template_id": "T07",
+      "template_version": "2.0.0",
+      "variant_id": "A",
+      "canvas": {
+        "width": 1920,
+        "height": 1080,
+        "fps": 30
+      },
+      "safe_area_px": {
+        "left": 96,
+        "right": 96,
+        "top": 60,
+        "bottom": 60
+      },
+      "slots": [
+        {
+          "slot_id": "map_compare_1",
+          "role": "map",
+          "required": true,
+          "rect_normalized": {
+            "x": 0.05,
+            "y": 0.08,
+            "w": 0.62,
+            "h": 0.82
+          },
+          "z_index": 0,
+          "fit": "contain",
+          "max_lines": 3
+        },
+        {
+          "slot_id": "map_compare_2",
+          "role": "map",
+          "required": true,
+          "rect_normalized": {
+            "x": 0.7,
+            "y": 0.16,
+            "w": 0.24,
+            "h": 0.28
+          },
+          "z_index": 1,
+          "fit": "contain",
+          "max_lines": 3
+        },
+        {
+          "slot_id": "map_compare_3",
+          "role": "date",
+          "required": false,
+          "rect_normalized": {
+            "x": 0.7,
+            "y": 0.57,
+            "w": 0.24,
+            "h": 0.28
+          },
+          "z_index": 2,
+          "fit": "contain",
+          "max_lines": 3
+        }
+      ],
+      "allowed_presets": [
+        "map-region-wipe",
+        "camera-pan",
+        "cross-dissolve"
+      ],
+      "camera_limits": {
+        "min_scale": 0.9,
+        "max_scale": 1.2,
+        "max_rotation_deg": 3,
+        "max_translation_px": 300
+      },
+      "transition_limits": {
+        "min_frames": 0,
+        "max_frames": 30
+      },
+      "overflow_policy": "try_variant_then_block",
+      "fallback_policy": "SAME_APPROVED_ASSET_ONLY",
+      "template_family": "MAP_COMPARE"
+    },
+    {
+      "schema_version": "TemplateLayout.v1",
+      "template_id": "T07",
+      "template_version": "2.0.0",
+      "variant_id": "B",
+      "canvas": {
+        "width": 1920,
+        "height": 1080,
+        "fps": 30
+      },
+      "safe_area_px": {
+        "left": 96,
+        "right": 96,
+        "top": 60,
+        "bottom": 60
+      },
+      "slots": [
+        {
+          "slot_id": "map_compare_1",
+          "role": "map",
+          "required": true,
+          "rect_normalized": {
+            "x": 0.39,
+            "y": 0.08,
+            "w": 0.55,
+            "h": 0.82
+          },
+          "z_index": 0,
+          "fit": "contain",
+          "max_lines": 3
+        },
+        {
+          "slot_id": "map_compare_2",
+          "role": "map",
+          "required": true,
+          "rect_normalized": {
+            "x": 0.06,
+            "y": 0.17,
+            "w": 0.29,
+            "h": 0.27
+          },
+          "z_index": 1,
+          "fit": "contain",
+          "max_lines": 3
+        },
+        {
+          "slot_id": "map_compare_3",
+          "role": "date",
+          "required": false,
+          "rect_normalized": {
+            "x": 0.06,
+            "y": 0.57,
+            "w": 0.29,
+            "h": 0.27
+          },
+          "z_index": 2,
+          "fit": "contain",
+          "max_lines": 3
+        }
+      ],
+      "allowed_presets": [
+        "map-region-wipe",
+        "camera-pan",
+        "cross-dissolve"
+      ],
+      "camera_limits": {
+        "min_scale": 0.9,
+        "max_scale": 1.2,
+        "max_rotation_deg": 3,
+        "max_translation_px": 300
+      },
+      "transition_limits": {
+        "min_frames": 0,
+        "max_frames": 30
+      },
+      "overflow_policy": "try_variant_then_block",
+      "fallback_policy": "SAME_APPROVED_ASSET_ONLY",
+      "template_family": "MAP_COMPARE"
+    },
+    {
+      "schema_version": "TemplateLayout.v1",
+      "template_id": "T07",
+      "template_version": "2.0.0",
+      "variant_id": "C",
+      "canvas": {
+        "width": 1920,
+        "height": 1080,
+        "fps": 30
+      },
+      "safe_area_px": {
+        "left": 96,
+        "right": 96,
+        "top": 60,
+        "bottom": 60
+      },
+      "slots": [
+        {
+          "slot_id": "map_compare_1",
+          "role": "map",
+          "required": true,
+          "rect_normalized": {
+            "x": 0.06,
+            "y": 0.08,
+            "w": 0.86,
+            "h": 0.54
+          },
+          "z_index": 0,
+          "fit": "contain",
+          "max_lines": 3
+        },
+        {
+          "slot_id": "map_compare_2",
+          "role": "map",
+          "required": true,
+          "rect_normalized": {
+            "x": 0.09,
+            "y": 0.69,
+            "w": 0.78,
+            "h": 0.22
+          },
+          "z_index": 1,
+          "fit": "contain",
+          "max_lines": 3
+        },
+        {
+          "slot_id": "map_compare_3",
+          "role": "date",
+          "required": false,
+          "rect_normalized": {
+            "x": 0.61,
+            "y": 0.09,
+            "w": 0.3,
+            "h": 0.3
+          },
+          "z_index": 2,
+          "fit": "contain",
+          "max_lines": 3
+        }
+      ],
+      "allowed_presets": [
+        "map-region-wipe",
+        "camera-pan",
+        "cross-dissolve"
+      ],
+      "camera_limits": {
+        "min_scale": 0.9,
+        "max_scale": 1.2,
+        "max_rotation_deg": 3,
+        "max_translation_px": 300
+      },
+      "transition_limits": {
+        "min_frames": 0,
+        "max_frames": 30
+      },
+      "overflow_policy": "try_variant_then_block",
+      "fallback_policy": "SAME_APPROVED_ASSET_ONLY",
+      "template_family": "MAP_COMPARE"
+    },
+    {
+      "schema_version": "TemplateLayout.v1",
+      "template_id": "T08",
+      "template_version": "2.0.0",
+      "variant_id": "A",
+      "canvas": {
+        "width": 1920,
+        "height": 1080,
+        "fps": 30
+      },
+      "safe_area_px": {
+        "left": 96,
+        "right": 96,
+        "top": 60,
+        "bottom": 60
+      },
+      "slots": [
+        {
+          "slot_id": "fact_1",
+          "role": "date",
+          "required": true,
+          "rect_normalized": {
+            "x": 0.05,
+            "y": 0.08,
+            "w": 0.62,
+            "h": 0.82
+          },
+          "z_index": 0,
+          "fit": "contain",
+          "max_lines": 3
+        },
+        {
+          "slot_id": "fact_2",
+          "role": "headline",
+          "required": false,
+          "rect_normalized": {
+            "x": 0.7,
+            "y": 0.16,
+            "w": 0.24,
+            "h": 0.28
+          },
+          "z_index": 1,
+          "fit": "contain",
+          "max_lines": 3
+        }
+      ],
+      "allowed_presets": [
+        "title-mask-reveal",
+        "camera-push",
+        "stagger-reveal",
+        "freeze-hold"
+      ],
+      "camera_limits": {
+        "min_scale": 0.9,
+        "max_scale": 1.2,
+        "max_rotation_deg": 3,
+        "max_translation_px": 300
+      },
+      "transition_limits": {
+        "min_frames": 0,
+        "max_frames": 30
+      },
+      "overflow_policy": "try_variant_then_block",
+      "fallback_policy": "SAME_APPROVED_ASSET_ONLY",
+      "template_family": "FACT"
+    },
+    {
+      "schema_version": "TemplateLayout.v1",
+      "template_id": "T08",
+      "template_version": "2.0.0",
+      "variant_id": "B",
+      "canvas": {
+        "width": 1920,
+        "height": 1080,
+        "fps": 30
+      },
+      "safe_area_px": {
+        "left": 96,
+        "right": 96,
+        "top": 60,
+        "bottom": 60
+      },
+      "slots": [
+        {
+          "slot_id": "fact_1",
+          "role": "date",
+          "required": true,
+          "rect_normalized": {
+            "x": 0.39,
+            "y": 0.08,
+            "w": 0.55,
+            "h": 0.82
+          },
+          "z_index": 0,
+          "fit": "contain",
+          "max_lines": 3
+        },
+        {
+          "slot_id": "fact_2",
+          "role": "headline",
+          "required": false,
+          "rect_normalized": {
+            "x": 0.06,
+            "y": 0.17,
+            "w": 0.29,
+            "h": 0.27
+          },
+          "z_index": 1,
+          "fit": "contain",
+          "max_lines": 3
+        }
+      ],
+      "allowed_presets": [
+        "title-mask-reveal",
+        "camera-push",
+        "stagger-reveal",
+        "freeze-hold"
+      ],
+      "camera_limits": {
+        "min_scale": 0.9,
+        "max_scale": 1.2,
+        "max_rotation_deg": 3,
+        "max_translation_px": 300
+      },
+      "transition_limits": {
+        "min_frames": 0,
+        "max_frames": 30
+      },
+      "overflow_policy": "try_variant_then_block",
+      "fallback_policy": "SAME_APPROVED_ASSET_ONLY",
+      "template_family": "FACT"
+    },
+    {
+      "schema_version": "TemplateLayout.v1",
+      "template_id": "T08",
+      "template_version": "2.0.0",
+      "variant_id": "C",
+      "canvas": {
+        "width": 1920,
+        "height": 1080,
+        "fps": 30
+      },
+      "safe_area_px": {
+        "left": 96,
+        "right": 96,
+        "top": 60,
+        "bottom": 60
+      },
+      "slots": [
+        {
+          "slot_id": "fact_1",
+          "role": "date",
+          "required": true,
+          "rect_normalized": {
+            "x": 0.06,
+            "y": 0.08,
+            "w": 0.86,
+            "h": 0.54
+          },
+          "z_index": 0,
+          "fit": "contain",
+          "max_lines": 3
+        },
+        {
+          "slot_id": "fact_2",
+          "role": "headline",
+          "required": false,
+          "rect_normalized": {
+            "x": 0.09,
+            "y": 0.69,
+            "w": 0.78,
+            "h": 0.22
+          },
+          "z_index": 1,
+          "fit": "contain",
+          "max_lines": 3
+        }
+      ],
+      "allowed_presets": [
+        "title-mask-reveal",
+        "camera-push",
+        "stagger-reveal",
+        "freeze-hold"
+      ],
+      "camera_limits": {
+        "min_scale": 0.9,
+        "max_scale": 1.2,
+        "max_rotation_deg": 3,
+        "max_translation_px": 300
+      },
+      "transition_limits": {
+        "min_frames": 0,
+        "max_frames": 30
+      },
+      "overflow_policy": "try_variant_then_block",
+      "fallback_policy": "SAME_APPROVED_ASSET_ONLY",
+      "template_family": "FACT"
+    },
+    {
+      "schema_version": "TemplateLayout.v1",
+      "template_id": "T09",
+      "template_version": "2.0.0",
+      "variant_id": "A",
+      "canvas": {
+        "width": 1920,
+        "height": 1080,
+        "fps": 30
+      },
+      "safe_area_px": {
+        "left": 96,
+        "right": 96,
+        "top": 60,
+        "bottom": 60
+      },
+      "slots": [
+        {
+          "slot_id": "quote_1",
+          "role": "headline",
+          "required": true,
+          "rect_normalized": {
+            "x": 0.05,
+            "y": 0.08,
+            "w": 0.62,
+            "h": 0.82
+          },
+          "z_index": 0,
+          "fit": "contain",
+          "max_lines": 3
+        },
+        {
+          "slot_id": "quote_2",
+          "role": "document",
+          "required": true,
+          "rect_normalized": {
+            "x": 0.7,
+            "y": 0.16,
+            "w": 0.24,
+            "h": 0.28
+          },
+          "z_index": 1,
+          "fit": "cover",
+          "max_lines": 3
+        },
+        {
+          "slot_id": "quote_3",
+          "role": "text",
+          "required": false,
+          "rect_normalized": {
+            "x": 0.7,
+            "y": 0.57,
+            "w": 0.24,
+            "h": 0.28
+          },
+          "z_index": 2,
+          "fit": "contain",
+          "max_lines": 5
+        }
+      ],
+      "allowed_presets": [
+        "title-mask-reveal",
+        "camera-push",
+        "stagger-reveal",
+        "freeze-hold"
+      ],
+      "camera_limits": {
+        "min_scale": 0.9,
+        "max_scale": 1.2,
+        "max_rotation_deg": 3,
+        "max_translation_px": 300
+      },
+      "transition_limits": {
+        "min_frames": 0,
+        "max_frames": 30
+      },
+      "overflow_policy": "try_variant_then_block",
+      "fallback_policy": "SAME_APPROVED_ASSET_ONLY",
+      "template_family": "QUOTE"
+    },
+    {
+      "schema_version": "TemplateLayout.v1",
+      "template_id": "T09",
+      "template_version": "2.0.0",
+      "variant_id": "B",
+      "canvas": {
+        "width": 1920,
+        "height": 1080,
+        "fps": 30
+      },
+      "safe_area_px": {
+        "left": 96,
+        "right": 96,
+        "top": 60,
+        "bottom": 60
+      },
+      "slots": [
+        {
+          "slot_id": "quote_1",
+          "role": "headline",
+          "required": true,
+          "rect_normalized": {
+            "x": 0.39,
+            "y": 0.08,
+            "w": 0.55,
+            "h": 0.82
+          },
+          "z_index": 0,
+          "fit": "contain",
+          "max_lines": 3
+        },
+        {
+          "slot_id": "quote_2",
+          "role": "document",
+          "required": true,
+          "rect_normalized": {
+            "x": 0.06,
+            "y": 0.17,
+            "w": 0.29,
+            "h": 0.27
+          },
+          "z_index": 1,
+          "fit": "cover",
+          "max_lines": 3
+        },
+        {
+          "slot_id": "quote_3",
+          "role": "text",
+          "required": false,
+          "rect_normalized": {
+            "x": 0.06,
+            "y": 0.57,
+            "w": 0.29,
+            "h": 0.27
+          },
+          "z_index": 2,
+          "fit": "contain",
+          "max_lines": 5
+        }
+      ],
+      "allowed_presets": [
+        "title-mask-reveal",
+        "camera-push",
+        "stagger-reveal",
+        "freeze-hold"
+      ],
+      "camera_limits": {
+        "min_scale": 0.9,
+        "max_scale": 1.2,
+        "max_rotation_deg": 3,
+        "max_translation_px": 300
+      },
+      "transition_limits": {
+        "min_frames": 0,
+        "max_frames": 30
+      },
+      "overflow_policy": "try_variant_then_block",
+      "fallback_policy": "SAME_APPROVED_ASSET_ONLY",
+      "template_family": "QUOTE"
+    },
+    {
+      "schema_version": "TemplateLayout.v1",
+      "template_id": "T09",
+      "template_version": "2.0.0",
+      "variant_id": "C",
+      "canvas": {
+        "width": 1920,
+        "height": 1080,
+        "fps": 30
+      },
+      "safe_area_px": {
+        "left": 96,
+        "right": 96,
+        "top": 60,
+        "bottom": 60
+      },
+      "slots": [
+        {
+          "slot_id": "quote_1",
+          "role": "headline",
+          "required": true,
+          "rect_normalized": {
+            "x": 0.06,
+            "y": 0.08,
+            "w": 0.86,
+            "h": 0.54
+          },
+          "z_index": 0,
+          "fit": "contain",
+          "max_lines": 3
+        },
+        {
+          "slot_id": "quote_2",
+          "role": "document",
+          "required": true,
+          "rect_normalized": {
+            "x": 0.09,
+            "y": 0.69,
+            "w": 0.78,
+            "h": 0.22
+          },
+          "z_index": 1,
+          "fit": "cover",
+          "max_lines": 3
+        },
+        {
+          "slot_id": "quote_3",
+          "role": "text",
+          "required": false,
+          "rect_normalized": {
+            "x": 0.61,
+            "y": 0.09,
+            "w": 0.3,
+            "h": 0.3
+          },
+          "z_index": 2,
+          "fit": "contain",
+          "max_lines": 5
+        }
+      ],
+      "allowed_presets": [
+        "title-mask-reveal",
+        "camera-push",
+        "stagger-reveal",
+        "freeze-hold"
+      ],
+      "camera_limits": {
+        "min_scale": 0.9,
+        "max_scale": 1.2,
+        "max_rotation_deg": 3,
+        "max_translation_px": 300
+      },
+      "transition_limits": {
+        "min_frames": 0,
+        "max_frames": 30
+      },
+      "overflow_policy": "try_variant_then_block",
+      "fallback_policy": "SAME_APPROVED_ASSET_ONLY",
+      "template_family": "QUOTE"
+    },
+    {
+      "schema_version": "TemplateLayout.v1",
+      "template_id": "T10",
+      "template_version": "2.0.0",
+      "variant_id": "A",
+      "canvas": {
+        "width": 1920,
+        "height": 1080,
+        "fps": 30
+      },
+      "safe_area_px": {
+        "left": 96,
+        "right": 96,
+        "top": 60,
+        "bottom": 60
+      },
+      "slots": [
+        {
+          "slot_id": "consequence_1",
+          "role": "map",
+          "required": true,
+          "rect_normalized": {
+            "x": 0.05,
+            "y": 0.08,
+            "w": 0.62,
+            "h": 0.82
+          },
+          "z_index": 0,
+          "fit": "contain",
+          "max_lines": 3
+        },
+        {
+          "slot_id": "consequence_2",
+          "role": "callout",
+          "required": false,
+          "rect_normalized": {
+            "x": 0.7,
+            "y": 0.16,
+            "w": 0.24,
+            "h": 0.28
+          },
+          "z_index": 1,
+          "fit": "contain",
+          "max_lines": 3
+        },
+        {
+          "slot_id": "consequence_3",
+          "role": "callout",
+          "required": false,
+          "rect_normalized": {
+            "x": 0.7,
+            "y": 0.57,
+            "w": 0.24,
+            "h": 0.28
+          },
+          "z_index": 2,
+          "fit": "contain",
+          "max_lines": 3
+        }
+      ],
+      "allowed_presets": [
+        "title-mask-reveal",
+        "camera-push",
+        "stagger-reveal",
+        "freeze-hold"
+      ],
+      "camera_limits": {
+        "min_scale": 0.9,
+        "max_scale": 1.2,
+        "max_rotation_deg": 3,
+        "max_translation_px": 300
+      },
+      "transition_limits": {
+        "min_frames": 0,
+        "max_frames": 30
+      },
+      "overflow_policy": "try_variant_then_block",
+      "fallback_policy": "SAME_APPROVED_ASSET_ONLY",
+      "template_family": "CONSEQUENCE"
+    },
+    {
+      "schema_version": "TemplateLayout.v1",
+      "template_id": "T10",
+      "template_version": "2.0.0",
+      "variant_id": "B",
+      "canvas": {
+        "width": 1920,
+        "height": 1080,
+        "fps": 30
+      },
+      "safe_area_px": {
+        "left": 96,
+        "right": 96,
+        "top": 60,
+        "bottom": 60
+      },
+      "slots": [
+        {
+          "slot_id": "consequence_1",
+          "role": "map",
+          "required": true,
+          "rect_normalized": {
+            "x": 0.39,
+            "y": 0.08,
+            "w": 0.55,
+            "h": 0.82
+          },
+          "z_index": 0,
+          "fit": "contain",
+          "max_lines": 3
+        },
+        {
+          "slot_id": "consequence_2",
+          "role": "callout",
+          "required": false,
+          "rect_normalized": {
+            "x": 0.06,
+            "y": 0.17,
+            "w": 0.29,
+            "h": 0.27
+          },
+          "z_index": 1,
+          "fit": "contain",
+          "max_lines": 3
+        },
+        {
+          "slot_id": "consequence_3",
+          "role": "callout",
+          "required": false,
+          "rect_normalized": {
+            "x": 0.06,
+            "y": 0.57,
+            "w": 0.29,
+            "h": 0.27
+          },
+          "z_index": 2,
+          "fit": "contain",
+          "max_lines": 3
+        }
+      ],
+      "allowed_presets": [
+        "title-mask-reveal",
+        "camera-push",
+        "stagger-reveal",
+        "freeze-hold"
+      ],
+      "camera_limits": {
+        "min_scale": 0.9,
+        "max_scale": 1.2,
+        "max_rotation_deg": 3,
+        "max_translation_px": 300
+      },
+      "transition_limits": {
+        "min_frames": 0,
+        "max_frames": 30
+      },
+      "overflow_policy": "try_variant_then_block",
+      "fallback_policy": "SAME_APPROVED_ASSET_ONLY",
+      "template_family": "CONSEQUENCE"
+    },
+    {
+      "schema_version": "TemplateLayout.v1",
+      "template_id": "T10",
+      "template_version": "2.0.0",
+      "variant_id": "C",
+      "canvas": {
+        "width": 1920,
+        "height": 1080,
+        "fps": 30
+      },
+      "safe_area_px": {
+        "left": 96,
+        "right": 96,
+        "top": 60,
+        "bottom": 60
+      },
+      "slots": [
+        {
+          "slot_id": "consequence_1",
+          "role": "map",
+          "required": true,
+          "rect_normalized": {
+            "x": 0.06,
+            "y": 0.08,
+            "w": 0.86,
+            "h": 0.54
+          },
+          "z_index": 0,
+          "fit": "contain",
+          "max_lines": 3
+        },
+        {
+          "slot_id": "consequence_2",
+          "role": "callout",
+          "required": false,
+          "rect_normalized": {
+            "x": 0.09,
+            "y": 0.69,
+            "w": 0.78,
+            "h": 0.22
+          },
+          "z_index": 1,
+          "fit": "contain",
+          "max_lines": 3
+        },
+        {
+          "slot_id": "consequence_3",
+          "role": "callout",
+          "required": false,
+          "rect_normalized": {
+            "x": 0.61,
+            "y": 0.09,
+            "w": 0.3,
+            "h": 0.3
+          },
+          "z_index": 2,
+          "fit": "contain",
+          "max_lines": 3
+        }
+      ],
+      "allowed_presets": [
+        "title-mask-reveal",
+        "camera-push",
+        "stagger-reveal",
+        "freeze-hold"
+      ],
+      "camera_limits": {
+        "min_scale": 0.9,
+        "max_scale": 1.2,
+        "max_rotation_deg": 3,
+        "max_translation_px": 300
+      },
+      "transition_limits": {
+        "min_frames": 0,
+        "max_frames": 30
+      },
+      "overflow_policy": "try_variant_then_block",
+      "fallback_policy": "SAME_APPROVED_ASSET_ONLY",
+      "template_family": "CONSEQUENCE"
+    }
+  ]
+}
