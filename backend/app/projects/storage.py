@@ -134,7 +134,7 @@ class ProjectStore:
                              (sha256,)).fetchone()
         if row is None:
             raise ContractViolation("ARTIFACT_NOT_FOUND", sha256, "Register the original artifact first.")
-        if row[2] != str(self.artifacts.path(sha256).relative_to(self.artifacts.root)).replace("\\", "/"):
+        if row[1] != str(self.artifacts.path(sha256).relative_to(self.artifacts.root)).replace("\\", "/"):
             raise ContractViolation("ARTIFACT_METADATA_CONFLICT", sha256, "Repair immutable storage metadata.")
         data = self.artifacts.read(sha256)
         if len(data) != row[0]:
