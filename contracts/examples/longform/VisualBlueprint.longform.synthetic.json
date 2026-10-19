@@ -28,7 +28,8 @@
             "text": "THE FRAGILE MAP OF EUROPE",
             "role": "headline",
             "claim_ref": null,
-            "max_lines": 2
+            "max_lines": 2,
+            "text_id": "text_setup_001"
           }
         ],
         "reveal_plan": [
@@ -59,7 +60,44 @@
         "layout_variant_hint": "A",
         "duration_policy": "voice_locked",
         "transition_intent": "hard_cut",
-        "historical_map_requirement_id": "req_001"
+        "historical_map_requirement_id": "req_001",
+        "visual_beats": [
+          {
+            "beat_id": "beat_setup_001",
+            "section_ref": "sec_001",
+            "cue": {
+              "section_id": "sec_001",
+              "phrase": "In",
+              "occurrence": 0
+            },
+            "action": "establish",
+            "focus_ref": "slot_sec_001",
+            "shot_goal": "Understand who, where and why this context matters",
+            "source_claim_refs": [
+              "claim_001"
+            ],
+            "relationships": [],
+            "staging": [
+              {
+                "ref": "slot_sec_001",
+                "operation": "enter",
+                "after_ref": null,
+                "motion_hint": "subtle_push",
+                "priority": 1
+              }
+            ],
+            "focus_move": "static",
+            "hold_policy": "narration_aligned",
+            "continuity": {
+              "group_id": "group_setup_001",
+              "carry_refs": [],
+              "entry": "new_setup",
+              "exit": "hard_cut",
+              "reason": "fixture setup boundary"
+            }
+          }
+        ],
+        "reuse_setup_id": null
       },
       "asset_slot_bindings": [
         {
@@ -82,6 +120,25 @@
           0.5,
           0.5
         ]
+      },
+      "template_payload": {
+        "template_id": "T01",
+        "map": {
+          "map_requirement_id": "req_001",
+          "year": 1914,
+          "approved_feature_refs": [],
+          "label_source_claim_refs": [
+            "claim_001"
+          ]
+        },
+        "focus_region_ref": "feature_001",
+        "location_labels": [
+          {
+            "source_claim_id": "claim_001",
+            "text": "THE FRAGILE MAP OF EUROPE"
+          }
+        ],
+        "highlight_feature_ids": []
       }
     },
     {
@@ -109,7 +166,8 @@
             "text": "THE FRAGILE MAP OF EUROPE",
             "role": "headline",
             "claim_ref": null,
-            "max_lines": 2
+            "max_lines": 2,
+            "text_id": "text_setup_002"
           }
         ],
         "reveal_plan": [
@@ -140,7 +198,44 @@
         "layout_variant_hint": "A",
         "duration_policy": "voice_locked",
         "transition_intent": "hard_cut",
-        "historical_map_requirement_id": "req_001"
+        "historical_map_requirement_id": "req_001",
+        "visual_beats": [
+          {
+            "beat_id": "beat_setup_002",
+            "section_ref": "sec_001",
+            "cue": {
+              "section_id": "sec_001",
+              "phrase": "In",
+              "occurrence": 0
+            },
+            "action": "establish",
+            "focus_ref": "slot_sec_001",
+            "shot_goal": "Understand who, where and why this context matters",
+            "source_claim_refs": [
+              "claim_001"
+            ],
+            "relationships": [],
+            "staging": [
+              {
+                "ref": "slot_sec_001",
+                "operation": "enter",
+                "after_ref": null,
+                "motion_hint": "subtle_push",
+                "priority": 1
+              }
+            ],
+            "focus_move": "static",
+            "hold_policy": "narration_aligned",
+            "continuity": {
+              "group_id": "group_setup_002",
+              "carry_refs": [],
+              "entry": "new_setup",
+              "exit": "hard_cut",
+              "reason": "fixture setup boundary"
+            }
+          }
+        ],
+        "reuse_setup_id": null
       },
       "asset_slot_bindings": [
         {
@@ -163,6 +258,25 @@
           0.5,
           0.5
         ]
+      },
+      "template_payload": {
+        "template_id": "T01",
+        "map": {
+          "map_requirement_id": "req_001",
+          "year": 1914,
+          "approved_feature_refs": [],
+          "label_source_claim_refs": [
+            "claim_001"
+          ]
+        },
+        "focus_region_ref": "feature_001",
+        "location_labels": [
+          {
+            "source_claim_id": "claim_001",
+            "text": "THE FRAGILE MAP OF EUROPE"
+          }
+        ],
+        "highlight_feature_ids": []
       }
     },
     {
@@ -190,7 +304,8 @@
             "text": "A CONTINENT OF EMPIRES",
             "role": "headline",
             "claim_ref": null,
-            "max_lines": 2
+            "max_lines": 2,
+            "text_id": "text_setup_003"
           }
         ],
         "reveal_plan": [
@@ -221,7 +336,44 @@
         "layout_variant_hint": "A",
         "duration_policy": "voice_locked",
         "transition_intent": "hard_cut",
-        "historical_map_requirement_id": null
+        "historical_map_requirement_id": null,
+        "visual_beats": [
+          {
+            "beat_id": "beat_setup_003",
+            "section_ref": "sec_002",
+            "cue": {
+              "section_id": "sec_002",
+              "phrase": "In",
+              "occurrence": 0
+            },
+            "action": "establish",
+            "focus_ref": "slot_sec_002",
+            "shot_goal": "Understand who, where and why this context matters",
+            "source_claim_refs": [
+              "claim_002"
+            ],
+            "relationships": [],
+            "staging": [
+              {
+                "ref": "slot_sec_002",
+                "operation": "enter",
+                "after_ref": null,
+                "motion_hint": "subtle_push",
+                "priority": 1
+              }
+            ],
+            "focus_move": "static",
+            "hold_policy": "narration_aligned",
+            "continuity": {
+              "group_id": "group_setup_003",
+              "carry_refs": [],
+              "entry": "new_setup",
+              "exit": "hard_cut",
+              "reason": "fixture setup boundary"
+            }
+          }
+        ],
+        "reuse_setup_id": null
       },
       "asset_slot_bindings": [
         {
@@ -244,6 +396,25 @@
           0.5,
           0.5
         ]
+      },
+      "template_payload": {
+        "template_id": "T03",
+        "cards": [
+          {
+            "card_id": "card_setup_003",
+            "asset_slot_id": "slot_sec_002",
+            "evidence_claim_id": "claim_002",
+            "card_role": "hero",
+            "caption_text_id": "text_setup_003",
+            "crop_focus": "subject",
+            "depth_plane": 2
+          }
+        ],
+        "card_reveal_order": [
+          "card_setup_003"
+        ],
+        "focus_card_id": "card_setup_003",
+        "occlusion_policy": "never_hide_hero"
       }
     },
     {
@@ -271,7 +442,8 @@
             "text": "A CONTINENT OF EMPIRES",
             "role": "headline",
             "claim_ref": null,
-            "max_lines": 2
+            "max_lines": 2,
+            "text_id": "text_setup_004"
           }
         ],
         "reveal_plan": [
@@ -302,7 +474,44 @@
         "layout_variant_hint": "A",
         "duration_policy": "voice_locked",
         "transition_intent": "hard_cut",
-        "historical_map_requirement_id": null
+        "historical_map_requirement_id": null,
+        "visual_beats": [
+          {
+            "beat_id": "beat_setup_004",
+            "section_ref": "sec_002",
+            "cue": {
+              "section_id": "sec_002",
+              "phrase": "In",
+              "occurrence": 0
+            },
+            "action": "establish",
+            "focus_ref": "slot_sec_002",
+            "shot_goal": "Understand who, where and why this context matters",
+            "source_claim_refs": [
+              "claim_002"
+            ],
+            "relationships": [],
+            "staging": [
+              {
+                "ref": "slot_sec_002",
+                "operation": "enter",
+                "after_ref": null,
+                "motion_hint": "subtle_push",
+                "priority": 1
+              }
+            ],
+            "focus_move": "static",
+            "hold_policy": "narration_aligned",
+            "continuity": {
+              "group_id": "group_setup_004",
+              "carry_refs": [],
+              "entry": "new_setup",
+              "exit": "hard_cut",
+              "reason": "fixture setup boundary"
+            }
+          }
+        ],
+        "reuse_setup_id": null
       },
       "asset_slot_bindings": [
         {
@@ -325,6 +534,25 @@
           0.5,
           0.5
         ]
+      },
+      "template_payload": {
+        "template_id": "T03",
+        "cards": [
+          {
+            "card_id": "card_setup_004",
+            "asset_slot_id": "slot_sec_002",
+            "evidence_claim_id": "claim_002",
+            "card_role": "hero",
+            "caption_text_id": "text_setup_004",
+            "crop_focus": "subject",
+            "depth_plane": 2
+          }
+        ],
+        "card_reveal_order": [
+          "card_setup_004"
+        ],
+        "focus_card_id": "card_setup_004",
+        "occlusion_policy": "never_hide_hero"
       }
     },
     {
@@ -352,7 +580,8 @@
             "text": "BOSNIA AND POLITICAL TENSIONS",
             "role": "headline",
             "claim_ref": null,
-            "max_lines": 2
+            "max_lines": 2,
+            "text_id": "text_setup_005"
           }
         ],
         "reveal_plan": [
@@ -383,7 +612,44 @@
         "layout_variant_hint": "A",
         "duration_policy": "voice_locked",
         "transition_intent": "hard_cut",
-        "historical_map_requirement_id": null
+        "historical_map_requirement_id": null,
+        "visual_beats": [
+          {
+            "beat_id": "beat_setup_005",
+            "section_ref": "sec_003",
+            "cue": {
+              "section_id": "sec_003",
+              "phrase": "In",
+              "occurrence": 0
+            },
+            "action": "establish",
+            "focus_ref": "slot_sec_003",
+            "shot_goal": "Understand who, where and why this context matters",
+            "source_claim_refs": [
+              "claim_003"
+            ],
+            "relationships": [],
+            "staging": [
+              {
+                "ref": "slot_sec_003",
+                "operation": "enter",
+                "after_ref": null,
+                "motion_hint": "subtle_push",
+                "priority": 1
+              }
+            ],
+            "focus_move": "static",
+            "hold_policy": "narration_aligned",
+            "continuity": {
+              "group_id": "group_setup_005",
+              "carry_refs": [],
+              "entry": "new_setup",
+              "exit": "hard_cut",
+              "reason": "fixture setup boundary"
+            }
+          }
+        ],
+        "reuse_setup_id": null
       },
       "asset_slot_bindings": [
         {
@@ -406,6 +672,22 @@
           0.5,
           0.5
         ]
+      },
+      "template_payload": {
+        "template_id": "T06",
+        "document_slot_id": "slot_sec_003",
+        "document_claim_id": "claim_003",
+        "page_reference": "synthetic page reference",
+        "excerpt_text_id": "text_setup_005",
+        "excerpt_kind": "paraphrase_disclosed",
+        "focus_region_uv": {
+          "x": 0.1,
+          "y": 0.15,
+          "w": 0.6,
+          "h": 0.5
+        },
+        "annotation_beat_id": "beat_setup_005",
+        "attribution_text_id": "text_setup_005"
       }
     },
     {
@@ -433,7 +715,8 @@
             "text": "BOSNIA AND POLITICAL TENSIONS",
             "role": "headline",
             "claim_ref": null,
-            "max_lines": 2
+            "max_lines": 2,
+            "text_id": "text_setup_006"
           }
         ],
         "reveal_plan": [
@@ -464,7 +747,44 @@
         "layout_variant_hint": "A",
         "duration_policy": "voice_locked",
         "transition_intent": "hard_cut",
-        "historical_map_requirement_id": null
+        "historical_map_requirement_id": null,
+        "visual_beats": [
+          {
+            "beat_id": "beat_setup_006",
+            "section_ref": "sec_003",
+            "cue": {
+              "section_id": "sec_003",
+              "phrase": "In",
+              "occurrence": 0
+            },
+            "action": "establish",
+            "focus_ref": "slot_sec_003",
+            "shot_goal": "Understand who, where and why this context matters",
+            "source_claim_refs": [
+              "claim_003"
+            ],
+            "relationships": [],
+            "staging": [
+              {
+                "ref": "slot_sec_003",
+                "operation": "enter",
+                "after_ref": null,
+                "motion_hint": "subtle_push",
+                "priority": 1
+              }
+            ],
+            "focus_move": "static",
+            "hold_policy": "narration_aligned",
+            "continuity": {
+              "group_id": "group_setup_006",
+              "carry_refs": [],
+              "entry": "new_setup",
+              "exit": "hard_cut",
+              "reason": "fixture setup boundary"
+            }
+          }
+        ],
+        "reuse_setup_id": null
       },
       "asset_slot_bindings": [
         {
@@ -487,6 +807,22 @@
           0.5,
           0.5
         ]
+      },
+      "template_payload": {
+        "template_id": "T06",
+        "document_slot_id": "slot_sec_003",
+        "document_claim_id": "claim_003",
+        "page_reference": "synthetic page reference",
+        "excerpt_text_id": "text_setup_006",
+        "excerpt_kind": "paraphrase_disclosed",
+        "focus_region_uv": {
+          "x": 0.1,
+          "y": 0.15,
+          "w": 0.6,
+          "h": 0.5
+        },
+        "annotation_beat_id": "beat_setup_006",
+        "attribution_text_id": "text_setup_006"
       }
     },
     {
@@ -514,7 +850,8 @@
             "text": "THE SARAJEVO VISIT",
             "role": "headline",
             "claim_ref": null,
-            "max_lines": 2
+            "max_lines": 2,
+            "text_id": "text_setup_007"
           }
         ],
         "reveal_plan": [
@@ -545,7 +882,44 @@
         "layout_variant_hint": "A",
         "duration_policy": "voice_locked",
         "transition_intent": "hard_cut",
-        "historical_map_requirement_id": null
+        "historical_map_requirement_id": null,
+        "visual_beats": [
+          {
+            "beat_id": "beat_setup_007",
+            "section_ref": "sec_004",
+            "cue": {
+              "section_id": "sec_004",
+              "phrase": "In",
+              "occurrence": 0
+            },
+            "action": "establish",
+            "focus_ref": "slot_sec_004",
+            "shot_goal": "Understand who, where and why this context matters",
+            "source_claim_refs": [
+              "claim_004"
+            ],
+            "relationships": [],
+            "staging": [
+              {
+                "ref": "slot_sec_004",
+                "operation": "enter",
+                "after_ref": null,
+                "motion_hint": "subtle_push",
+                "priority": 1
+              }
+            ],
+            "focus_move": "static",
+            "hold_policy": "narration_aligned",
+            "continuity": {
+              "group_id": "group_setup_007",
+              "carry_refs": [],
+              "entry": "new_setup",
+              "exit": "hard_cut",
+              "reason": "fixture setup boundary"
+            }
+          }
+        ],
+        "reuse_setup_id": null
       },
       "asset_slot_bindings": [
         {
@@ -568,6 +942,15 @@
           0.5,
           0.5
         ]
+      },
+      "template_payload": {
+        "template_id": "T08",
+        "fact_claim_id": "claim_004",
+        "fact_text_id": "text_setup_007",
+        "display_value": "1914",
+        "unit_text_id": null,
+        "animation_rule": "reveal_exact",
+        "source_text_id": null
       }
     },
     {
@@ -595,7 +978,8 @@
             "text": "THE SARAJEVO VISIT",
             "role": "headline",
             "claim_ref": null,
-            "max_lines": 2
+            "max_lines": 2,
+            "text_id": "text_setup_008"
           }
         ],
         "reveal_plan": [
@@ -626,7 +1010,44 @@
         "layout_variant_hint": "A",
         "duration_policy": "voice_locked",
         "transition_intent": "hard_cut",
-        "historical_map_requirement_id": null
+        "historical_map_requirement_id": null,
+        "visual_beats": [
+          {
+            "beat_id": "beat_setup_008",
+            "section_ref": "sec_004",
+            "cue": {
+              "section_id": "sec_004",
+              "phrase": "In",
+              "occurrence": 0
+            },
+            "action": "establish",
+            "focus_ref": "slot_sec_004",
+            "shot_goal": "Understand who, where and why this context matters",
+            "source_claim_refs": [
+              "claim_004"
+            ],
+            "relationships": [],
+            "staging": [
+              {
+                "ref": "slot_sec_004",
+                "operation": "enter",
+                "after_ref": null,
+                "motion_hint": "subtle_push",
+                "priority": 1
+              }
+            ],
+            "focus_move": "static",
+            "hold_policy": "narration_aligned",
+            "continuity": {
+              "group_id": "group_setup_008",
+              "carry_refs": [],
+              "entry": "new_setup",
+              "exit": "hard_cut",
+              "reason": "fixture setup boundary"
+            }
+          }
+        ],
+        "reuse_setup_id": null
       },
       "asset_slot_bindings": [
         {
@@ -649,6 +1070,15 @@
           0.5,
           0.5
         ]
+      },
+      "template_payload": {
+        "template_id": "T08",
+        "fact_claim_id": "claim_004",
+        "fact_text_id": "text_setup_008",
+        "display_value": "1914",
+        "unit_text_id": null,
+        "animation_rule": "reveal_exact",
+        "source_text_id": null
       }
     },
     {
@@ -676,7 +1106,8 @@
             "text": "THE CITY AND ITS STREETS",
             "role": "headline",
             "claim_ref": null,
-            "max_lines": 2
+            "max_lines": 2,
+            "text_id": "text_setup_009"
           }
         ],
         "reveal_plan": [
@@ -707,7 +1138,44 @@
         "layout_variant_hint": "A",
         "duration_policy": "voice_locked",
         "transition_intent": "hard_cut",
-        "historical_map_requirement_id": "req_005"
+        "historical_map_requirement_id": "req_005",
+        "visual_beats": [
+          {
+            "beat_id": "beat_setup_009",
+            "section_ref": "sec_005",
+            "cue": {
+              "section_id": "sec_005",
+              "phrase": "In",
+              "occurrence": 0
+            },
+            "action": "establish",
+            "focus_ref": "slot_sec_005",
+            "shot_goal": "Understand who, where and why this context matters",
+            "source_claim_refs": [
+              "claim_005"
+            ],
+            "relationships": [],
+            "staging": [
+              {
+                "ref": "slot_sec_005",
+                "operation": "enter",
+                "after_ref": null,
+                "motion_hint": "subtle_push",
+                "priority": 1
+              }
+            ],
+            "focus_move": "static",
+            "hold_policy": "narration_aligned",
+            "continuity": {
+              "group_id": "group_setup_009",
+              "carry_refs": [],
+              "entry": "new_setup",
+              "exit": "hard_cut",
+              "reason": "fixture setup boundary"
+            }
+          }
+        ],
+        "reuse_setup_id": null
       },
       "asset_slot_bindings": [
         {
@@ -730,6 +1198,25 @@
           0.5,
           0.5
         ]
+      },
+      "template_payload": {
+        "template_id": "T01",
+        "map": {
+          "map_requirement_id": "req_005",
+          "year": 1914,
+          "approved_feature_refs": [],
+          "label_source_claim_refs": [
+            "claim_005"
+          ]
+        },
+        "focus_region_ref": "feature_001",
+        "location_labels": [
+          {
+            "source_claim_id": "claim_005",
+            "text": "THE CITY AND ITS STREETS"
+          }
+        ],
+        "highlight_feature_ids": []
       }
     },
     {
@@ -757,7 +1244,8 @@
             "text": "THE CITY AND ITS STREETS",
             "role": "headline",
             "claim_ref": null,
-            "max_lines": 2
+            "max_lines": 2,
+            "text_id": "text_setup_010"
           }
         ],
         "reveal_plan": [
@@ -788,7 +1276,44 @@
         "layout_variant_hint": "A",
         "duration_policy": "voice_locked",
         "transition_intent": "hard_cut",
-        "historical_map_requirement_id": "req_005"
+        "historical_map_requirement_id": "req_005",
+        "visual_beats": [
+          {
+            "beat_id": "beat_setup_010",
+            "section_ref": "sec_005",
+            "cue": {
+              "section_id": "sec_005",
+              "phrase": "In",
+              "occurrence": 0
+            },
+            "action": "establish",
+            "focus_ref": "slot_sec_005",
+            "shot_goal": "Understand who, where and why this context matters",
+            "source_claim_refs": [
+              "claim_005"
+            ],
+            "relationships": [],
+            "staging": [
+              {
+                "ref": "slot_sec_005",
+                "operation": "enter",
+                "after_ref": null,
+                "motion_hint": "subtle_push",
+                "priority": 1
+              }
+            ],
+            "focus_move": "static",
+            "hold_policy": "narration_aligned",
+            "continuity": {
+              "group_id": "group_setup_010",
+              "carry_refs": [],
+              "entry": "new_setup",
+              "exit": "hard_cut",
+              "reason": "fixture setup boundary"
+            }
+          }
+        ],
+        "reuse_setup_id": null
       },
       "asset_slot_bindings": [
         {
@@ -811,6 +1336,25 @@
           0.5,
           0.5
         ]
+      },
+      "template_payload": {
+        "template_id": "T01",
+        "map": {
+          "map_requirement_id": "req_005",
+          "year": 1914,
+          "approved_feature_refs": [],
+          "label_source_claim_refs": [
+            "claim_005"
+          ]
+        },
+        "focus_region_ref": "feature_001",
+        "location_labels": [
+          {
+            "source_claim_id": "claim_005",
+            "text": "THE CITY AND ITS STREETS"
+          }
+        ],
+        "highlight_feature_ids": []
       }
     },
     {
@@ -838,7 +1382,8 @@
             "text": "A PROCESSION ON THE MOVE",
             "role": "headline",
             "claim_ref": null,
-            "max_lines": 2
+            "max_lines": 2,
+            "text_id": "text_setup_011"
           }
         ],
         "reveal_plan": [
@@ -869,7 +1414,44 @@
         "layout_variant_hint": "A",
         "duration_policy": "voice_locked",
         "transition_intent": "hard_cut",
-        "historical_map_requirement_id": null
+        "historical_map_requirement_id": null,
+        "visual_beats": [
+          {
+            "beat_id": "beat_setup_011",
+            "section_ref": "sec_006",
+            "cue": {
+              "section_id": "sec_006",
+              "phrase": "In",
+              "occurrence": 0
+            },
+            "action": "establish",
+            "focus_ref": "slot_sec_006",
+            "shot_goal": "Understand who, where and why this context matters",
+            "source_claim_refs": [
+              "claim_006"
+            ],
+            "relationships": [],
+            "staging": [
+              {
+                "ref": "slot_sec_006",
+                "operation": "enter",
+                "after_ref": null,
+                "motion_hint": "subtle_push",
+                "priority": 1
+              }
+            ],
+            "focus_move": "static",
+            "hold_policy": "narration_aligned",
+            "continuity": {
+              "group_id": "group_setup_011",
+              "carry_refs": [],
+              "entry": "new_setup",
+              "exit": "hard_cut",
+              "reason": "fixture setup boundary"
+            }
+          }
+        ],
+        "reuse_setup_id": null
       },
       "asset_slot_bindings": [
         {
@@ -892,6 +1474,25 @@
           0.5,
           0.5
         ]
+      },
+      "template_payload": {
+        "template_id": "T03",
+        "cards": [
+          {
+            "card_id": "card_setup_011",
+            "asset_slot_id": "slot_sec_006",
+            "evidence_claim_id": "claim_006",
+            "card_role": "hero",
+            "caption_text_id": "text_setup_011",
+            "crop_focus": "subject",
+            "depth_plane": 2
+          }
+        ],
+        "card_reveal_order": [
+          "card_setup_011"
+        ],
+        "focus_card_id": "card_setup_011",
+        "occlusion_policy": "never_hide_hero"
       }
     },
     {
@@ -919,7 +1520,8 @@
             "text": "A PROCESSION ON THE MOVE",
             "role": "headline",
             "claim_ref": null,
-            "max_lines": 2
+            "max_lines": 2,
+            "text_id": "text_setup_012"
           }
         ],
         "reveal_plan": [
@@ -950,7 +1552,44 @@
         "layout_variant_hint": "A",
         "duration_policy": "voice_locked",
         "transition_intent": "hard_cut",
-        "historical_map_requirement_id": null
+        "historical_map_requirement_id": null,
+        "visual_beats": [
+          {
+            "beat_id": "beat_setup_012",
+            "section_ref": "sec_006",
+            "cue": {
+              "section_id": "sec_006",
+              "phrase": "In",
+              "occurrence": 0
+            },
+            "action": "establish",
+            "focus_ref": "slot_sec_006",
+            "shot_goal": "Understand who, where and why this context matters",
+            "source_claim_refs": [
+              "claim_006"
+            ],
+            "relationships": [],
+            "staging": [
+              {
+                "ref": "slot_sec_006",
+                "operation": "enter",
+                "after_ref": null,
+                "motion_hint": "subtle_push",
+                "priority": 1
+              }
+            ],
+            "focus_move": "static",
+            "hold_policy": "narration_aligned",
+            "continuity": {
+              "group_id": "group_setup_012",
+              "carry_refs": [],
+              "entry": "new_setup",
+              "exit": "hard_cut",
+              "reason": "fixture setup boundary"
+            }
+          }
+        ],
+        "reuse_setup_id": null
       },
       "asset_slot_bindings": [
         {
@@ -973,6 +1612,25 @@
           0.5,
           0.5
         ]
+      },
+      "template_payload": {
+        "template_id": "T03",
+        "cards": [
+          {
+            "card_id": "card_setup_012",
+            "asset_slot_id": "slot_sec_006",
+            "evidence_claim_id": "claim_006",
+            "card_role": "hero",
+            "caption_text_id": "text_setup_012",
+            "crop_focus": "subject",
+            "depth_plane": 2
+          }
+        ],
+        "card_reveal_order": [
+          "card_setup_012"
+        ],
+        "focus_card_id": "card_setup_012",
+        "occlusion_policy": "never_hide_hero"
       }
     },
     {
@@ -1000,7 +1658,8 @@
             "text": "THE FIRST TURNING POINT",
             "role": "headline",
             "claim_ref": null,
-            "max_lines": 2
+            "max_lines": 2,
+            "text_id": "text_setup_013"
           }
         ],
         "reveal_plan": [
@@ -1031,7 +1690,44 @@
         "layout_variant_hint": "A",
         "duration_policy": "voice_locked",
         "transition_intent": "hard_cut",
-        "historical_map_requirement_id": null
+        "historical_map_requirement_id": null,
+        "visual_beats": [
+          {
+            "beat_id": "beat_setup_013",
+            "section_ref": "sec_007",
+            "cue": {
+              "section_id": "sec_007",
+              "phrase": "In",
+              "occurrence": 0
+            },
+            "action": "establish",
+            "focus_ref": "slot_sec_007",
+            "shot_goal": "Understand who, where and why this context matters",
+            "source_claim_refs": [
+              "claim_007"
+            ],
+            "relationships": [],
+            "staging": [
+              {
+                "ref": "slot_sec_007",
+                "operation": "enter",
+                "after_ref": null,
+                "motion_hint": "subtle_push",
+                "priority": 1
+              }
+            ],
+            "focus_move": "static",
+            "hold_policy": "narration_aligned",
+            "continuity": {
+              "group_id": "group_setup_013",
+              "carry_refs": [],
+              "entry": "new_setup",
+              "exit": "hard_cut",
+              "reason": "fixture setup boundary"
+            }
+          }
+        ],
+        "reuse_setup_id": null
       },
       "asset_slot_bindings": [
         {
@@ -1054,6 +1750,22 @@
           0.5,
           0.5
         ]
+      },
+      "template_payload": {
+        "template_id": "T06",
+        "document_slot_id": "slot_sec_007",
+        "document_claim_id": "claim_007",
+        "page_reference": "synthetic page reference",
+        "excerpt_text_id": "text_setup_013",
+        "excerpt_kind": "paraphrase_disclosed",
+        "focus_region_uv": {
+          "x": 0.1,
+          "y": 0.15,
+          "w": 0.6,
+          "h": 0.5
+        },
+        "annotation_beat_id": "beat_setup_013",
+        "attribution_text_id": "text_setup_013"
       }
     },
     {
@@ -1081,7 +1793,8 @@
             "text": "THE FIRST TURNING POINT",
             "role": "headline",
             "claim_ref": null,
-            "max_lines": 2
+            "max_lines": 2,
+            "text_id": "text_setup_014"
           }
         ],
         "reveal_plan": [
@@ -1112,7 +1825,44 @@
         "layout_variant_hint": "A",
         "duration_policy": "voice_locked",
         "transition_intent": "hard_cut",
-        "historical_map_requirement_id": null
+        "historical_map_requirement_id": null,
+        "visual_beats": [
+          {
+            "beat_id": "beat_setup_014",
+            "section_ref": "sec_007",
+            "cue": {
+              "section_id": "sec_007",
+              "phrase": "In",
+              "occurrence": 0
+            },
+            "action": "establish",
+            "focus_ref": "slot_sec_007",
+            "shot_goal": "Understand who, where and why this context matters",
+            "source_claim_refs": [
+              "claim_007"
+            ],
+            "relationships": [],
+            "staging": [
+              {
+                "ref": "slot_sec_007",
+                "operation": "enter",
+                "after_ref": null,
+                "motion_hint": "subtle_push",
+                "priority": 1
+              }
+            ],
+            "focus_move": "static",
+            "hold_policy": "narration_aligned",
+            "continuity": {
+              "group_id": "group_setup_014",
+              "carry_refs": [],
+              "entry": "new_setup",
+              "exit": "hard_cut",
+              "reason": "fixture setup boundary"
+            }
+          }
+        ],
+        "reuse_setup_id": null
       },
       "asset_slot_bindings": [
         {
@@ -1135,6 +1885,22 @@
           0.5,
           0.5
         ]
+      },
+      "template_payload": {
+        "template_id": "T06",
+        "document_slot_id": "slot_sec_007",
+        "document_claim_id": "claim_007",
+        "page_reference": "synthetic page reference",
+        "excerpt_text_id": "text_setup_014",
+        "excerpt_kind": "paraphrase_disclosed",
+        "focus_region_uv": {
+          "x": 0.1,
+          "y": 0.15,
+          "w": 0.6,
+          "h": 0.5
+        },
+        "annotation_beat_id": "beat_setup_014",
+        "attribution_text_id": "text_setup_014"
       }
     },
     {
@@ -1162,7 +1928,8 @@
             "text": "CONFUSION AROUND THE ROUTE",
             "role": "headline",
             "claim_ref": null,
-            "max_lines": 2
+            "max_lines": 2,
+            "text_id": "text_setup_015"
           }
         ],
         "reveal_plan": [
@@ -1193,7 +1960,44 @@
         "layout_variant_hint": "A",
         "duration_policy": "voice_locked",
         "transition_intent": "hard_cut",
-        "historical_map_requirement_id": null
+        "historical_map_requirement_id": null,
+        "visual_beats": [
+          {
+            "beat_id": "beat_setup_015",
+            "section_ref": "sec_008",
+            "cue": {
+              "section_id": "sec_008",
+              "phrase": "In",
+              "occurrence": 0
+            },
+            "action": "establish",
+            "focus_ref": "slot_sec_008",
+            "shot_goal": "Understand who, where and why this context matters",
+            "source_claim_refs": [
+              "claim_008"
+            ],
+            "relationships": [],
+            "staging": [
+              {
+                "ref": "slot_sec_008",
+                "operation": "enter",
+                "after_ref": null,
+                "motion_hint": "subtle_push",
+                "priority": 1
+              }
+            ],
+            "focus_move": "static",
+            "hold_policy": "narration_aligned",
+            "continuity": {
+              "group_id": "group_setup_015",
+              "carry_refs": [],
+              "entry": "new_setup",
+              "exit": "hard_cut",
+              "reason": "fixture setup boundary"
+            }
+          }
+        ],
+        "reuse_setup_id": null
       },
       "asset_slot_bindings": [
         {
@@ -1216,6 +2020,15 @@
           0.5,
           0.5
         ]
+      },
+      "template_payload": {
+        "template_id": "T08",
+        "fact_claim_id": "claim_008",
+        "fact_text_id": "text_setup_015",
+        "display_value": "1914",
+        "unit_text_id": null,
+        "animation_rule": "reveal_exact",
+        "source_text_id": null
       }
     },
     {
@@ -1243,7 +2056,8 @@
             "text": "CONFUSION AROUND THE ROUTE",
             "role": "headline",
             "claim_ref": null,
-            "max_lines": 2
+            "max_lines": 2,
+            "text_id": "text_setup_016"
           }
         ],
         "reveal_plan": [
@@ -1274,7 +2088,44 @@
         "layout_variant_hint": "A",
         "duration_policy": "voice_locked",
         "transition_intent": "hard_cut",
-        "historical_map_requirement_id": null
+        "historical_map_requirement_id": null,
+        "visual_beats": [
+          {
+            "beat_id": "beat_setup_016",
+            "section_ref": "sec_008",
+            "cue": {
+              "section_id": "sec_008",
+              "phrase": "In",
+              "occurrence": 0
+            },
+            "action": "establish",
+            "focus_ref": "slot_sec_008",
+            "shot_goal": "Understand who, where and why this context matters",
+            "source_claim_refs": [
+              "claim_008"
+            ],
+            "relationships": [],
+            "staging": [
+              {
+                "ref": "slot_sec_008",
+                "operation": "enter",
+                "after_ref": null,
+                "motion_hint": "subtle_push",
+                "priority": 1
+              }
+            ],
+            "focus_move": "static",
+            "hold_policy": "narration_aligned",
+            "continuity": {
+              "group_id": "group_setup_016",
+              "carry_refs": [],
+              "entry": "new_setup",
+              "exit": "hard_cut",
+              "reason": "fixture setup boundary"
+            }
+          }
+        ],
+        "reuse_setup_id": null
       },
       "asset_slot_bindings": [
         {
@@ -1297,6 +2148,15 @@
           0.5,
           0.5
         ]
+      },
+      "template_payload": {
+        "template_id": "T08",
+        "fact_claim_id": "claim_008",
+        "fact_text_id": "text_setup_016",
+        "display_value": "1914",
+        "unit_text_id": null,
+        "animation_rule": "reveal_exact",
+        "source_text_id": null
       }
     },
     {
@@ -1324,7 +2184,8 @@
             "text": "THE CONFRONTATION",
             "role": "headline",
             "claim_ref": null,
-            "max_lines": 2
+            "max_lines": 2,
+            "text_id": "text_setup_017"
           }
         ],
         "reveal_plan": [
@@ -1355,7 +2216,44 @@
         "layout_variant_hint": "A",
         "duration_policy": "voice_locked",
         "transition_intent": "hard_cut",
-        "historical_map_requirement_id": "req_009"
+        "historical_map_requirement_id": "req_009",
+        "visual_beats": [
+          {
+            "beat_id": "beat_setup_017",
+            "section_ref": "sec_009",
+            "cue": {
+              "section_id": "sec_009",
+              "phrase": "In",
+              "occurrence": 0
+            },
+            "action": "establish",
+            "focus_ref": "slot_sec_009",
+            "shot_goal": "Understand who, where and why this context matters",
+            "source_claim_refs": [
+              "claim_009"
+            ],
+            "relationships": [],
+            "staging": [
+              {
+                "ref": "slot_sec_009",
+                "operation": "enter",
+                "after_ref": null,
+                "motion_hint": "subtle_push",
+                "priority": 1
+              }
+            ],
+            "focus_move": "static",
+            "hold_policy": "narration_aligned",
+            "continuity": {
+              "group_id": "group_setup_017",
+              "carry_refs": [],
+              "entry": "new_setup",
+              "exit": "hard_cut",
+              "reason": "fixture setup boundary"
+            }
+          }
+        ],
+        "reuse_setup_id": null
       },
       "asset_slot_bindings": [
         {
@@ -1378,6 +2276,25 @@
           0.5,
           0.5
         ]
+      },
+      "template_payload": {
+        "template_id": "T01",
+        "map": {
+          "map_requirement_id": "req_009",
+          "year": 1914,
+          "approved_feature_refs": [],
+          "label_source_claim_refs": [
+            "claim_009"
+          ]
+        },
+        "focus_region_ref": "feature_001",
+        "location_labels": [
+          {
+            "source_claim_id": "claim_009",
+            "text": "THE CONFRONTATION"
+          }
+        ],
+        "highlight_feature_ids": []
       }
     },
     {
@@ -1405,7 +2322,8 @@
             "text": "THE CONFRONTATION",
             "role": "headline",
             "claim_ref": null,
-            "max_lines": 2
+            "max_lines": 2,
+            "text_id": "text_setup_018"
           }
         ],
         "reveal_plan": [
@@ -1436,7 +2354,44 @@
         "layout_variant_hint": "A",
         "duration_policy": "voice_locked",
         "transition_intent": "hard_cut",
-        "historical_map_requirement_id": "req_009"
+        "historical_map_requirement_id": "req_009",
+        "visual_beats": [
+          {
+            "beat_id": "beat_setup_018",
+            "section_ref": "sec_009",
+            "cue": {
+              "section_id": "sec_009",
+              "phrase": "In",
+              "occurrence": 0
+            },
+            "action": "establish",
+            "focus_ref": "slot_sec_009",
+            "shot_goal": "Understand who, where and why this context matters",
+            "source_claim_refs": [
+              "claim_009"
+            ],
+            "relationships": [],
+            "staging": [
+              {
+                "ref": "slot_sec_009",
+                "operation": "enter",
+                "after_ref": null,
+                "motion_hint": "subtle_push",
+                "priority": 1
+              }
+            ],
+            "focus_move": "static",
+            "hold_policy": "narration_aligned",
+            "continuity": {
+              "group_id": "group_setup_018",
+              "carry_refs": [],
+              "entry": "new_setup",
+              "exit": "hard_cut",
+              "reason": "fixture setup boundary"
+            }
+          }
+        ],
+        "reuse_setup_id": null
       },
       "asset_slot_bindings": [
         {
@@ -1459,6 +2414,25 @@
           0.5,
           0.5
         ]
+      },
+      "template_payload": {
+        "template_id": "T01",
+        "map": {
+          "map_requirement_id": "req_009",
+          "year": 1914,
+          "approved_feature_refs": [],
+          "label_source_claim_refs": [
+            "claim_009"
+          ]
+        },
+        "focus_region_ref": "feature_001",
+        "location_labels": [
+          {
+            "source_claim_id": "claim_009",
+            "text": "THE CONFRONTATION"
+          }
+        ],
+        "highlight_feature_ids": []
       }
     },
     {
@@ -1486,7 +2460,8 @@
             "text": "NEWS SPREADS",
             "role": "headline",
             "claim_ref": null,
-            "max_lines": 2
+            "max_lines": 2,
+            "text_id": "text_setup_019"
           }
         ],
         "reveal_plan": [
@@ -1517,7 +2492,44 @@
         "layout_variant_hint": "A",
         "duration_policy": "voice_locked",
         "transition_intent": "hard_cut",
-        "historical_map_requirement_id": null
+        "historical_map_requirement_id": null,
+        "visual_beats": [
+          {
+            "beat_id": "beat_setup_019",
+            "section_ref": "sec_010",
+            "cue": {
+              "section_id": "sec_010",
+              "phrase": "In",
+              "occurrence": 0
+            },
+            "action": "establish",
+            "focus_ref": "slot_sec_010",
+            "shot_goal": "Understand who, where and why this context matters",
+            "source_claim_refs": [
+              "claim_010"
+            ],
+            "relationships": [],
+            "staging": [
+              {
+                "ref": "slot_sec_010",
+                "operation": "enter",
+                "after_ref": null,
+                "motion_hint": "subtle_push",
+                "priority": 1
+              }
+            ],
+            "focus_move": "static",
+            "hold_policy": "narration_aligned",
+            "continuity": {
+              "group_id": "group_setup_019",
+              "carry_refs": [],
+              "entry": "new_setup",
+              "exit": "hard_cut",
+              "reason": "fixture setup boundary"
+            }
+          }
+        ],
+        "reuse_setup_id": null
       },
       "asset_slot_bindings": [
         {
@@ -1540,6 +2552,25 @@
           0.5,
           0.5
         ]
+      },
+      "template_payload": {
+        "template_id": "T03",
+        "cards": [
+          {
+            "card_id": "card_setup_019",
+            "asset_slot_id": "slot_sec_010",
+            "evidence_claim_id": "claim_010",
+            "card_role": "hero",
+            "caption_text_id": "text_setup_019",
+            "crop_focus": "subject",
+            "depth_plane": 2
+          }
+        ],
+        "card_reveal_order": [
+          "card_setup_019"
+        ],
+        "focus_card_id": "card_setup_019",
+        "occlusion_policy": "never_hide_hero"
       }
     },
     {
@@ -1567,7 +2598,8 @@
             "text": "NEWS SPREADS",
             "role": "headline",
             "claim_ref": null,
-            "max_lines": 2
+            "max_lines": 2,
+            "text_id": "text_setup_020"
           }
         ],
         "reveal_plan": [
@@ -1598,7 +2630,44 @@
         "layout_variant_hint": "A",
         "duration_policy": "voice_locked",
         "transition_intent": "hard_cut",
-        "historical_map_requirement_id": null
+        "historical_map_requirement_id": null,
+        "visual_beats": [
+          {
+            "beat_id": "beat_setup_020",
+            "section_ref": "sec_010",
+            "cue": {
+              "section_id": "sec_010",
+              "phrase": "In",
+              "occurrence": 0
+            },
+            "action": "establish",
+            "focus_ref": "slot_sec_010",
+            "shot_goal": "Understand who, where and why this context matters",
+            "source_claim_refs": [
+              "claim_010"
+            ],
+            "relationships": [],
+            "staging": [
+              {
+                "ref": "slot_sec_010",
+                "operation": "enter",
+                "after_ref": null,
+                "motion_hint": "subtle_push",
+                "priority": 1
+              }
+            ],
+            "focus_move": "static",
+            "hold_policy": "narration_aligned",
+            "continuity": {
+              "group_id": "group_setup_020",
+              "carry_refs": [],
+              "entry": "new_setup",
+              "exit": "hard_cut",
+              "reason": "fixture setup boundary"
+            }
+          }
+        ],
+        "reuse_setup_id": null
       },
       "asset_slot_bindings": [
         {
@@ -1621,6 +2690,25 @@
           0.5,
           0.5
         ]
+      },
+      "template_payload": {
+        "template_id": "T03",
+        "cards": [
+          {
+            "card_id": "card_setup_020",
+            "asset_slot_id": "slot_sec_010",
+            "evidence_claim_id": "claim_010",
+            "card_role": "hero",
+            "caption_text_id": "text_setup_020",
+            "crop_focus": "subject",
+            "depth_plane": 2
+          }
+        ],
+        "card_reveal_order": [
+          "card_setup_020"
+        ],
+        "focus_card_id": "card_setup_020",
+        "occlusion_policy": "never_hide_hero"
       }
     },
     {
@@ -1648,7 +2736,8 @@
             "text": "THE RESPONSE IN VIENNA",
             "role": "headline",
             "claim_ref": null,
-            "max_lines": 2
+            "max_lines": 2,
+            "text_id": "text_setup_021"
           }
         ],
         "reveal_plan": [
@@ -1679,7 +2768,44 @@
         "layout_variant_hint": "A",
         "duration_policy": "voice_locked",
         "transition_intent": "hard_cut",
-        "historical_map_requirement_id": null
+        "historical_map_requirement_id": null,
+        "visual_beats": [
+          {
+            "beat_id": "beat_setup_021",
+            "section_ref": "sec_011",
+            "cue": {
+              "section_id": "sec_011",
+              "phrase": "In",
+              "occurrence": 0
+            },
+            "action": "establish",
+            "focus_ref": "slot_sec_011",
+            "shot_goal": "Understand who, where and why this context matters",
+            "source_claim_refs": [
+              "claim_011"
+            ],
+            "relationships": [],
+            "staging": [
+              {
+                "ref": "slot_sec_011",
+                "operation": "enter",
+                "after_ref": null,
+                "motion_hint": "subtle_push",
+                "priority": 1
+              }
+            ],
+            "focus_move": "static",
+            "hold_policy": "narration_aligned",
+            "continuity": {
+              "group_id": "group_setup_021",
+              "carry_refs": [],
+              "entry": "new_setup",
+              "exit": "hard_cut",
+              "reason": "fixture setup boundary"
+            }
+          }
+        ],
+        "reuse_setup_id": null
       },
       "asset_slot_bindings": [
         {
@@ -1702,6 +2828,22 @@
           0.5,
           0.5
         ]
+      },
+      "template_payload": {
+        "template_id": "T06",
+        "document_slot_id": "slot_sec_011",
+        "document_claim_id": "claim_011",
+        "page_reference": "synthetic page reference",
+        "excerpt_text_id": "text_setup_021",
+        "excerpt_kind": "paraphrase_disclosed",
+        "focus_region_uv": {
+          "x": 0.1,
+          "y": 0.15,
+          "w": 0.6,
+          "h": 0.5
+        },
+        "annotation_beat_id": "beat_setup_021",
+        "attribution_text_id": "text_setup_021"
       }
     },
     {
@@ -1729,7 +2871,8 @@
             "text": "THE RESPONSE IN VIENNA",
             "role": "headline",
             "claim_ref": null,
-            "max_lines": 2
+            "max_lines": 2,
+            "text_id": "text_setup_022"
           }
         ],
         "reveal_plan": [
@@ -1760,7 +2903,44 @@
         "layout_variant_hint": "A",
         "duration_policy": "voice_locked",
         "transition_intent": "hard_cut",
-        "historical_map_requirement_id": null
+        "historical_map_requirement_id": null,
+        "visual_beats": [
+          {
+            "beat_id": "beat_setup_022",
+            "section_ref": "sec_011",
+            "cue": {
+              "section_id": "sec_011",
+              "phrase": "In",
+              "occurrence": 0
+            },
+            "action": "establish",
+            "focus_ref": "slot_sec_011",
+            "shot_goal": "Understand who, where and why this context matters",
+            "source_claim_refs": [
+              "claim_011"
+            ],
+            "relationships": [],
+            "staging": [
+              {
+                "ref": "slot_sec_011",
+                "operation": "enter",
+                "after_ref": null,
+                "motion_hint": "subtle_push",
+                "priority": 1
+              }
+            ],
+            "focus_move": "static",
+            "hold_policy": "narration_aligned",
+            "continuity": {
+              "group_id": "group_setup_022",
+              "carry_refs": [],
+              "entry": "new_setup",
+              "exit": "hard_cut",
+              "reason": "fixture setup boundary"
+            }
+          }
+        ],
+        "reuse_setup_id": null
       },
       "asset_slot_bindings": [
         {
@@ -1783,6 +2963,22 @@
           0.5,
           0.5
         ]
+      },
+      "template_payload": {
+        "template_id": "T06",
+        "document_slot_id": "slot_sec_011",
+        "document_claim_id": "claim_011",
+        "page_reference": "synthetic page reference",
+        "excerpt_text_id": "text_setup_022",
+        "excerpt_kind": "paraphrase_disclosed",
+        "focus_region_uv": {
+          "x": 0.1,
+          "y": 0.15,
+          "w": 0.6,
+          "h": 0.5
+        },
+        "annotation_beat_id": "beat_setup_022",
+        "attribution_text_id": "text_setup_022"
       }
     },
     {
@@ -1810,7 +3006,8 @@
             "text": "THE DIPLOMATIC DEMANDS",
             "role": "headline",
             "claim_ref": null,
-            "max_lines": 2
+            "max_lines": 2,
+            "text_id": "text_setup_023"
           }
         ],
         "reveal_plan": [
@@ -1841,7 +3038,44 @@
         "layout_variant_hint": "A",
         "duration_policy": "voice_locked",
         "transition_intent": "hard_cut",
-        "historical_map_requirement_id": null
+        "historical_map_requirement_id": null,
+        "visual_beats": [
+          {
+            "beat_id": "beat_setup_023",
+            "section_ref": "sec_012",
+            "cue": {
+              "section_id": "sec_012",
+              "phrase": "In",
+              "occurrence": 0
+            },
+            "action": "establish",
+            "focus_ref": "slot_sec_012",
+            "shot_goal": "Understand who, where and why this context matters",
+            "source_claim_refs": [
+              "claim_012"
+            ],
+            "relationships": [],
+            "staging": [
+              {
+                "ref": "slot_sec_012",
+                "operation": "enter",
+                "after_ref": null,
+                "motion_hint": "subtle_push",
+                "priority": 1
+              }
+            ],
+            "focus_move": "static",
+            "hold_policy": "narration_aligned",
+            "continuity": {
+              "group_id": "group_setup_023",
+              "carry_refs": [],
+              "entry": "new_setup",
+              "exit": "hard_cut",
+              "reason": "fixture setup boundary"
+            }
+          }
+        ],
+        "reuse_setup_id": null
       },
       "asset_slot_bindings": [
         {
@@ -1864,6 +3098,15 @@
           0.5,
           0.5
         ]
+      },
+      "template_payload": {
+        "template_id": "T08",
+        "fact_claim_id": "claim_012",
+        "fact_text_id": "text_setup_023",
+        "display_value": "1914",
+        "unit_text_id": null,
+        "animation_rule": "reveal_exact",
+        "source_text_id": null
       }
     },
     {
@@ -1891,7 +3134,8 @@
             "text": "THE DIPLOMATIC DEMANDS",
             "role": "headline",
             "claim_ref": null,
-            "max_lines": 2
+            "max_lines": 2,
+            "text_id": "text_setup_024"
           }
         ],
         "reveal_plan": [
@@ -1922,7 +3166,44 @@
         "layout_variant_hint": "A",
         "duration_policy": "voice_locked",
         "transition_intent": "hard_cut",
-        "historical_map_requirement_id": null
+        "historical_map_requirement_id": null,
+        "visual_beats": [
+          {
+            "beat_id": "beat_setup_024",
+            "section_ref": "sec_012",
+            "cue": {
+              "section_id": "sec_012",
+              "phrase": "In",
+              "occurrence": 0
+            },
+            "action": "establish",
+            "focus_ref": "slot_sec_012",
+            "shot_goal": "Understand who, where and why this context matters",
+            "source_claim_refs": [
+              "claim_012"
+            ],
+            "relationships": [],
+            "staging": [
+              {
+                "ref": "slot_sec_012",
+                "operation": "enter",
+                "after_ref": null,
+                "motion_hint": "subtle_push",
+                "priority": 1
+              }
+            ],
+            "focus_move": "static",
+            "hold_policy": "narration_aligned",
+            "continuity": {
+              "group_id": "group_setup_024",
+              "carry_refs": [],
+              "entry": "new_setup",
+              "exit": "hard_cut",
+              "reason": "fixture setup boundary"
+            }
+          }
+        ],
+        "reuse_setup_id": null
       },
       "asset_slot_bindings": [
         {
@@ -1945,6 +3226,15 @@
           0.5,
           0.5
         ]
+      },
+      "template_payload": {
+        "template_id": "T08",
+        "fact_claim_id": "claim_012",
+        "fact_text_id": "text_setup_024",
+        "display_value": "1914",
+        "unit_text_id": null,
+        "animation_rule": "reveal_exact",
+        "source_text_id": null
       }
     },
     {
@@ -1972,7 +3262,8 @@
             "text": "SERBIA AND THE ULTIMATUM",
             "role": "headline",
             "claim_ref": null,
-            "max_lines": 2
+            "max_lines": 2,
+            "text_id": "text_setup_025"
           }
         ],
         "reveal_plan": [
@@ -2003,7 +3294,44 @@
         "layout_variant_hint": "A",
         "duration_policy": "voice_locked",
         "transition_intent": "hard_cut",
-        "historical_map_requirement_id": "req_013"
+        "historical_map_requirement_id": "req_013",
+        "visual_beats": [
+          {
+            "beat_id": "beat_setup_025",
+            "section_ref": "sec_013",
+            "cue": {
+              "section_id": "sec_013",
+              "phrase": "In",
+              "occurrence": 0
+            },
+            "action": "establish",
+            "focus_ref": "slot_sec_013",
+            "shot_goal": "Understand who, where and why this context matters",
+            "source_claim_refs": [
+              "claim_013"
+            ],
+            "relationships": [],
+            "staging": [
+              {
+                "ref": "slot_sec_013",
+                "operation": "enter",
+                "after_ref": null,
+                "motion_hint": "subtle_push",
+                "priority": 1
+              }
+            ],
+            "focus_move": "static",
+            "hold_policy": "narration_aligned",
+            "continuity": {
+              "group_id": "group_setup_025",
+              "carry_refs": [],
+              "entry": "new_setup",
+              "exit": "hard_cut",
+              "reason": "fixture setup boundary"
+            }
+          }
+        ],
+        "reuse_setup_id": null
       },
       "asset_slot_bindings": [
         {
@@ -2026,6 +3354,25 @@
           0.5,
           0.5
         ]
+      },
+      "template_payload": {
+        "template_id": "T01",
+        "map": {
+          "map_requirement_id": "req_013",
+          "year": 1914,
+          "approved_feature_refs": [],
+          "label_source_claim_refs": [
+            "claim_013"
+          ]
+        },
+        "focus_region_ref": "feature_001",
+        "location_labels": [
+          {
+            "source_claim_id": "claim_013",
+            "text": "SERBIA AND THE ULTIMATUM"
+          }
+        ],
+        "highlight_feature_ids": []
       }
     },
     {
@@ -2053,7 +3400,8 @@
             "text": "SERBIA AND THE ULTIMATUM",
             "role": "headline",
             "claim_ref": null,
-            "max_lines": 2
+            "max_lines": 2,
+            "text_id": "text_setup_026"
           }
         ],
         "reveal_plan": [
@@ -2084,7 +3432,44 @@
         "layout_variant_hint": "A",
         "duration_policy": "voice_locked",
         "transition_intent": "hard_cut",
-        "historical_map_requirement_id": "req_013"
+        "historical_map_requirement_id": "req_013",
+        "visual_beats": [
+          {
+            "beat_id": "beat_setup_026",
+            "section_ref": "sec_013",
+            "cue": {
+              "section_id": "sec_013",
+              "phrase": "In",
+              "occurrence": 0
+            },
+            "action": "establish",
+            "focus_ref": "slot_sec_013",
+            "shot_goal": "Understand who, where and why this context matters",
+            "source_claim_refs": [
+              "claim_013"
+            ],
+            "relationships": [],
+            "staging": [
+              {
+                "ref": "slot_sec_013",
+                "operation": "enter",
+                "after_ref": null,
+                "motion_hint": "subtle_push",
+                "priority": 1
+              }
+            ],
+            "focus_move": "static",
+            "hold_policy": "narration_aligned",
+            "continuity": {
+              "group_id": "group_setup_026",
+              "carry_refs": [],
+              "entry": "new_setup",
+              "exit": "hard_cut",
+              "reason": "fixture setup boundary"
+            }
+          }
+        ],
+        "reuse_setup_id": null
       },
       "asset_slot_bindings": [
         {
@@ -2107,6 +3492,25 @@
           0.5,
           0.5
         ]
+      },
+      "template_payload": {
+        "template_id": "T01",
+        "map": {
+          "map_requirement_id": "req_013",
+          "year": 1914,
+          "approved_feature_refs": [],
+          "label_source_claim_refs": [
+            "claim_013"
+          ]
+        },
+        "focus_region_ref": "feature_001",
+        "location_labels": [
+          {
+            "source_claim_id": "claim_013",
+            "text": "SERBIA AND THE ULTIMATUM"
+          }
+        ],
+        "highlight_feature_ids": []
       }
     },
     {
@@ -2134,7 +3538,8 @@
             "text": "RUSSIA AND MOBILIZATION",
             "role": "headline",
             "claim_ref": null,
-            "max_lines": 2
+            "max_lines": 2,
+            "text_id": "text_setup_027"
           }
         ],
         "reveal_plan": [
@@ -2165,7 +3570,44 @@
         "layout_variant_hint": "A",
         "duration_policy": "voice_locked",
         "transition_intent": "hard_cut",
-        "historical_map_requirement_id": null
+        "historical_map_requirement_id": null,
+        "visual_beats": [
+          {
+            "beat_id": "beat_setup_027",
+            "section_ref": "sec_014",
+            "cue": {
+              "section_id": "sec_014",
+              "phrase": "In",
+              "occurrence": 0
+            },
+            "action": "establish",
+            "focus_ref": "slot_sec_014",
+            "shot_goal": "Understand who, where and why this context matters",
+            "source_claim_refs": [
+              "claim_014"
+            ],
+            "relationships": [],
+            "staging": [
+              {
+                "ref": "slot_sec_014",
+                "operation": "enter",
+                "after_ref": null,
+                "motion_hint": "subtle_push",
+                "priority": 1
+              }
+            ],
+            "focus_move": "static",
+            "hold_policy": "narration_aligned",
+            "continuity": {
+              "group_id": "group_setup_027",
+              "carry_refs": [],
+              "entry": "new_setup",
+              "exit": "hard_cut",
+              "reason": "fixture setup boundary"
+            }
+          }
+        ],
+        "reuse_setup_id": null
       },
       "asset_slot_bindings": [
         {
@@ -2188,6 +3630,25 @@
           0.5,
           0.5
         ]
+      },
+      "template_payload": {
+        "template_id": "T03",
+        "cards": [
+          {
+            "card_id": "card_setup_027",
+            "asset_slot_id": "slot_sec_014",
+            "evidence_claim_id": "claim_014",
+            "card_role": "hero",
+            "caption_text_id": "text_setup_027",
+            "crop_focus": "subject",
+            "depth_plane": 2
+          }
+        ],
+        "card_reveal_order": [
+          "card_setup_027"
+        ],
+        "focus_card_id": "card_setup_027",
+        "occlusion_policy": "never_hide_hero"
       }
     },
     {
@@ -2215,7 +3676,8 @@
             "text": "RUSSIA AND MOBILIZATION",
             "role": "headline",
             "claim_ref": null,
-            "max_lines": 2
+            "max_lines": 2,
+            "text_id": "text_setup_028"
           }
         ],
         "reveal_plan": [
@@ -2246,7 +3708,44 @@
         "layout_variant_hint": "A",
         "duration_policy": "voice_locked",
         "transition_intent": "hard_cut",
-        "historical_map_requirement_id": null
+        "historical_map_requirement_id": null,
+        "visual_beats": [
+          {
+            "beat_id": "beat_setup_028",
+            "section_ref": "sec_014",
+            "cue": {
+              "section_id": "sec_014",
+              "phrase": "In",
+              "occurrence": 0
+            },
+            "action": "establish",
+            "focus_ref": "slot_sec_014",
+            "shot_goal": "Understand who, where and why this context matters",
+            "source_claim_refs": [
+              "claim_014"
+            ],
+            "relationships": [],
+            "staging": [
+              {
+                "ref": "slot_sec_014",
+                "operation": "enter",
+                "after_ref": null,
+                "motion_hint": "subtle_push",
+                "priority": 1
+              }
+            ],
+            "focus_move": "static",
+            "hold_policy": "narration_aligned",
+            "continuity": {
+              "group_id": "group_setup_028",
+              "carry_refs": [],
+              "entry": "new_setup",
+              "exit": "hard_cut",
+              "reason": "fixture setup boundary"
+            }
+          }
+        ],
+        "reuse_setup_id": null
       },
       "asset_slot_bindings": [
         {
@@ -2269,6 +3768,25 @@
           0.5,
           0.5
         ]
+      },
+      "template_payload": {
+        "template_id": "T03",
+        "cards": [
+          {
+            "card_id": "card_setup_028",
+            "asset_slot_id": "slot_sec_014",
+            "evidence_claim_id": "claim_014",
+            "card_role": "hero",
+            "caption_text_id": "text_setup_028",
+            "crop_focus": "subject",
+            "depth_plane": 2
+          }
+        ],
+        "card_reveal_order": [
+          "card_setup_028"
+        ],
+        "focus_card_id": "card_setup_028",
+        "occlusion_policy": "never_hide_hero"
       }
     },
     {
@@ -2296,7 +3814,8 @@
             "text": "BERLIN'S DECISIONS",
             "role": "headline",
             "claim_ref": null,
-            "max_lines": 2
+            "max_lines": 2,
+            "text_id": "text_setup_029"
           }
         ],
         "reveal_plan": [
@@ -2327,7 +3846,44 @@
         "layout_variant_hint": "A",
         "duration_policy": "voice_locked",
         "transition_intent": "hard_cut",
-        "historical_map_requirement_id": null
+        "historical_map_requirement_id": null,
+        "visual_beats": [
+          {
+            "beat_id": "beat_setup_029",
+            "section_ref": "sec_015",
+            "cue": {
+              "section_id": "sec_015",
+              "phrase": "In",
+              "occurrence": 0
+            },
+            "action": "establish",
+            "focus_ref": "slot_sec_015",
+            "shot_goal": "Understand who, where and why this context matters",
+            "source_claim_refs": [
+              "claim_015"
+            ],
+            "relationships": [],
+            "staging": [
+              {
+                "ref": "slot_sec_015",
+                "operation": "enter",
+                "after_ref": null,
+                "motion_hint": "subtle_push",
+                "priority": 1
+              }
+            ],
+            "focus_move": "static",
+            "hold_policy": "narration_aligned",
+            "continuity": {
+              "group_id": "group_setup_029",
+              "carry_refs": [],
+              "entry": "new_setup",
+              "exit": "hard_cut",
+              "reason": "fixture setup boundary"
+            }
+          }
+        ],
+        "reuse_setup_id": null
       },
       "asset_slot_bindings": [
         {
@@ -2350,6 +3906,22 @@
           0.5,
           0.5
         ]
+      },
+      "template_payload": {
+        "template_id": "T06",
+        "document_slot_id": "slot_sec_015",
+        "document_claim_id": "claim_015",
+        "page_reference": "synthetic page reference",
+        "excerpt_text_id": "text_setup_029",
+        "excerpt_kind": "paraphrase_disclosed",
+        "focus_region_uv": {
+          "x": 0.1,
+          "y": 0.15,
+          "w": 0.6,
+          "h": 0.5
+        },
+        "annotation_beat_id": "beat_setup_029",
+        "attribution_text_id": "text_setup_029"
       }
     },
     {
@@ -2377,7 +3949,8 @@
             "text": "BERLIN'S DECISIONS",
             "role": "headline",
             "claim_ref": null,
-            "max_lines": 2
+            "max_lines": 2,
+            "text_id": "text_setup_030"
           }
         ],
         "reveal_plan": [
@@ -2408,7 +3981,44 @@
         "layout_variant_hint": "A",
         "duration_policy": "voice_locked",
         "transition_intent": "hard_cut",
-        "historical_map_requirement_id": null
+        "historical_map_requirement_id": null,
+        "visual_beats": [
+          {
+            "beat_id": "beat_setup_030",
+            "section_ref": "sec_015",
+            "cue": {
+              "section_id": "sec_015",
+              "phrase": "In",
+              "occurrence": 0
+            },
+            "action": "establish",
+            "focus_ref": "slot_sec_015",
+            "shot_goal": "Understand who, where and why this context matters",
+            "source_claim_refs": [
+              "claim_015"
+            ],
+            "relationships": [],
+            "staging": [
+              {
+                "ref": "slot_sec_015",
+                "operation": "enter",
+                "after_ref": null,
+                "motion_hint": "subtle_push",
+                "priority": 1
+              }
+            ],
+            "focus_move": "static",
+            "hold_policy": "narration_aligned",
+            "continuity": {
+              "group_id": "group_setup_030",
+              "carry_refs": [],
+              "entry": "new_setup",
+              "exit": "hard_cut",
+              "reason": "fixture setup boundary"
+            }
+          }
+        ],
+        "reuse_setup_id": null
       },
       "asset_slot_bindings": [
         {
@@ -2431,6 +4041,22 @@
           0.5,
           0.5
         ]
+      },
+      "template_payload": {
+        "template_id": "T06",
+        "document_slot_id": "slot_sec_015",
+        "document_claim_id": "claim_015",
+        "page_reference": "synthetic page reference",
+        "excerpt_text_id": "text_setup_030",
+        "excerpt_kind": "paraphrase_disclosed",
+        "focus_region_uv": {
+          "x": 0.1,
+          "y": 0.15,
+          "w": 0.6,
+          "h": 0.5
+        },
+        "annotation_beat_id": "beat_setup_030",
+        "attribution_text_id": "text_setup_030"
       }
     },
     {
@@ -2458,7 +4084,8 @@
             "text": "PARIS WATCHES EVENTS",
             "role": "headline",
             "claim_ref": null,
-            "max_lines": 2
+            "max_lines": 2,
+            "text_id": "text_setup_031"
           }
         ],
         "reveal_plan": [
@@ -2489,7 +4116,44 @@
         "layout_variant_hint": "A",
         "duration_policy": "voice_locked",
         "transition_intent": "hard_cut",
-        "historical_map_requirement_id": null
+        "historical_map_requirement_id": null,
+        "visual_beats": [
+          {
+            "beat_id": "beat_setup_031",
+            "section_ref": "sec_016",
+            "cue": {
+              "section_id": "sec_016",
+              "phrase": "In",
+              "occurrence": 0
+            },
+            "action": "establish",
+            "focus_ref": "slot_sec_016",
+            "shot_goal": "Understand who, where and why this context matters",
+            "source_claim_refs": [
+              "claim_016"
+            ],
+            "relationships": [],
+            "staging": [
+              {
+                "ref": "slot_sec_016",
+                "operation": "enter",
+                "after_ref": null,
+                "motion_hint": "subtle_push",
+                "priority": 1
+              }
+            ],
+            "focus_move": "static",
+            "hold_policy": "narration_aligned",
+            "continuity": {
+              "group_id": "group_setup_031",
+              "carry_refs": [],
+              "entry": "new_setup",
+              "exit": "hard_cut",
+              "reason": "fixture setup boundary"
+            }
+          }
+        ],
+        "reuse_setup_id": null
       },
       "asset_slot_bindings": [
         {
@@ -2512,6 +4176,15 @@
           0.5,
           0.5
         ]
+      },
+      "template_payload": {
+        "template_id": "T08",
+        "fact_claim_id": "claim_016",
+        "fact_text_id": "text_setup_031",
+        "display_value": "1914",
+        "unit_text_id": null,
+        "animation_rule": "reveal_exact",
+        "source_text_id": null
       }
     },
     {
@@ -2539,7 +4212,8 @@
             "text": "PARIS WATCHES EVENTS",
             "role": "headline",
             "claim_ref": null,
-            "max_lines": 2
+            "max_lines": 2,
+            "text_id": "text_setup_032"
           }
         ],
         "reveal_plan": [
@@ -2570,7 +4244,44 @@
         "layout_variant_hint": "A",
         "duration_policy": "voice_locked",
         "transition_intent": "hard_cut",
-        "historical_map_requirement_id": null
+        "historical_map_requirement_id": null,
+        "visual_beats": [
+          {
+            "beat_id": "beat_setup_032",
+            "section_ref": "sec_016",
+            "cue": {
+              "section_id": "sec_016",
+              "phrase": "In",
+              "occurrence": 0
+            },
+            "action": "establish",
+            "focus_ref": "slot_sec_016",
+            "shot_goal": "Understand who, where and why this context matters",
+            "source_claim_refs": [
+              "claim_016"
+            ],
+            "relationships": [],
+            "staging": [
+              {
+                "ref": "slot_sec_016",
+                "operation": "enter",
+                "after_ref": null,
+                "motion_hint": "subtle_push",
+                "priority": 1
+              }
+            ],
+            "focus_move": "static",
+            "hold_policy": "narration_aligned",
+            "continuity": {
+              "group_id": "group_setup_032",
+              "carry_refs": [],
+              "entry": "new_setup",
+              "exit": "hard_cut",
+              "reason": "fixture setup boundary"
+            }
+          }
+        ],
+        "reuse_setup_id": null
       },
       "asset_slot_bindings": [
         {
@@ -2593,6 +4304,15 @@
           0.5,
           0.5
         ]
+      },
+      "template_payload": {
+        "template_id": "T08",
+        "fact_claim_id": "claim_016",
+        "fact_text_id": "text_setup_032",
+        "display_value": "1914",
+        "unit_text_id": null,
+        "animation_rule": "reveal_exact",
+        "source_text_id": null
       }
     },
     {
@@ -2620,7 +4340,8 @@
             "text": "LONDON EXAMINES REPORTS",
             "role": "headline",
             "claim_ref": null,
-            "max_lines": 2
+            "max_lines": 2,
+            "text_id": "text_setup_033"
           }
         ],
         "reveal_plan": [
@@ -2651,7 +4372,44 @@
         "layout_variant_hint": "A",
         "duration_policy": "voice_locked",
         "transition_intent": "hard_cut",
-        "historical_map_requirement_id": "req_017"
+        "historical_map_requirement_id": "req_017",
+        "visual_beats": [
+          {
+            "beat_id": "beat_setup_033",
+            "section_ref": "sec_017",
+            "cue": {
+              "section_id": "sec_017",
+              "phrase": "In",
+              "occurrence": 0
+            },
+            "action": "establish",
+            "focus_ref": "slot_sec_017",
+            "shot_goal": "Understand who, where and why this context matters",
+            "source_claim_refs": [
+              "claim_017"
+            ],
+            "relationships": [],
+            "staging": [
+              {
+                "ref": "slot_sec_017",
+                "operation": "enter",
+                "after_ref": null,
+                "motion_hint": "subtle_push",
+                "priority": 1
+              }
+            ],
+            "focus_move": "static",
+            "hold_policy": "narration_aligned",
+            "continuity": {
+              "group_id": "group_setup_033",
+              "carry_refs": [],
+              "entry": "new_setup",
+              "exit": "hard_cut",
+              "reason": "fixture setup boundary"
+            }
+          }
+        ],
+        "reuse_setup_id": null
       },
       "asset_slot_bindings": [
         {
@@ -2674,6 +4432,25 @@
           0.5,
           0.5
         ]
+      },
+      "template_payload": {
+        "template_id": "T01",
+        "map": {
+          "map_requirement_id": "req_017",
+          "year": 1914,
+          "approved_feature_refs": [],
+          "label_source_claim_refs": [
+            "claim_017"
+          ]
+        },
+        "focus_region_ref": "feature_001",
+        "location_labels": [
+          {
+            "source_claim_id": "claim_017",
+            "text": "LONDON EXAMINES REPORTS"
+          }
+        ],
+        "highlight_feature_ids": []
       }
     },
     {
@@ -2701,7 +4478,8 @@
             "text": "LONDON EXAMINES REPORTS",
             "role": "headline",
             "claim_ref": null,
-            "max_lines": 2
+            "max_lines": 2,
+            "text_id": "text_setup_034"
           }
         ],
         "reveal_plan": [
@@ -2732,7 +4510,44 @@
         "layout_variant_hint": "A",
         "duration_policy": "voice_locked",
         "transition_intent": "hard_cut",
-        "historical_map_requirement_id": "req_017"
+        "historical_map_requirement_id": "req_017",
+        "visual_beats": [
+          {
+            "beat_id": "beat_setup_034",
+            "section_ref": "sec_017",
+            "cue": {
+              "section_id": "sec_017",
+              "phrase": "In",
+              "occurrence": 0
+            },
+            "action": "establish",
+            "focus_ref": "slot_sec_017",
+            "shot_goal": "Understand who, where and why this context matters",
+            "source_claim_refs": [
+              "claim_017"
+            ],
+            "relationships": [],
+            "staging": [
+              {
+                "ref": "slot_sec_017",
+                "operation": "enter",
+                "after_ref": null,
+                "motion_hint": "subtle_push",
+                "priority": 1
+              }
+            ],
+            "focus_move": "static",
+            "hold_policy": "narration_aligned",
+            "continuity": {
+              "group_id": "group_setup_034",
+              "carry_refs": [],
+              "entry": "new_setup",
+              "exit": "hard_cut",
+              "reason": "fixture setup boundary"
+            }
+          }
+        ],
+        "reuse_setup_id": null
       },
       "asset_slot_bindings": [
         {
@@ -2755,6 +4570,25 @@
           0.5,
           0.5
         ]
+      },
+      "template_payload": {
+        "template_id": "T01",
+        "map": {
+          "map_requirement_id": "req_017",
+          "year": 1914,
+          "approved_feature_refs": [],
+          "label_source_claim_refs": [
+            "claim_017"
+          ]
+        },
+        "focus_region_ref": "feature_001",
+        "location_labels": [
+          {
+            "source_claim_id": "claim_017",
+            "text": "LONDON EXAMINES REPORTS"
+          }
+        ],
+        "highlight_feature_ids": []
       }
     },
     {
@@ -2782,7 +4616,8 @@
             "text": "BORDER CROSSINGS",
             "role": "headline",
             "claim_ref": null,
-            "max_lines": 2
+            "max_lines": 2,
+            "text_id": "text_setup_035"
           }
         ],
         "reveal_plan": [
@@ -2813,7 +4648,44 @@
         "layout_variant_hint": "A",
         "duration_policy": "voice_locked",
         "transition_intent": "hard_cut",
-        "historical_map_requirement_id": null
+        "historical_map_requirement_id": null,
+        "visual_beats": [
+          {
+            "beat_id": "beat_setup_035",
+            "section_ref": "sec_018",
+            "cue": {
+              "section_id": "sec_018",
+              "phrase": "In",
+              "occurrence": 0
+            },
+            "action": "establish",
+            "focus_ref": "slot_sec_018",
+            "shot_goal": "Understand who, where and why this context matters",
+            "source_claim_refs": [
+              "claim_018"
+            ],
+            "relationships": [],
+            "staging": [
+              {
+                "ref": "slot_sec_018",
+                "operation": "enter",
+                "after_ref": null,
+                "motion_hint": "subtle_push",
+                "priority": 1
+              }
+            ],
+            "focus_move": "static",
+            "hold_policy": "narration_aligned",
+            "continuity": {
+              "group_id": "group_setup_035",
+              "carry_refs": [],
+              "entry": "new_setup",
+              "exit": "hard_cut",
+              "reason": "fixture setup boundary"
+            }
+          }
+        ],
+        "reuse_setup_id": null
       },
       "asset_slot_bindings": [
         {
@@ -2836,6 +4708,25 @@
           0.5,
           0.5
         ]
+      },
+      "template_payload": {
+        "template_id": "T03",
+        "cards": [
+          {
+            "card_id": "card_setup_035",
+            "asset_slot_id": "slot_sec_018",
+            "evidence_claim_id": "claim_018",
+            "card_role": "hero",
+            "caption_text_id": "text_setup_035",
+            "crop_focus": "subject",
+            "depth_plane": 2
+          }
+        ],
+        "card_reveal_order": [
+          "card_setup_035"
+        ],
+        "focus_card_id": "card_setup_035",
+        "occlusion_policy": "never_hide_hero"
       }
     },
     {
@@ -2863,7 +4754,8 @@
             "text": "BORDER CROSSINGS",
             "role": "headline",
             "claim_ref": null,
-            "max_lines": 2
+            "max_lines": 2,
+            "text_id": "text_setup_036"
           }
         ],
         "reveal_plan": [
@@ -2894,7 +4786,44 @@
         "layout_variant_hint": "A",
         "duration_policy": "voice_locked",
         "transition_intent": "hard_cut",
-        "historical_map_requirement_id": null
+        "historical_map_requirement_id": null,
+        "visual_beats": [
+          {
+            "beat_id": "beat_setup_036",
+            "section_ref": "sec_018",
+            "cue": {
+              "section_id": "sec_018",
+              "phrase": "In",
+              "occurrence": 0
+            },
+            "action": "establish",
+            "focus_ref": "slot_sec_018",
+            "shot_goal": "Understand who, where and why this context matters",
+            "source_claim_refs": [
+              "claim_018"
+            ],
+            "relationships": [],
+            "staging": [
+              {
+                "ref": "slot_sec_018",
+                "operation": "enter",
+                "after_ref": null,
+                "motion_hint": "subtle_push",
+                "priority": 1
+              }
+            ],
+            "focus_move": "static",
+            "hold_policy": "narration_aligned",
+            "continuity": {
+              "group_id": "group_setup_036",
+              "carry_refs": [],
+              "entry": "new_setup",
+              "exit": "hard_cut",
+              "reason": "fixture setup boundary"
+            }
+          }
+        ],
+        "reuse_setup_id": null
       },
       "asset_slot_bindings": [
         {
@@ -2917,6 +4846,25 @@
           0.5,
           0.5
         ]
+      },
+      "template_payload": {
+        "template_id": "T03",
+        "cards": [
+          {
+            "card_id": "card_setup_036",
+            "asset_slot_id": "slot_sec_018",
+            "evidence_claim_id": "claim_018",
+            "card_role": "hero",
+            "caption_text_id": "text_setup_036",
+            "crop_focus": "subject",
+            "depth_plane": 2
+          }
+        ],
+        "card_reveal_order": [
+          "card_setup_036"
+        ],
+        "focus_card_id": "card_setup_036",
+        "occlusion_policy": "never_hide_hero"
       }
     },
     {
@@ -2944,7 +4892,8 @@
             "text": "ALLIANCES AND COMMITMENTS",
             "role": "headline",
             "claim_ref": null,
-            "max_lines": 2
+            "max_lines": 2,
+            "text_id": "text_setup_037"
           }
         ],
         "reveal_plan": [
@@ -2975,7 +4924,44 @@
         "layout_variant_hint": "A",
         "duration_policy": "voice_locked",
         "transition_intent": "hard_cut",
-        "historical_map_requirement_id": null
+        "historical_map_requirement_id": null,
+        "visual_beats": [
+          {
+            "beat_id": "beat_setup_037",
+            "section_ref": "sec_019",
+            "cue": {
+              "section_id": "sec_019",
+              "phrase": "In",
+              "occurrence": 0
+            },
+            "action": "establish",
+            "focus_ref": "slot_sec_019",
+            "shot_goal": "Understand who, where and why this context matters",
+            "source_claim_refs": [
+              "claim_019"
+            ],
+            "relationships": [],
+            "staging": [
+              {
+                "ref": "slot_sec_019",
+                "operation": "enter",
+                "after_ref": null,
+                "motion_hint": "subtle_push",
+                "priority": 1
+              }
+            ],
+            "focus_move": "static",
+            "hold_policy": "narration_aligned",
+            "continuity": {
+              "group_id": "group_setup_037",
+              "carry_refs": [],
+              "entry": "new_setup",
+              "exit": "hard_cut",
+              "reason": "fixture setup boundary"
+            }
+          }
+        ],
+        "reuse_setup_id": null
       },
       "asset_slot_bindings": [
         {
@@ -2998,6 +4984,22 @@
           0.5,
           0.5
         ]
+      },
+      "template_payload": {
+        "template_id": "T06",
+        "document_slot_id": "slot_sec_019",
+        "document_claim_id": "claim_019",
+        "page_reference": "synthetic page reference",
+        "excerpt_text_id": "text_setup_037",
+        "excerpt_kind": "paraphrase_disclosed",
+        "focus_region_uv": {
+          "x": 0.1,
+          "y": 0.15,
+          "w": 0.6,
+          "h": 0.5
+        },
+        "annotation_beat_id": "beat_setup_037",
+        "attribution_text_id": "text_setup_037"
       }
     },
     {
@@ -3025,7 +5027,8 @@
             "text": "ALLIANCES AND COMMITMENTS",
             "role": "headline",
             "claim_ref": null,
-            "max_lines": 2
+            "max_lines": 2,
+            "text_id": "text_setup_038"
           }
         ],
         "reveal_plan": [
@@ -3056,7 +5059,44 @@
         "layout_variant_hint": "A",
         "duration_policy": "voice_locked",
         "transition_intent": "hard_cut",
-        "historical_map_requirement_id": null
+        "historical_map_requirement_id": null,
+        "visual_beats": [
+          {
+            "beat_id": "beat_setup_038",
+            "section_ref": "sec_019",
+            "cue": {
+              "section_id": "sec_019",
+              "phrase": "In",
+              "occurrence": 0
+            },
+            "action": "establish",
+            "focus_ref": "slot_sec_019",
+            "shot_goal": "Understand who, where and why this context matters",
+            "source_claim_refs": [
+              "claim_019"
+            ],
+            "relationships": [],
+            "staging": [
+              {
+                "ref": "slot_sec_019",
+                "operation": "enter",
+                "after_ref": null,
+                "motion_hint": "subtle_push",
+                "priority": 1
+              }
+            ],
+            "focus_move": "static",
+            "hold_policy": "narration_aligned",
+            "continuity": {
+              "group_id": "group_setup_038",
+              "carry_refs": [],
+              "entry": "new_setup",
+              "exit": "hard_cut",
+              "reason": "fixture setup boundary"
+            }
+          }
+        ],
+        "reuse_setup_id": null
       },
       "asset_slot_bindings": [
         {
@@ -3079,6 +5119,22 @@
           0.5,
           0.5
         ]
+      },
+      "template_payload": {
+        "template_id": "T06",
+        "document_slot_id": "slot_sec_019",
+        "document_claim_id": "claim_019",
+        "page_reference": "synthetic page reference",
+        "excerpt_text_id": "text_setup_038",
+        "excerpt_kind": "paraphrase_disclosed",
+        "focus_region_uv": {
+          "x": 0.1,
+          "y": 0.15,
+          "w": 0.6,
+          "h": 0.5
+        },
+        "annotation_beat_id": "beat_setup_038",
+        "attribution_text_id": "text_setup_038"
       }
     },
     {
@@ -3106,7 +5162,8 @@
             "text": "PUBLIC REACTION",
             "role": "headline",
             "claim_ref": null,
-            "max_lines": 2
+            "max_lines": 2,
+            "text_id": "text_setup_039"
           }
         ],
         "reveal_plan": [
@@ -3137,7 +5194,44 @@
         "layout_variant_hint": "A",
         "duration_policy": "voice_locked",
         "transition_intent": "hard_cut",
-        "historical_map_requirement_id": null
+        "historical_map_requirement_id": null,
+        "visual_beats": [
+          {
+            "beat_id": "beat_setup_039",
+            "section_ref": "sec_020",
+            "cue": {
+              "section_id": "sec_020",
+              "phrase": "In",
+              "occurrence": 0
+            },
+            "action": "establish",
+            "focus_ref": "slot_sec_020",
+            "shot_goal": "Understand who, where and why this context matters",
+            "source_claim_refs": [
+              "claim_020"
+            ],
+            "relationships": [],
+            "staging": [
+              {
+                "ref": "slot_sec_020",
+                "operation": "enter",
+                "after_ref": null,
+                "motion_hint": "subtle_push",
+                "priority": 1
+              }
+            ],
+            "focus_move": "static",
+            "hold_policy": "narration_aligned",
+            "continuity": {
+              "group_id": "group_setup_039",
+              "carry_refs": [],
+              "entry": "new_setup",
+              "exit": "hard_cut",
+              "reason": "fixture setup boundary"
+            }
+          }
+        ],
+        "reuse_setup_id": null
       },
       "asset_slot_bindings": [
         {
@@ -3160,6 +5254,15 @@
           0.5,
           0.5
         ]
+      },
+      "template_payload": {
+        "template_id": "T08",
+        "fact_claim_id": "claim_020",
+        "fact_text_id": "text_setup_039",
+        "display_value": "1914",
+        "unit_text_id": null,
+        "animation_rule": "reveal_exact",
+        "source_text_id": null
       }
     },
     {
@@ -3187,7 +5290,8 @@
             "text": "PUBLIC REACTION",
             "role": "headline",
             "claim_ref": null,
-            "max_lines": 2
+            "max_lines": 2,
+            "text_id": "text_setup_040"
           }
         ],
         "reveal_plan": [
@@ -3218,7 +5322,44 @@
         "layout_variant_hint": "A",
         "duration_policy": "voice_locked",
         "transition_intent": "hard_cut",
-        "historical_map_requirement_id": null
+        "historical_map_requirement_id": null,
+        "visual_beats": [
+          {
+            "beat_id": "beat_setup_040",
+            "section_ref": "sec_020",
+            "cue": {
+              "section_id": "sec_020",
+              "phrase": "In",
+              "occurrence": 0
+            },
+            "action": "establish",
+            "focus_ref": "slot_sec_020",
+            "shot_goal": "Understand who, where and why this context matters",
+            "source_claim_refs": [
+              "claim_020"
+            ],
+            "relationships": [],
+            "staging": [
+              {
+                "ref": "slot_sec_020",
+                "operation": "enter",
+                "after_ref": null,
+                "motion_hint": "subtle_push",
+                "priority": 1
+              }
+            ],
+            "focus_move": "static",
+            "hold_policy": "narration_aligned",
+            "continuity": {
+              "group_id": "group_setup_040",
+              "carry_refs": [],
+              "entry": "new_setup",
+              "exit": "hard_cut",
+              "reason": "fixture setup boundary"
+            }
+          }
+        ],
+        "reuse_setup_id": null
       },
       "asset_slot_bindings": [
         {
@@ -3241,6 +5382,15 @@
           0.5,
           0.5
         ]
+      },
+      "template_payload": {
+        "template_id": "T08",
+        "fact_claim_id": "claim_020",
+        "fact_text_id": "text_setup_040",
+        "display_value": "1914",
+        "unit_text_id": null,
+        "animation_rule": "reveal_exact",
+        "source_text_id": null
       }
     },
     {
@@ -3268,7 +5418,8 @@
             "text": "THE TIMETABLE ACCELERATES",
             "role": "headline",
             "claim_ref": null,
-            "max_lines": 2
+            "max_lines": 2,
+            "text_id": "text_setup_041"
           }
         ],
         "reveal_plan": [
@@ -3299,7 +5450,44 @@
         "layout_variant_hint": "A",
         "duration_policy": "voice_locked",
         "transition_intent": "hard_cut",
-        "historical_map_requirement_id": "req_021"
+        "historical_map_requirement_id": "req_021",
+        "visual_beats": [
+          {
+            "beat_id": "beat_setup_041",
+            "section_ref": "sec_021",
+            "cue": {
+              "section_id": "sec_021",
+              "phrase": "In",
+              "occurrence": 0
+            },
+            "action": "establish",
+            "focus_ref": "slot_sec_021",
+            "shot_goal": "Understand who, where and why this context matters",
+            "source_claim_refs": [
+              "claim_021"
+            ],
+            "relationships": [],
+            "staging": [
+              {
+                "ref": "slot_sec_021",
+                "operation": "enter",
+                "after_ref": null,
+                "motion_hint": "subtle_push",
+                "priority": 1
+              }
+            ],
+            "focus_move": "static",
+            "hold_policy": "narration_aligned",
+            "continuity": {
+              "group_id": "group_setup_041",
+              "carry_refs": [],
+              "entry": "new_setup",
+              "exit": "hard_cut",
+              "reason": "fixture setup boundary"
+            }
+          }
+        ],
+        "reuse_setup_id": null
       },
       "asset_slot_bindings": [
         {
@@ -3322,6 +5510,25 @@
           0.5,
           0.5
         ]
+      },
+      "template_payload": {
+        "template_id": "T01",
+        "map": {
+          "map_requirement_id": "req_021",
+          "year": 1914,
+          "approved_feature_refs": [],
+          "label_source_claim_refs": [
+            "claim_021"
+          ]
+        },
+        "focus_region_ref": "feature_001",
+        "location_labels": [
+          {
+            "source_claim_id": "claim_021",
+            "text": "THE TIMETABLE ACCELERATES"
+          }
+        ],
+        "highlight_feature_ids": []
       }
     },
     {
@@ -3349,7 +5556,8 @@
             "text": "THE TIMETABLE ACCELERATES",
             "role": "headline",
             "claim_ref": null,
-            "max_lines": 2
+            "max_lines": 2,
+            "text_id": "text_setup_042"
           }
         ],
         "reveal_plan": [
@@ -3380,7 +5588,44 @@
         "layout_variant_hint": "A",
         "duration_policy": "voice_locked",
         "transition_intent": "hard_cut",
-        "historical_map_requirement_id": "req_021"
+        "historical_map_requirement_id": "req_021",
+        "visual_beats": [
+          {
+            "beat_id": "beat_setup_042",
+            "section_ref": "sec_021",
+            "cue": {
+              "section_id": "sec_021",
+              "phrase": "In",
+              "occurrence": 0
+            },
+            "action": "establish",
+            "focus_ref": "slot_sec_021",
+            "shot_goal": "Understand who, where and why this context matters",
+            "source_claim_refs": [
+              "claim_021"
+            ],
+            "relationships": [],
+            "staging": [
+              {
+                "ref": "slot_sec_021",
+                "operation": "enter",
+                "after_ref": null,
+                "motion_hint": "subtle_push",
+                "priority": 1
+              }
+            ],
+            "focus_move": "static",
+            "hold_policy": "narration_aligned",
+            "continuity": {
+              "group_id": "group_setup_042",
+              "carry_refs": [],
+              "entry": "new_setup",
+              "exit": "hard_cut",
+              "reason": "fixture setup boundary"
+            }
+          }
+        ],
+        "reuse_setup_id": null
       },
       "asset_slot_bindings": [
         {
@@ -3403,6 +5648,25 @@
           0.5,
           0.5
         ]
+      },
+      "template_payload": {
+        "template_id": "T01",
+        "map": {
+          "map_requirement_id": "req_021",
+          "year": 1914,
+          "approved_feature_refs": [],
+          "label_source_claim_refs": [
+            "claim_021"
+          ]
+        },
+        "focus_region_ref": "feature_001",
+        "location_labels": [
+          {
+            "source_claim_id": "claim_021",
+            "text": "THE TIMETABLE ACCELERATES"
+          }
+        ],
+        "highlight_feature_ids": []
       }
     },
     {
@@ -3430,7 +5694,8 @@
             "text": "THE FIRST WEEKS OF WAR",
             "role": "headline",
             "claim_ref": null,
-            "max_lines": 2
+            "max_lines": 2,
+            "text_id": "text_setup_043"
           }
         ],
         "reveal_plan": [
@@ -3461,7 +5726,44 @@
         "layout_variant_hint": "A",
         "duration_policy": "voice_locked",
         "transition_intent": "hard_cut",
-        "historical_map_requirement_id": null
+        "historical_map_requirement_id": null,
+        "visual_beats": [
+          {
+            "beat_id": "beat_setup_043",
+            "section_ref": "sec_022",
+            "cue": {
+              "section_id": "sec_022",
+              "phrase": "In",
+              "occurrence": 0
+            },
+            "action": "establish",
+            "focus_ref": "slot_sec_022",
+            "shot_goal": "Understand who, where and why this context matters",
+            "source_claim_refs": [
+              "claim_022"
+            ],
+            "relationships": [],
+            "staging": [
+              {
+                "ref": "slot_sec_022",
+                "operation": "enter",
+                "after_ref": null,
+                "motion_hint": "subtle_push",
+                "priority": 1
+              }
+            ],
+            "focus_move": "static",
+            "hold_policy": "narration_aligned",
+            "continuity": {
+              "group_id": "group_setup_043",
+              "carry_refs": [],
+              "entry": "new_setup",
+              "exit": "hard_cut",
+              "reason": "fixture setup boundary"
+            }
+          }
+        ],
+        "reuse_setup_id": null
       },
       "asset_slot_bindings": [
         {
@@ -3484,6 +5786,25 @@
           0.5,
           0.5
         ]
+      },
+      "template_payload": {
+        "template_id": "T03",
+        "cards": [
+          {
+            "card_id": "card_setup_043",
+            "asset_slot_id": "slot_sec_022",
+            "evidence_claim_id": "claim_022",
+            "card_role": "hero",
+            "caption_text_id": "text_setup_043",
+            "crop_focus": "subject",
+            "depth_plane": 2
+          }
+        ],
+        "card_reveal_order": [
+          "card_setup_043"
+        ],
+        "focus_card_id": "card_setup_043",
+        "occlusion_policy": "never_hide_hero"
       }
     },
     {
@@ -3511,7 +5832,8 @@
             "text": "THE FIRST WEEKS OF WAR",
             "role": "headline",
             "claim_ref": null,
-            "max_lines": 2
+            "max_lines": 2,
+            "text_id": "text_setup_044"
           }
         ],
         "reveal_plan": [
@@ -3542,7 +5864,44 @@
         "layout_variant_hint": "A",
         "duration_policy": "voice_locked",
         "transition_intent": "hard_cut",
-        "historical_map_requirement_id": null
+        "historical_map_requirement_id": null,
+        "visual_beats": [
+          {
+            "beat_id": "beat_setup_044",
+            "section_ref": "sec_022",
+            "cue": {
+              "section_id": "sec_022",
+              "phrase": "In",
+              "occurrence": 0
+            },
+            "action": "establish",
+            "focus_ref": "slot_sec_022",
+            "shot_goal": "Understand who, where and why this context matters",
+            "source_claim_refs": [
+              "claim_022"
+            ],
+            "relationships": [],
+            "staging": [
+              {
+                "ref": "slot_sec_022",
+                "operation": "enter",
+                "after_ref": null,
+                "motion_hint": "subtle_push",
+                "priority": 1
+              }
+            ],
+            "focus_move": "static",
+            "hold_policy": "narration_aligned",
+            "continuity": {
+              "group_id": "group_setup_044",
+              "carry_refs": [],
+              "entry": "new_setup",
+              "exit": "hard_cut",
+              "reason": "fixture setup boundary"
+            }
+          }
+        ],
+        "reuse_setup_id": null
       },
       "asset_slot_bindings": [
         {
@@ -3565,6 +5924,25 @@
           0.5,
           0.5
         ]
+      },
+      "template_payload": {
+        "template_id": "T03",
+        "cards": [
+          {
+            "card_id": "card_setup_044",
+            "asset_slot_id": "slot_sec_022",
+            "evidence_claim_id": "claim_022",
+            "card_role": "hero",
+            "caption_text_id": "text_setup_044",
+            "crop_focus": "subject",
+            "depth_plane": 2
+          }
+        ],
+        "card_reveal_order": [
+          "card_setup_044"
+        ],
+        "focus_card_id": "card_setup_044",
+        "occlusion_policy": "never_hide_hero"
       }
     },
     {
@@ -3592,7 +5970,8 @@
             "text": "CONSEQUENCES ACROSS EUROPE",
             "role": "headline",
             "claim_ref": null,
-            "max_lines": 2
+            "max_lines": 2,
+            "text_id": "text_setup_045"
           }
         ],
         "reveal_plan": [
@@ -3623,7 +6002,44 @@
         "layout_variant_hint": "A",
         "duration_policy": "voice_locked",
         "transition_intent": "hard_cut",
-        "historical_map_requirement_id": null
+        "historical_map_requirement_id": null,
+        "visual_beats": [
+          {
+            "beat_id": "beat_setup_045",
+            "section_ref": "sec_023",
+            "cue": {
+              "section_id": "sec_023",
+              "phrase": "In",
+              "occurrence": 0
+            },
+            "action": "establish",
+            "focus_ref": "slot_sec_023",
+            "shot_goal": "Understand who, where and why this context matters",
+            "source_claim_refs": [
+              "claim_023"
+            ],
+            "relationships": [],
+            "staging": [
+              {
+                "ref": "slot_sec_023",
+                "operation": "enter",
+                "after_ref": null,
+                "motion_hint": "subtle_push",
+                "priority": 1
+              }
+            ],
+            "focus_move": "static",
+            "hold_policy": "narration_aligned",
+            "continuity": {
+              "group_id": "group_setup_045",
+              "carry_refs": [],
+              "entry": "new_setup",
+              "exit": "hard_cut",
+              "reason": "fixture setup boundary"
+            }
+          }
+        ],
+        "reuse_setup_id": null
       },
       "asset_slot_bindings": [
         {
@@ -3646,6 +6062,22 @@
           0.5,
           0.5
         ]
+      },
+      "template_payload": {
+        "template_id": "T06",
+        "document_slot_id": "slot_sec_023",
+        "document_claim_id": "claim_023",
+        "page_reference": "synthetic page reference",
+        "excerpt_text_id": "text_setup_045",
+        "excerpt_kind": "paraphrase_disclosed",
+        "focus_region_uv": {
+          "x": 0.1,
+          "y": 0.15,
+          "w": 0.6,
+          "h": 0.5
+        },
+        "annotation_beat_id": "beat_setup_045",
+        "attribution_text_id": "text_setup_045"
       }
     },
     {
@@ -3673,7 +6105,8 @@
             "text": "CONSEQUENCES ACROSS EUROPE",
             "role": "headline",
             "claim_ref": null,
-            "max_lines": 2
+            "max_lines": 2,
+            "text_id": "text_setup_046"
           }
         ],
         "reveal_plan": [
@@ -3704,7 +6137,44 @@
         "layout_variant_hint": "A",
         "duration_policy": "voice_locked",
         "transition_intent": "hard_cut",
-        "historical_map_requirement_id": null
+        "historical_map_requirement_id": null,
+        "visual_beats": [
+          {
+            "beat_id": "beat_setup_046",
+            "section_ref": "sec_023",
+            "cue": {
+              "section_id": "sec_023",
+              "phrase": "In",
+              "occurrence": 0
+            },
+            "action": "establish",
+            "focus_ref": "slot_sec_023",
+            "shot_goal": "Understand who, where and why this context matters",
+            "source_claim_refs": [
+              "claim_023"
+            ],
+            "relationships": [],
+            "staging": [
+              {
+                "ref": "slot_sec_023",
+                "operation": "enter",
+                "after_ref": null,
+                "motion_hint": "subtle_push",
+                "priority": 1
+              }
+            ],
+            "focus_move": "static",
+            "hold_policy": "narration_aligned",
+            "continuity": {
+              "group_id": "group_setup_046",
+              "carry_refs": [],
+              "entry": "new_setup",
+              "exit": "hard_cut",
+              "reason": "fixture setup boundary"
+            }
+          }
+        ],
+        "reuse_setup_id": null
       },
       "asset_slot_bindings": [
         {
@@ -3727,6 +6197,22 @@
           0.5,
           0.5
         ]
+      },
+      "template_payload": {
+        "template_id": "T06",
+        "document_slot_id": "slot_sec_023",
+        "document_claim_id": "claim_023",
+        "page_reference": "synthetic page reference",
+        "excerpt_text_id": "text_setup_046",
+        "excerpt_kind": "paraphrase_disclosed",
+        "focus_region_uv": {
+          "x": 0.1,
+          "y": 0.15,
+          "w": 0.6,
+          "h": 0.5
+        },
+        "annotation_beat_id": "beat_setup_046",
+        "attribution_text_id": "text_setup_046"
       }
     },
     {
@@ -3754,7 +6240,8 @@
             "text": "WHY ONE EVENT MATTERED",
             "role": "headline",
             "claim_ref": null,
-            "max_lines": 2
+            "max_lines": 2,
+            "text_id": "text_setup_047"
           }
         ],
         "reveal_plan": [
@@ -3785,7 +6272,44 @@
         "layout_variant_hint": "A",
         "duration_policy": "voice_locked",
         "transition_intent": "hard_cut",
-        "historical_map_requirement_id": null
+        "historical_map_requirement_id": null,
+        "visual_beats": [
+          {
+            "beat_id": "beat_setup_047",
+            "section_ref": "sec_024",
+            "cue": {
+              "section_id": "sec_024",
+              "phrase": "In",
+              "occurrence": 0
+            },
+            "action": "establish",
+            "focus_ref": "slot_sec_024",
+            "shot_goal": "Understand who, where and why this context matters",
+            "source_claim_refs": [
+              "claim_024"
+            ],
+            "relationships": [],
+            "staging": [
+              {
+                "ref": "slot_sec_024",
+                "operation": "enter",
+                "after_ref": null,
+                "motion_hint": "subtle_push",
+                "priority": 1
+              }
+            ],
+            "focus_move": "static",
+            "hold_policy": "narration_aligned",
+            "continuity": {
+              "group_id": "group_setup_047",
+              "carry_refs": [],
+              "entry": "new_setup",
+              "exit": "hard_cut",
+              "reason": "fixture setup boundary"
+            }
+          }
+        ],
+        "reuse_setup_id": null
       },
       "asset_slot_bindings": [
         {
@@ -3808,6 +6332,15 @@
           0.5,
           0.5
         ]
+      },
+      "template_payload": {
+        "template_id": "T08",
+        "fact_claim_id": "claim_024",
+        "fact_text_id": "text_setup_047",
+        "display_value": "1914",
+        "unit_text_id": null,
+        "animation_rule": "reveal_exact",
+        "source_text_id": null
       }
     },
     {
@@ -3835,7 +6368,8 @@
             "text": "WHY ONE EVENT MATTERED",
             "role": "headline",
             "claim_ref": null,
-            "max_lines": 2
+            "max_lines": 2,
+            "text_id": "text_setup_048"
           }
         ],
         "reveal_plan": [
@@ -3866,7 +6400,44 @@
         "layout_variant_hint": "A",
         "duration_policy": "voice_locked",
         "transition_intent": "hard_cut",
-        "historical_map_requirement_id": null
+        "historical_map_requirement_id": null,
+        "visual_beats": [
+          {
+            "beat_id": "beat_setup_048",
+            "section_ref": "sec_024",
+            "cue": {
+              "section_id": "sec_024",
+              "phrase": "In",
+              "occurrence": 0
+            },
+            "action": "establish",
+            "focus_ref": "slot_sec_024",
+            "shot_goal": "Understand who, where and why this context matters",
+            "source_claim_refs": [
+              "claim_024"
+            ],
+            "relationships": [],
+            "staging": [
+              {
+                "ref": "slot_sec_024",
+                "operation": "enter",
+                "after_ref": null,
+                "motion_hint": "subtle_push",
+                "priority": 1
+              }
+            ],
+            "focus_move": "static",
+            "hold_policy": "narration_aligned",
+            "continuity": {
+              "group_id": "group_setup_048",
+              "carry_refs": [],
+              "entry": "new_setup",
+              "exit": "hard_cut",
+              "reason": "fixture setup boundary"
+            }
+          }
+        ],
+        "reuse_setup_id": null
       },
       "asset_slot_bindings": [
         {
@@ -3889,6 +6460,15 @@
           0.5,
           0.5
         ]
+      },
+      "template_payload": {
+        "template_id": "T08",
+        "fact_claim_id": "claim_024",
+        "fact_text_id": "text_setup_048",
+        "display_value": "1914",
+        "unit_text_id": null,
+        "animation_rule": "reveal_exact",
+        "source_text_id": null
       }
     }
   ]

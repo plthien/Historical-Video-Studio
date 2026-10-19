@@ -67,7 +67,8 @@
             "text": "GERMANY 1871",
             "role": "headline",
             "claim_ref": null,
-            "max_lines": 2
+            "max_lines": 2,
+            "text_id": "text_setup_001"
           }
         ],
         "reveal_plan": [
@@ -98,7 +99,44 @@
         "layout_variant_hint": "A",
         "duration_policy": "voice_locked",
         "transition_intent": "hard_cut",
-        "historical_map_requirement_id": "req_001"
+        "historical_map_requirement_id": "req_001",
+        "visual_beats": [
+          {
+            "beat_id": "beat_setup_001",
+            "section_ref": "sec_001",
+            "cue": {
+              "section_id": "sec_001",
+              "phrase": "In",
+              "occurrence": 0
+            },
+            "action": "establish",
+            "focus_ref": "slot_sec_001",
+            "shot_goal": "Understand who, where and why this context matters",
+            "source_claim_refs": [
+              "claim_001"
+            ],
+            "relationships": [],
+            "staging": [
+              {
+                "ref": "slot_sec_001",
+                "operation": "enter",
+                "after_ref": null,
+                "motion_hint": "subtle_push",
+                "priority": 1
+              }
+            ],
+            "focus_move": "static",
+            "hold_policy": "narration_aligned",
+            "continuity": {
+              "group_id": "group_setup_001",
+              "carry_refs": [],
+              "entry": "new_setup",
+              "exit": "hard_cut",
+              "reason": "fixture setup boundary"
+            }
+          }
+        ],
+        "reuse_setup_id": null
       }
     }
   ],

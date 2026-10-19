@@ -57,7 +57,21 @@
             "stroke_token": null,
             "max_lines": 3
           },
-          "map_binding": null
+          "map_binding": null,
+          "parent_layer_id": null,
+          "group_id": "group_scene_001",
+          "transform_origin": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "depth_order": 0,
+          "treatment": {
+            "kind": "ink_map",
+            "source_preserving": true,
+            "evidence_badge": "archival"
+          },
+          "path_geometry_ref": null,
+          "text_layout": null
         },
         {
           "layer_id": "title_001",
@@ -91,7 +105,30 @@
             "stroke_token": null,
             "max_lines": 3
           },
-          "map_binding": null
+          "map_binding": null,
+          "parent_layer_id": null,
+          "group_id": "group_scene_001",
+          "transform_origin": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "depth_order": 1,
+          "treatment": {
+            "kind": "headline_text",
+            "source_preserving": true,
+            "evidence_badge": "none"
+          },
+          "path_geometry_ref": null,
+          "text_layout": {
+            "font_token": "headline_sans",
+            "font_size_px": 64,
+            "line_height": 1.16,
+            "letter_spacing_px": 0,
+            "horizontal_align": "left",
+            "vertical_align": "center",
+            "max_lines": 3,
+            "overflow": "block"
+          }
         }
       ],
       "events": [
@@ -104,7 +141,8 @@
           "cue_word_id": "word_001",
           "params": {
             "direction": "up",
-            "distance_px": 30
+            "distance_px": 30,
+            "feather_px": 4
           },
           "animated_property": "opacity",
           "keyframes": [
@@ -122,7 +160,22 @@
           "cue_binding": {
             "word_id": "word_001",
             "offset_frames": 0
-          }
+          },
+          "phases": [
+            {
+              "phase_id": "phase_event_001",
+              "kind": "enter",
+              "start_offset_frames": 0,
+              "duration_frames": 18,
+              "depends_on_phase_ids": []
+            }
+          ],
+          "motion_space": "layer_local",
+          "affected_layer_ids": [
+            "title_001"
+          ],
+          "stagger": null,
+          "depth_parallax": null
         }
       ],
       "camera": {
@@ -148,7 +201,16 @@
           }
         ],
         "focus_entity_id": null,
-        "clamp_to_content": true
+        "clamp_to_content": true,
+        "focus_path": [
+          {
+            "at_frame": 0,
+            "focus_layer_id": "layer_001",
+            "focus_geo_feature_id": null,
+            "framing": "subject_center"
+          }
+        ],
+        "transform_order": "layer_then_group_then_camera"
       },
       "transition_out": {
         "type": "hard_cut",
@@ -157,6 +219,37 @@
       "story_cue_span": {
         "first_word_id": "word_001",
         "last_word_id": "word_001"
+      },
+      "staging": {
+        "composition_graph": {
+          "group_ids": [
+            "group_scene_001"
+          ],
+          "edges": [
+            {
+              "from_id": "title_001",
+              "to_id": "layer_001",
+              "relation": "foreground_of"
+            }
+          ]
+        },
+        "beat_sequence": [
+          {
+            "beat_id": "beat_setup_001",
+            "local_start_frame": 0,
+            "local_end_frame": 225,
+            "focus_layer_id": "layer_001",
+            "activated_layer_ids": [
+              "layer_001",
+              "title_001"
+            ],
+            "hidden_layer_ids": []
+          }
+        ],
+        "continuity_group_id": "group_setup_001",
+        "carry_layer_ids": [],
+        "entry_focus_layer_id": "layer_001",
+        "exit_focus_layer_id": "layer_001"
       }
     },
     {
@@ -202,7 +295,21 @@
             "stroke_token": null,
             "max_lines": 3
           },
-          "map_binding": null
+          "map_binding": null,
+          "parent_layer_id": null,
+          "group_id": "group_scene_002",
+          "transform_origin": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "depth_order": 0,
+          "treatment": {
+            "kind": "ink_map",
+            "source_preserving": true,
+            "evidence_badge": "archival"
+          },
+          "path_geometry_ref": null,
+          "text_layout": null
         },
         {
           "layer_id": "title_002",
@@ -236,7 +343,30 @@
             "stroke_token": null,
             "max_lines": 3
           },
-          "map_binding": null
+          "map_binding": null,
+          "parent_layer_id": null,
+          "group_id": "group_scene_002",
+          "transform_origin": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "depth_order": 1,
+          "treatment": {
+            "kind": "headline_text",
+            "source_preserving": true,
+            "evidence_badge": "none"
+          },
+          "path_geometry_ref": null,
+          "text_layout": {
+            "font_token": "headline_sans",
+            "font_size_px": 64,
+            "line_height": 1.16,
+            "letter_spacing_px": 0,
+            "horizontal_align": "left",
+            "vertical_align": "center",
+            "max_lines": 3,
+            "overflow": "block"
+          }
         }
       ],
       "events": [
@@ -249,7 +379,8 @@
           "cue_word_id": "word_002",
           "params": {
             "direction": "up",
-            "distance_px": 30
+            "distance_px": 30,
+            "feather_px": 4
           },
           "animated_property": "opacity",
           "keyframes": [
@@ -267,7 +398,22 @@
           "cue_binding": {
             "word_id": "word_002",
             "offset_frames": 0
-          }
+          },
+          "phases": [
+            {
+              "phase_id": "phase_event_002",
+              "kind": "enter",
+              "start_offset_frames": 0,
+              "duration_frames": 18,
+              "depends_on_phase_ids": []
+            }
+          ],
+          "motion_space": "layer_local",
+          "affected_layer_ids": [
+            "title_002"
+          ],
+          "stagger": null,
+          "depth_parallax": null
         }
       ],
       "camera": {
@@ -293,7 +439,16 @@
           }
         ],
         "focus_entity_id": null,
-        "clamp_to_content": true
+        "clamp_to_content": true,
+        "focus_path": [
+          {
+            "at_frame": 0,
+            "focus_layer_id": "layer_002",
+            "focus_geo_feature_id": null,
+            "framing": "subject_center"
+          }
+        ],
+        "transform_order": "layer_then_group_then_camera"
       },
       "transition_out": {
         "type": "hard_cut",
@@ -302,6 +457,37 @@
       "story_cue_span": {
         "first_word_id": "word_002",
         "last_word_id": "word_002"
+      },
+      "staging": {
+        "composition_graph": {
+          "group_ids": [
+            "group_scene_002"
+          ],
+          "edges": [
+            {
+              "from_id": "title_002",
+              "to_id": "layer_002",
+              "relation": "foreground_of"
+            }
+          ]
+        },
+        "beat_sequence": [
+          {
+            "beat_id": "beat_setup_002",
+            "local_start_frame": 0,
+            "local_end_frame": 225,
+            "focus_layer_id": "layer_002",
+            "activated_layer_ids": [
+              "layer_002",
+              "title_002"
+            ],
+            "hidden_layer_ids": []
+          }
+        ],
+        "continuity_group_id": "group_setup_002",
+        "carry_layer_ids": [],
+        "entry_focus_layer_id": "layer_002",
+        "exit_focus_layer_id": "layer_002"
       }
     },
     {
@@ -347,7 +533,21 @@
             "stroke_token": null,
             "max_lines": 3
           },
-          "map_binding": null
+          "map_binding": null,
+          "parent_layer_id": null,
+          "group_id": "group_scene_003",
+          "transform_origin": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "depth_order": 0,
+          "treatment": {
+            "kind": "source_photo_card",
+            "source_preserving": true,
+            "evidence_badge": "archival"
+          },
+          "path_geometry_ref": null,
+          "text_layout": null
         },
         {
           "layer_id": "title_003",
@@ -381,7 +581,30 @@
             "stroke_token": null,
             "max_lines": 3
           },
-          "map_binding": null
+          "map_binding": null,
+          "parent_layer_id": null,
+          "group_id": "group_scene_003",
+          "transform_origin": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "depth_order": 1,
+          "treatment": {
+            "kind": "headline_text",
+            "source_preserving": true,
+            "evidence_badge": "none"
+          },
+          "path_geometry_ref": null,
+          "text_layout": {
+            "font_token": "headline_sans",
+            "font_size_px": 64,
+            "line_height": 1.16,
+            "letter_spacing_px": 0,
+            "horizontal_align": "left",
+            "vertical_align": "center",
+            "max_lines": 3,
+            "overflow": "block"
+          }
         }
       ],
       "events": [
@@ -394,7 +617,8 @@
           "cue_word_id": "word_003",
           "params": {
             "direction": "up",
-            "distance_px": 30
+            "distance_px": 30,
+            "feather_px": 4
           },
           "animated_property": "opacity",
           "keyframes": [
@@ -412,7 +636,22 @@
           "cue_binding": {
             "word_id": "word_003",
             "offset_frames": 0
-          }
+          },
+          "phases": [
+            {
+              "phase_id": "phase_event_003",
+              "kind": "enter",
+              "start_offset_frames": 0,
+              "duration_frames": 18,
+              "depends_on_phase_ids": []
+            }
+          ],
+          "motion_space": "layer_local",
+          "affected_layer_ids": [
+            "title_003"
+          ],
+          "stagger": null,
+          "depth_parallax": null
         }
       ],
       "camera": {
@@ -438,7 +677,16 @@
           }
         ],
         "focus_entity_id": null,
-        "clamp_to_content": true
+        "clamp_to_content": true,
+        "focus_path": [
+          {
+            "at_frame": 0,
+            "focus_layer_id": "layer_003",
+            "focus_geo_feature_id": null,
+            "framing": "subject_center"
+          }
+        ],
+        "transform_order": "layer_then_group_then_camera"
       },
       "transition_out": {
         "type": "hard_cut",
@@ -447,6 +695,37 @@
       "story_cue_span": {
         "first_word_id": "word_003",
         "last_word_id": "word_003"
+      },
+      "staging": {
+        "composition_graph": {
+          "group_ids": [
+            "group_scene_003"
+          ],
+          "edges": [
+            {
+              "from_id": "title_003",
+              "to_id": "layer_003",
+              "relation": "foreground_of"
+            }
+          ]
+        },
+        "beat_sequence": [
+          {
+            "beat_id": "beat_setup_003",
+            "local_start_frame": 0,
+            "local_end_frame": 225,
+            "focus_layer_id": "layer_003",
+            "activated_layer_ids": [
+              "layer_003",
+              "title_003"
+            ],
+            "hidden_layer_ids": []
+          }
+        ],
+        "continuity_group_id": "group_setup_003",
+        "carry_layer_ids": [],
+        "entry_focus_layer_id": "layer_003",
+        "exit_focus_layer_id": "layer_003"
       }
     },
     {
@@ -492,7 +771,21 @@
             "stroke_token": null,
             "max_lines": 3
           },
-          "map_binding": null
+          "map_binding": null,
+          "parent_layer_id": null,
+          "group_id": "group_scene_004",
+          "transform_origin": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "depth_order": 0,
+          "treatment": {
+            "kind": "source_photo_card",
+            "source_preserving": true,
+            "evidence_badge": "archival"
+          },
+          "path_geometry_ref": null,
+          "text_layout": null
         },
         {
           "layer_id": "title_004",
@@ -526,7 +819,30 @@
             "stroke_token": null,
             "max_lines": 3
           },
-          "map_binding": null
+          "map_binding": null,
+          "parent_layer_id": null,
+          "group_id": "group_scene_004",
+          "transform_origin": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "depth_order": 1,
+          "treatment": {
+            "kind": "headline_text",
+            "source_preserving": true,
+            "evidence_badge": "none"
+          },
+          "path_geometry_ref": null,
+          "text_layout": {
+            "font_token": "headline_sans",
+            "font_size_px": 64,
+            "line_height": 1.16,
+            "letter_spacing_px": 0,
+            "horizontal_align": "left",
+            "vertical_align": "center",
+            "max_lines": 3,
+            "overflow": "block"
+          }
         }
       ],
       "events": [
@@ -539,7 +855,8 @@
           "cue_word_id": "word_004",
           "params": {
             "direction": "up",
-            "distance_px": 30
+            "distance_px": 30,
+            "feather_px": 4
           },
           "animated_property": "opacity",
           "keyframes": [
@@ -557,7 +874,22 @@
           "cue_binding": {
             "word_id": "word_004",
             "offset_frames": 0
-          }
+          },
+          "phases": [
+            {
+              "phase_id": "phase_event_004",
+              "kind": "enter",
+              "start_offset_frames": 0,
+              "duration_frames": 18,
+              "depends_on_phase_ids": []
+            }
+          ],
+          "motion_space": "layer_local",
+          "affected_layer_ids": [
+            "title_004"
+          ],
+          "stagger": null,
+          "depth_parallax": null
         }
       ],
       "camera": {
@@ -583,7 +915,16 @@
           }
         ],
         "focus_entity_id": null,
-        "clamp_to_content": true
+        "clamp_to_content": true,
+        "focus_path": [
+          {
+            "at_frame": 0,
+            "focus_layer_id": "layer_004",
+            "focus_geo_feature_id": null,
+            "framing": "subject_center"
+          }
+        ],
+        "transform_order": "layer_then_group_then_camera"
       },
       "transition_out": {
         "type": "hard_cut",
@@ -592,6 +933,37 @@
       "story_cue_span": {
         "first_word_id": "word_004",
         "last_word_id": "word_004"
+      },
+      "staging": {
+        "composition_graph": {
+          "group_ids": [
+            "group_scene_004"
+          ],
+          "edges": [
+            {
+              "from_id": "title_004",
+              "to_id": "layer_004",
+              "relation": "foreground_of"
+            }
+          ]
+        },
+        "beat_sequence": [
+          {
+            "beat_id": "beat_setup_004",
+            "local_start_frame": 0,
+            "local_end_frame": 225,
+            "focus_layer_id": "layer_004",
+            "activated_layer_ids": [
+              "layer_004",
+              "title_004"
+            ],
+            "hidden_layer_ids": []
+          }
+        ],
+        "continuity_group_id": "group_setup_004",
+        "carry_layer_ids": [],
+        "entry_focus_layer_id": "layer_004",
+        "exit_focus_layer_id": "layer_004"
       }
     },
     {
@@ -637,7 +1009,21 @@
             "stroke_token": null,
             "max_lines": 3
           },
-          "map_binding": null
+          "map_binding": null,
+          "parent_layer_id": null,
+          "group_id": "group_scene_005",
+          "transform_origin": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "depth_order": 0,
+          "treatment": {
+            "kind": "source_photo_card",
+            "source_preserving": true,
+            "evidence_badge": "archival"
+          },
+          "path_geometry_ref": null,
+          "text_layout": null
         },
         {
           "layer_id": "title_005",
@@ -671,7 +1057,30 @@
             "stroke_token": null,
             "max_lines": 3
           },
-          "map_binding": null
+          "map_binding": null,
+          "parent_layer_id": null,
+          "group_id": "group_scene_005",
+          "transform_origin": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "depth_order": 1,
+          "treatment": {
+            "kind": "headline_text",
+            "source_preserving": true,
+            "evidence_badge": "none"
+          },
+          "path_geometry_ref": null,
+          "text_layout": {
+            "font_token": "headline_sans",
+            "font_size_px": 64,
+            "line_height": 1.16,
+            "letter_spacing_px": 0,
+            "horizontal_align": "left",
+            "vertical_align": "center",
+            "max_lines": 3,
+            "overflow": "block"
+          }
         }
       ],
       "events": [
@@ -684,7 +1093,8 @@
           "cue_word_id": "word_005",
           "params": {
             "direction": "up",
-            "distance_px": 30
+            "distance_px": 30,
+            "feather_px": 4
           },
           "animated_property": "opacity",
           "keyframes": [
@@ -702,7 +1112,22 @@
           "cue_binding": {
             "word_id": "word_005",
             "offset_frames": 0
-          }
+          },
+          "phases": [
+            {
+              "phase_id": "phase_event_005",
+              "kind": "enter",
+              "start_offset_frames": 0,
+              "duration_frames": 18,
+              "depends_on_phase_ids": []
+            }
+          ],
+          "motion_space": "layer_local",
+          "affected_layer_ids": [
+            "title_005"
+          ],
+          "stagger": null,
+          "depth_parallax": null
         }
       ],
       "camera": {
@@ -728,7 +1153,16 @@
           }
         ],
         "focus_entity_id": null,
-        "clamp_to_content": true
+        "clamp_to_content": true,
+        "focus_path": [
+          {
+            "at_frame": 0,
+            "focus_layer_id": "layer_005",
+            "focus_geo_feature_id": null,
+            "framing": "subject_center"
+          }
+        ],
+        "transform_order": "layer_then_group_then_camera"
       },
       "transition_out": {
         "type": "hard_cut",
@@ -737,6 +1171,37 @@
       "story_cue_span": {
         "first_word_id": "word_005",
         "last_word_id": "word_005"
+      },
+      "staging": {
+        "composition_graph": {
+          "group_ids": [
+            "group_scene_005"
+          ],
+          "edges": [
+            {
+              "from_id": "title_005",
+              "to_id": "layer_005",
+              "relation": "foreground_of"
+            }
+          ]
+        },
+        "beat_sequence": [
+          {
+            "beat_id": "beat_setup_005",
+            "local_start_frame": 0,
+            "local_end_frame": 225,
+            "focus_layer_id": "layer_005",
+            "activated_layer_ids": [
+              "layer_005",
+              "title_005"
+            ],
+            "hidden_layer_ids": []
+          }
+        ],
+        "continuity_group_id": "group_setup_005",
+        "carry_layer_ids": [],
+        "entry_focus_layer_id": "layer_005",
+        "exit_focus_layer_id": "layer_005"
       }
     },
     {
@@ -782,7 +1247,21 @@
             "stroke_token": null,
             "max_lines": 3
           },
-          "map_binding": null
+          "map_binding": null,
+          "parent_layer_id": null,
+          "group_id": "group_scene_006",
+          "transform_origin": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "depth_order": 0,
+          "treatment": {
+            "kind": "source_photo_card",
+            "source_preserving": true,
+            "evidence_badge": "archival"
+          },
+          "path_geometry_ref": null,
+          "text_layout": null
         },
         {
           "layer_id": "title_006",
@@ -816,7 +1295,30 @@
             "stroke_token": null,
             "max_lines": 3
           },
-          "map_binding": null
+          "map_binding": null,
+          "parent_layer_id": null,
+          "group_id": "group_scene_006",
+          "transform_origin": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "depth_order": 1,
+          "treatment": {
+            "kind": "headline_text",
+            "source_preserving": true,
+            "evidence_badge": "none"
+          },
+          "path_geometry_ref": null,
+          "text_layout": {
+            "font_token": "headline_sans",
+            "font_size_px": 64,
+            "line_height": 1.16,
+            "letter_spacing_px": 0,
+            "horizontal_align": "left",
+            "vertical_align": "center",
+            "max_lines": 3,
+            "overflow": "block"
+          }
         }
       ],
       "events": [
@@ -829,7 +1331,8 @@
           "cue_word_id": "word_006",
           "params": {
             "direction": "up",
-            "distance_px": 30
+            "distance_px": 30,
+            "feather_px": 4
           },
           "animated_property": "opacity",
           "keyframes": [
@@ -847,7 +1350,22 @@
           "cue_binding": {
             "word_id": "word_006",
             "offset_frames": 0
-          }
+          },
+          "phases": [
+            {
+              "phase_id": "phase_event_006",
+              "kind": "enter",
+              "start_offset_frames": 0,
+              "duration_frames": 18,
+              "depends_on_phase_ids": []
+            }
+          ],
+          "motion_space": "layer_local",
+          "affected_layer_ids": [
+            "title_006"
+          ],
+          "stagger": null,
+          "depth_parallax": null
         }
       ],
       "camera": {
@@ -873,7 +1391,16 @@
           }
         ],
         "focus_entity_id": null,
-        "clamp_to_content": true
+        "clamp_to_content": true,
+        "focus_path": [
+          {
+            "at_frame": 0,
+            "focus_layer_id": "layer_006",
+            "focus_geo_feature_id": null,
+            "framing": "subject_center"
+          }
+        ],
+        "transform_order": "layer_then_group_then_camera"
       },
       "transition_out": {
         "type": "hard_cut",
@@ -882,6 +1409,37 @@
       "story_cue_span": {
         "first_word_id": "word_006",
         "last_word_id": "word_006"
+      },
+      "staging": {
+        "composition_graph": {
+          "group_ids": [
+            "group_scene_006"
+          ],
+          "edges": [
+            {
+              "from_id": "title_006",
+              "to_id": "layer_006",
+              "relation": "foreground_of"
+            }
+          ]
+        },
+        "beat_sequence": [
+          {
+            "beat_id": "beat_setup_006",
+            "local_start_frame": 0,
+            "local_end_frame": 225,
+            "focus_layer_id": "layer_006",
+            "activated_layer_ids": [
+              "layer_006",
+              "title_006"
+            ],
+            "hidden_layer_ids": []
+          }
+        ],
+        "continuity_group_id": "group_setup_006",
+        "carry_layer_ids": [],
+        "entry_focus_layer_id": "layer_006",
+        "exit_focus_layer_id": "layer_006"
       }
     },
     {
@@ -927,7 +1485,21 @@
             "stroke_token": null,
             "max_lines": 3
           },
-          "map_binding": null
+          "map_binding": null,
+          "parent_layer_id": null,
+          "group_id": "group_scene_007",
+          "transform_origin": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "depth_order": 0,
+          "treatment": {
+            "kind": "source_photo_card",
+            "source_preserving": true,
+            "evidence_badge": "archival"
+          },
+          "path_geometry_ref": null,
+          "text_layout": null
         },
         {
           "layer_id": "title_007",
@@ -961,7 +1533,30 @@
             "stroke_token": null,
             "max_lines": 3
           },
-          "map_binding": null
+          "map_binding": null,
+          "parent_layer_id": null,
+          "group_id": "group_scene_007",
+          "transform_origin": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "depth_order": 1,
+          "treatment": {
+            "kind": "headline_text",
+            "source_preserving": true,
+            "evidence_badge": "none"
+          },
+          "path_geometry_ref": null,
+          "text_layout": {
+            "font_token": "headline_sans",
+            "font_size_px": 64,
+            "line_height": 1.16,
+            "letter_spacing_px": 0,
+            "horizontal_align": "left",
+            "vertical_align": "center",
+            "max_lines": 3,
+            "overflow": "block"
+          }
         }
       ],
       "events": [
@@ -974,7 +1569,8 @@
           "cue_word_id": "word_007",
           "params": {
             "direction": "up",
-            "distance_px": 30
+            "distance_px": 30,
+            "feather_px": 4
           },
           "animated_property": "opacity",
           "keyframes": [
@@ -992,7 +1588,22 @@
           "cue_binding": {
             "word_id": "word_007",
             "offset_frames": 0
-          }
+          },
+          "phases": [
+            {
+              "phase_id": "phase_event_007",
+              "kind": "enter",
+              "start_offset_frames": 0,
+              "duration_frames": 18,
+              "depends_on_phase_ids": []
+            }
+          ],
+          "motion_space": "layer_local",
+          "affected_layer_ids": [
+            "title_007"
+          ],
+          "stagger": null,
+          "depth_parallax": null
         }
       ],
       "camera": {
@@ -1018,7 +1629,16 @@
           }
         ],
         "focus_entity_id": null,
-        "clamp_to_content": true
+        "clamp_to_content": true,
+        "focus_path": [
+          {
+            "at_frame": 0,
+            "focus_layer_id": "layer_007",
+            "focus_geo_feature_id": null,
+            "framing": "subject_center"
+          }
+        ],
+        "transform_order": "layer_then_group_then_camera"
       },
       "transition_out": {
         "type": "hard_cut",
@@ -1027,6 +1647,37 @@
       "story_cue_span": {
         "first_word_id": "word_007",
         "last_word_id": "word_007"
+      },
+      "staging": {
+        "composition_graph": {
+          "group_ids": [
+            "group_scene_007"
+          ],
+          "edges": [
+            {
+              "from_id": "title_007",
+              "to_id": "layer_007",
+              "relation": "foreground_of"
+            }
+          ]
+        },
+        "beat_sequence": [
+          {
+            "beat_id": "beat_setup_007",
+            "local_start_frame": 0,
+            "local_end_frame": 225,
+            "focus_layer_id": "layer_007",
+            "activated_layer_ids": [
+              "layer_007",
+              "title_007"
+            ],
+            "hidden_layer_ids": []
+          }
+        ],
+        "continuity_group_id": "group_setup_007",
+        "carry_layer_ids": [],
+        "entry_focus_layer_id": "layer_007",
+        "exit_focus_layer_id": "layer_007"
       }
     },
     {
@@ -1072,7 +1723,21 @@
             "stroke_token": null,
             "max_lines": 3
           },
-          "map_binding": null
+          "map_binding": null,
+          "parent_layer_id": null,
+          "group_id": "group_scene_008",
+          "transform_origin": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "depth_order": 0,
+          "treatment": {
+            "kind": "source_photo_card",
+            "source_preserving": true,
+            "evidence_badge": "archival"
+          },
+          "path_geometry_ref": null,
+          "text_layout": null
         },
         {
           "layer_id": "title_008",
@@ -1106,7 +1771,30 @@
             "stroke_token": null,
             "max_lines": 3
           },
-          "map_binding": null
+          "map_binding": null,
+          "parent_layer_id": null,
+          "group_id": "group_scene_008",
+          "transform_origin": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "depth_order": 1,
+          "treatment": {
+            "kind": "headline_text",
+            "source_preserving": true,
+            "evidence_badge": "none"
+          },
+          "path_geometry_ref": null,
+          "text_layout": {
+            "font_token": "headline_sans",
+            "font_size_px": 64,
+            "line_height": 1.16,
+            "letter_spacing_px": 0,
+            "horizontal_align": "left",
+            "vertical_align": "center",
+            "max_lines": 3,
+            "overflow": "block"
+          }
         }
       ],
       "events": [
@@ -1119,7 +1807,8 @@
           "cue_word_id": "word_008",
           "params": {
             "direction": "up",
-            "distance_px": 30
+            "distance_px": 30,
+            "feather_px": 4
           },
           "animated_property": "opacity",
           "keyframes": [
@@ -1137,7 +1826,22 @@
           "cue_binding": {
             "word_id": "word_008",
             "offset_frames": 0
-          }
+          },
+          "phases": [
+            {
+              "phase_id": "phase_event_008",
+              "kind": "enter",
+              "start_offset_frames": 0,
+              "duration_frames": 18,
+              "depends_on_phase_ids": []
+            }
+          ],
+          "motion_space": "layer_local",
+          "affected_layer_ids": [
+            "title_008"
+          ],
+          "stagger": null,
+          "depth_parallax": null
         }
       ],
       "camera": {
@@ -1163,7 +1867,16 @@
           }
         ],
         "focus_entity_id": null,
-        "clamp_to_content": true
+        "clamp_to_content": true,
+        "focus_path": [
+          {
+            "at_frame": 0,
+            "focus_layer_id": "layer_008",
+            "focus_geo_feature_id": null,
+            "framing": "subject_center"
+          }
+        ],
+        "transform_order": "layer_then_group_then_camera"
       },
       "transition_out": {
         "type": "hard_cut",
@@ -1172,6 +1885,37 @@
       "story_cue_span": {
         "first_word_id": "word_008",
         "last_word_id": "word_008"
+      },
+      "staging": {
+        "composition_graph": {
+          "group_ids": [
+            "group_scene_008"
+          ],
+          "edges": [
+            {
+              "from_id": "title_008",
+              "to_id": "layer_008",
+              "relation": "foreground_of"
+            }
+          ]
+        },
+        "beat_sequence": [
+          {
+            "beat_id": "beat_setup_008",
+            "local_start_frame": 0,
+            "local_end_frame": 225,
+            "focus_layer_id": "layer_008",
+            "activated_layer_ids": [
+              "layer_008",
+              "title_008"
+            ],
+            "hidden_layer_ids": []
+          }
+        ],
+        "continuity_group_id": "group_setup_008",
+        "carry_layer_ids": [],
+        "entry_focus_layer_id": "layer_008",
+        "exit_focus_layer_id": "layer_008"
       }
     },
     {
@@ -1217,7 +1961,21 @@
             "stroke_token": null,
             "max_lines": 3
           },
-          "map_binding": null
+          "map_binding": null,
+          "parent_layer_id": null,
+          "group_id": "group_scene_009",
+          "transform_origin": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "depth_order": 0,
+          "treatment": {
+            "kind": "ink_map",
+            "source_preserving": true,
+            "evidence_badge": "archival"
+          },
+          "path_geometry_ref": null,
+          "text_layout": null
         },
         {
           "layer_id": "title_009",
@@ -1251,7 +2009,30 @@
             "stroke_token": null,
             "max_lines": 3
           },
-          "map_binding": null
+          "map_binding": null,
+          "parent_layer_id": null,
+          "group_id": "group_scene_009",
+          "transform_origin": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "depth_order": 1,
+          "treatment": {
+            "kind": "headline_text",
+            "source_preserving": true,
+            "evidence_badge": "none"
+          },
+          "path_geometry_ref": null,
+          "text_layout": {
+            "font_token": "headline_sans",
+            "font_size_px": 64,
+            "line_height": 1.16,
+            "letter_spacing_px": 0,
+            "horizontal_align": "left",
+            "vertical_align": "center",
+            "max_lines": 3,
+            "overflow": "block"
+          }
         }
       ],
       "events": [
@@ -1264,7 +2045,8 @@
           "cue_word_id": "word_009",
           "params": {
             "direction": "up",
-            "distance_px": 30
+            "distance_px": 30,
+            "feather_px": 4
           },
           "animated_property": "opacity",
           "keyframes": [
@@ -1282,7 +2064,22 @@
           "cue_binding": {
             "word_id": "word_009",
             "offset_frames": 0
-          }
+          },
+          "phases": [
+            {
+              "phase_id": "phase_event_009",
+              "kind": "enter",
+              "start_offset_frames": 0,
+              "duration_frames": 18,
+              "depends_on_phase_ids": []
+            }
+          ],
+          "motion_space": "layer_local",
+          "affected_layer_ids": [
+            "title_009"
+          ],
+          "stagger": null,
+          "depth_parallax": null
         }
       ],
       "camera": {
@@ -1308,7 +2105,16 @@
           }
         ],
         "focus_entity_id": null,
-        "clamp_to_content": true
+        "clamp_to_content": true,
+        "focus_path": [
+          {
+            "at_frame": 0,
+            "focus_layer_id": "layer_009",
+            "focus_geo_feature_id": null,
+            "framing": "subject_center"
+          }
+        ],
+        "transform_order": "layer_then_group_then_camera"
       },
       "transition_out": {
         "type": "hard_cut",
@@ -1317,6 +2123,37 @@
       "story_cue_span": {
         "first_word_id": "word_009",
         "last_word_id": "word_009"
+      },
+      "staging": {
+        "composition_graph": {
+          "group_ids": [
+            "group_scene_009"
+          ],
+          "edges": [
+            {
+              "from_id": "title_009",
+              "to_id": "layer_009",
+              "relation": "foreground_of"
+            }
+          ]
+        },
+        "beat_sequence": [
+          {
+            "beat_id": "beat_setup_009",
+            "local_start_frame": 0,
+            "local_end_frame": 225,
+            "focus_layer_id": "layer_009",
+            "activated_layer_ids": [
+              "layer_009",
+              "title_009"
+            ],
+            "hidden_layer_ids": []
+          }
+        ],
+        "continuity_group_id": "group_setup_009",
+        "carry_layer_ids": [],
+        "entry_focus_layer_id": "layer_009",
+        "exit_focus_layer_id": "layer_009"
       }
     },
     {
@@ -1362,7 +2199,21 @@
             "stroke_token": null,
             "max_lines": 3
           },
-          "map_binding": null
+          "map_binding": null,
+          "parent_layer_id": null,
+          "group_id": "group_scene_010",
+          "transform_origin": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "depth_order": 0,
+          "treatment": {
+            "kind": "ink_map",
+            "source_preserving": true,
+            "evidence_badge": "archival"
+          },
+          "path_geometry_ref": null,
+          "text_layout": null
         },
         {
           "layer_id": "title_010",
@@ -1396,7 +2247,30 @@
             "stroke_token": null,
             "max_lines": 3
           },
-          "map_binding": null
+          "map_binding": null,
+          "parent_layer_id": null,
+          "group_id": "group_scene_010",
+          "transform_origin": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "depth_order": 1,
+          "treatment": {
+            "kind": "headline_text",
+            "source_preserving": true,
+            "evidence_badge": "none"
+          },
+          "path_geometry_ref": null,
+          "text_layout": {
+            "font_token": "headline_sans",
+            "font_size_px": 64,
+            "line_height": 1.16,
+            "letter_spacing_px": 0,
+            "horizontal_align": "left",
+            "vertical_align": "center",
+            "max_lines": 3,
+            "overflow": "block"
+          }
         }
       ],
       "events": [
@@ -1409,7 +2283,8 @@
           "cue_word_id": "word_010",
           "params": {
             "direction": "up",
-            "distance_px": 30
+            "distance_px": 30,
+            "feather_px": 4
           },
           "animated_property": "opacity",
           "keyframes": [
@@ -1427,7 +2302,22 @@
           "cue_binding": {
             "word_id": "word_010",
             "offset_frames": 0
-          }
+          },
+          "phases": [
+            {
+              "phase_id": "phase_event_010",
+              "kind": "enter",
+              "start_offset_frames": 0,
+              "duration_frames": 18,
+              "depends_on_phase_ids": []
+            }
+          ],
+          "motion_space": "layer_local",
+          "affected_layer_ids": [
+            "title_010"
+          ],
+          "stagger": null,
+          "depth_parallax": null
         }
       ],
       "camera": {
@@ -1453,7 +2343,16 @@
           }
         ],
         "focus_entity_id": null,
-        "clamp_to_content": true
+        "clamp_to_content": true,
+        "focus_path": [
+          {
+            "at_frame": 0,
+            "focus_layer_id": "layer_010",
+            "focus_geo_feature_id": null,
+            "framing": "subject_center"
+          }
+        ],
+        "transform_order": "layer_then_group_then_camera"
       },
       "transition_out": {
         "type": "hard_cut",
@@ -1462,6 +2361,37 @@
       "story_cue_span": {
         "first_word_id": "word_010",
         "last_word_id": "word_010"
+      },
+      "staging": {
+        "composition_graph": {
+          "group_ids": [
+            "group_scene_010"
+          ],
+          "edges": [
+            {
+              "from_id": "title_010",
+              "to_id": "layer_010",
+              "relation": "foreground_of"
+            }
+          ]
+        },
+        "beat_sequence": [
+          {
+            "beat_id": "beat_setup_010",
+            "local_start_frame": 0,
+            "local_end_frame": 225,
+            "focus_layer_id": "layer_010",
+            "activated_layer_ids": [
+              "layer_010",
+              "title_010"
+            ],
+            "hidden_layer_ids": []
+          }
+        ],
+        "continuity_group_id": "group_setup_010",
+        "carry_layer_ids": [],
+        "entry_focus_layer_id": "layer_010",
+        "exit_focus_layer_id": "layer_010"
       }
     },
     {
@@ -1507,7 +2437,21 @@
             "stroke_token": null,
             "max_lines": 3
           },
-          "map_binding": null
+          "map_binding": null,
+          "parent_layer_id": null,
+          "group_id": "group_scene_011",
+          "transform_origin": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "depth_order": 0,
+          "treatment": {
+            "kind": "source_photo_card",
+            "source_preserving": true,
+            "evidence_badge": "archival"
+          },
+          "path_geometry_ref": null,
+          "text_layout": null
         },
         {
           "layer_id": "title_011",
@@ -1541,7 +2485,30 @@
             "stroke_token": null,
             "max_lines": 3
           },
-          "map_binding": null
+          "map_binding": null,
+          "parent_layer_id": null,
+          "group_id": "group_scene_011",
+          "transform_origin": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "depth_order": 1,
+          "treatment": {
+            "kind": "headline_text",
+            "source_preserving": true,
+            "evidence_badge": "none"
+          },
+          "path_geometry_ref": null,
+          "text_layout": {
+            "font_token": "headline_sans",
+            "font_size_px": 64,
+            "line_height": 1.16,
+            "letter_spacing_px": 0,
+            "horizontal_align": "left",
+            "vertical_align": "center",
+            "max_lines": 3,
+            "overflow": "block"
+          }
         }
       ],
       "events": [
@@ -1554,7 +2521,8 @@
           "cue_word_id": "word_011",
           "params": {
             "direction": "up",
-            "distance_px": 30
+            "distance_px": 30,
+            "feather_px": 4
           },
           "animated_property": "opacity",
           "keyframes": [
@@ -1572,7 +2540,22 @@
           "cue_binding": {
             "word_id": "word_011",
             "offset_frames": 0
-          }
+          },
+          "phases": [
+            {
+              "phase_id": "phase_event_011",
+              "kind": "enter",
+              "start_offset_frames": 0,
+              "duration_frames": 18,
+              "depends_on_phase_ids": []
+            }
+          ],
+          "motion_space": "layer_local",
+          "affected_layer_ids": [
+            "title_011"
+          ],
+          "stagger": null,
+          "depth_parallax": null
         }
       ],
       "camera": {
@@ -1598,7 +2581,16 @@
           }
         ],
         "focus_entity_id": null,
-        "clamp_to_content": true
+        "clamp_to_content": true,
+        "focus_path": [
+          {
+            "at_frame": 0,
+            "focus_layer_id": "layer_011",
+            "focus_geo_feature_id": null,
+            "framing": "subject_center"
+          }
+        ],
+        "transform_order": "layer_then_group_then_camera"
       },
       "transition_out": {
         "type": "hard_cut",
@@ -1607,6 +2599,37 @@
       "story_cue_span": {
         "first_word_id": "word_011",
         "last_word_id": "word_011"
+      },
+      "staging": {
+        "composition_graph": {
+          "group_ids": [
+            "group_scene_011"
+          ],
+          "edges": [
+            {
+              "from_id": "title_011",
+              "to_id": "layer_011",
+              "relation": "foreground_of"
+            }
+          ]
+        },
+        "beat_sequence": [
+          {
+            "beat_id": "beat_setup_011",
+            "local_start_frame": 0,
+            "local_end_frame": 225,
+            "focus_layer_id": "layer_011",
+            "activated_layer_ids": [
+              "layer_011",
+              "title_011"
+            ],
+            "hidden_layer_ids": []
+          }
+        ],
+        "continuity_group_id": "group_setup_011",
+        "carry_layer_ids": [],
+        "entry_focus_layer_id": "layer_011",
+        "exit_focus_layer_id": "layer_011"
       }
     },
     {
@@ -1652,7 +2675,21 @@
             "stroke_token": null,
             "max_lines": 3
           },
-          "map_binding": null
+          "map_binding": null,
+          "parent_layer_id": null,
+          "group_id": "group_scene_012",
+          "transform_origin": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "depth_order": 0,
+          "treatment": {
+            "kind": "source_photo_card",
+            "source_preserving": true,
+            "evidence_badge": "archival"
+          },
+          "path_geometry_ref": null,
+          "text_layout": null
         },
         {
           "layer_id": "title_012",
@@ -1686,7 +2723,30 @@
             "stroke_token": null,
             "max_lines": 3
           },
-          "map_binding": null
+          "map_binding": null,
+          "parent_layer_id": null,
+          "group_id": "group_scene_012",
+          "transform_origin": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "depth_order": 1,
+          "treatment": {
+            "kind": "headline_text",
+            "source_preserving": true,
+            "evidence_badge": "none"
+          },
+          "path_geometry_ref": null,
+          "text_layout": {
+            "font_token": "headline_sans",
+            "font_size_px": 64,
+            "line_height": 1.16,
+            "letter_spacing_px": 0,
+            "horizontal_align": "left",
+            "vertical_align": "center",
+            "max_lines": 3,
+            "overflow": "block"
+          }
         }
       ],
       "events": [
@@ -1699,7 +2759,8 @@
           "cue_word_id": "word_012",
           "params": {
             "direction": "up",
-            "distance_px": 30
+            "distance_px": 30,
+            "feather_px": 4
           },
           "animated_property": "opacity",
           "keyframes": [
@@ -1717,7 +2778,22 @@
           "cue_binding": {
             "word_id": "word_012",
             "offset_frames": 0
-          }
+          },
+          "phases": [
+            {
+              "phase_id": "phase_event_012",
+              "kind": "enter",
+              "start_offset_frames": 0,
+              "duration_frames": 18,
+              "depends_on_phase_ids": []
+            }
+          ],
+          "motion_space": "layer_local",
+          "affected_layer_ids": [
+            "title_012"
+          ],
+          "stagger": null,
+          "depth_parallax": null
         }
       ],
       "camera": {
@@ -1743,7 +2819,16 @@
           }
         ],
         "focus_entity_id": null,
-        "clamp_to_content": true
+        "clamp_to_content": true,
+        "focus_path": [
+          {
+            "at_frame": 0,
+            "focus_layer_id": "layer_012",
+            "focus_geo_feature_id": null,
+            "framing": "subject_center"
+          }
+        ],
+        "transform_order": "layer_then_group_then_camera"
       },
       "transition_out": {
         "type": "hard_cut",
@@ -1752,6 +2837,37 @@
       "story_cue_span": {
         "first_word_id": "word_012",
         "last_word_id": "word_012"
+      },
+      "staging": {
+        "composition_graph": {
+          "group_ids": [
+            "group_scene_012"
+          ],
+          "edges": [
+            {
+              "from_id": "title_012",
+              "to_id": "layer_012",
+              "relation": "foreground_of"
+            }
+          ]
+        },
+        "beat_sequence": [
+          {
+            "beat_id": "beat_setup_012",
+            "local_start_frame": 0,
+            "local_end_frame": 225,
+            "focus_layer_id": "layer_012",
+            "activated_layer_ids": [
+              "layer_012",
+              "title_012"
+            ],
+            "hidden_layer_ids": []
+          }
+        ],
+        "continuity_group_id": "group_setup_012",
+        "carry_layer_ids": [],
+        "entry_focus_layer_id": "layer_012",
+        "exit_focus_layer_id": "layer_012"
       }
     },
     {
@@ -1797,7 +2913,21 @@
             "stroke_token": null,
             "max_lines": 3
           },
-          "map_binding": null
+          "map_binding": null,
+          "parent_layer_id": null,
+          "group_id": "group_scene_013",
+          "transform_origin": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "depth_order": 0,
+          "treatment": {
+            "kind": "source_photo_card",
+            "source_preserving": true,
+            "evidence_badge": "archival"
+          },
+          "path_geometry_ref": null,
+          "text_layout": null
         },
         {
           "layer_id": "title_013",
@@ -1831,7 +2961,30 @@
             "stroke_token": null,
             "max_lines": 3
           },
-          "map_binding": null
+          "map_binding": null,
+          "parent_layer_id": null,
+          "group_id": "group_scene_013",
+          "transform_origin": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "depth_order": 1,
+          "treatment": {
+            "kind": "headline_text",
+            "source_preserving": true,
+            "evidence_badge": "none"
+          },
+          "path_geometry_ref": null,
+          "text_layout": {
+            "font_token": "headline_sans",
+            "font_size_px": 64,
+            "line_height": 1.16,
+            "letter_spacing_px": 0,
+            "horizontal_align": "left",
+            "vertical_align": "center",
+            "max_lines": 3,
+            "overflow": "block"
+          }
         }
       ],
       "events": [
@@ -1844,7 +2997,8 @@
           "cue_word_id": "word_013",
           "params": {
             "direction": "up",
-            "distance_px": 30
+            "distance_px": 30,
+            "feather_px": 4
           },
           "animated_property": "opacity",
           "keyframes": [
@@ -1862,7 +3016,22 @@
           "cue_binding": {
             "word_id": "word_013",
             "offset_frames": 0
-          }
+          },
+          "phases": [
+            {
+              "phase_id": "phase_event_013",
+              "kind": "enter",
+              "start_offset_frames": 0,
+              "duration_frames": 18,
+              "depends_on_phase_ids": []
+            }
+          ],
+          "motion_space": "layer_local",
+          "affected_layer_ids": [
+            "title_013"
+          ],
+          "stagger": null,
+          "depth_parallax": null
         }
       ],
       "camera": {
@@ -1888,7 +3057,16 @@
           }
         ],
         "focus_entity_id": null,
-        "clamp_to_content": true
+        "clamp_to_content": true,
+        "focus_path": [
+          {
+            "at_frame": 0,
+            "focus_layer_id": "layer_013",
+            "focus_geo_feature_id": null,
+            "framing": "subject_center"
+          }
+        ],
+        "transform_order": "layer_then_group_then_camera"
       },
       "transition_out": {
         "type": "hard_cut",
@@ -1897,6 +3075,37 @@
       "story_cue_span": {
         "first_word_id": "word_013",
         "last_word_id": "word_013"
+      },
+      "staging": {
+        "composition_graph": {
+          "group_ids": [
+            "group_scene_013"
+          ],
+          "edges": [
+            {
+              "from_id": "title_013",
+              "to_id": "layer_013",
+              "relation": "foreground_of"
+            }
+          ]
+        },
+        "beat_sequence": [
+          {
+            "beat_id": "beat_setup_013",
+            "local_start_frame": 0,
+            "local_end_frame": 225,
+            "focus_layer_id": "layer_013",
+            "activated_layer_ids": [
+              "layer_013",
+              "title_013"
+            ],
+            "hidden_layer_ids": []
+          }
+        ],
+        "continuity_group_id": "group_setup_013",
+        "carry_layer_ids": [],
+        "entry_focus_layer_id": "layer_013",
+        "exit_focus_layer_id": "layer_013"
       }
     },
     {
@@ -1942,7 +3151,21 @@
             "stroke_token": null,
             "max_lines": 3
           },
-          "map_binding": null
+          "map_binding": null,
+          "parent_layer_id": null,
+          "group_id": "group_scene_014",
+          "transform_origin": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "depth_order": 0,
+          "treatment": {
+            "kind": "source_photo_card",
+            "source_preserving": true,
+            "evidence_badge": "archival"
+          },
+          "path_geometry_ref": null,
+          "text_layout": null
         },
         {
           "layer_id": "title_014",
@@ -1976,7 +3199,30 @@
             "stroke_token": null,
             "max_lines": 3
           },
-          "map_binding": null
+          "map_binding": null,
+          "parent_layer_id": null,
+          "group_id": "group_scene_014",
+          "transform_origin": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "depth_order": 1,
+          "treatment": {
+            "kind": "headline_text",
+            "source_preserving": true,
+            "evidence_badge": "none"
+          },
+          "path_geometry_ref": null,
+          "text_layout": {
+            "font_token": "headline_sans",
+            "font_size_px": 64,
+            "line_height": 1.16,
+            "letter_spacing_px": 0,
+            "horizontal_align": "left",
+            "vertical_align": "center",
+            "max_lines": 3,
+            "overflow": "block"
+          }
         }
       ],
       "events": [
@@ -1989,7 +3235,8 @@
           "cue_word_id": "word_014",
           "params": {
             "direction": "up",
-            "distance_px": 30
+            "distance_px": 30,
+            "feather_px": 4
           },
           "animated_property": "opacity",
           "keyframes": [
@@ -2007,7 +3254,22 @@
           "cue_binding": {
             "word_id": "word_014",
             "offset_frames": 0
-          }
+          },
+          "phases": [
+            {
+              "phase_id": "phase_event_014",
+              "kind": "enter",
+              "start_offset_frames": 0,
+              "duration_frames": 18,
+              "depends_on_phase_ids": []
+            }
+          ],
+          "motion_space": "layer_local",
+          "affected_layer_ids": [
+            "title_014"
+          ],
+          "stagger": null,
+          "depth_parallax": null
         }
       ],
       "camera": {
@@ -2033,7 +3295,16 @@
           }
         ],
         "focus_entity_id": null,
-        "clamp_to_content": true
+        "clamp_to_content": true,
+        "focus_path": [
+          {
+            "at_frame": 0,
+            "focus_layer_id": "layer_014",
+            "focus_geo_feature_id": null,
+            "framing": "subject_center"
+          }
+        ],
+        "transform_order": "layer_then_group_then_camera"
       },
       "transition_out": {
         "type": "hard_cut",
@@ -2042,6 +3313,37 @@
       "story_cue_span": {
         "first_word_id": "word_014",
         "last_word_id": "word_014"
+      },
+      "staging": {
+        "composition_graph": {
+          "group_ids": [
+            "group_scene_014"
+          ],
+          "edges": [
+            {
+              "from_id": "title_014",
+              "to_id": "layer_014",
+              "relation": "foreground_of"
+            }
+          ]
+        },
+        "beat_sequence": [
+          {
+            "beat_id": "beat_setup_014",
+            "local_start_frame": 0,
+            "local_end_frame": 225,
+            "focus_layer_id": "layer_014",
+            "activated_layer_ids": [
+              "layer_014",
+              "title_014"
+            ],
+            "hidden_layer_ids": []
+          }
+        ],
+        "continuity_group_id": "group_setup_014",
+        "carry_layer_ids": [],
+        "entry_focus_layer_id": "layer_014",
+        "exit_focus_layer_id": "layer_014"
       }
     },
     {
@@ -2087,7 +3389,21 @@
             "stroke_token": null,
             "max_lines": 3
           },
-          "map_binding": null
+          "map_binding": null,
+          "parent_layer_id": null,
+          "group_id": "group_scene_015",
+          "transform_origin": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "depth_order": 0,
+          "treatment": {
+            "kind": "source_photo_card",
+            "source_preserving": true,
+            "evidence_badge": "archival"
+          },
+          "path_geometry_ref": null,
+          "text_layout": null
         },
         {
           "layer_id": "title_015",
@@ -2121,7 +3437,30 @@
             "stroke_token": null,
             "max_lines": 3
           },
-          "map_binding": null
+          "map_binding": null,
+          "parent_layer_id": null,
+          "group_id": "group_scene_015",
+          "transform_origin": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "depth_order": 1,
+          "treatment": {
+            "kind": "headline_text",
+            "source_preserving": true,
+            "evidence_badge": "none"
+          },
+          "path_geometry_ref": null,
+          "text_layout": {
+            "font_token": "headline_sans",
+            "font_size_px": 64,
+            "line_height": 1.16,
+            "letter_spacing_px": 0,
+            "horizontal_align": "left",
+            "vertical_align": "center",
+            "max_lines": 3,
+            "overflow": "block"
+          }
         }
       ],
       "events": [
@@ -2134,7 +3473,8 @@
           "cue_word_id": "word_015",
           "params": {
             "direction": "up",
-            "distance_px": 30
+            "distance_px": 30,
+            "feather_px": 4
           },
           "animated_property": "opacity",
           "keyframes": [
@@ -2152,7 +3492,22 @@
           "cue_binding": {
             "word_id": "word_015",
             "offset_frames": 0
-          }
+          },
+          "phases": [
+            {
+              "phase_id": "phase_event_015",
+              "kind": "enter",
+              "start_offset_frames": 0,
+              "duration_frames": 18,
+              "depends_on_phase_ids": []
+            }
+          ],
+          "motion_space": "layer_local",
+          "affected_layer_ids": [
+            "title_015"
+          ],
+          "stagger": null,
+          "depth_parallax": null
         }
       ],
       "camera": {
@@ -2178,7 +3533,16 @@
           }
         ],
         "focus_entity_id": null,
-        "clamp_to_content": true
+        "clamp_to_content": true,
+        "focus_path": [
+          {
+            "at_frame": 0,
+            "focus_layer_id": "layer_015",
+            "focus_geo_feature_id": null,
+            "framing": "subject_center"
+          }
+        ],
+        "transform_order": "layer_then_group_then_camera"
       },
       "transition_out": {
         "type": "hard_cut",
@@ -2187,6 +3551,37 @@
       "story_cue_span": {
         "first_word_id": "word_015",
         "last_word_id": "word_015"
+      },
+      "staging": {
+        "composition_graph": {
+          "group_ids": [
+            "group_scene_015"
+          ],
+          "edges": [
+            {
+              "from_id": "title_015",
+              "to_id": "layer_015",
+              "relation": "foreground_of"
+            }
+          ]
+        },
+        "beat_sequence": [
+          {
+            "beat_id": "beat_setup_015",
+            "local_start_frame": 0,
+            "local_end_frame": 225,
+            "focus_layer_id": "layer_015",
+            "activated_layer_ids": [
+              "layer_015",
+              "title_015"
+            ],
+            "hidden_layer_ids": []
+          }
+        ],
+        "continuity_group_id": "group_setup_015",
+        "carry_layer_ids": [],
+        "entry_focus_layer_id": "layer_015",
+        "exit_focus_layer_id": "layer_015"
       }
     },
     {
@@ -2232,7 +3627,21 @@
             "stroke_token": null,
             "max_lines": 3
           },
-          "map_binding": null
+          "map_binding": null,
+          "parent_layer_id": null,
+          "group_id": "group_scene_016",
+          "transform_origin": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "depth_order": 0,
+          "treatment": {
+            "kind": "source_photo_card",
+            "source_preserving": true,
+            "evidence_badge": "archival"
+          },
+          "path_geometry_ref": null,
+          "text_layout": null
         },
         {
           "layer_id": "title_016",
@@ -2266,7 +3675,30 @@
             "stroke_token": null,
             "max_lines": 3
           },
-          "map_binding": null
+          "map_binding": null,
+          "parent_layer_id": null,
+          "group_id": "group_scene_016",
+          "transform_origin": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "depth_order": 1,
+          "treatment": {
+            "kind": "headline_text",
+            "source_preserving": true,
+            "evidence_badge": "none"
+          },
+          "path_geometry_ref": null,
+          "text_layout": {
+            "font_token": "headline_sans",
+            "font_size_px": 64,
+            "line_height": 1.16,
+            "letter_spacing_px": 0,
+            "horizontal_align": "left",
+            "vertical_align": "center",
+            "max_lines": 3,
+            "overflow": "block"
+          }
         }
       ],
       "events": [
@@ -2279,7 +3711,8 @@
           "cue_word_id": "word_016",
           "params": {
             "direction": "up",
-            "distance_px": 30
+            "distance_px": 30,
+            "feather_px": 4
           },
           "animated_property": "opacity",
           "keyframes": [
@@ -2297,7 +3730,22 @@
           "cue_binding": {
             "word_id": "word_016",
             "offset_frames": 0
-          }
+          },
+          "phases": [
+            {
+              "phase_id": "phase_event_016",
+              "kind": "enter",
+              "start_offset_frames": 0,
+              "duration_frames": 18,
+              "depends_on_phase_ids": []
+            }
+          ],
+          "motion_space": "layer_local",
+          "affected_layer_ids": [
+            "title_016"
+          ],
+          "stagger": null,
+          "depth_parallax": null
         }
       ],
       "camera": {
@@ -2323,7 +3771,16 @@
           }
         ],
         "focus_entity_id": null,
-        "clamp_to_content": true
+        "clamp_to_content": true,
+        "focus_path": [
+          {
+            "at_frame": 0,
+            "focus_layer_id": "layer_016",
+            "focus_geo_feature_id": null,
+            "framing": "subject_center"
+          }
+        ],
+        "transform_order": "layer_then_group_then_camera"
       },
       "transition_out": {
         "type": "hard_cut",
@@ -2332,6 +3789,37 @@
       "story_cue_span": {
         "first_word_id": "word_016",
         "last_word_id": "word_016"
+      },
+      "staging": {
+        "composition_graph": {
+          "group_ids": [
+            "group_scene_016"
+          ],
+          "edges": [
+            {
+              "from_id": "title_016",
+              "to_id": "layer_016",
+              "relation": "foreground_of"
+            }
+          ]
+        },
+        "beat_sequence": [
+          {
+            "beat_id": "beat_setup_016",
+            "local_start_frame": 0,
+            "local_end_frame": 225,
+            "focus_layer_id": "layer_016",
+            "activated_layer_ids": [
+              "layer_016",
+              "title_016"
+            ],
+            "hidden_layer_ids": []
+          }
+        ],
+        "continuity_group_id": "group_setup_016",
+        "carry_layer_ids": [],
+        "entry_focus_layer_id": "layer_016",
+        "exit_focus_layer_id": "layer_016"
       }
     },
     {
@@ -2377,7 +3865,21 @@
             "stroke_token": null,
             "max_lines": 3
           },
-          "map_binding": null
+          "map_binding": null,
+          "parent_layer_id": null,
+          "group_id": "group_scene_017",
+          "transform_origin": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "depth_order": 0,
+          "treatment": {
+            "kind": "ink_map",
+            "source_preserving": true,
+            "evidence_badge": "archival"
+          },
+          "path_geometry_ref": null,
+          "text_layout": null
         },
         {
           "layer_id": "title_017",
@@ -2411,7 +3913,30 @@
             "stroke_token": null,
             "max_lines": 3
           },
-          "map_binding": null
+          "map_binding": null,
+          "parent_layer_id": null,
+          "group_id": "group_scene_017",
+          "transform_origin": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "depth_order": 1,
+          "treatment": {
+            "kind": "headline_text",
+            "source_preserving": true,
+            "evidence_badge": "none"
+          },
+          "path_geometry_ref": null,
+          "text_layout": {
+            "font_token": "headline_sans",
+            "font_size_px": 64,
+            "line_height": 1.16,
+            "letter_spacing_px": 0,
+            "horizontal_align": "left",
+            "vertical_align": "center",
+            "max_lines": 3,
+            "overflow": "block"
+          }
         }
       ],
       "events": [
@@ -2424,7 +3949,8 @@
           "cue_word_id": "word_017",
           "params": {
             "direction": "up",
-            "distance_px": 30
+            "distance_px": 30,
+            "feather_px": 4
           },
           "animated_property": "opacity",
           "keyframes": [
@@ -2442,7 +3968,22 @@
           "cue_binding": {
             "word_id": "word_017",
             "offset_frames": 0
-          }
+          },
+          "phases": [
+            {
+              "phase_id": "phase_event_017",
+              "kind": "enter",
+              "start_offset_frames": 0,
+              "duration_frames": 18,
+              "depends_on_phase_ids": []
+            }
+          ],
+          "motion_space": "layer_local",
+          "affected_layer_ids": [
+            "title_017"
+          ],
+          "stagger": null,
+          "depth_parallax": null
         }
       ],
       "camera": {
@@ -2468,7 +4009,16 @@
           }
         ],
         "focus_entity_id": null,
-        "clamp_to_content": true
+        "clamp_to_content": true,
+        "focus_path": [
+          {
+            "at_frame": 0,
+            "focus_layer_id": "layer_017",
+            "focus_geo_feature_id": null,
+            "framing": "subject_center"
+          }
+        ],
+        "transform_order": "layer_then_group_then_camera"
       },
       "transition_out": {
         "type": "hard_cut",
@@ -2477,6 +4027,37 @@
       "story_cue_span": {
         "first_word_id": "word_017",
         "last_word_id": "word_017"
+      },
+      "staging": {
+        "composition_graph": {
+          "group_ids": [
+            "group_scene_017"
+          ],
+          "edges": [
+            {
+              "from_id": "title_017",
+              "to_id": "layer_017",
+              "relation": "foreground_of"
+            }
+          ]
+        },
+        "beat_sequence": [
+          {
+            "beat_id": "beat_setup_017",
+            "local_start_frame": 0,
+            "local_end_frame": 225,
+            "focus_layer_id": "layer_017",
+            "activated_layer_ids": [
+              "layer_017",
+              "title_017"
+            ],
+            "hidden_layer_ids": []
+          }
+        ],
+        "continuity_group_id": "group_setup_017",
+        "carry_layer_ids": [],
+        "entry_focus_layer_id": "layer_017",
+        "exit_focus_layer_id": "layer_017"
       }
     },
     {
@@ -2522,7 +4103,21 @@
             "stroke_token": null,
             "max_lines": 3
           },
-          "map_binding": null
+          "map_binding": null,
+          "parent_layer_id": null,
+          "group_id": "group_scene_018",
+          "transform_origin": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "depth_order": 0,
+          "treatment": {
+            "kind": "ink_map",
+            "source_preserving": true,
+            "evidence_badge": "archival"
+          },
+          "path_geometry_ref": null,
+          "text_layout": null
         },
         {
           "layer_id": "title_018",
@@ -2556,7 +4151,30 @@
             "stroke_token": null,
             "max_lines": 3
           },
-          "map_binding": null
+          "map_binding": null,
+          "parent_layer_id": null,
+          "group_id": "group_scene_018",
+          "transform_origin": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "depth_order": 1,
+          "treatment": {
+            "kind": "headline_text",
+            "source_preserving": true,
+            "evidence_badge": "none"
+          },
+          "path_geometry_ref": null,
+          "text_layout": {
+            "font_token": "headline_sans",
+            "font_size_px": 64,
+            "line_height": 1.16,
+            "letter_spacing_px": 0,
+            "horizontal_align": "left",
+            "vertical_align": "center",
+            "max_lines": 3,
+            "overflow": "block"
+          }
         }
       ],
       "events": [
@@ -2569,7 +4187,8 @@
           "cue_word_id": "word_018",
           "params": {
             "direction": "up",
-            "distance_px": 30
+            "distance_px": 30,
+            "feather_px": 4
           },
           "animated_property": "opacity",
           "keyframes": [
@@ -2587,7 +4206,22 @@
           "cue_binding": {
             "word_id": "word_018",
             "offset_frames": 0
-          }
+          },
+          "phases": [
+            {
+              "phase_id": "phase_event_018",
+              "kind": "enter",
+              "start_offset_frames": 0,
+              "duration_frames": 18,
+              "depends_on_phase_ids": []
+            }
+          ],
+          "motion_space": "layer_local",
+          "affected_layer_ids": [
+            "title_018"
+          ],
+          "stagger": null,
+          "depth_parallax": null
         }
       ],
       "camera": {
@@ -2613,7 +4247,16 @@
           }
         ],
         "focus_entity_id": null,
-        "clamp_to_content": true
+        "clamp_to_content": true,
+        "focus_path": [
+          {
+            "at_frame": 0,
+            "focus_layer_id": "layer_018",
+            "focus_geo_feature_id": null,
+            "framing": "subject_center"
+          }
+        ],
+        "transform_order": "layer_then_group_then_camera"
       },
       "transition_out": {
         "type": "hard_cut",
@@ -2622,6 +4265,37 @@
       "story_cue_span": {
         "first_word_id": "word_018",
         "last_word_id": "word_018"
+      },
+      "staging": {
+        "composition_graph": {
+          "group_ids": [
+            "group_scene_018"
+          ],
+          "edges": [
+            {
+              "from_id": "title_018",
+              "to_id": "layer_018",
+              "relation": "foreground_of"
+            }
+          ]
+        },
+        "beat_sequence": [
+          {
+            "beat_id": "beat_setup_018",
+            "local_start_frame": 0,
+            "local_end_frame": 225,
+            "focus_layer_id": "layer_018",
+            "activated_layer_ids": [
+              "layer_018",
+              "title_018"
+            ],
+            "hidden_layer_ids": []
+          }
+        ],
+        "continuity_group_id": "group_setup_018",
+        "carry_layer_ids": [],
+        "entry_focus_layer_id": "layer_018",
+        "exit_focus_layer_id": "layer_018"
       }
     },
     {
@@ -2667,7 +4341,21 @@
             "stroke_token": null,
             "max_lines": 3
           },
-          "map_binding": null
+          "map_binding": null,
+          "parent_layer_id": null,
+          "group_id": "group_scene_019",
+          "transform_origin": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "depth_order": 0,
+          "treatment": {
+            "kind": "source_photo_card",
+            "source_preserving": true,
+            "evidence_badge": "archival"
+          },
+          "path_geometry_ref": null,
+          "text_layout": null
         },
         {
           "layer_id": "title_019",
@@ -2701,7 +4389,30 @@
             "stroke_token": null,
             "max_lines": 3
           },
-          "map_binding": null
+          "map_binding": null,
+          "parent_layer_id": null,
+          "group_id": "group_scene_019",
+          "transform_origin": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "depth_order": 1,
+          "treatment": {
+            "kind": "headline_text",
+            "source_preserving": true,
+            "evidence_badge": "none"
+          },
+          "path_geometry_ref": null,
+          "text_layout": {
+            "font_token": "headline_sans",
+            "font_size_px": 64,
+            "line_height": 1.16,
+            "letter_spacing_px": 0,
+            "horizontal_align": "left",
+            "vertical_align": "center",
+            "max_lines": 3,
+            "overflow": "block"
+          }
         }
       ],
       "events": [
@@ -2714,7 +4425,8 @@
           "cue_word_id": "word_019",
           "params": {
             "direction": "up",
-            "distance_px": 30
+            "distance_px": 30,
+            "feather_px": 4
           },
           "animated_property": "opacity",
           "keyframes": [
@@ -2732,7 +4444,22 @@
           "cue_binding": {
             "word_id": "word_019",
             "offset_frames": 0
-          }
+          },
+          "phases": [
+            {
+              "phase_id": "phase_event_019",
+              "kind": "enter",
+              "start_offset_frames": 0,
+              "duration_frames": 18,
+              "depends_on_phase_ids": []
+            }
+          ],
+          "motion_space": "layer_local",
+          "affected_layer_ids": [
+            "title_019"
+          ],
+          "stagger": null,
+          "depth_parallax": null
         }
       ],
       "camera": {
@@ -2758,7 +4485,16 @@
           }
         ],
         "focus_entity_id": null,
-        "clamp_to_content": true
+        "clamp_to_content": true,
+        "focus_path": [
+          {
+            "at_frame": 0,
+            "focus_layer_id": "layer_019",
+            "focus_geo_feature_id": null,
+            "framing": "subject_center"
+          }
+        ],
+        "transform_order": "layer_then_group_then_camera"
       },
       "transition_out": {
         "type": "hard_cut",
@@ -2767,6 +4503,37 @@
       "story_cue_span": {
         "first_word_id": "word_019",
         "last_word_id": "word_019"
+      },
+      "staging": {
+        "composition_graph": {
+          "group_ids": [
+            "group_scene_019"
+          ],
+          "edges": [
+            {
+              "from_id": "title_019",
+              "to_id": "layer_019",
+              "relation": "foreground_of"
+            }
+          ]
+        },
+        "beat_sequence": [
+          {
+            "beat_id": "beat_setup_019",
+            "local_start_frame": 0,
+            "local_end_frame": 225,
+            "focus_layer_id": "layer_019",
+            "activated_layer_ids": [
+              "layer_019",
+              "title_019"
+            ],
+            "hidden_layer_ids": []
+          }
+        ],
+        "continuity_group_id": "group_setup_019",
+        "carry_layer_ids": [],
+        "entry_focus_layer_id": "layer_019",
+        "exit_focus_layer_id": "layer_019"
       }
     },
     {
@@ -2812,7 +4579,21 @@
             "stroke_token": null,
             "max_lines": 3
           },
-          "map_binding": null
+          "map_binding": null,
+          "parent_layer_id": null,
+          "group_id": "group_scene_020",
+          "transform_origin": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "depth_order": 0,
+          "treatment": {
+            "kind": "source_photo_card",
+            "source_preserving": true,
+            "evidence_badge": "archival"
+          },
+          "path_geometry_ref": null,
+          "text_layout": null
         },
         {
           "layer_id": "title_020",
@@ -2846,7 +4627,30 @@
             "stroke_token": null,
             "max_lines": 3
           },
-          "map_binding": null
+          "map_binding": null,
+          "parent_layer_id": null,
+          "group_id": "group_scene_020",
+          "transform_origin": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "depth_order": 1,
+          "treatment": {
+            "kind": "headline_text",
+            "source_preserving": true,
+            "evidence_badge": "none"
+          },
+          "path_geometry_ref": null,
+          "text_layout": {
+            "font_token": "headline_sans",
+            "font_size_px": 64,
+            "line_height": 1.16,
+            "letter_spacing_px": 0,
+            "horizontal_align": "left",
+            "vertical_align": "center",
+            "max_lines": 3,
+            "overflow": "block"
+          }
         }
       ],
       "events": [
@@ -2859,7 +4663,8 @@
           "cue_word_id": "word_020",
           "params": {
             "direction": "up",
-            "distance_px": 30
+            "distance_px": 30,
+            "feather_px": 4
           },
           "animated_property": "opacity",
           "keyframes": [
@@ -2877,7 +4682,22 @@
           "cue_binding": {
             "word_id": "word_020",
             "offset_frames": 0
-          }
+          },
+          "phases": [
+            {
+              "phase_id": "phase_event_020",
+              "kind": "enter",
+              "start_offset_frames": 0,
+              "duration_frames": 18,
+              "depends_on_phase_ids": []
+            }
+          ],
+          "motion_space": "layer_local",
+          "affected_layer_ids": [
+            "title_020"
+          ],
+          "stagger": null,
+          "depth_parallax": null
         }
       ],
       "camera": {
@@ -2903,7 +4723,16 @@
           }
         ],
         "focus_entity_id": null,
-        "clamp_to_content": true
+        "clamp_to_content": true,
+        "focus_path": [
+          {
+            "at_frame": 0,
+            "focus_layer_id": "layer_020",
+            "focus_geo_feature_id": null,
+            "framing": "subject_center"
+          }
+        ],
+        "transform_order": "layer_then_group_then_camera"
       },
       "transition_out": {
         "type": "hard_cut",
@@ -2912,6 +4741,37 @@
       "story_cue_span": {
         "first_word_id": "word_020",
         "last_word_id": "word_020"
+      },
+      "staging": {
+        "composition_graph": {
+          "group_ids": [
+            "group_scene_020"
+          ],
+          "edges": [
+            {
+              "from_id": "title_020",
+              "to_id": "layer_020",
+              "relation": "foreground_of"
+            }
+          ]
+        },
+        "beat_sequence": [
+          {
+            "beat_id": "beat_setup_020",
+            "local_start_frame": 0,
+            "local_end_frame": 225,
+            "focus_layer_id": "layer_020",
+            "activated_layer_ids": [
+              "layer_020",
+              "title_020"
+            ],
+            "hidden_layer_ids": []
+          }
+        ],
+        "continuity_group_id": "group_setup_020",
+        "carry_layer_ids": [],
+        "entry_focus_layer_id": "layer_020",
+        "exit_focus_layer_id": "layer_020"
       }
     },
     {
@@ -2957,7 +4817,21 @@
             "stroke_token": null,
             "max_lines": 3
           },
-          "map_binding": null
+          "map_binding": null,
+          "parent_layer_id": null,
+          "group_id": "group_scene_021",
+          "transform_origin": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "depth_order": 0,
+          "treatment": {
+            "kind": "source_photo_card",
+            "source_preserving": true,
+            "evidence_badge": "archival"
+          },
+          "path_geometry_ref": null,
+          "text_layout": null
         },
         {
           "layer_id": "title_021",
@@ -2991,7 +4865,30 @@
             "stroke_token": null,
             "max_lines": 3
           },
-          "map_binding": null
+          "map_binding": null,
+          "parent_layer_id": null,
+          "group_id": "group_scene_021",
+          "transform_origin": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "depth_order": 1,
+          "treatment": {
+            "kind": "headline_text",
+            "source_preserving": true,
+            "evidence_badge": "none"
+          },
+          "path_geometry_ref": null,
+          "text_layout": {
+            "font_token": "headline_sans",
+            "font_size_px": 64,
+            "line_height": 1.16,
+            "letter_spacing_px": 0,
+            "horizontal_align": "left",
+            "vertical_align": "center",
+            "max_lines": 3,
+            "overflow": "block"
+          }
         }
       ],
       "events": [
@@ -3004,7 +4901,8 @@
           "cue_word_id": "word_021",
           "params": {
             "direction": "up",
-            "distance_px": 30
+            "distance_px": 30,
+            "feather_px": 4
           },
           "animated_property": "opacity",
           "keyframes": [
@@ -3022,7 +4920,22 @@
           "cue_binding": {
             "word_id": "word_021",
             "offset_frames": 0
-          }
+          },
+          "phases": [
+            {
+              "phase_id": "phase_event_021",
+              "kind": "enter",
+              "start_offset_frames": 0,
+              "duration_frames": 18,
+              "depends_on_phase_ids": []
+            }
+          ],
+          "motion_space": "layer_local",
+          "affected_layer_ids": [
+            "title_021"
+          ],
+          "stagger": null,
+          "depth_parallax": null
         }
       ],
       "camera": {
@@ -3048,7 +4961,16 @@
           }
         ],
         "focus_entity_id": null,
-        "clamp_to_content": true
+        "clamp_to_content": true,
+        "focus_path": [
+          {
+            "at_frame": 0,
+            "focus_layer_id": "layer_021",
+            "focus_geo_feature_id": null,
+            "framing": "subject_center"
+          }
+        ],
+        "transform_order": "layer_then_group_then_camera"
       },
       "transition_out": {
         "type": "hard_cut",
@@ -3057,6 +4979,37 @@
       "story_cue_span": {
         "first_word_id": "word_021",
         "last_word_id": "word_021"
+      },
+      "staging": {
+        "composition_graph": {
+          "group_ids": [
+            "group_scene_021"
+          ],
+          "edges": [
+            {
+              "from_id": "title_021",
+              "to_id": "layer_021",
+              "relation": "foreground_of"
+            }
+          ]
+        },
+        "beat_sequence": [
+          {
+            "beat_id": "beat_setup_021",
+            "local_start_frame": 0,
+            "local_end_frame": 225,
+            "focus_layer_id": "layer_021",
+            "activated_layer_ids": [
+              "layer_021",
+              "title_021"
+            ],
+            "hidden_layer_ids": []
+          }
+        ],
+        "continuity_group_id": "group_setup_021",
+        "carry_layer_ids": [],
+        "entry_focus_layer_id": "layer_021",
+        "exit_focus_layer_id": "layer_021"
       }
     },
     {
@@ -3102,7 +5055,21 @@
             "stroke_token": null,
             "max_lines": 3
           },
-          "map_binding": null
+          "map_binding": null,
+          "parent_layer_id": null,
+          "group_id": "group_scene_022",
+          "transform_origin": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "depth_order": 0,
+          "treatment": {
+            "kind": "source_photo_card",
+            "source_preserving": true,
+            "evidence_badge": "archival"
+          },
+          "path_geometry_ref": null,
+          "text_layout": null
         },
         {
           "layer_id": "title_022",
@@ -3136,7 +5103,30 @@
             "stroke_token": null,
             "max_lines": 3
           },
-          "map_binding": null
+          "map_binding": null,
+          "parent_layer_id": null,
+          "group_id": "group_scene_022",
+          "transform_origin": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "depth_order": 1,
+          "treatment": {
+            "kind": "headline_text",
+            "source_preserving": true,
+            "evidence_badge": "none"
+          },
+          "path_geometry_ref": null,
+          "text_layout": {
+            "font_token": "headline_sans",
+            "font_size_px": 64,
+            "line_height": 1.16,
+            "letter_spacing_px": 0,
+            "horizontal_align": "left",
+            "vertical_align": "center",
+            "max_lines": 3,
+            "overflow": "block"
+          }
         }
       ],
       "events": [
@@ -3149,7 +5139,8 @@
           "cue_word_id": "word_022",
           "params": {
             "direction": "up",
-            "distance_px": 30
+            "distance_px": 30,
+            "feather_px": 4
           },
           "animated_property": "opacity",
           "keyframes": [
@@ -3167,7 +5158,22 @@
           "cue_binding": {
             "word_id": "word_022",
             "offset_frames": 0
-          }
+          },
+          "phases": [
+            {
+              "phase_id": "phase_event_022",
+              "kind": "enter",
+              "start_offset_frames": 0,
+              "duration_frames": 18,
+              "depends_on_phase_ids": []
+            }
+          ],
+          "motion_space": "layer_local",
+          "affected_layer_ids": [
+            "title_022"
+          ],
+          "stagger": null,
+          "depth_parallax": null
         }
       ],
       "camera": {
@@ -3193,7 +5199,16 @@
           }
         ],
         "focus_entity_id": null,
-        "clamp_to_content": true
+        "clamp_to_content": true,
+        "focus_path": [
+          {
+            "at_frame": 0,
+            "focus_layer_id": "layer_022",
+            "focus_geo_feature_id": null,
+            "framing": "subject_center"
+          }
+        ],
+        "transform_order": "layer_then_group_then_camera"
       },
       "transition_out": {
         "type": "hard_cut",
@@ -3202,6 +5217,37 @@
       "story_cue_span": {
         "first_word_id": "word_022",
         "last_word_id": "word_022"
+      },
+      "staging": {
+        "composition_graph": {
+          "group_ids": [
+            "group_scene_022"
+          ],
+          "edges": [
+            {
+              "from_id": "title_022",
+              "to_id": "layer_022",
+              "relation": "foreground_of"
+            }
+          ]
+        },
+        "beat_sequence": [
+          {
+            "beat_id": "beat_setup_022",
+            "local_start_frame": 0,
+            "local_end_frame": 225,
+            "focus_layer_id": "layer_022",
+            "activated_layer_ids": [
+              "layer_022",
+              "title_022"
+            ],
+            "hidden_layer_ids": []
+          }
+        ],
+        "continuity_group_id": "group_setup_022",
+        "carry_layer_ids": [],
+        "entry_focus_layer_id": "layer_022",
+        "exit_focus_layer_id": "layer_022"
       }
     },
     {
@@ -3247,7 +5293,21 @@
             "stroke_token": null,
             "max_lines": 3
           },
-          "map_binding": null
+          "map_binding": null,
+          "parent_layer_id": null,
+          "group_id": "group_scene_023",
+          "transform_origin": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "depth_order": 0,
+          "treatment": {
+            "kind": "source_photo_card",
+            "source_preserving": true,
+            "evidence_badge": "archival"
+          },
+          "path_geometry_ref": null,
+          "text_layout": null
         },
         {
           "layer_id": "title_023",
@@ -3281,7 +5341,30 @@
             "stroke_token": null,
             "max_lines": 3
           },
-          "map_binding": null
+          "map_binding": null,
+          "parent_layer_id": null,
+          "group_id": "group_scene_023",
+          "transform_origin": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "depth_order": 1,
+          "treatment": {
+            "kind": "headline_text",
+            "source_preserving": true,
+            "evidence_badge": "none"
+          },
+          "path_geometry_ref": null,
+          "text_layout": {
+            "font_token": "headline_sans",
+            "font_size_px": 64,
+            "line_height": 1.16,
+            "letter_spacing_px": 0,
+            "horizontal_align": "left",
+            "vertical_align": "center",
+            "max_lines": 3,
+            "overflow": "block"
+          }
         }
       ],
       "events": [
@@ -3294,7 +5377,8 @@
           "cue_word_id": "word_023",
           "params": {
             "direction": "up",
-            "distance_px": 30
+            "distance_px": 30,
+            "feather_px": 4
           },
           "animated_property": "opacity",
           "keyframes": [
@@ -3312,7 +5396,22 @@
           "cue_binding": {
             "word_id": "word_023",
             "offset_frames": 0
-          }
+          },
+          "phases": [
+            {
+              "phase_id": "phase_event_023",
+              "kind": "enter",
+              "start_offset_frames": 0,
+              "duration_frames": 18,
+              "depends_on_phase_ids": []
+            }
+          ],
+          "motion_space": "layer_local",
+          "affected_layer_ids": [
+            "title_023"
+          ],
+          "stagger": null,
+          "depth_parallax": null
         }
       ],
       "camera": {
@@ -3338,7 +5437,16 @@
           }
         ],
         "focus_entity_id": null,
-        "clamp_to_content": true
+        "clamp_to_content": true,
+        "focus_path": [
+          {
+            "at_frame": 0,
+            "focus_layer_id": "layer_023",
+            "focus_geo_feature_id": null,
+            "framing": "subject_center"
+          }
+        ],
+        "transform_order": "layer_then_group_then_camera"
       },
       "transition_out": {
         "type": "hard_cut",
@@ -3347,6 +5455,37 @@
       "story_cue_span": {
         "first_word_id": "word_023",
         "last_word_id": "word_023"
+      },
+      "staging": {
+        "composition_graph": {
+          "group_ids": [
+            "group_scene_023"
+          ],
+          "edges": [
+            {
+              "from_id": "title_023",
+              "to_id": "layer_023",
+              "relation": "foreground_of"
+            }
+          ]
+        },
+        "beat_sequence": [
+          {
+            "beat_id": "beat_setup_023",
+            "local_start_frame": 0,
+            "local_end_frame": 225,
+            "focus_layer_id": "layer_023",
+            "activated_layer_ids": [
+              "layer_023",
+              "title_023"
+            ],
+            "hidden_layer_ids": []
+          }
+        ],
+        "continuity_group_id": "group_setup_023",
+        "carry_layer_ids": [],
+        "entry_focus_layer_id": "layer_023",
+        "exit_focus_layer_id": "layer_023"
       }
     },
     {
@@ -3392,7 +5531,21 @@
             "stroke_token": null,
             "max_lines": 3
           },
-          "map_binding": null
+          "map_binding": null,
+          "parent_layer_id": null,
+          "group_id": "group_scene_024",
+          "transform_origin": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "depth_order": 0,
+          "treatment": {
+            "kind": "source_photo_card",
+            "source_preserving": true,
+            "evidence_badge": "archival"
+          },
+          "path_geometry_ref": null,
+          "text_layout": null
         },
         {
           "layer_id": "title_024",
@@ -3426,7 +5579,30 @@
             "stroke_token": null,
             "max_lines": 3
           },
-          "map_binding": null
+          "map_binding": null,
+          "parent_layer_id": null,
+          "group_id": "group_scene_024",
+          "transform_origin": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "depth_order": 1,
+          "treatment": {
+            "kind": "headline_text",
+            "source_preserving": true,
+            "evidence_badge": "none"
+          },
+          "path_geometry_ref": null,
+          "text_layout": {
+            "font_token": "headline_sans",
+            "font_size_px": 64,
+            "line_height": 1.16,
+            "letter_spacing_px": 0,
+            "horizontal_align": "left",
+            "vertical_align": "center",
+            "max_lines": 3,
+            "overflow": "block"
+          }
         }
       ],
       "events": [
@@ -3439,7 +5615,8 @@
           "cue_word_id": "word_024",
           "params": {
             "direction": "up",
-            "distance_px": 30
+            "distance_px": 30,
+            "feather_px": 4
           },
           "animated_property": "opacity",
           "keyframes": [
@@ -3457,7 +5634,22 @@
           "cue_binding": {
             "word_id": "word_024",
             "offset_frames": 0
-          }
+          },
+          "phases": [
+            {
+              "phase_id": "phase_event_024",
+              "kind": "enter",
+              "start_offset_frames": 0,
+              "duration_frames": 18,
+              "depends_on_phase_ids": []
+            }
+          ],
+          "motion_space": "layer_local",
+          "affected_layer_ids": [
+            "title_024"
+          ],
+          "stagger": null,
+          "depth_parallax": null
         }
       ],
       "camera": {
@@ -3483,7 +5675,16 @@
           }
         ],
         "focus_entity_id": null,
-        "clamp_to_content": true
+        "clamp_to_content": true,
+        "focus_path": [
+          {
+            "at_frame": 0,
+            "focus_layer_id": "layer_024",
+            "focus_geo_feature_id": null,
+            "framing": "subject_center"
+          }
+        ],
+        "transform_order": "layer_then_group_then_camera"
       },
       "transition_out": {
         "type": "hard_cut",
@@ -3492,6 +5693,37 @@
       "story_cue_span": {
         "first_word_id": "word_024",
         "last_word_id": "word_024"
+      },
+      "staging": {
+        "composition_graph": {
+          "group_ids": [
+            "group_scene_024"
+          ],
+          "edges": [
+            {
+              "from_id": "title_024",
+              "to_id": "layer_024",
+              "relation": "foreground_of"
+            }
+          ]
+        },
+        "beat_sequence": [
+          {
+            "beat_id": "beat_setup_024",
+            "local_start_frame": 0,
+            "local_end_frame": 225,
+            "focus_layer_id": "layer_024",
+            "activated_layer_ids": [
+              "layer_024",
+              "title_024"
+            ],
+            "hidden_layer_ids": []
+          }
+        ],
+        "continuity_group_id": "group_setup_024",
+        "carry_layer_ids": [],
+        "entry_focus_layer_id": "layer_024",
+        "exit_focus_layer_id": "layer_024"
       }
     },
     {
@@ -3537,7 +5769,21 @@
             "stroke_token": null,
             "max_lines": 3
           },
-          "map_binding": null
+          "map_binding": null,
+          "parent_layer_id": null,
+          "group_id": "group_scene_025",
+          "transform_origin": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "depth_order": 0,
+          "treatment": {
+            "kind": "ink_map",
+            "source_preserving": true,
+            "evidence_badge": "archival"
+          },
+          "path_geometry_ref": null,
+          "text_layout": null
         },
         {
           "layer_id": "title_025",
@@ -3571,7 +5817,30 @@
             "stroke_token": null,
             "max_lines": 3
           },
-          "map_binding": null
+          "map_binding": null,
+          "parent_layer_id": null,
+          "group_id": "group_scene_025",
+          "transform_origin": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "depth_order": 1,
+          "treatment": {
+            "kind": "headline_text",
+            "source_preserving": true,
+            "evidence_badge": "none"
+          },
+          "path_geometry_ref": null,
+          "text_layout": {
+            "font_token": "headline_sans",
+            "font_size_px": 64,
+            "line_height": 1.16,
+            "letter_spacing_px": 0,
+            "horizontal_align": "left",
+            "vertical_align": "center",
+            "max_lines": 3,
+            "overflow": "block"
+          }
         }
       ],
       "events": [
@@ -3584,7 +5853,8 @@
           "cue_word_id": "word_025",
           "params": {
             "direction": "up",
-            "distance_px": 30
+            "distance_px": 30,
+            "feather_px": 4
           },
           "animated_property": "opacity",
           "keyframes": [
@@ -3602,7 +5872,22 @@
           "cue_binding": {
             "word_id": "word_025",
             "offset_frames": 0
-          }
+          },
+          "phases": [
+            {
+              "phase_id": "phase_event_025",
+              "kind": "enter",
+              "start_offset_frames": 0,
+              "duration_frames": 18,
+              "depends_on_phase_ids": []
+            }
+          ],
+          "motion_space": "layer_local",
+          "affected_layer_ids": [
+            "title_025"
+          ],
+          "stagger": null,
+          "depth_parallax": null
         }
       ],
       "camera": {
@@ -3628,7 +5913,16 @@
           }
         ],
         "focus_entity_id": null,
-        "clamp_to_content": true
+        "clamp_to_content": true,
+        "focus_path": [
+          {
+            "at_frame": 0,
+            "focus_layer_id": "layer_025",
+            "focus_geo_feature_id": null,
+            "framing": "subject_center"
+          }
+        ],
+        "transform_order": "layer_then_group_then_camera"
       },
       "transition_out": {
         "type": "hard_cut",
@@ -3637,6 +5931,37 @@
       "story_cue_span": {
         "first_word_id": "word_025",
         "last_word_id": "word_025"
+      },
+      "staging": {
+        "composition_graph": {
+          "group_ids": [
+            "group_scene_025"
+          ],
+          "edges": [
+            {
+              "from_id": "title_025",
+              "to_id": "layer_025",
+              "relation": "foreground_of"
+            }
+          ]
+        },
+        "beat_sequence": [
+          {
+            "beat_id": "beat_setup_025",
+            "local_start_frame": 0,
+            "local_end_frame": 225,
+            "focus_layer_id": "layer_025",
+            "activated_layer_ids": [
+              "layer_025",
+              "title_025"
+            ],
+            "hidden_layer_ids": []
+          }
+        ],
+        "continuity_group_id": "group_setup_025",
+        "carry_layer_ids": [],
+        "entry_focus_layer_id": "layer_025",
+        "exit_focus_layer_id": "layer_025"
       }
     },
     {
@@ -3682,7 +6007,21 @@
             "stroke_token": null,
             "max_lines": 3
           },
-          "map_binding": null
+          "map_binding": null,
+          "parent_layer_id": null,
+          "group_id": "group_scene_026",
+          "transform_origin": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "depth_order": 0,
+          "treatment": {
+            "kind": "ink_map",
+            "source_preserving": true,
+            "evidence_badge": "archival"
+          },
+          "path_geometry_ref": null,
+          "text_layout": null
         },
         {
           "layer_id": "title_026",
@@ -3716,7 +6055,30 @@
             "stroke_token": null,
             "max_lines": 3
           },
-          "map_binding": null
+          "map_binding": null,
+          "parent_layer_id": null,
+          "group_id": "group_scene_026",
+          "transform_origin": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "depth_order": 1,
+          "treatment": {
+            "kind": "headline_text",
+            "source_preserving": true,
+            "evidence_badge": "none"
+          },
+          "path_geometry_ref": null,
+          "text_layout": {
+            "font_token": "headline_sans",
+            "font_size_px": 64,
+            "line_height": 1.16,
+            "letter_spacing_px": 0,
+            "horizontal_align": "left",
+            "vertical_align": "center",
+            "max_lines": 3,
+            "overflow": "block"
+          }
         }
       ],
       "events": [
@@ -3729,7 +6091,8 @@
           "cue_word_id": "word_026",
           "params": {
             "direction": "up",
-            "distance_px": 30
+            "distance_px": 30,
+            "feather_px": 4
           },
           "animated_property": "opacity",
           "keyframes": [
@@ -3747,7 +6110,22 @@
           "cue_binding": {
             "word_id": "word_026",
             "offset_frames": 0
-          }
+          },
+          "phases": [
+            {
+              "phase_id": "phase_event_026",
+              "kind": "enter",
+              "start_offset_frames": 0,
+              "duration_frames": 18,
+              "depends_on_phase_ids": []
+            }
+          ],
+          "motion_space": "layer_local",
+          "affected_layer_ids": [
+            "title_026"
+          ],
+          "stagger": null,
+          "depth_parallax": null
         }
       ],
       "camera": {
@@ -3773,7 +6151,16 @@
           }
         ],
         "focus_entity_id": null,
-        "clamp_to_content": true
+        "clamp_to_content": true,
+        "focus_path": [
+          {
+            "at_frame": 0,
+            "focus_layer_id": "layer_026",
+            "focus_geo_feature_id": null,
+            "framing": "subject_center"
+          }
+        ],
+        "transform_order": "layer_then_group_then_camera"
       },
       "transition_out": {
         "type": "hard_cut",
@@ -3782,6 +6169,37 @@
       "story_cue_span": {
         "first_word_id": "word_026",
         "last_word_id": "word_026"
+      },
+      "staging": {
+        "composition_graph": {
+          "group_ids": [
+            "group_scene_026"
+          ],
+          "edges": [
+            {
+              "from_id": "title_026",
+              "to_id": "layer_026",
+              "relation": "foreground_of"
+            }
+          ]
+        },
+        "beat_sequence": [
+          {
+            "beat_id": "beat_setup_026",
+            "local_start_frame": 0,
+            "local_end_frame": 225,
+            "focus_layer_id": "layer_026",
+            "activated_layer_ids": [
+              "layer_026",
+              "title_026"
+            ],
+            "hidden_layer_ids": []
+          }
+        ],
+        "continuity_group_id": "group_setup_026",
+        "carry_layer_ids": [],
+        "entry_focus_layer_id": "layer_026",
+        "exit_focus_layer_id": "layer_026"
       }
     },
     {
@@ -3827,7 +6245,21 @@
             "stroke_token": null,
             "max_lines": 3
           },
-          "map_binding": null
+          "map_binding": null,
+          "parent_layer_id": null,
+          "group_id": "group_scene_027",
+          "transform_origin": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "depth_order": 0,
+          "treatment": {
+            "kind": "source_photo_card",
+            "source_preserving": true,
+            "evidence_badge": "archival"
+          },
+          "path_geometry_ref": null,
+          "text_layout": null
         },
         {
           "layer_id": "title_027",
@@ -3861,7 +6293,30 @@
             "stroke_token": null,
             "max_lines": 3
           },
-          "map_binding": null
+          "map_binding": null,
+          "parent_layer_id": null,
+          "group_id": "group_scene_027",
+          "transform_origin": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "depth_order": 1,
+          "treatment": {
+            "kind": "headline_text",
+            "source_preserving": true,
+            "evidence_badge": "none"
+          },
+          "path_geometry_ref": null,
+          "text_layout": {
+            "font_token": "headline_sans",
+            "font_size_px": 64,
+            "line_height": 1.16,
+            "letter_spacing_px": 0,
+            "horizontal_align": "left",
+            "vertical_align": "center",
+            "max_lines": 3,
+            "overflow": "block"
+          }
         }
       ],
       "events": [
@@ -3874,7 +6329,8 @@
           "cue_word_id": "word_027",
           "params": {
             "direction": "up",
-            "distance_px": 30
+            "distance_px": 30,
+            "feather_px": 4
           },
           "animated_property": "opacity",
           "keyframes": [
@@ -3892,7 +6348,22 @@
           "cue_binding": {
             "word_id": "word_027",
             "offset_frames": 0
-          }
+          },
+          "phases": [
+            {
+              "phase_id": "phase_event_027",
+              "kind": "enter",
+              "start_offset_frames": 0,
+              "duration_frames": 18,
+              "depends_on_phase_ids": []
+            }
+          ],
+          "motion_space": "layer_local",
+          "affected_layer_ids": [
+            "title_027"
+          ],
+          "stagger": null,
+          "depth_parallax": null
         }
       ],
       "camera": {
@@ -3918,7 +6389,16 @@
           }
         ],
         "focus_entity_id": null,
-        "clamp_to_content": true
+        "clamp_to_content": true,
+        "focus_path": [
+          {
+            "at_frame": 0,
+            "focus_layer_id": "layer_027",
+            "focus_geo_feature_id": null,
+            "framing": "subject_center"
+          }
+        ],
+        "transform_order": "layer_then_group_then_camera"
       },
       "transition_out": {
         "type": "hard_cut",
@@ -3927,6 +6407,37 @@
       "story_cue_span": {
         "first_word_id": "word_027",
         "last_word_id": "word_027"
+      },
+      "staging": {
+        "composition_graph": {
+          "group_ids": [
+            "group_scene_027"
+          ],
+          "edges": [
+            {
+              "from_id": "title_027",
+              "to_id": "layer_027",
+              "relation": "foreground_of"
+            }
+          ]
+        },
+        "beat_sequence": [
+          {
+            "beat_id": "beat_setup_027",
+            "local_start_frame": 0,
+            "local_end_frame": 225,
+            "focus_layer_id": "layer_027",
+            "activated_layer_ids": [
+              "layer_027",
+              "title_027"
+            ],
+            "hidden_layer_ids": []
+          }
+        ],
+        "continuity_group_id": "group_setup_027",
+        "carry_layer_ids": [],
+        "entry_focus_layer_id": "layer_027",
+        "exit_focus_layer_id": "layer_027"
       }
     },
     {
@@ -3972,7 +6483,21 @@
             "stroke_token": null,
             "max_lines": 3
           },
-          "map_binding": null
+          "map_binding": null,
+          "parent_layer_id": null,
+          "group_id": "group_scene_028",
+          "transform_origin": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "depth_order": 0,
+          "treatment": {
+            "kind": "source_photo_card",
+            "source_preserving": true,
+            "evidence_badge": "archival"
+          },
+          "path_geometry_ref": null,
+          "text_layout": null
         },
         {
           "layer_id": "title_028",
@@ -4006,7 +6531,30 @@
             "stroke_token": null,
             "max_lines": 3
           },
-          "map_binding": null
+          "map_binding": null,
+          "parent_layer_id": null,
+          "group_id": "group_scene_028",
+          "transform_origin": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "depth_order": 1,
+          "treatment": {
+            "kind": "headline_text",
+            "source_preserving": true,
+            "evidence_badge": "none"
+          },
+          "path_geometry_ref": null,
+          "text_layout": {
+            "font_token": "headline_sans",
+            "font_size_px": 64,
+            "line_height": 1.16,
+            "letter_spacing_px": 0,
+            "horizontal_align": "left",
+            "vertical_align": "center",
+            "max_lines": 3,
+            "overflow": "block"
+          }
         }
       ],
       "events": [
@@ -4019,7 +6567,8 @@
           "cue_word_id": "word_028",
           "params": {
             "direction": "up",
-            "distance_px": 30
+            "distance_px": 30,
+            "feather_px": 4
           },
           "animated_property": "opacity",
           "keyframes": [
@@ -4037,7 +6586,22 @@
           "cue_binding": {
             "word_id": "word_028",
             "offset_frames": 0
-          }
+          },
+          "phases": [
+            {
+              "phase_id": "phase_event_028",
+              "kind": "enter",
+              "start_offset_frames": 0,
+              "duration_frames": 18,
+              "depends_on_phase_ids": []
+            }
+          ],
+          "motion_space": "layer_local",
+          "affected_layer_ids": [
+            "title_028"
+          ],
+          "stagger": null,
+          "depth_parallax": null
         }
       ],
       "camera": {
@@ -4063,7 +6627,16 @@
           }
         ],
         "focus_entity_id": null,
-        "clamp_to_content": true
+        "clamp_to_content": true,
+        "focus_path": [
+          {
+            "at_frame": 0,
+            "focus_layer_id": "layer_028",
+            "focus_geo_feature_id": null,
+            "framing": "subject_center"
+          }
+        ],
+        "transform_order": "layer_then_group_then_camera"
       },
       "transition_out": {
         "type": "hard_cut",
@@ -4072,6 +6645,37 @@
       "story_cue_span": {
         "first_word_id": "word_028",
         "last_word_id": "word_028"
+      },
+      "staging": {
+        "composition_graph": {
+          "group_ids": [
+            "group_scene_028"
+          ],
+          "edges": [
+            {
+              "from_id": "title_028",
+              "to_id": "layer_028",
+              "relation": "foreground_of"
+            }
+          ]
+        },
+        "beat_sequence": [
+          {
+            "beat_id": "beat_setup_028",
+            "local_start_frame": 0,
+            "local_end_frame": 225,
+            "focus_layer_id": "layer_028",
+            "activated_layer_ids": [
+              "layer_028",
+              "title_028"
+            ],
+            "hidden_layer_ids": []
+          }
+        ],
+        "continuity_group_id": "group_setup_028",
+        "carry_layer_ids": [],
+        "entry_focus_layer_id": "layer_028",
+        "exit_focus_layer_id": "layer_028"
       }
     },
     {
@@ -4117,7 +6721,21 @@
             "stroke_token": null,
             "max_lines": 3
           },
-          "map_binding": null
+          "map_binding": null,
+          "parent_layer_id": null,
+          "group_id": "group_scene_029",
+          "transform_origin": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "depth_order": 0,
+          "treatment": {
+            "kind": "source_photo_card",
+            "source_preserving": true,
+            "evidence_badge": "archival"
+          },
+          "path_geometry_ref": null,
+          "text_layout": null
         },
         {
           "layer_id": "title_029",
@@ -4151,7 +6769,30 @@
             "stroke_token": null,
             "max_lines": 3
           },
-          "map_binding": null
+          "map_binding": null,
+          "parent_layer_id": null,
+          "group_id": "group_scene_029",
+          "transform_origin": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "depth_order": 1,
+          "treatment": {
+            "kind": "headline_text",
+            "source_preserving": true,
+            "evidence_badge": "none"
+          },
+          "path_geometry_ref": null,
+          "text_layout": {
+            "font_token": "headline_sans",
+            "font_size_px": 64,
+            "line_height": 1.16,
+            "letter_spacing_px": 0,
+            "horizontal_align": "left",
+            "vertical_align": "center",
+            "max_lines": 3,
+            "overflow": "block"
+          }
         }
       ],
       "events": [
@@ -4164,7 +6805,8 @@
           "cue_word_id": "word_029",
           "params": {
             "direction": "up",
-            "distance_px": 30
+            "distance_px": 30,
+            "feather_px": 4
           },
           "animated_property": "opacity",
           "keyframes": [
@@ -4182,7 +6824,22 @@
           "cue_binding": {
             "word_id": "word_029",
             "offset_frames": 0
-          }
+          },
+          "phases": [
+            {
+              "phase_id": "phase_event_029",
+              "kind": "enter",
+              "start_offset_frames": 0,
+              "duration_frames": 18,
+              "depends_on_phase_ids": []
+            }
+          ],
+          "motion_space": "layer_local",
+          "affected_layer_ids": [
+            "title_029"
+          ],
+          "stagger": null,
+          "depth_parallax": null
         }
       ],
       "camera": {
@@ -4208,7 +6865,16 @@
           }
         ],
         "focus_entity_id": null,
-        "clamp_to_content": true
+        "clamp_to_content": true,
+        "focus_path": [
+          {
+            "at_frame": 0,
+            "focus_layer_id": "layer_029",
+            "focus_geo_feature_id": null,
+            "framing": "subject_center"
+          }
+        ],
+        "transform_order": "layer_then_group_then_camera"
       },
       "transition_out": {
         "type": "hard_cut",
@@ -4217,6 +6883,37 @@
       "story_cue_span": {
         "first_word_id": "word_029",
         "last_word_id": "word_029"
+      },
+      "staging": {
+        "composition_graph": {
+          "group_ids": [
+            "group_scene_029"
+          ],
+          "edges": [
+            {
+              "from_id": "title_029",
+              "to_id": "layer_029",
+              "relation": "foreground_of"
+            }
+          ]
+        },
+        "beat_sequence": [
+          {
+            "beat_id": "beat_setup_029",
+            "local_start_frame": 0,
+            "local_end_frame": 225,
+            "focus_layer_id": "layer_029",
+            "activated_layer_ids": [
+              "layer_029",
+              "title_029"
+            ],
+            "hidden_layer_ids": []
+          }
+        ],
+        "continuity_group_id": "group_setup_029",
+        "carry_layer_ids": [],
+        "entry_focus_layer_id": "layer_029",
+        "exit_focus_layer_id": "layer_029"
       }
     },
     {
@@ -4262,7 +6959,21 @@
             "stroke_token": null,
             "max_lines": 3
           },
-          "map_binding": null
+          "map_binding": null,
+          "parent_layer_id": null,
+          "group_id": "group_scene_030",
+          "transform_origin": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "depth_order": 0,
+          "treatment": {
+            "kind": "source_photo_card",
+            "source_preserving": true,
+            "evidence_badge": "archival"
+          },
+          "path_geometry_ref": null,
+          "text_layout": null
         },
         {
           "layer_id": "title_030",
@@ -4296,7 +7007,30 @@
             "stroke_token": null,
             "max_lines": 3
           },
-          "map_binding": null
+          "map_binding": null,
+          "parent_layer_id": null,
+          "group_id": "group_scene_030",
+          "transform_origin": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "depth_order": 1,
+          "treatment": {
+            "kind": "headline_text",
+            "source_preserving": true,
+            "evidence_badge": "none"
+          },
+          "path_geometry_ref": null,
+          "text_layout": {
+            "font_token": "headline_sans",
+            "font_size_px": 64,
+            "line_height": 1.16,
+            "letter_spacing_px": 0,
+            "horizontal_align": "left",
+            "vertical_align": "center",
+            "max_lines": 3,
+            "overflow": "block"
+          }
         }
       ],
       "events": [
@@ -4309,7 +7043,8 @@
           "cue_word_id": "word_030",
           "params": {
             "direction": "up",
-            "distance_px": 30
+            "distance_px": 30,
+            "feather_px": 4
           },
           "animated_property": "opacity",
           "keyframes": [
@@ -4327,7 +7062,22 @@
           "cue_binding": {
             "word_id": "word_030",
             "offset_frames": 0
-          }
+          },
+          "phases": [
+            {
+              "phase_id": "phase_event_030",
+              "kind": "enter",
+              "start_offset_frames": 0,
+              "duration_frames": 18,
+              "depends_on_phase_ids": []
+            }
+          ],
+          "motion_space": "layer_local",
+          "affected_layer_ids": [
+            "title_030"
+          ],
+          "stagger": null,
+          "depth_parallax": null
         }
       ],
       "camera": {
@@ -4353,7 +7103,16 @@
           }
         ],
         "focus_entity_id": null,
-        "clamp_to_content": true
+        "clamp_to_content": true,
+        "focus_path": [
+          {
+            "at_frame": 0,
+            "focus_layer_id": "layer_030",
+            "focus_geo_feature_id": null,
+            "framing": "subject_center"
+          }
+        ],
+        "transform_order": "layer_then_group_then_camera"
       },
       "transition_out": {
         "type": "hard_cut",
@@ -4362,6 +7121,37 @@
       "story_cue_span": {
         "first_word_id": "word_030",
         "last_word_id": "word_030"
+      },
+      "staging": {
+        "composition_graph": {
+          "group_ids": [
+            "group_scene_030"
+          ],
+          "edges": [
+            {
+              "from_id": "title_030",
+              "to_id": "layer_030",
+              "relation": "foreground_of"
+            }
+          ]
+        },
+        "beat_sequence": [
+          {
+            "beat_id": "beat_setup_030",
+            "local_start_frame": 0,
+            "local_end_frame": 225,
+            "focus_layer_id": "layer_030",
+            "activated_layer_ids": [
+              "layer_030",
+              "title_030"
+            ],
+            "hidden_layer_ids": []
+          }
+        ],
+        "continuity_group_id": "group_setup_030",
+        "carry_layer_ids": [],
+        "entry_focus_layer_id": "layer_030",
+        "exit_focus_layer_id": "layer_030"
       }
     },
     {
@@ -4407,7 +7197,21 @@
             "stroke_token": null,
             "max_lines": 3
           },
-          "map_binding": null
+          "map_binding": null,
+          "parent_layer_id": null,
+          "group_id": "group_scene_031",
+          "transform_origin": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "depth_order": 0,
+          "treatment": {
+            "kind": "source_photo_card",
+            "source_preserving": true,
+            "evidence_badge": "archival"
+          },
+          "path_geometry_ref": null,
+          "text_layout": null
         },
         {
           "layer_id": "title_031",
@@ -4441,7 +7245,30 @@
             "stroke_token": null,
             "max_lines": 3
           },
-          "map_binding": null
+          "map_binding": null,
+          "parent_layer_id": null,
+          "group_id": "group_scene_031",
+          "transform_origin": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "depth_order": 1,
+          "treatment": {
+            "kind": "headline_text",
+            "source_preserving": true,
+            "evidence_badge": "none"
+          },
+          "path_geometry_ref": null,
+          "text_layout": {
+            "font_token": "headline_sans",
+            "font_size_px": 64,
+            "line_height": 1.16,
+            "letter_spacing_px": 0,
+            "horizontal_align": "left",
+            "vertical_align": "center",
+            "max_lines": 3,
+            "overflow": "block"
+          }
         }
       ],
       "events": [
@@ -4454,7 +7281,8 @@
           "cue_word_id": "word_031",
           "params": {
             "direction": "up",
-            "distance_px": 30
+            "distance_px": 30,
+            "feather_px": 4
           },
           "animated_property": "opacity",
           "keyframes": [
@@ -4472,7 +7300,22 @@
           "cue_binding": {
             "word_id": "word_031",
             "offset_frames": 0
-          }
+          },
+          "phases": [
+            {
+              "phase_id": "phase_event_031",
+              "kind": "enter",
+              "start_offset_frames": 0,
+              "duration_frames": 18,
+              "depends_on_phase_ids": []
+            }
+          ],
+          "motion_space": "layer_local",
+          "affected_layer_ids": [
+            "title_031"
+          ],
+          "stagger": null,
+          "depth_parallax": null
         }
       ],
       "camera": {
@@ -4498,7 +7341,16 @@
           }
         ],
         "focus_entity_id": null,
-        "clamp_to_content": true
+        "clamp_to_content": true,
+        "focus_path": [
+          {
+            "at_frame": 0,
+            "focus_layer_id": "layer_031",
+            "focus_geo_feature_id": null,
+            "framing": "subject_center"
+          }
+        ],
+        "transform_order": "layer_then_group_then_camera"
       },
       "transition_out": {
         "type": "hard_cut",
@@ -4507,6 +7359,37 @@
       "story_cue_span": {
         "first_word_id": "word_031",
         "last_word_id": "word_031"
+      },
+      "staging": {
+        "composition_graph": {
+          "group_ids": [
+            "group_scene_031"
+          ],
+          "edges": [
+            {
+              "from_id": "title_031",
+              "to_id": "layer_031",
+              "relation": "foreground_of"
+            }
+          ]
+        },
+        "beat_sequence": [
+          {
+            "beat_id": "beat_setup_031",
+            "local_start_frame": 0,
+            "local_end_frame": 225,
+            "focus_layer_id": "layer_031",
+            "activated_layer_ids": [
+              "layer_031",
+              "title_031"
+            ],
+            "hidden_layer_ids": []
+          }
+        ],
+        "continuity_group_id": "group_setup_031",
+        "carry_layer_ids": [],
+        "entry_focus_layer_id": "layer_031",
+        "exit_focus_layer_id": "layer_031"
       }
     },
     {
@@ -4552,7 +7435,21 @@
             "stroke_token": null,
             "max_lines": 3
           },
-          "map_binding": null
+          "map_binding": null,
+          "parent_layer_id": null,
+          "group_id": "group_scene_032",
+          "transform_origin": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "depth_order": 0,
+          "treatment": {
+            "kind": "source_photo_card",
+            "source_preserving": true,
+            "evidence_badge": "archival"
+          },
+          "path_geometry_ref": null,
+          "text_layout": null
         },
         {
           "layer_id": "title_032",
@@ -4586,7 +7483,30 @@
             "stroke_token": null,
             "max_lines": 3
           },
-          "map_binding": null
+          "map_binding": null,
+          "parent_layer_id": null,
+          "group_id": "group_scene_032",
+          "transform_origin": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "depth_order": 1,
+          "treatment": {
+            "kind": "headline_text",
+            "source_preserving": true,
+            "evidence_badge": "none"
+          },
+          "path_geometry_ref": null,
+          "text_layout": {
+            "font_token": "headline_sans",
+            "font_size_px": 64,
+            "line_height": 1.16,
+            "letter_spacing_px": 0,
+            "horizontal_align": "left",
+            "vertical_align": "center",
+            "max_lines": 3,
+            "overflow": "block"
+          }
         }
       ],
       "events": [
@@ -4599,7 +7519,8 @@
           "cue_word_id": "word_032",
           "params": {
             "direction": "up",
-            "distance_px": 30
+            "distance_px": 30,
+            "feather_px": 4
           },
           "animated_property": "opacity",
           "keyframes": [
@@ -4617,7 +7538,22 @@
           "cue_binding": {
             "word_id": "word_032",
             "offset_frames": 0
-          }
+          },
+          "phases": [
+            {
+              "phase_id": "phase_event_032",
+              "kind": "enter",
+              "start_offset_frames": 0,
+              "duration_frames": 18,
+              "depends_on_phase_ids": []
+            }
+          ],
+          "motion_space": "layer_local",
+          "affected_layer_ids": [
+            "title_032"
+          ],
+          "stagger": null,
+          "depth_parallax": null
         }
       ],
       "camera": {
@@ -4643,7 +7579,16 @@
           }
         ],
         "focus_entity_id": null,
-        "clamp_to_content": true
+        "clamp_to_content": true,
+        "focus_path": [
+          {
+            "at_frame": 0,
+            "focus_layer_id": "layer_032",
+            "focus_geo_feature_id": null,
+            "framing": "subject_center"
+          }
+        ],
+        "transform_order": "layer_then_group_then_camera"
       },
       "transition_out": {
         "type": "hard_cut",
@@ -4652,6 +7597,37 @@
       "story_cue_span": {
         "first_word_id": "word_032",
         "last_word_id": "word_032"
+      },
+      "staging": {
+        "composition_graph": {
+          "group_ids": [
+            "group_scene_032"
+          ],
+          "edges": [
+            {
+              "from_id": "title_032",
+              "to_id": "layer_032",
+              "relation": "foreground_of"
+            }
+          ]
+        },
+        "beat_sequence": [
+          {
+            "beat_id": "beat_setup_032",
+            "local_start_frame": 0,
+            "local_end_frame": 225,
+            "focus_layer_id": "layer_032",
+            "activated_layer_ids": [
+              "layer_032",
+              "title_032"
+            ],
+            "hidden_layer_ids": []
+          }
+        ],
+        "continuity_group_id": "group_setup_032",
+        "carry_layer_ids": [],
+        "entry_focus_layer_id": "layer_032",
+        "exit_focus_layer_id": "layer_032"
       }
     },
     {
@@ -4697,7 +7673,21 @@
             "stroke_token": null,
             "max_lines": 3
           },
-          "map_binding": null
+          "map_binding": null,
+          "parent_layer_id": null,
+          "group_id": "group_scene_033",
+          "transform_origin": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "depth_order": 0,
+          "treatment": {
+            "kind": "ink_map",
+            "source_preserving": true,
+            "evidence_badge": "archival"
+          },
+          "path_geometry_ref": null,
+          "text_layout": null
         },
         {
           "layer_id": "title_033",
@@ -4731,7 +7721,30 @@
             "stroke_token": null,
             "max_lines": 3
           },
-          "map_binding": null
+          "map_binding": null,
+          "parent_layer_id": null,
+          "group_id": "group_scene_033",
+          "transform_origin": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "depth_order": 1,
+          "treatment": {
+            "kind": "headline_text",
+            "source_preserving": true,
+            "evidence_badge": "none"
+          },
+          "path_geometry_ref": null,
+          "text_layout": {
+            "font_token": "headline_sans",
+            "font_size_px": 64,
+            "line_height": 1.16,
+            "letter_spacing_px": 0,
+            "horizontal_align": "left",
+            "vertical_align": "center",
+            "max_lines": 3,
+            "overflow": "block"
+          }
         }
       ],
       "events": [
@@ -4744,7 +7757,8 @@
           "cue_word_id": "word_033",
           "params": {
             "direction": "up",
-            "distance_px": 30
+            "distance_px": 30,
+            "feather_px": 4
           },
           "animated_property": "opacity",
           "keyframes": [
@@ -4762,7 +7776,22 @@
           "cue_binding": {
             "word_id": "word_033",
             "offset_frames": 0
-          }
+          },
+          "phases": [
+            {
+              "phase_id": "phase_event_033",
+              "kind": "enter",
+              "start_offset_frames": 0,
+              "duration_frames": 18,
+              "depends_on_phase_ids": []
+            }
+          ],
+          "motion_space": "layer_local",
+          "affected_layer_ids": [
+            "title_033"
+          ],
+          "stagger": null,
+          "depth_parallax": null
         }
       ],
       "camera": {
@@ -4788,7 +7817,16 @@
           }
         ],
         "focus_entity_id": null,
-        "clamp_to_content": true
+        "clamp_to_content": true,
+        "focus_path": [
+          {
+            "at_frame": 0,
+            "focus_layer_id": "layer_033",
+            "focus_geo_feature_id": null,
+            "framing": "subject_center"
+          }
+        ],
+        "transform_order": "layer_then_group_then_camera"
       },
       "transition_out": {
         "type": "hard_cut",
@@ -4797,6 +7835,37 @@
       "story_cue_span": {
         "first_word_id": "word_033",
         "last_word_id": "word_033"
+      },
+      "staging": {
+        "composition_graph": {
+          "group_ids": [
+            "group_scene_033"
+          ],
+          "edges": [
+            {
+              "from_id": "title_033",
+              "to_id": "layer_033",
+              "relation": "foreground_of"
+            }
+          ]
+        },
+        "beat_sequence": [
+          {
+            "beat_id": "beat_setup_033",
+            "local_start_frame": 0,
+            "local_end_frame": 225,
+            "focus_layer_id": "layer_033",
+            "activated_layer_ids": [
+              "layer_033",
+              "title_033"
+            ],
+            "hidden_layer_ids": []
+          }
+        ],
+        "continuity_group_id": "group_setup_033",
+        "carry_layer_ids": [],
+        "entry_focus_layer_id": "layer_033",
+        "exit_focus_layer_id": "layer_033"
       }
     },
     {
@@ -4842,7 +7911,21 @@
             "stroke_token": null,
             "max_lines": 3
           },
-          "map_binding": null
+          "map_binding": null,
+          "parent_layer_id": null,
+          "group_id": "group_scene_034",
+          "transform_origin": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "depth_order": 0,
+          "treatment": {
+            "kind": "ink_map",
+            "source_preserving": true,
+            "evidence_badge": "archival"
+          },
+          "path_geometry_ref": null,
+          "text_layout": null
         },
         {
           "layer_id": "title_034",
@@ -4876,7 +7959,30 @@
             "stroke_token": null,
             "max_lines": 3
           },
-          "map_binding": null
+          "map_binding": null,
+          "parent_layer_id": null,
+          "group_id": "group_scene_034",
+          "transform_origin": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "depth_order": 1,
+          "treatment": {
+            "kind": "headline_text",
+            "source_preserving": true,
+            "evidence_badge": "none"
+          },
+          "path_geometry_ref": null,
+          "text_layout": {
+            "font_token": "headline_sans",
+            "font_size_px": 64,
+            "line_height": 1.16,
+            "letter_spacing_px": 0,
+            "horizontal_align": "left",
+            "vertical_align": "center",
+            "max_lines": 3,
+            "overflow": "block"
+          }
         }
       ],
       "events": [
@@ -4889,7 +7995,8 @@
           "cue_word_id": "word_034",
           "params": {
             "direction": "up",
-            "distance_px": 30
+            "distance_px": 30,
+            "feather_px": 4
           },
           "animated_property": "opacity",
           "keyframes": [
@@ -4907,7 +8014,22 @@
           "cue_binding": {
             "word_id": "word_034",
             "offset_frames": 0
-          }
+          },
+          "phases": [
+            {
+              "phase_id": "phase_event_034",
+              "kind": "enter",
+              "start_offset_frames": 0,
+              "duration_frames": 18,
+              "depends_on_phase_ids": []
+            }
+          ],
+          "motion_space": "layer_local",
+          "affected_layer_ids": [
+            "title_034"
+          ],
+          "stagger": null,
+          "depth_parallax": null
         }
       ],
       "camera": {
@@ -4933,7 +8055,16 @@
           }
         ],
         "focus_entity_id": null,
-        "clamp_to_content": true
+        "clamp_to_content": true,
+        "focus_path": [
+          {
+            "at_frame": 0,
+            "focus_layer_id": "layer_034",
+            "focus_geo_feature_id": null,
+            "framing": "subject_center"
+          }
+        ],
+        "transform_order": "layer_then_group_then_camera"
       },
       "transition_out": {
         "type": "hard_cut",
@@ -4942,6 +8073,37 @@
       "story_cue_span": {
         "first_word_id": "word_034",
         "last_word_id": "word_034"
+      },
+      "staging": {
+        "composition_graph": {
+          "group_ids": [
+            "group_scene_034"
+          ],
+          "edges": [
+            {
+              "from_id": "title_034",
+              "to_id": "layer_034",
+              "relation": "foreground_of"
+            }
+          ]
+        },
+        "beat_sequence": [
+          {
+            "beat_id": "beat_setup_034",
+            "local_start_frame": 0,
+            "local_end_frame": 225,
+            "focus_layer_id": "layer_034",
+            "activated_layer_ids": [
+              "layer_034",
+              "title_034"
+            ],
+            "hidden_layer_ids": []
+          }
+        ],
+        "continuity_group_id": "group_setup_034",
+        "carry_layer_ids": [],
+        "entry_focus_layer_id": "layer_034",
+        "exit_focus_layer_id": "layer_034"
       }
     },
     {
@@ -4987,7 +8149,21 @@
             "stroke_token": null,
             "max_lines": 3
           },
-          "map_binding": null
+          "map_binding": null,
+          "parent_layer_id": null,
+          "group_id": "group_scene_035",
+          "transform_origin": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "depth_order": 0,
+          "treatment": {
+            "kind": "source_photo_card",
+            "source_preserving": true,
+            "evidence_badge": "archival"
+          },
+          "path_geometry_ref": null,
+          "text_layout": null
         },
         {
           "layer_id": "title_035",
@@ -5021,7 +8197,30 @@
             "stroke_token": null,
             "max_lines": 3
           },
-          "map_binding": null
+          "map_binding": null,
+          "parent_layer_id": null,
+          "group_id": "group_scene_035",
+          "transform_origin": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "depth_order": 1,
+          "treatment": {
+            "kind": "headline_text",
+            "source_preserving": true,
+            "evidence_badge": "none"
+          },
+          "path_geometry_ref": null,
+          "text_layout": {
+            "font_token": "headline_sans",
+            "font_size_px": 64,
+            "line_height": 1.16,
+            "letter_spacing_px": 0,
+            "horizontal_align": "left",
+            "vertical_align": "center",
+            "max_lines": 3,
+            "overflow": "block"
+          }
         }
       ],
       "events": [
@@ -5034,7 +8233,8 @@
           "cue_word_id": "word_035",
           "params": {
             "direction": "up",
-            "distance_px": 30
+            "distance_px": 30,
+            "feather_px": 4
           },
           "animated_property": "opacity",
           "keyframes": [
@@ -5052,7 +8252,22 @@
           "cue_binding": {
             "word_id": "word_035",
             "offset_frames": 0
-          }
+          },
+          "phases": [
+            {
+              "phase_id": "phase_event_035",
+              "kind": "enter",
+              "start_offset_frames": 0,
+              "duration_frames": 18,
+              "depends_on_phase_ids": []
+            }
+          ],
+          "motion_space": "layer_local",
+          "affected_layer_ids": [
+            "title_035"
+          ],
+          "stagger": null,
+          "depth_parallax": null
         }
       ],
       "camera": {
@@ -5078,7 +8293,16 @@
           }
         ],
         "focus_entity_id": null,
-        "clamp_to_content": true
+        "clamp_to_content": true,
+        "focus_path": [
+          {
+            "at_frame": 0,
+            "focus_layer_id": "layer_035",
+            "focus_geo_feature_id": null,
+            "framing": "subject_center"
+          }
+        ],
+        "transform_order": "layer_then_group_then_camera"
       },
       "transition_out": {
         "type": "hard_cut",
@@ -5087,6 +8311,37 @@
       "story_cue_span": {
         "first_word_id": "word_035",
         "last_word_id": "word_035"
+      },
+      "staging": {
+        "composition_graph": {
+          "group_ids": [
+            "group_scene_035"
+          ],
+          "edges": [
+            {
+              "from_id": "title_035",
+              "to_id": "layer_035",
+              "relation": "foreground_of"
+            }
+          ]
+        },
+        "beat_sequence": [
+          {
+            "beat_id": "beat_setup_035",
+            "local_start_frame": 0,
+            "local_end_frame": 225,
+            "focus_layer_id": "layer_035",
+            "activated_layer_ids": [
+              "layer_035",
+              "title_035"
+            ],
+            "hidden_layer_ids": []
+          }
+        ],
+        "continuity_group_id": "group_setup_035",
+        "carry_layer_ids": [],
+        "entry_focus_layer_id": "layer_035",
+        "exit_focus_layer_id": "layer_035"
       }
     },
     {
@@ -5132,7 +8387,21 @@
             "stroke_token": null,
             "max_lines": 3
           },
-          "map_binding": null
+          "map_binding": null,
+          "parent_layer_id": null,
+          "group_id": "group_scene_036",
+          "transform_origin": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "depth_order": 0,
+          "treatment": {
+            "kind": "source_photo_card",
+            "source_preserving": true,
+            "evidence_badge": "archival"
+          },
+          "path_geometry_ref": null,
+          "text_layout": null
         },
         {
           "layer_id": "title_036",
@@ -5166,7 +8435,30 @@
             "stroke_token": null,
             "max_lines": 3
           },
-          "map_binding": null
+          "map_binding": null,
+          "parent_layer_id": null,
+          "group_id": "group_scene_036",
+          "transform_origin": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "depth_order": 1,
+          "treatment": {
+            "kind": "headline_text",
+            "source_preserving": true,
+            "evidence_badge": "none"
+          },
+          "path_geometry_ref": null,
+          "text_layout": {
+            "font_token": "headline_sans",
+            "font_size_px": 64,
+            "line_height": 1.16,
+            "letter_spacing_px": 0,
+            "horizontal_align": "left",
+            "vertical_align": "center",
+            "max_lines": 3,
+            "overflow": "block"
+          }
         }
       ],
       "events": [
@@ -5179,7 +8471,8 @@
           "cue_word_id": "word_036",
           "params": {
             "direction": "up",
-            "distance_px": 30
+            "distance_px": 30,
+            "feather_px": 4
           },
           "animated_property": "opacity",
           "keyframes": [
@@ -5197,7 +8490,22 @@
           "cue_binding": {
             "word_id": "word_036",
             "offset_frames": 0
-          }
+          },
+          "phases": [
+            {
+              "phase_id": "phase_event_036",
+              "kind": "enter",
+              "start_offset_frames": 0,
+              "duration_frames": 18,
+              "depends_on_phase_ids": []
+            }
+          ],
+          "motion_space": "layer_local",
+          "affected_layer_ids": [
+            "title_036"
+          ],
+          "stagger": null,
+          "depth_parallax": null
         }
       ],
       "camera": {
@@ -5223,7 +8531,16 @@
           }
         ],
         "focus_entity_id": null,
-        "clamp_to_content": true
+        "clamp_to_content": true,
+        "focus_path": [
+          {
+            "at_frame": 0,
+            "focus_layer_id": "layer_036",
+            "focus_geo_feature_id": null,
+            "framing": "subject_center"
+          }
+        ],
+        "transform_order": "layer_then_group_then_camera"
       },
       "transition_out": {
         "type": "hard_cut",
@@ -5232,6 +8549,37 @@
       "story_cue_span": {
         "first_word_id": "word_036",
         "last_word_id": "word_036"
+      },
+      "staging": {
+        "composition_graph": {
+          "group_ids": [
+            "group_scene_036"
+          ],
+          "edges": [
+            {
+              "from_id": "title_036",
+              "to_id": "layer_036",
+              "relation": "foreground_of"
+            }
+          ]
+        },
+        "beat_sequence": [
+          {
+            "beat_id": "beat_setup_036",
+            "local_start_frame": 0,
+            "local_end_frame": 225,
+            "focus_layer_id": "layer_036",
+            "activated_layer_ids": [
+              "layer_036",
+              "title_036"
+            ],
+            "hidden_layer_ids": []
+          }
+        ],
+        "continuity_group_id": "group_setup_036",
+        "carry_layer_ids": [],
+        "entry_focus_layer_id": "layer_036",
+        "exit_focus_layer_id": "layer_036"
       }
     },
     {
@@ -5277,7 +8625,21 @@
             "stroke_token": null,
             "max_lines": 3
           },
-          "map_binding": null
+          "map_binding": null,
+          "parent_layer_id": null,
+          "group_id": "group_scene_037",
+          "transform_origin": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "depth_order": 0,
+          "treatment": {
+            "kind": "source_photo_card",
+            "source_preserving": true,
+            "evidence_badge": "archival"
+          },
+          "path_geometry_ref": null,
+          "text_layout": null
         },
         {
           "layer_id": "title_037",
@@ -5311,7 +8673,30 @@
             "stroke_token": null,
             "max_lines": 3
           },
-          "map_binding": null
+          "map_binding": null,
+          "parent_layer_id": null,
+          "group_id": "group_scene_037",
+          "transform_origin": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "depth_order": 1,
+          "treatment": {
+            "kind": "headline_text",
+            "source_preserving": true,
+            "evidence_badge": "none"
+          },
+          "path_geometry_ref": null,
+          "text_layout": {
+            "font_token": "headline_sans",
+            "font_size_px": 64,
+            "line_height": 1.16,
+            "letter_spacing_px": 0,
+            "horizontal_align": "left",
+            "vertical_align": "center",
+            "max_lines": 3,
+            "overflow": "block"
+          }
         }
       ],
       "events": [
@@ -5324,7 +8709,8 @@
           "cue_word_id": "word_037",
           "params": {
             "direction": "up",
-            "distance_px": 30
+            "distance_px": 30,
+            "feather_px": 4
           },
           "animated_property": "opacity",
           "keyframes": [
@@ -5342,7 +8728,22 @@
           "cue_binding": {
             "word_id": "word_037",
             "offset_frames": 0
-          }
+          },
+          "phases": [
+            {
+              "phase_id": "phase_event_037",
+              "kind": "enter",
+              "start_offset_frames": 0,
+              "duration_frames": 18,
+              "depends_on_phase_ids": []
+            }
+          ],
+          "motion_space": "layer_local",
+          "affected_layer_ids": [
+            "title_037"
+          ],
+          "stagger": null,
+          "depth_parallax": null
         }
       ],
       "camera": {
@@ -5368,7 +8769,16 @@
           }
         ],
         "focus_entity_id": null,
-        "clamp_to_content": true
+        "clamp_to_content": true,
+        "focus_path": [
+          {
+            "at_frame": 0,
+            "focus_layer_id": "layer_037",
+            "focus_geo_feature_id": null,
+            "framing": "subject_center"
+          }
+        ],
+        "transform_order": "layer_then_group_then_camera"
       },
       "transition_out": {
         "type": "hard_cut",
@@ -5377,6 +8787,37 @@
       "story_cue_span": {
         "first_word_id": "word_037",
         "last_word_id": "word_037"
+      },
+      "staging": {
+        "composition_graph": {
+          "group_ids": [
+            "group_scene_037"
+          ],
+          "edges": [
+            {
+              "from_id": "title_037",
+              "to_id": "layer_037",
+              "relation": "foreground_of"
+            }
+          ]
+        },
+        "beat_sequence": [
+          {
+            "beat_id": "beat_setup_037",
+            "local_start_frame": 0,
+            "local_end_frame": 225,
+            "focus_layer_id": "layer_037",
+            "activated_layer_ids": [
+              "layer_037",
+              "title_037"
+            ],
+            "hidden_layer_ids": []
+          }
+        ],
+        "continuity_group_id": "group_setup_037",
+        "carry_layer_ids": [],
+        "entry_focus_layer_id": "layer_037",
+        "exit_focus_layer_id": "layer_037"
       }
     },
     {
@@ -5422,7 +8863,21 @@
             "stroke_token": null,
             "max_lines": 3
           },
-          "map_binding": null
+          "map_binding": null,
+          "parent_layer_id": null,
+          "group_id": "group_scene_038",
+          "transform_origin": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "depth_order": 0,
+          "treatment": {
+            "kind": "source_photo_card",
+            "source_preserving": true,
+            "evidence_badge": "archival"
+          },
+          "path_geometry_ref": null,
+          "text_layout": null
         },
         {
           "layer_id": "title_038",
@@ -5456,7 +8911,30 @@
             "stroke_token": null,
             "max_lines": 3
           },
-          "map_binding": null
+          "map_binding": null,
+          "parent_layer_id": null,
+          "group_id": "group_scene_038",
+          "transform_origin": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "depth_order": 1,
+          "treatment": {
+            "kind": "headline_text",
+            "source_preserving": true,
+            "evidence_badge": "none"
+          },
+          "path_geometry_ref": null,
+          "text_layout": {
+            "font_token": "headline_sans",
+            "font_size_px": 64,
+            "line_height": 1.16,
+            "letter_spacing_px": 0,
+            "horizontal_align": "left",
+            "vertical_align": "center",
+            "max_lines": 3,
+            "overflow": "block"
+          }
         }
       ],
       "events": [
@@ -5469,7 +8947,8 @@
           "cue_word_id": "word_038",
           "params": {
             "direction": "up",
-            "distance_px": 30
+            "distance_px": 30,
+            "feather_px": 4
           },
           "animated_property": "opacity",
           "keyframes": [
@@ -5487,7 +8966,22 @@
           "cue_binding": {
             "word_id": "word_038",
             "offset_frames": 0
-          }
+          },
+          "phases": [
+            {
+              "phase_id": "phase_event_038",
+              "kind": "enter",
+              "start_offset_frames": 0,
+              "duration_frames": 18,
+              "depends_on_phase_ids": []
+            }
+          ],
+          "motion_space": "layer_local",
+          "affected_layer_ids": [
+            "title_038"
+          ],
+          "stagger": null,
+          "depth_parallax": null
         }
       ],
       "camera": {
@@ -5513,7 +9007,16 @@
           }
         ],
         "focus_entity_id": null,
-        "clamp_to_content": true
+        "clamp_to_content": true,
+        "focus_path": [
+          {
+            "at_frame": 0,
+            "focus_layer_id": "layer_038",
+            "focus_geo_feature_id": null,
+            "framing": "subject_center"
+          }
+        ],
+        "transform_order": "layer_then_group_then_camera"
       },
       "transition_out": {
         "type": "hard_cut",
@@ -5522,6 +9025,37 @@
       "story_cue_span": {
         "first_word_id": "word_038",
         "last_word_id": "word_038"
+      },
+      "staging": {
+        "composition_graph": {
+          "group_ids": [
+            "group_scene_038"
+          ],
+          "edges": [
+            {
+              "from_id": "title_038",
+              "to_id": "layer_038",
+              "relation": "foreground_of"
+            }
+          ]
+        },
+        "beat_sequence": [
+          {
+            "beat_id": "beat_setup_038",
+            "local_start_frame": 0,
+            "local_end_frame": 225,
+            "focus_layer_id": "layer_038",
+            "activated_layer_ids": [
+              "layer_038",
+              "title_038"
+            ],
+            "hidden_layer_ids": []
+          }
+        ],
+        "continuity_group_id": "group_setup_038",
+        "carry_layer_ids": [],
+        "entry_focus_layer_id": "layer_038",
+        "exit_focus_layer_id": "layer_038"
       }
     },
     {
@@ -5567,7 +9101,21 @@
             "stroke_token": null,
             "max_lines": 3
           },
-          "map_binding": null
+          "map_binding": null,
+          "parent_layer_id": null,
+          "group_id": "group_scene_039",
+          "transform_origin": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "depth_order": 0,
+          "treatment": {
+            "kind": "source_photo_card",
+            "source_preserving": true,
+            "evidence_badge": "archival"
+          },
+          "path_geometry_ref": null,
+          "text_layout": null
         },
         {
           "layer_id": "title_039",
@@ -5601,7 +9149,30 @@
             "stroke_token": null,
             "max_lines": 3
           },
-          "map_binding": null
+          "map_binding": null,
+          "parent_layer_id": null,
+          "group_id": "group_scene_039",
+          "transform_origin": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "depth_order": 1,
+          "treatment": {
+            "kind": "headline_text",
+            "source_preserving": true,
+            "evidence_badge": "none"
+          },
+          "path_geometry_ref": null,
+          "text_layout": {
+            "font_token": "headline_sans",
+            "font_size_px": 64,
+            "line_height": 1.16,
+            "letter_spacing_px": 0,
+            "horizontal_align": "left",
+            "vertical_align": "center",
+            "max_lines": 3,
+            "overflow": "block"
+          }
         }
       ],
       "events": [
@@ -5614,7 +9185,8 @@
           "cue_word_id": "word_039",
           "params": {
             "direction": "up",
-            "distance_px": 30
+            "distance_px": 30,
+            "feather_px": 4
           },
           "animated_property": "opacity",
           "keyframes": [
@@ -5632,7 +9204,22 @@
           "cue_binding": {
             "word_id": "word_039",
             "offset_frames": 0
-          }
+          },
+          "phases": [
+            {
+              "phase_id": "phase_event_039",
+              "kind": "enter",
+              "start_offset_frames": 0,
+              "duration_frames": 18,
+              "depends_on_phase_ids": []
+            }
+          ],
+          "motion_space": "layer_local",
+          "affected_layer_ids": [
+            "title_039"
+          ],
+          "stagger": null,
+          "depth_parallax": null
         }
       ],
       "camera": {
@@ -5658,7 +9245,16 @@
           }
         ],
         "focus_entity_id": null,
-        "clamp_to_content": true
+        "clamp_to_content": true,
+        "focus_path": [
+          {
+            "at_frame": 0,
+            "focus_layer_id": "layer_039",
+            "focus_geo_feature_id": null,
+            "framing": "subject_center"
+          }
+        ],
+        "transform_order": "layer_then_group_then_camera"
       },
       "transition_out": {
         "type": "hard_cut",
@@ -5667,6 +9263,37 @@
       "story_cue_span": {
         "first_word_id": "word_039",
         "last_word_id": "word_039"
+      },
+      "staging": {
+        "composition_graph": {
+          "group_ids": [
+            "group_scene_039"
+          ],
+          "edges": [
+            {
+              "from_id": "title_039",
+              "to_id": "layer_039",
+              "relation": "foreground_of"
+            }
+          ]
+        },
+        "beat_sequence": [
+          {
+            "beat_id": "beat_setup_039",
+            "local_start_frame": 0,
+            "local_end_frame": 225,
+            "focus_layer_id": "layer_039",
+            "activated_layer_ids": [
+              "layer_039",
+              "title_039"
+            ],
+            "hidden_layer_ids": []
+          }
+        ],
+        "continuity_group_id": "group_setup_039",
+        "carry_layer_ids": [],
+        "entry_focus_layer_id": "layer_039",
+        "exit_focus_layer_id": "layer_039"
       }
     },
     {
@@ -5712,7 +9339,21 @@
             "stroke_token": null,
             "max_lines": 3
           },
-          "map_binding": null
+          "map_binding": null,
+          "parent_layer_id": null,
+          "group_id": "group_scene_040",
+          "transform_origin": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "depth_order": 0,
+          "treatment": {
+            "kind": "source_photo_card",
+            "source_preserving": true,
+            "evidence_badge": "archival"
+          },
+          "path_geometry_ref": null,
+          "text_layout": null
         },
         {
           "layer_id": "title_040",
@@ -5746,7 +9387,30 @@
             "stroke_token": null,
             "max_lines": 3
           },
-          "map_binding": null
+          "map_binding": null,
+          "parent_layer_id": null,
+          "group_id": "group_scene_040",
+          "transform_origin": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "depth_order": 1,
+          "treatment": {
+            "kind": "headline_text",
+            "source_preserving": true,
+            "evidence_badge": "none"
+          },
+          "path_geometry_ref": null,
+          "text_layout": {
+            "font_token": "headline_sans",
+            "font_size_px": 64,
+            "line_height": 1.16,
+            "letter_spacing_px": 0,
+            "horizontal_align": "left",
+            "vertical_align": "center",
+            "max_lines": 3,
+            "overflow": "block"
+          }
         }
       ],
       "events": [
@@ -5759,7 +9423,8 @@
           "cue_word_id": "word_040",
           "params": {
             "direction": "up",
-            "distance_px": 30
+            "distance_px": 30,
+            "feather_px": 4
           },
           "animated_property": "opacity",
           "keyframes": [
@@ -5777,7 +9442,22 @@
           "cue_binding": {
             "word_id": "word_040",
             "offset_frames": 0
-          }
+          },
+          "phases": [
+            {
+              "phase_id": "phase_event_040",
+              "kind": "enter",
+              "start_offset_frames": 0,
+              "duration_frames": 18,
+              "depends_on_phase_ids": []
+            }
+          ],
+          "motion_space": "layer_local",
+          "affected_layer_ids": [
+            "title_040"
+          ],
+          "stagger": null,
+          "depth_parallax": null
         }
       ],
       "camera": {
@@ -5803,7 +9483,16 @@
           }
         ],
         "focus_entity_id": null,
-        "clamp_to_content": true
+        "clamp_to_content": true,
+        "focus_path": [
+          {
+            "at_frame": 0,
+            "focus_layer_id": "layer_040",
+            "focus_geo_feature_id": null,
+            "framing": "subject_center"
+          }
+        ],
+        "transform_order": "layer_then_group_then_camera"
       },
       "transition_out": {
         "type": "hard_cut",
@@ -5812,6 +9501,37 @@
       "story_cue_span": {
         "first_word_id": "word_040",
         "last_word_id": "word_040"
+      },
+      "staging": {
+        "composition_graph": {
+          "group_ids": [
+            "group_scene_040"
+          ],
+          "edges": [
+            {
+              "from_id": "title_040",
+              "to_id": "layer_040",
+              "relation": "foreground_of"
+            }
+          ]
+        },
+        "beat_sequence": [
+          {
+            "beat_id": "beat_setup_040",
+            "local_start_frame": 0,
+            "local_end_frame": 225,
+            "focus_layer_id": "layer_040",
+            "activated_layer_ids": [
+              "layer_040",
+              "title_040"
+            ],
+            "hidden_layer_ids": []
+          }
+        ],
+        "continuity_group_id": "group_setup_040",
+        "carry_layer_ids": [],
+        "entry_focus_layer_id": "layer_040",
+        "exit_focus_layer_id": "layer_040"
       }
     },
     {
@@ -5857,7 +9577,21 @@
             "stroke_token": null,
             "max_lines": 3
           },
-          "map_binding": null
+          "map_binding": null,
+          "parent_layer_id": null,
+          "group_id": "group_scene_041",
+          "transform_origin": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "depth_order": 0,
+          "treatment": {
+            "kind": "ink_map",
+            "source_preserving": true,
+            "evidence_badge": "archival"
+          },
+          "path_geometry_ref": null,
+          "text_layout": null
         },
         {
           "layer_id": "title_041",
@@ -5891,7 +9625,30 @@
             "stroke_token": null,
             "max_lines": 3
           },
-          "map_binding": null
+          "map_binding": null,
+          "parent_layer_id": null,
+          "group_id": "group_scene_041",
+          "transform_origin": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "depth_order": 1,
+          "treatment": {
+            "kind": "headline_text",
+            "source_preserving": true,
+            "evidence_badge": "none"
+          },
+          "path_geometry_ref": null,
+          "text_layout": {
+            "font_token": "headline_sans",
+            "font_size_px": 64,
+            "line_height": 1.16,
+            "letter_spacing_px": 0,
+            "horizontal_align": "left",
+            "vertical_align": "center",
+            "max_lines": 3,
+            "overflow": "block"
+          }
         }
       ],
       "events": [
@@ -5904,7 +9661,8 @@
           "cue_word_id": "word_041",
           "params": {
             "direction": "up",
-            "distance_px": 30
+            "distance_px": 30,
+            "feather_px": 4
           },
           "animated_property": "opacity",
           "keyframes": [
@@ -5922,7 +9680,22 @@
           "cue_binding": {
             "word_id": "word_041",
             "offset_frames": 0
-          }
+          },
+          "phases": [
+            {
+              "phase_id": "phase_event_041",
+              "kind": "enter",
+              "start_offset_frames": 0,
+              "duration_frames": 18,
+              "depends_on_phase_ids": []
+            }
+          ],
+          "motion_space": "layer_local",
+          "affected_layer_ids": [
+            "title_041"
+          ],
+          "stagger": null,
+          "depth_parallax": null
         }
       ],
       "camera": {
@@ -5948,7 +9721,16 @@
           }
         ],
         "focus_entity_id": null,
-        "clamp_to_content": true
+        "clamp_to_content": true,
+        "focus_path": [
+          {
+            "at_frame": 0,
+            "focus_layer_id": "layer_041",
+            "focus_geo_feature_id": null,
+            "framing": "subject_center"
+          }
+        ],
+        "transform_order": "layer_then_group_then_camera"
       },
       "transition_out": {
         "type": "hard_cut",
@@ -5957,6 +9739,37 @@
       "story_cue_span": {
         "first_word_id": "word_041",
         "last_word_id": "word_041"
+      },
+      "staging": {
+        "composition_graph": {
+          "group_ids": [
+            "group_scene_041"
+          ],
+          "edges": [
+            {
+              "from_id": "title_041",
+              "to_id": "layer_041",
+              "relation": "foreground_of"
+            }
+          ]
+        },
+        "beat_sequence": [
+          {
+            "beat_id": "beat_setup_041",
+            "local_start_frame": 0,
+            "local_end_frame": 225,
+            "focus_layer_id": "layer_041",
+            "activated_layer_ids": [
+              "layer_041",
+              "title_041"
+            ],
+            "hidden_layer_ids": []
+          }
+        ],
+        "continuity_group_id": "group_setup_041",
+        "carry_layer_ids": [],
+        "entry_focus_layer_id": "layer_041",
+        "exit_focus_layer_id": "layer_041"
       }
     },
     {
@@ -6002,7 +9815,21 @@
             "stroke_token": null,
             "max_lines": 3
           },
-          "map_binding": null
+          "map_binding": null,
+          "parent_layer_id": null,
+          "group_id": "group_scene_042",
+          "transform_origin": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "depth_order": 0,
+          "treatment": {
+            "kind": "ink_map",
+            "source_preserving": true,
+            "evidence_badge": "archival"
+          },
+          "path_geometry_ref": null,
+          "text_layout": null
         },
         {
           "layer_id": "title_042",
@@ -6036,7 +9863,30 @@
             "stroke_token": null,
             "max_lines": 3
           },
-          "map_binding": null
+          "map_binding": null,
+          "parent_layer_id": null,
+          "group_id": "group_scene_042",
+          "transform_origin": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "depth_order": 1,
+          "treatment": {
+            "kind": "headline_text",
+            "source_preserving": true,
+            "evidence_badge": "none"
+          },
+          "path_geometry_ref": null,
+          "text_layout": {
+            "font_token": "headline_sans",
+            "font_size_px": 64,
+            "line_height": 1.16,
+            "letter_spacing_px": 0,
+            "horizontal_align": "left",
+            "vertical_align": "center",
+            "max_lines": 3,
+            "overflow": "block"
+          }
         }
       ],
       "events": [
@@ -6049,7 +9899,8 @@
           "cue_word_id": "word_042",
           "params": {
             "direction": "up",
-            "distance_px": 30
+            "distance_px": 30,
+            "feather_px": 4
           },
           "animated_property": "opacity",
           "keyframes": [
@@ -6067,7 +9918,22 @@
           "cue_binding": {
             "word_id": "word_042",
             "offset_frames": 0
-          }
+          },
+          "phases": [
+            {
+              "phase_id": "phase_event_042",
+              "kind": "enter",
+              "start_offset_frames": 0,
+              "duration_frames": 18,
+              "depends_on_phase_ids": []
+            }
+          ],
+          "motion_space": "layer_local",
+          "affected_layer_ids": [
+            "title_042"
+          ],
+          "stagger": null,
+          "depth_parallax": null
         }
       ],
       "camera": {
@@ -6093,7 +9959,16 @@
           }
         ],
         "focus_entity_id": null,
-        "clamp_to_content": true
+        "clamp_to_content": true,
+        "focus_path": [
+          {
+            "at_frame": 0,
+            "focus_layer_id": "layer_042",
+            "focus_geo_feature_id": null,
+            "framing": "subject_center"
+          }
+        ],
+        "transform_order": "layer_then_group_then_camera"
       },
       "transition_out": {
         "type": "hard_cut",
@@ -6102,6 +9977,37 @@
       "story_cue_span": {
         "first_word_id": "word_042",
         "last_word_id": "word_042"
+      },
+      "staging": {
+        "composition_graph": {
+          "group_ids": [
+            "group_scene_042"
+          ],
+          "edges": [
+            {
+              "from_id": "title_042",
+              "to_id": "layer_042",
+              "relation": "foreground_of"
+            }
+          ]
+        },
+        "beat_sequence": [
+          {
+            "beat_id": "beat_setup_042",
+            "local_start_frame": 0,
+            "local_end_frame": 225,
+            "focus_layer_id": "layer_042",
+            "activated_layer_ids": [
+              "layer_042",
+              "title_042"
+            ],
+            "hidden_layer_ids": []
+          }
+        ],
+        "continuity_group_id": "group_setup_042",
+        "carry_layer_ids": [],
+        "entry_focus_layer_id": "layer_042",
+        "exit_focus_layer_id": "layer_042"
       }
     },
     {
@@ -6147,7 +10053,21 @@
             "stroke_token": null,
             "max_lines": 3
           },
-          "map_binding": null
+          "map_binding": null,
+          "parent_layer_id": null,
+          "group_id": "group_scene_043",
+          "transform_origin": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "depth_order": 0,
+          "treatment": {
+            "kind": "source_photo_card",
+            "source_preserving": true,
+            "evidence_badge": "archival"
+          },
+          "path_geometry_ref": null,
+          "text_layout": null
         },
         {
           "layer_id": "title_043",
@@ -6181,7 +10101,30 @@
             "stroke_token": null,
             "max_lines": 3
           },
-          "map_binding": null
+          "map_binding": null,
+          "parent_layer_id": null,
+          "group_id": "group_scene_043",
+          "transform_origin": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "depth_order": 1,
+          "treatment": {
+            "kind": "headline_text",
+            "source_preserving": true,
+            "evidence_badge": "none"
+          },
+          "path_geometry_ref": null,
+          "text_layout": {
+            "font_token": "headline_sans",
+            "font_size_px": 64,
+            "line_height": 1.16,
+            "letter_spacing_px": 0,
+            "horizontal_align": "left",
+            "vertical_align": "center",
+            "max_lines": 3,
+            "overflow": "block"
+          }
         }
       ],
       "events": [
@@ -6194,7 +10137,8 @@
           "cue_word_id": "word_043",
           "params": {
             "direction": "up",
-            "distance_px": 30
+            "distance_px": 30,
+            "feather_px": 4
           },
           "animated_property": "opacity",
           "keyframes": [
@@ -6212,7 +10156,22 @@
           "cue_binding": {
             "word_id": "word_043",
             "offset_frames": 0
-          }
+          },
+          "phases": [
+            {
+              "phase_id": "phase_event_043",
+              "kind": "enter",
+              "start_offset_frames": 0,
+              "duration_frames": 18,
+              "depends_on_phase_ids": []
+            }
+          ],
+          "motion_space": "layer_local",
+          "affected_layer_ids": [
+            "title_043"
+          ],
+          "stagger": null,
+          "depth_parallax": null
         }
       ],
       "camera": {
@@ -6238,7 +10197,16 @@
           }
         ],
         "focus_entity_id": null,
-        "clamp_to_content": true
+        "clamp_to_content": true,
+        "focus_path": [
+          {
+            "at_frame": 0,
+            "focus_layer_id": "layer_043",
+            "focus_geo_feature_id": null,
+            "framing": "subject_center"
+          }
+        ],
+        "transform_order": "layer_then_group_then_camera"
       },
       "transition_out": {
         "type": "hard_cut",
@@ -6247,6 +10215,37 @@
       "story_cue_span": {
         "first_word_id": "word_043",
         "last_word_id": "word_043"
+      },
+      "staging": {
+        "composition_graph": {
+          "group_ids": [
+            "group_scene_043"
+          ],
+          "edges": [
+            {
+              "from_id": "title_043",
+              "to_id": "layer_043",
+              "relation": "foreground_of"
+            }
+          ]
+        },
+        "beat_sequence": [
+          {
+            "beat_id": "beat_setup_043",
+            "local_start_frame": 0,
+            "local_end_frame": 225,
+            "focus_layer_id": "layer_043",
+            "activated_layer_ids": [
+              "layer_043",
+              "title_043"
+            ],
+            "hidden_layer_ids": []
+          }
+        ],
+        "continuity_group_id": "group_setup_043",
+        "carry_layer_ids": [],
+        "entry_focus_layer_id": "layer_043",
+        "exit_focus_layer_id": "layer_043"
       }
     },
     {
@@ -6292,7 +10291,21 @@
             "stroke_token": null,
             "max_lines": 3
           },
-          "map_binding": null
+          "map_binding": null,
+          "parent_layer_id": null,
+          "group_id": "group_scene_044",
+          "transform_origin": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "depth_order": 0,
+          "treatment": {
+            "kind": "source_photo_card",
+            "source_preserving": true,
+            "evidence_badge": "archival"
+          },
+          "path_geometry_ref": null,
+          "text_layout": null
         },
         {
           "layer_id": "title_044",
@@ -6326,7 +10339,30 @@
             "stroke_token": null,
             "max_lines": 3
           },
-          "map_binding": null
+          "map_binding": null,
+          "parent_layer_id": null,
+          "group_id": "group_scene_044",
+          "transform_origin": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "depth_order": 1,
+          "treatment": {
+            "kind": "headline_text",
+            "source_preserving": true,
+            "evidence_badge": "none"
+          },
+          "path_geometry_ref": null,
+          "text_layout": {
+            "font_token": "headline_sans",
+            "font_size_px": 64,
+            "line_height": 1.16,
+            "letter_spacing_px": 0,
+            "horizontal_align": "left",
+            "vertical_align": "center",
+            "max_lines": 3,
+            "overflow": "block"
+          }
         }
       ],
       "events": [
@@ -6339,7 +10375,8 @@
           "cue_word_id": "word_044",
           "params": {
             "direction": "up",
-            "distance_px": 30
+            "distance_px": 30,
+            "feather_px": 4
           },
           "animated_property": "opacity",
           "keyframes": [
@@ -6357,7 +10394,22 @@
           "cue_binding": {
             "word_id": "word_044",
             "offset_frames": 0
-          }
+          },
+          "phases": [
+            {
+              "phase_id": "phase_event_044",
+              "kind": "enter",
+              "start_offset_frames": 0,
+              "duration_frames": 18,
+              "depends_on_phase_ids": []
+            }
+          ],
+          "motion_space": "layer_local",
+          "affected_layer_ids": [
+            "title_044"
+          ],
+          "stagger": null,
+          "depth_parallax": null
         }
       ],
       "camera": {
@@ -6383,7 +10435,16 @@
           }
         ],
         "focus_entity_id": null,
-        "clamp_to_content": true
+        "clamp_to_content": true,
+        "focus_path": [
+          {
+            "at_frame": 0,
+            "focus_layer_id": "layer_044",
+            "focus_geo_feature_id": null,
+            "framing": "subject_center"
+          }
+        ],
+        "transform_order": "layer_then_group_then_camera"
       },
       "transition_out": {
         "type": "hard_cut",
@@ -6392,6 +10453,37 @@
       "story_cue_span": {
         "first_word_id": "word_044",
         "last_word_id": "word_044"
+      },
+      "staging": {
+        "composition_graph": {
+          "group_ids": [
+            "group_scene_044"
+          ],
+          "edges": [
+            {
+              "from_id": "title_044",
+              "to_id": "layer_044",
+              "relation": "foreground_of"
+            }
+          ]
+        },
+        "beat_sequence": [
+          {
+            "beat_id": "beat_setup_044",
+            "local_start_frame": 0,
+            "local_end_frame": 225,
+            "focus_layer_id": "layer_044",
+            "activated_layer_ids": [
+              "layer_044",
+              "title_044"
+            ],
+            "hidden_layer_ids": []
+          }
+        ],
+        "continuity_group_id": "group_setup_044",
+        "carry_layer_ids": [],
+        "entry_focus_layer_id": "layer_044",
+        "exit_focus_layer_id": "layer_044"
       }
     },
     {
@@ -6437,7 +10529,21 @@
             "stroke_token": null,
             "max_lines": 3
           },
-          "map_binding": null
+          "map_binding": null,
+          "parent_layer_id": null,
+          "group_id": "group_scene_045",
+          "transform_origin": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "depth_order": 0,
+          "treatment": {
+            "kind": "source_photo_card",
+            "source_preserving": true,
+            "evidence_badge": "archival"
+          },
+          "path_geometry_ref": null,
+          "text_layout": null
         },
         {
           "layer_id": "title_045",
@@ -6471,7 +10577,30 @@
             "stroke_token": null,
             "max_lines": 3
           },
-          "map_binding": null
+          "map_binding": null,
+          "parent_layer_id": null,
+          "group_id": "group_scene_045",
+          "transform_origin": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "depth_order": 1,
+          "treatment": {
+            "kind": "headline_text",
+            "source_preserving": true,
+            "evidence_badge": "none"
+          },
+          "path_geometry_ref": null,
+          "text_layout": {
+            "font_token": "headline_sans",
+            "font_size_px": 64,
+            "line_height": 1.16,
+            "letter_spacing_px": 0,
+            "horizontal_align": "left",
+            "vertical_align": "center",
+            "max_lines": 3,
+            "overflow": "block"
+          }
         }
       ],
       "events": [
@@ -6484,7 +10613,8 @@
           "cue_word_id": "word_045",
           "params": {
             "direction": "up",
-            "distance_px": 30
+            "distance_px": 30,
+            "feather_px": 4
           },
           "animated_property": "opacity",
           "keyframes": [
@@ -6502,7 +10632,22 @@
           "cue_binding": {
             "word_id": "word_045",
             "offset_frames": 0
-          }
+          },
+          "phases": [
+            {
+              "phase_id": "phase_event_045",
+              "kind": "enter",
+              "start_offset_frames": 0,
+              "duration_frames": 18,
+              "depends_on_phase_ids": []
+            }
+          ],
+          "motion_space": "layer_local",
+          "affected_layer_ids": [
+            "title_045"
+          ],
+          "stagger": null,
+          "depth_parallax": null
         }
       ],
       "camera": {
@@ -6528,7 +10673,16 @@
           }
         ],
         "focus_entity_id": null,
-        "clamp_to_content": true
+        "clamp_to_content": true,
+        "focus_path": [
+          {
+            "at_frame": 0,
+            "focus_layer_id": "layer_045",
+            "focus_geo_feature_id": null,
+            "framing": "subject_center"
+          }
+        ],
+        "transform_order": "layer_then_group_then_camera"
       },
       "transition_out": {
         "type": "hard_cut",
@@ -6537,6 +10691,37 @@
       "story_cue_span": {
         "first_word_id": "word_045",
         "last_word_id": "word_045"
+      },
+      "staging": {
+        "composition_graph": {
+          "group_ids": [
+            "group_scene_045"
+          ],
+          "edges": [
+            {
+              "from_id": "title_045",
+              "to_id": "layer_045",
+              "relation": "foreground_of"
+            }
+          ]
+        },
+        "beat_sequence": [
+          {
+            "beat_id": "beat_setup_045",
+            "local_start_frame": 0,
+            "local_end_frame": 225,
+            "focus_layer_id": "layer_045",
+            "activated_layer_ids": [
+              "layer_045",
+              "title_045"
+            ],
+            "hidden_layer_ids": []
+          }
+        ],
+        "continuity_group_id": "group_setup_045",
+        "carry_layer_ids": [],
+        "entry_focus_layer_id": "layer_045",
+        "exit_focus_layer_id": "layer_045"
       }
     },
     {
@@ -6582,7 +10767,21 @@
             "stroke_token": null,
             "max_lines": 3
           },
-          "map_binding": null
+          "map_binding": null,
+          "parent_layer_id": null,
+          "group_id": "group_scene_046",
+          "transform_origin": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "depth_order": 0,
+          "treatment": {
+            "kind": "source_photo_card",
+            "source_preserving": true,
+            "evidence_badge": "archival"
+          },
+          "path_geometry_ref": null,
+          "text_layout": null
         },
         {
           "layer_id": "title_046",
@@ -6616,7 +10815,30 @@
             "stroke_token": null,
             "max_lines": 3
           },
-          "map_binding": null
+          "map_binding": null,
+          "parent_layer_id": null,
+          "group_id": "group_scene_046",
+          "transform_origin": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "depth_order": 1,
+          "treatment": {
+            "kind": "headline_text",
+            "source_preserving": true,
+            "evidence_badge": "none"
+          },
+          "path_geometry_ref": null,
+          "text_layout": {
+            "font_token": "headline_sans",
+            "font_size_px": 64,
+            "line_height": 1.16,
+            "letter_spacing_px": 0,
+            "horizontal_align": "left",
+            "vertical_align": "center",
+            "max_lines": 3,
+            "overflow": "block"
+          }
         }
       ],
       "events": [
@@ -6629,7 +10851,8 @@
           "cue_word_id": "word_046",
           "params": {
             "direction": "up",
-            "distance_px": 30
+            "distance_px": 30,
+            "feather_px": 4
           },
           "animated_property": "opacity",
           "keyframes": [
@@ -6647,7 +10870,22 @@
           "cue_binding": {
             "word_id": "word_046",
             "offset_frames": 0
-          }
+          },
+          "phases": [
+            {
+              "phase_id": "phase_event_046",
+              "kind": "enter",
+              "start_offset_frames": 0,
+              "duration_frames": 18,
+              "depends_on_phase_ids": []
+            }
+          ],
+          "motion_space": "layer_local",
+          "affected_layer_ids": [
+            "title_046"
+          ],
+          "stagger": null,
+          "depth_parallax": null
         }
       ],
       "camera": {
@@ -6673,7 +10911,16 @@
           }
         ],
         "focus_entity_id": null,
-        "clamp_to_content": true
+        "clamp_to_content": true,
+        "focus_path": [
+          {
+            "at_frame": 0,
+            "focus_layer_id": "layer_046",
+            "focus_geo_feature_id": null,
+            "framing": "subject_center"
+          }
+        ],
+        "transform_order": "layer_then_group_then_camera"
       },
       "transition_out": {
         "type": "hard_cut",
@@ -6682,6 +10929,37 @@
       "story_cue_span": {
         "first_word_id": "word_046",
         "last_word_id": "word_046"
+      },
+      "staging": {
+        "composition_graph": {
+          "group_ids": [
+            "group_scene_046"
+          ],
+          "edges": [
+            {
+              "from_id": "title_046",
+              "to_id": "layer_046",
+              "relation": "foreground_of"
+            }
+          ]
+        },
+        "beat_sequence": [
+          {
+            "beat_id": "beat_setup_046",
+            "local_start_frame": 0,
+            "local_end_frame": 225,
+            "focus_layer_id": "layer_046",
+            "activated_layer_ids": [
+              "layer_046",
+              "title_046"
+            ],
+            "hidden_layer_ids": []
+          }
+        ],
+        "continuity_group_id": "group_setup_046",
+        "carry_layer_ids": [],
+        "entry_focus_layer_id": "layer_046",
+        "exit_focus_layer_id": "layer_046"
       }
     },
     {
@@ -6727,7 +11005,21 @@
             "stroke_token": null,
             "max_lines": 3
           },
-          "map_binding": null
+          "map_binding": null,
+          "parent_layer_id": null,
+          "group_id": "group_scene_047",
+          "transform_origin": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "depth_order": 0,
+          "treatment": {
+            "kind": "source_photo_card",
+            "source_preserving": true,
+            "evidence_badge": "archival"
+          },
+          "path_geometry_ref": null,
+          "text_layout": null
         },
         {
           "layer_id": "title_047",
@@ -6761,7 +11053,30 @@
             "stroke_token": null,
             "max_lines": 3
           },
-          "map_binding": null
+          "map_binding": null,
+          "parent_layer_id": null,
+          "group_id": "group_scene_047",
+          "transform_origin": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "depth_order": 1,
+          "treatment": {
+            "kind": "headline_text",
+            "source_preserving": true,
+            "evidence_badge": "none"
+          },
+          "path_geometry_ref": null,
+          "text_layout": {
+            "font_token": "headline_sans",
+            "font_size_px": 64,
+            "line_height": 1.16,
+            "letter_spacing_px": 0,
+            "horizontal_align": "left",
+            "vertical_align": "center",
+            "max_lines": 3,
+            "overflow": "block"
+          }
         }
       ],
       "events": [
@@ -6774,7 +11089,8 @@
           "cue_word_id": "word_047",
           "params": {
             "direction": "up",
-            "distance_px": 30
+            "distance_px": 30,
+            "feather_px": 4
           },
           "animated_property": "opacity",
           "keyframes": [
@@ -6792,7 +11108,22 @@
           "cue_binding": {
             "word_id": "word_047",
             "offset_frames": 0
-          }
+          },
+          "phases": [
+            {
+              "phase_id": "phase_event_047",
+              "kind": "enter",
+              "start_offset_frames": 0,
+              "duration_frames": 18,
+              "depends_on_phase_ids": []
+            }
+          ],
+          "motion_space": "layer_local",
+          "affected_layer_ids": [
+            "title_047"
+          ],
+          "stagger": null,
+          "depth_parallax": null
         }
       ],
       "camera": {
@@ -6818,7 +11149,16 @@
           }
         ],
         "focus_entity_id": null,
-        "clamp_to_content": true
+        "clamp_to_content": true,
+        "focus_path": [
+          {
+            "at_frame": 0,
+            "focus_layer_id": "layer_047",
+            "focus_geo_feature_id": null,
+            "framing": "subject_center"
+          }
+        ],
+        "transform_order": "layer_then_group_then_camera"
       },
       "transition_out": {
         "type": "hard_cut",
@@ -6827,6 +11167,37 @@
       "story_cue_span": {
         "first_word_id": "word_047",
         "last_word_id": "word_047"
+      },
+      "staging": {
+        "composition_graph": {
+          "group_ids": [
+            "group_scene_047"
+          ],
+          "edges": [
+            {
+              "from_id": "title_047",
+              "to_id": "layer_047",
+              "relation": "foreground_of"
+            }
+          ]
+        },
+        "beat_sequence": [
+          {
+            "beat_id": "beat_setup_047",
+            "local_start_frame": 0,
+            "local_end_frame": 225,
+            "focus_layer_id": "layer_047",
+            "activated_layer_ids": [
+              "layer_047",
+              "title_047"
+            ],
+            "hidden_layer_ids": []
+          }
+        ],
+        "continuity_group_id": "group_setup_047",
+        "carry_layer_ids": [],
+        "entry_focus_layer_id": "layer_047",
+        "exit_focus_layer_id": "layer_047"
       }
     },
     {
@@ -6872,7 +11243,21 @@
             "stroke_token": null,
             "max_lines": 3
           },
-          "map_binding": null
+          "map_binding": null,
+          "parent_layer_id": null,
+          "group_id": "group_scene_048",
+          "transform_origin": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "depth_order": 0,
+          "treatment": {
+            "kind": "source_photo_card",
+            "source_preserving": true,
+            "evidence_badge": "archival"
+          },
+          "path_geometry_ref": null,
+          "text_layout": null
         },
         {
           "layer_id": "title_048",
@@ -6906,7 +11291,30 @@
             "stroke_token": null,
             "max_lines": 3
           },
-          "map_binding": null
+          "map_binding": null,
+          "parent_layer_id": null,
+          "group_id": "group_scene_048",
+          "transform_origin": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "depth_order": 1,
+          "treatment": {
+            "kind": "headline_text",
+            "source_preserving": true,
+            "evidence_badge": "none"
+          },
+          "path_geometry_ref": null,
+          "text_layout": {
+            "font_token": "headline_sans",
+            "font_size_px": 64,
+            "line_height": 1.16,
+            "letter_spacing_px": 0,
+            "horizontal_align": "left",
+            "vertical_align": "center",
+            "max_lines": 3,
+            "overflow": "block"
+          }
         }
       ],
       "events": [
@@ -6919,7 +11327,8 @@
           "cue_word_id": "word_048",
           "params": {
             "direction": "up",
-            "distance_px": 30
+            "distance_px": 30,
+            "feather_px": 4
           },
           "animated_property": "opacity",
           "keyframes": [
@@ -6937,7 +11346,22 @@
           "cue_binding": {
             "word_id": "word_048",
             "offset_frames": 0
-          }
+          },
+          "phases": [
+            {
+              "phase_id": "phase_event_048",
+              "kind": "enter",
+              "start_offset_frames": 0,
+              "duration_frames": 18,
+              "depends_on_phase_ids": []
+            }
+          ],
+          "motion_space": "layer_local",
+          "affected_layer_ids": [
+            "title_048"
+          ],
+          "stagger": null,
+          "depth_parallax": null
         }
       ],
       "camera": {
@@ -6963,7 +11387,16 @@
           }
         ],
         "focus_entity_id": null,
-        "clamp_to_content": true
+        "clamp_to_content": true,
+        "focus_path": [
+          {
+            "at_frame": 0,
+            "focus_layer_id": "layer_048",
+            "focus_geo_feature_id": null,
+            "framing": "subject_center"
+          }
+        ],
+        "transform_order": "layer_then_group_then_camera"
       },
       "transition_out": {
         "type": "hard_cut",
@@ -6972,6 +11405,37 @@
       "story_cue_span": {
         "first_word_id": "word_048",
         "last_word_id": "word_048"
+      },
+      "staging": {
+        "composition_graph": {
+          "group_ids": [
+            "group_scene_048"
+          ],
+          "edges": [
+            {
+              "from_id": "title_048",
+              "to_id": "layer_048",
+              "relation": "foreground_of"
+            }
+          ]
+        },
+        "beat_sequence": [
+          {
+            "beat_id": "beat_setup_048",
+            "local_start_frame": 0,
+            "local_end_frame": 225,
+            "focus_layer_id": "layer_048",
+            "activated_layer_ids": [
+              "layer_048",
+              "title_048"
+            ],
+            "hidden_layer_ids": []
+          }
+        ],
+        "continuity_group_id": "group_setup_048",
+        "carry_layer_ids": [],
+        "entry_focus_layer_id": "layer_048",
+        "exit_focus_layer_id": "layer_048"
       }
     }
   ]
