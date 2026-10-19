@@ -165,8 +165,13 @@ def test_schema_generated_python_import_preserves_tuple(tmp_path):
     output.write_text(generate()[0], encoding="utf-8")
     spec = importlib.util.spec_from_file_location("temporary_contract_models", output)
     module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-    model = module.VisualBlueprint_v1Setup_PlansItemLayout_Control
-    annotated = get_type_hints(model)["focal_point"]
-    assert get_args(get_args(annotated)[0]) == (float, float)
-    assert module.API_REQUEST_MODELS["post__projects_project_id_voice_sections_section_id_regenerate"]
+    import sys
+    sys.modules[spec.name] = module
+    try:
+        spec.loader.exec_module(module)
+        model = module.VisualBlueprint_v1Setup_PlansItemLayout_Control
+        annotated = get_type_hints(model)["focal_point"]
+        assert get_args(get_args(annotated)[0]) == (float, float)
+        assert module.API_REQUEST_MODELS["post__projects_project_id_voice_sections_section_id_regenerate"]
+    finally:
+        sys.modules.pop(spec.name, None)
