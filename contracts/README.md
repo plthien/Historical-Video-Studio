@@ -1,19 +1,14 @@
-# Design-time Contracts — Step 01/02
+# Contracts — Full-Flow Design V1
+All files are design authority for future implementation, not a running app.
 
-**Version:** V1.0 design freeze. These files are authoritative *proposed interfaces*, not implemented application code or evidence of a working provider.
+- **Twelve** strict Draft 2020-12 JSON schemas under schema/ and twelve valid example shapes under examples/.
+- longform/: synthetic 24 English sections / 48 scenes / 360-second, 10800-frame full-length structure; not real audio, approved source or render proof.
+- registries/: 30 template variants (T01–T10/A–C) and 18 bounded motion presets; enforced by semantic validators and future compiler.
+- openapi.yaml: original core API; openapi-fullflow-extension.json: additive **25** typed edit/regenerate/asset review/storyboard/export/provider endpoints. They have no overlapping path-method keys; implementation merges both specs and maintains one FastAPI router namespace.
+- providers/reference/WEBHOOK_INTEGRATION.vi(1).md: byte-for-byte original user-supplied G-Labs webhook document, 1,148 lines. Do not replace it with our summary.
+- providers/: separate detailed adapters for Wikimedia Commons, Library of Congress, Europeana, ElevenLabs forced alignment and G-Labs scoped image generation; candidate source evidence is not historical accuracy or rights approval.
+- ../scripts/check_design_contracts.py and ../tests/contracts/: Windows-only static shape and negative semantic tests. Mock passing does not imply live audio, G-Labs, real assets or MP4 success.
 
-- schema/: twelve strict JSON Schema Draft 2020–12 contracts, filename matches each schema_version.
-- examples/: one synthetic shape-valid fixture per schema; plus a 360-second/48-scene long-form synthetic contract set. **They do not establish historical truth, production rights or a working provider.** Cross-object fixtures require explicit binding and semantics checks.
-- openapi.yaml: proposed local FastAPI endpoints for six UI workspaces, review gates and jobs.
-- providers/: boundary-specific adapter behavior from official docs / user-supplied contract.
-- ../scripts/check_design_contracts.py and ../tests/contracts/: Python validation, ten positive fixtures and negative semantic cases.
+Run from root on Windows: python -m pip install -r requirements-design.txt; python scripts/check_design_contracts.py; python -m unittest discover -s tests/contracts -p "test_*.py" -v.
 
-Run on Windows (Python 3.12):
-~~~
-python -m pip install -r requirements-design.txt
-python scripts/check_design_contracts.py
-python -m unittest discover -s tests/contracts -p "test_*.py" -v
-~~~
-The distinction matters: JSON Schema verifies shape/type/allowlisted keys. Semantic validation must additionally verify ID uniqueness, revision hashes, word samples and ordered ranges, exact asset approval and mapping, route/date rights, layer cue relationships, scene clipping and human approval state. Partial validators are **design acceptance scaffolding**, not production validation coverage.
-
-No schema gives permission to run code, arbitrary URLs, or object-selected JSX/React. Voice alignment is ElevenLabs regardless of TTS source; English is V1 lane. See docs/step01-02/04_DATA_CONTRACTS_AND_GATES.md and /05_IMPLEMENTATION_PLAN.md.
+Latest design implementation authority: docs/step01-02/05_IMPLEMENTATION_PLAN.md (FULL-FLOW, NO PILOT) and FULL_FLOW_VISUAL_COMPILER_CONTRACT.md.
