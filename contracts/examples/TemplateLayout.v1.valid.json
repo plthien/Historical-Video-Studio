@@ -16,48 +16,91 @@
   },
   "slots": [
     {
-      "slot_id": "map_hero",
+      "slot_id": "map_main",
       "role": "map",
       "required": true,
       "rect_normalized": {
-        "x": 0.04,
-        "y": 0.04,
+        "x": 0.06,
+        "y": 0.07,
         "w": 0.72,
-        "h": 0.92
+        "h": 0.84
       },
       "z_index": 0,
       "fit": "contain",
-      "max_lines": 2
+      "max_lines": 1
     },
     {
-      "slot_id": "headline_hero",
+      "slot_id": "place_head",
       "role": "headline",
       "required": true,
       "rect_normalized": {
-        "x": 0.74,
-        "y": 0.15,
-        "w": 0.22,
-        "h": 0.4
+        "x": 0.73,
+        "y": 0.12,
+        "w": 0.21,
+        "h": 0.22
       },
-      "z_index": 5,
+      "z_index": 1,
+      "fit": "contain",
+      "max_lines": 3
+    },
+    {
+      "slot_id": "feature_note",
+      "role": "callout",
+      "required": false,
+      "rect_normalized": {
+        "x": 0.7,
+        "y": 0.49,
+        "w": 0.24,
+        "h": 0.23
+      },
+      "z_index": 2,
       "fit": "contain",
       "max_lines": 3
     }
   ],
   "allowed_presets": [
+    "camera-pan",
     "camera-push",
-    "title-mask-reveal"
+    "map-region-wipe",
+    "stagger-reveal",
+    "title-mask-reveal",
+    "freeze-hold"
   ],
   "camera_limits": {
     "min_scale": 0.9,
     "max_scale": 1.2,
-    "max_rotation_deg": 4,
+    "max_rotation_deg": 2,
     "max_translation_px": 300
   },
   "transition_limits": {
     "min_frames": 0,
-    "max_frames": 25
+    "max_frames": 24
   },
   "overflow_policy": "try_variant_then_block",
-  "fallback_policy": "SAME_APPROVED_ASSET_ONLY"
+  "fallback_policy": "SAME_APPROVED_ASSET_ONLY",
+  "layout_family": "map_full",
+  "visual_variation_signature": "T01-A-map_full-map_main-place_head-feature_note",
+  "layer_relations": [],
+  "composition_rules": {
+    "required_role_counts": [
+      {
+        "role": "map",
+        "min_count": 1,
+        "max_count": 1
+      },
+      {
+        "role": "headline",
+        "min_count": 1,
+        "max_count": 1
+      },
+      {
+        "role": "callout",
+        "min_count": 0,
+        "max_count": 1
+      }
+    ],
+    "max_simultaneous_labels": 6,
+    "requires_contextual_source_caption": false,
+    "overflow_action": "variant_then_G4_block"
+  }
 }
