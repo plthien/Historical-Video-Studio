@@ -70,7 +70,9 @@ class FullFlowDesignTests(unittest.TestCase):
                 self.assertTrue(op["summary"])
                 if method not in {"get","head"}:
                     self.assertIn("requestBody",op)
-                    self.assertIn("expected_revision",op["requestBody"]["content"]["application/json"]["schema"].get("properties",{})) if False else None
+                    request_name=op["requestBody"]["content"]["application/json"]["schema"]["$ref"].rsplit("/",1)[-1]
+                    if request_name!="ProviderSettings":
+                        self.assertIn("expected_revision",ext["components"]["schemas"][request_name]["required"])
                     self.assertIn("Idempotency-Key",[x["name"] for x in op["parameters"]])
                     ref=op["requestBody"]["content"]["application/json"]["schema"]["$ref"]
                     self.assertTrue(ref.startswith("#/components/schemas/"))

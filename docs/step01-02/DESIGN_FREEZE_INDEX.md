@@ -17,6 +17,7 @@
 - [Base OpenAPI](../../contracts/openapi.yaml) plus [25 full-flow extension operations](../../contracts/openapi-fullflow-extension.json) (zero overlapping method/path; implementation combines).
 - [Original verbatim G-Labs webhook](../../contracts/providers/reference/WEBHOOK_INTEGRATION.vi(1).md) and [three archival-source adapters](../../contracts/providers/ARCHIVE_ADAPTER_MATRIX.v1.md).
 - [UI mockup](../../ui/mockups/index.html) and [UI/API mapping](UI_WIREFRAME_AND_API_MATRIX.md).
+- [Full-flow final six-role re-audit](FULL_FLOW_FINAL_REAUDIT.md) documents the five targeted repairs, residual runtime evidence and design-only PASS boundary.
 
 ## Precedence (avoid conflicting pilot statements)
 1. Latest direct user requirements: **implement full production flow, no separate pilot**; English-first; G-Labs contract-first; five review gates.
