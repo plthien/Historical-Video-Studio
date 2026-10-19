@@ -537,6 +537,7 @@
               },
               "visual_beats": {
                 "type": "array",
+                "minItems": 1,
                 "items": {
                   "type": "object",
                   "additionalProperties": false,
@@ -545,19 +546,9 @@
                       "type": "string",
                       "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
                     },
-                    "purpose": {
+                    "section_ref": {
                       "type": "string",
-                      "enum": [
-                        "establish",
-                        "orient",
-                        "introduce",
-                        "contrast",
-                        "reveal",
-                        "explain_cause",
-                        "focus_evidence",
-                        "consequence",
-                        "hold"
-                      ]
+                      "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
                     },
                     "cue": {
                       "type": "object",
@@ -569,11 +560,13 @@
                         },
                         "phrase": {
                           "type": "string",
-                          "minLength": 1
+                          "minLength": 1,
+                          "maxLength": 200
                         },
                         "occurrence": {
                           "type": "integer",
-                          "minimum": 0
+                          "minimum": 0,
+                          "maximum": 100
                         }
                       },
                       "required": [
@@ -582,58 +575,221 @@
                         "occurrence"
                       ]
                     },
-                    "focus_subject_id": {
+                    "action": {
+                      "type": "string",
+                      "enum": [
+                        "establish",
+                        "introduce",
+                        "compare",
+                        "trace",
+                        "annotate",
+                        "reveal",
+                        "reframe",
+                        "hold",
+                        "consequence"
+                      ]
+                    },
+                    "focus_ref": {
                       "type": "string",
                       "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
                     },
-                    "visual_operation": {
+                    "shot_goal": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 350
+                    },
+                    "source_claim_refs": {
+                      "type": "array",
+                      "minItems": 0,
+                      "items": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+                      }
+                    },
+                    "relationships": {
+                      "type": "array",
+                      "minItems": 0,
+                      "items": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                          "from_ref": {
+                            "type": "string",
+                            "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+                          },
+                          "to_ref": {
+                            "type": "string",
+                            "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+                          },
+                          "relation": {
+                            "type": "string",
+                            "enum": [
+                              "left_of",
+                              "right_of",
+                              "foreground_of",
+                              "background_of",
+                              "inside",
+                              "overlaps",
+                              "points_to",
+                              "follows",
+                              "compares_to",
+                              "same_subject_as"
+                            ]
+                          }
+                        },
+                        "required": [
+                          "from_ref",
+                          "to_ref",
+                          "relation"
+                        ]
+                      }
+                    },
+                    "staging": {
+                      "type": "array",
+                      "minItems": 1,
+                      "items": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                          "ref": {
+                            "type": "string",
+                            "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+                          },
+                          "operation": {
+                            "type": "string",
+                            "enum": [
+                              "enter",
+                              "hold",
+                              "highlight",
+                              "exit",
+                              "reposition",
+                              "focus",
+                              "draw_path",
+                              "reveal_mask"
+                            ]
+                          },
+                          "after_ref": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "motion_hint": {
+                            "type": "string",
+                            "enum": [
+                              "none",
+                              "subtle_push",
+                              "parallax",
+                              "stagger",
+                              "line_draw",
+                              "wipe",
+                              "cut",
+                              "track",
+                              "zoom"
+                            ]
+                          },
+                          "priority": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "maximum": 20
+                          }
+                        },
+                        "required": [
+                          "ref",
+                          "operation",
+                          "after_ref",
+                          "motion_hint",
+                          "priority"
+                        ]
+                      }
+                    },
+                    "focus_move": {
                       "type": "string",
                       "enum": [
-                        "enter",
-                        "exit",
-                        "highlight",
-                        "track",
-                        "connect",
-                        "compare",
-                        "crop_focus",
-                        "hold",
-                        "replace"
+                        "none",
+                        "subject_to_subject",
+                        "detail_to_overview",
+                        "overview_to_detail",
+                        "follow_path",
+                        "static"
                       ]
                     },
-                    "subject_refs": {
-                      "type": "array",
-                      "items": {
-                        "type": "string",
-                        "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
-                      },
-                      "minItems": 1
+                    "hold_policy": {
+                      "type": "string",
+                      "enum": [
+                        "readable",
+                        "narration_aligned",
+                        "editorial_pause"
+                      ]
                     },
-                    "relationship_refs": {
-                      "type": "array",
-                      "items": {
-                        "type": "string",
-                        "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+                    "continuity": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {
+                        "group_id": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+                        },
+                        "carry_refs": {
+                          "type": "array",
+                          "minItems": 0,
+                          "items": {
+                            "type": "string",
+                            "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+                          }
+                        },
+                        "entry": {
+                          "type": "string",
+                          "enum": [
+                            "new_setup",
+                            "carry_forward",
+                            "reveal_from_prior"
+                          ]
+                        },
+                        "exit": {
+                          "type": "string",
+                          "enum": [
+                            "hard_cut",
+                            "match_focus",
+                            "same_canvas",
+                            "dissolve"
+                          ]
+                        },
+                        "reason": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 350
+                        }
                       },
-                      "minItems": 0
-                    },
-                    "importance": {
-                      "type": "integer",
-                      "minimum": 1,
-                      "maximum": 5
+                      "required": [
+                        "group_id",
+                        "carry_refs",
+                        "entry",
+                        "exit",
+                        "reason"
+                      ]
                     }
                   },
                   "required": [
                     "beat_id",
-                    "purpose",
+                    "section_ref",
                     "cue",
-                    "focus_subject_id",
-                    "visual_operation",
-                    "subject_refs",
-                    "relationship_refs",
-                    "importance"
+                    "action",
+                    "focus_ref",
+                    "shot_goal",
+                    "source_claim_refs",
+                    "relationships",
+                    "staging",
+                    "focus_move",
+                    "hold_policy",
+                    "continuity"
                   ]
-                },
-                "minItems": 1
+                }
               },
               "reuse_setup_id": {
                 "anyOf": [
@@ -644,180 +800,6 @@
                   {
                     "type": "null"
                   }
-                ]
-              },
-              "visual_subjects": {
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "additionalProperties": false,
-                  "properties": {
-                    "subject_id": {
-                      "type": "string",
-                      "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
-                    },
-                    "role": {
-                      "type": "string",
-                      "enum": [
-                        "person",
-                        "place",
-                        "document",
-                        "photo",
-                        "map",
-                        "event",
-                        "number",
-                        "label",
-                        "route",
-                        "context"
-                      ]
-                    },
-                    "asset_requirement_id": {
-                      "anyOf": [
-                        {
-                          "type": "string",
-                          "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
-                        },
-                        {
-                          "type": "null"
-                        }
-                      ]
-                    },
-                    "claim_ref": {
-                      "anyOf": [
-                        {
-                          "type": "string",
-                          "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
-                        },
-                        {
-                          "type": "null"
-                        }
-                      ]
-                    },
-                    "semantic_label": {
-                      "type": "string",
-                      "minLength": 1
-                    },
-                    "continuity_key": {
-                      "type": [
-                        "string",
-                        "null"
-                      ]
-                    }
-                  },
-                  "required": [
-                    "subject_id",
-                    "role",
-                    "asset_requirement_id",
-                    "claim_ref",
-                    "semantic_label",
-                    "continuity_key"
-                  ]
-                },
-                "minItems": 1
-              },
-              "visual_relationships": {
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "additionalProperties": false,
-                  "properties": {
-                    "relationship_id": {
-                      "type": "string",
-                      "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
-                    },
-                    "type": {
-                      "type": "string",
-                      "enum": [
-                        "overlaps",
-                        "foreground_of",
-                        "behind",
-                        "anchored_to",
-                        "connects",
-                        "compares_with",
-                        "reveals",
-                        "focus_shifts_to",
-                        "belongs_to"
-                      ]
-                    },
-                    "from_subject_id": {
-                      "type": "string",
-                      "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
-                    },
-                    "to_subject_id": {
-                      "type": "string",
-                      "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
-                    },
-                    "asserts_historical_fact": {
-                      "type": "boolean"
-                    }
-                  },
-                  "required": [
-                    "relationship_id",
-                    "type",
-                    "from_subject_id",
-                    "to_subject_id",
-                    "asserts_historical_fact"
-                  ]
-                },
-                "minItems": 0
-              },
-              "editorial_emphasis": {
-                "type": "string",
-                "enum": [
-                  "subtle",
-                  "balanced",
-                  "dramatic_reveal",
-                  "documentary_serious"
-                ]
-              },
-              "continuity_intent": {
-                "type": "object",
-                "additionalProperties": false,
-                "properties": {
-                  "carry_subject_ids": {
-                    "type": "array",
-                    "items": {
-                      "type": "string",
-                      "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
-                    },
-                    "minItems": 0
-                  },
-                  "previous_setup_id": {
-                    "anyOf": [
-                      {
-                        "type": "string",
-                        "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ]
-                  },
-                  "transition_focus_subject_id": {
-                    "anyOf": [
-                      {
-                        "type": "string",
-                        "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ]
-                  }
-                },
-                "required": [
-                  "carry_subject_ids",
-                  "previous_setup_id",
-                  "transition_focus_subject_id"
-                ]
-              },
-              "evidence_usage": {
-                "type": "string",
-                "enum": [
-                  "event_exact",
-                  "period_context",
-                  "verified_schematic",
-                  "editorial_summary"
                 ]
               }
             },
@@ -835,13 +817,7 @@
               "transition_intent",
               "historical_map_requirement_id",
               "visual_beats",
-              "reuse_setup_id",
-              "visual_beats",
-              "visual_subjects",
-              "visual_relationships",
-              "editorial_emphasis",
-              "continuity_intent",
-              "evidence_usage"
+              "reuse_setup_id"
             ]
           }
         },

@@ -469,54 +469,74 @@
                   ]
                 },
                 "text_layout": {
-                  "type": "object",
-                  "additionalProperties": false,
-                  "properties": {
-                    "font_family_token": {
-                      "type": [
-                        "string",
-                        "null"
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {
+                        "font_token": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 100
+                        },
+                        "font_size_px": {
+                          "type": "integer",
+                          "minimum": 20,
+                          "maximum": 160
+                        },
+                        "line_height": {
+                          "type": "number",
+                          "minimum": 1,
+                          "maximum": 2.5
+                        },
+                        "letter_spacing_px": {
+                          "type": "number",
+                          "minimum": -6,
+                          "maximum": 10
+                        },
+                        "horizontal_align": {
+                          "type": "string",
+                          "enum": [
+                            "left",
+                            "center",
+                            "right"
+                          ]
+                        },
+                        "vertical_align": {
+                          "type": "string",
+                          "enum": [
+                            "top",
+                            "center",
+                            "bottom"
+                          ]
+                        },
+                        "max_lines": {
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 8
+                        },
+                        "overflow": {
+                          "type": "string",
+                          "enum": [
+                            "block",
+                            "approved_split"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "font_token",
+                        "font_size_px",
+                        "line_height",
+                        "letter_spacing_px",
+                        "horizontal_align",
+                        "vertical_align",
+                        "max_lines",
+                        "overflow"
                       ]
                     },
-                    "font_size_px": {
-                      "type": "integer",
-                      "minimum": 12,
-                      "maximum": 300
-                    },
-                    "line_height": {
-                      "type": "number",
-                      "minimum": 0.8,
-                      "maximum": 2.5
-                    },
-                    "font_weight": {
-                      "type": "integer",
-                      "minimum": 100,
-                      "maximum": 900
-                    },
-                    "align": {
-                      "type": "string",
-                      "enum": [
-                        "left",
-                        "center",
-                        "right"
-                      ]
-                    },
-                    "overflow": {
-                      "type": "string",
-                      "enum": [
-                        "block",
-                        "reflow",
-                        "split_for_review"
-                      ]
+                    {
+                      "type": "null"
                     }
-                  },
-                  "required": [
-                    "font_family_token",
-                    "font_size_px",
-                    "line_height",
-                    "font_weight",
-                    "align",
-                    "overflow"
                   ]
                 },
                 "template_slot_id": {
@@ -532,72 +552,6 @@
                     {
                       "type": "null"
                     }
-                  ]
-                },
-                "parent_group_id": {
-                  "anyOf": [
-                    {
-                      "type": "string",
-                      "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
-                    },
-                    {
-                      "type": "null"
-                    }
-                  ]
-                },
-                "clip_path_ref": {
-                  "anyOf": [
-                    {
-                      "type": "string",
-                      "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
-                    },
-                    {
-                      "type": "null"
-                    }
-                  ]
-                },
-                "source_binding": {
-                  "type": "object",
-                  "additionalProperties": false,
-                  "properties": {
-                    "requirement_id": {
-                      "anyOf": [
-                        {
-                          "type": "string",
-                          "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
-                        },
-                        {
-                          "type": "null"
-                        }
-                      ]
-                    },
-                    "approved_asset_sha256": {
-                      "anyOf": [
-                        {
-                          "type": "string",
-                          "pattern": "^[0-9a-f]{64}$"
-                        },
-                        {
-                          "type": "null"
-                        }
-                      ]
-                    },
-                    "claim_ref": {
-                      "anyOf": [
-                        {
-                          "type": "string",
-                          "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
-                        },
-                        {
-                          "type": "null"
-                        }
-                      ]
-                    }
-                  },
-                  "required": [
-                    "requirement_id",
-                    "approved_asset_sha256",
-                    "claim_ref"
                   ]
                 }
               },
@@ -620,13 +574,7 @@
                 "path_geometry_ref",
                 "text_layout",
                 "template_slot_id",
-                "source_asset_slot_id",
-                "parent_group_id",
-                "transform_origin",
-                "clip_path_ref",
-                "path_geometry_ref",
-                "source_binding",
-                "text_layout"
+                "source_asset_slot_id"
               ],
               "additionalProperties": false
             },
@@ -1274,111 +1222,6 @@
               "entry_focus_layer_id",
               "exit_focus_layer_id"
             ]
-          },
-          "layer_groups": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "additionalProperties": false,
-              "properties": {
-                "group_id": {
-                  "type": "string",
-                  "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
-                },
-                "parent_group_id": {
-                  "anyOf": [
-                    {
-                      "type": "string",
-                      "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
-                    },
-                    {
-                      "type": "null"
-                    }
-                  ]
-                },
-                "depth": {
-                  "type": "number",
-                  "minimum": -1,
-                  "maximum": 1
-                },
-                "parallax_factor": {
-                  "type": "number",
-                  "minimum": 0,
-                  "maximum": 2
-                },
-                "transform_origin": {
-                  "type": "object",
-                  "additionalProperties": false,
-                  "properties": {
-                    "x": {
-                      "type": "number",
-                      "minimum": 0,
-                      "maximum": 1
-                    },
-                    "y": {
-                      "type": "number",
-                      "minimum": 0,
-                      "maximum": 1
-                    }
-                  },
-                  "required": [
-                    "x",
-                    "y"
-                  ]
-                }
-              },
-              "required": [
-                "group_id",
-                "parent_group_id",
-                "depth",
-                "parallax_factor",
-                "transform_origin"
-              ]
-            },
-            "minItems": 1
-          },
-          "focus_tracks": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "additionalProperties": false,
-              "properties": {
-                "track_id": {
-                  "type": "string",
-                  "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
-                },
-                "target_layer_id": {
-                  "type": "string",
-                  "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
-                },
-                "start_frame": {
-                  "type": "integer",
-                  "minimum": 0
-                },
-                "end_frame": {
-                  "type": "integer",
-                  "minimum": 1
-                },
-                "focus_mode": {
-                  "type": "string",
-                  "enum": [
-                    "hold",
-                    "pan",
-                    "push",
-                    "rack",
-                    "follow_path"
-                  ]
-                }
-              },
-              "required": [
-                "track_id",
-                "target_layer_id",
-                "start_frame",
-                "end_frame",
-                "focus_mode"
-              ]
-            },
-            "minItems": 0
           }
         },
         "required": [
@@ -1394,9 +1237,7 @@
           "camera",
           "transition_out",
           "story_cue_span",
-          "staging",
-          "layer_groups",
-          "focus_tracks"
+          "staging"
         ],
         "additionalProperties": false
       },
