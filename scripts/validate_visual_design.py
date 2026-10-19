@@ -258,12 +258,18 @@ def validate_visual_registry(layouts: dict, motions: dict) -> None:
     if len(variants) != 30 or len(motions["presets"]) != 18:
         _fail("REGISTRY_INCOMPLETE", "registries", "Exactly 10 templates × 3 and 18 motion grammars.")
     signatures = set()
+    geometry_signatures = set()
     for l in variants:
         validate_schema("TemplateLayout.v1", l)
         key = l["template_id"] + l["variant_id"]
         if l["visual_variation_signature"] in signatures:
             _fail("LAYOUT_VARIANTS_CLONED", key, "Variants need distinct compositional signatures.")
         signatures.add(l["visual_variation_signature"])
+        geom = tuple((slot["role"], slot["required"], tuple(slot["rect_normalized"][k] for k in ("x","y","w","h")))
+                     for slot in l["slots"])
+        if geom in geometry_signatures:
+            _fail("LAYOUT_VARIANTS_CLONED", key, "Two variants share identical composition geometry despite different labels.")
+        geometry_signatures.add(geom)
         ids = [s["slot_id"] for s in l["slots"]]
         _unique(ids, "LAYOUT_SLOT_DUPLICATE", key)
         cnt = Counter(s["role"] for s in l["slots"] if s["required"])

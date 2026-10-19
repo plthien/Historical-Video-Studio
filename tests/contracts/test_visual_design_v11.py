@@ -134,5 +134,42 @@ class VisualDesignV11Tests(unittest.TestCase):
             can_approve_story(self.story)
 
 
+    def test_cloned_geometry_is_not_a_new_layout(self):
+        x=copy.deepcopy(self.layouts)
+        x["layouts"][1]["slots"]=copy.deepcopy(x["layouts"][0]["slots"])
+        with self.assertRaisesRegex(ContractError,"LAYOUT_VARIANTS_CLONED"):
+            validate_visual_registry(x,self.motions)
+
+    def test_compiled_layer_requires_exact_slot_origin(self):
+        x=copy.deepcopy(self.timeline)
+        x["scenes"][2]["layers"][0]["template_slot_id"]="wrong_card_slot"
+        with self.assertRaisesRegex(ContractError,"TEMPLATE_LAYER_SLOT_DRIFT"):
+            validate_visual_timeline(self.blue,x,self.layouts,self.motions)
+
+    def test_render_asset_links_to_authoring_slot(self):
+        x=copy.deepcopy(self.timeline)
+        x["scenes"][2]["layers"][0]["source_asset_slot_id"]="asset_slot_unknown"
+        with self.assertRaisesRegex(ContractError,"RENDER_SOURCE_SLOT_MISSING"):
+            validate_visual_timeline(self.blue,x,self.layouts,self.motions)
+
+    def test_operator_visual_edit_requires_provenance_but_preserves_g1(self):
+        x=copy.deepcopy(self.blue)
+        p=x["setup_plans"][0]
+        p["editorial_direction"]["visual_beats"][0]["shot_goal"]="Move focus to approved historical map"
+        p["direction_revision"].update(kind="operator_visual_edit",edited_paths=["visual_beats"],
+                                       operator_confirmed=True,edit_reason="G4 staging improvement")
+        validate_blueprint(self.story,x)
+        p["editorial_direction"]["visual_beats"][0]["source_claim_refs"]=[]
+        with self.assertRaisesRegex(ContractError,"G1_SEMANTICS_PROTECTED"):
+            validate_blueprint(self.story,x)
+
+    def test_undocumented_blueprint_mutation_rejected(self):
+        x=copy.deepcopy(self.blue)
+        x["setup_plans"][0]["editorial_direction"]["camera_intent"]="static"
+        with self.assertRaisesRegex(ContractError,"BLUEPRINT_DIRECTION_DRIFT"):
+            validate_blueprint(self.story,x)
+
+
+
 if __name__ == "__main__":
     unittest.main()

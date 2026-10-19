@@ -7,6 +7,7 @@ on:
       - "docs/step01-02/**"
       - "ui/mockups/**"
       - "scripts/check_design_contracts.py"
+      - "scripts/validate_visual_design.py"
       - "tests/contracts/**"
       - "requirements-design.txt"
       - ".github/workflows/design-contracts-windows.yml"
@@ -24,5 +25,7 @@ jobs:
         run: python -m pip install -r requirements-design.txt
       - name: Validate all schema/example pairs
         run: python scripts/check_design_contracts.py
+      - name: Validate visual director, all templates, and motion grammar
+        run: python scripts/validate_visual_design.py
       - name: Negative regressions and gate invariants
         run: python -m unittest discover -s tests/contracts -p "test_*.py" -v
