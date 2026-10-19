@@ -1098,7 +1098,8 @@
         "camera",
         "map",
         "archival_photo",
-        "portrait"
+        "portrait",
+        "document"
       ],
       "default_duration_frames": 15,
       "min_duration_frames": 1,
