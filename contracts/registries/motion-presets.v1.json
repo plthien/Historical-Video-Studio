@@ -1,6 +1,6 @@
 {
-  "registry_version": "1.0.0",
-  "design_status": "frozen_design_not_rendered",
+  "registry_version": "1.1.0",
+  "design_status": "preset_specific_motion_grammar",
   "presets": [
     {
       "preset_id": "pop-in",
@@ -53,7 +53,58 @@
         }
       },
       "reduced_motion": "fade_or_hold",
-      "source_notice": "In-house design; Motion Prompt naming used as a reference only. No copied source code."
+      "source_notice": "In-house design; Motion Prompt naming used as a reference only. No copied source code.",
+      "parameter_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "from_scale": {
+            "type": "number",
+            "minimum": 0.85,
+            "maximum": 1
+          },
+          "to_scale": {
+            "type": "number",
+            "minimum": 0.95,
+            "maximum": 1.15
+          },
+          "overshoot": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 0.12
+          }
+        },
+        "required": [
+          "from_scale",
+          "to_scale",
+          "overshoot"
+        ]
+      },
+      "default_params": {
+        "from_scale": 0.95,
+        "to_scale": 1,
+        "overshoot": 0.025
+      },
+      "render_recipe": {
+        "primitive": "layer_scale",
+        "transform_space": "layer_local",
+        "deterministic_by_frame": true,
+        "reads_external_state": false
+      },
+      "phase_recipe": [
+        {
+          "phase": "enter",
+          "start_fraction": 0,
+          "end_fraction": 0.7
+        },
+        {
+          "phase": "hold",
+          "start_fraction": 0.7,
+          "end_fraction": 1
+        }
+      ],
+      "preview_fallback": "reduced_motion_fade_or_hold",
+      "geometry_requirement": "none"
     },
     {
       "preset_id": "stagger-reveal",
@@ -106,7 +157,68 @@
         }
       },
       "reduced_motion": "fade_or_hold",
-      "source_notice": "In-house design; Motion Prompt naming used as a reference only. No copied source code."
+      "source_notice": "In-house design; Motion Prompt naming used as a reference only. No copied source code.",
+      "parameter_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "ordered_layer_ids": {
+            "type": "array",
+            "minItems": 2,
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+            }
+          },
+          "gap_frames": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 24
+          },
+          "direction": {
+            "type": "string",
+            "enum": [
+              "front_to_back",
+              "left_to_right",
+              "evidence_order"
+            ]
+          }
+        },
+        "required": [
+          "ordered_layer_ids",
+          "gap_frames",
+          "direction"
+        ]
+      },
+      "default_params": {
+        "ordered_layer_ids": [
+          "layer_a",
+          "layer_b"
+        ],
+        "gap_frames": 6,
+        "direction": "evidence_order"
+      },
+      "render_recipe": {
+        "primitive": "layer_stagger",
+        "transform_space": "group_local",
+        "deterministic_by_frame": true,
+        "reads_external_state": false
+      },
+      "phase_recipe": [
+        {
+          "phase": "enter",
+          "start_fraction": 0,
+          "end_fraction": 0.78
+        },
+        {
+          "phase": "hold",
+          "start_fraction": 0.78,
+          "end_fraction": 1
+        }
+      ],
+      "preview_fallback": "reduced_motion_fade_or_hold",
+      "geometry_requirement": "none"
     },
     {
       "preset_id": "route-line-draw",
@@ -148,7 +260,75 @@
         }
       },
       "reduced_motion": "fade_or_hold",
-      "source_notice": "In-house design; Motion Prompt naming used as a reference only. No copied source code."
+      "source_notice": "In-house design; Motion Prompt naming used as a reference only. No copied source code.",
+      "parameter_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "route_geometry_ref": {
+            "type": "string",
+            "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+          },
+          "start_progress": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "end_progress": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "follow_marker_layer_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "route_geometry_ref",
+          "start_progress",
+          "end_progress",
+          "follow_marker_layer_id"
+        ]
+      },
+      "default_params": {
+        "route_geometry_ref": "geometry_001",
+        "start_progress": 0,
+        "end_progress": 1,
+        "follow_marker_layer_id": null
+      },
+      "render_recipe": {
+        "primitive": "svg_path_length",
+        "transform_space": "map_world",
+        "deterministic_by_frame": true,
+        "reads_external_state": false
+      },
+      "phase_recipe": [
+        {
+          "phase": "enter",
+          "start_fraction": 0,
+          "end_fraction": 0.2
+        },
+        {
+          "phase": "track",
+          "start_fraction": 0.2,
+          "end_fraction": 0.78
+        },
+        {
+          "phase": "hold",
+          "start_fraction": 0.78,
+          "end_fraction": 1
+        }
+      ],
+      "preview_fallback": "reduced_motion_fade_or_hold",
+      "geometry_requirement": "approved_ordered_linestring"
     },
     {
       "preset_id": "title-mask-reveal",
@@ -201,7 +381,62 @@
         }
       },
       "reduced_motion": "fade_or_hold",
-      "source_notice": "In-house design; Motion Prompt naming used as a reference only. No copied source code."
+      "source_notice": "In-house design; Motion Prompt naming used as a reference only. No copied source code.",
+      "parameter_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "direction": {
+            "type": "string",
+            "enum": [
+              "up",
+              "down",
+              "left",
+              "right"
+            ]
+          },
+          "distance_px": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 160
+          },
+          "feather_px": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 40
+          }
+        },
+        "required": [
+          "direction",
+          "distance_px",
+          "feather_px"
+        ]
+      },
+      "default_params": {
+        "direction": "up",
+        "distance_px": 30,
+        "feather_px": 4
+      },
+      "render_recipe": {
+        "primitive": "mask_progress",
+        "transform_space": "layer_local",
+        "deterministic_by_frame": true,
+        "reads_external_state": false
+      },
+      "phase_recipe": [
+        {
+          "phase": "enter",
+          "start_fraction": 0,
+          "end_fraction": 0.7
+        },
+        {
+          "phase": "hold",
+          "start_fraction": 0.7,
+          "end_fraction": 1
+        }
+      ],
+      "preview_fallback": "reduced_motion_fade_or_hold",
+      "geometry_requirement": "none"
     },
     {
       "preset_id": "typewriter",
@@ -244,7 +479,61 @@
         }
       },
       "reduced_motion": "fade_or_hold",
-      "source_notice": "In-house design; Motion Prompt naming used as a reference only. No copied source code."
+      "source_notice": "In-house design; Motion Prompt naming used as a reference only. No copied source code.",
+      "parameter_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "text_layer_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+          },
+          "characters_per_second": {
+            "type": "number",
+            "minimum": 6,
+            "maximum": 55
+          },
+          "cursor_visible": {
+            "type": "boolean"
+          },
+          "quoted_source_claim_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+          }
+        },
+        "required": [
+          "text_layer_id",
+          "characters_per_second",
+          "cursor_visible",
+          "quoted_source_claim_id"
+        ]
+      },
+      "default_params": {
+        "text_layer_id": "layer_text",
+        "characters_per_second": 22,
+        "cursor_visible": false,
+        "quoted_source_claim_id": "claim_001"
+      },
+      "render_recipe": {
+        "primitive": "verified_text_reveal",
+        "transform_space": "layer_local",
+        "deterministic_by_frame": true,
+        "reads_external_state": false
+      },
+      "phase_recipe": [
+        {
+          "phase": "enter",
+          "start_fraction": 0,
+          "end_fraction": 0.7
+        },
+        {
+          "phase": "hold",
+          "start_fraction": 0.7,
+          "end_fraction": 1
+        }
+      ],
+      "preview_fallback": "reduced_motion_fade_or_hold",
+      "geometry_requirement": "none"
     },
     {
       "preset_id": "number-count",
@@ -288,7 +577,69 @@
         }
       },
       "reduced_motion": "fade_or_hold",
-      "source_notice": "In-house design; Motion Prompt naming used as a reference only. No copied source code."
+      "source_notice": "In-house design; Motion Prompt naming used as a reference only. No copied source code.",
+      "parameter_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "source_claim_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+          },
+          "start_value": {
+            "type": "number",
+            "minimum": -1000000000,
+            "maximum": 1000000000
+          },
+          "end_value": {
+            "type": "number",
+            "minimum": -1000000000,
+            "maximum": 1000000000
+          },
+          "precision": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 3
+          },
+          "intermediate_truthful": {
+            "const": true
+          }
+        },
+        "required": [
+          "source_claim_id",
+          "start_value",
+          "end_value",
+          "precision",
+          "intermediate_truthful"
+        ]
+      },
+      "default_params": {
+        "source_claim_id": "claim_001",
+        "start_value": 0,
+        "end_value": 1914,
+        "precision": 0,
+        "intermediate_truthful": true
+      },
+      "render_recipe": {
+        "primitive": "number_interpolate",
+        "transform_space": "layer_local",
+        "deterministic_by_frame": true,
+        "reads_external_state": false
+      },
+      "phase_recipe": [
+        {
+          "phase": "enter",
+          "start_fraction": 0,
+          "end_fraction": 0.7
+        },
+        {
+          "phase": "hold",
+          "start_fraction": 0.7,
+          "end_fraction": 1
+        }
+      ],
+      "preview_fallback": "reduced_motion_fade_or_hold",
+      "geometry_requirement": "none"
     },
     {
       "preset_id": "kinetic-type",
@@ -341,23 +692,70 @@
         }
       },
       "reduced_motion": "fade_or_hold",
-      "source_notice": "In-house design; Motion Prompt naming used as a reference only. No copied source code."
+      "source_notice": "In-house design; Motion Prompt naming used as a reference only. No copied source code.",
+      "parameter_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "word_ids": {
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+            }
+          },
+          "max_offset_px": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100
+          },
+          "line_preservation": {
+            "const": true
+          }
+        },
+        "required": [
+          "word_ids",
+          "max_offset_px",
+          "line_preservation"
+        ]
+      },
+      "default_params": {
+        "word_ids": [
+          "word_001"
+        ],
+        "max_offset_px": 24,
+        "line_preservation": true
+      },
+      "render_recipe": {
+        "primitive": "word_transform",
+        "transform_space": "layer_local",
+        "deterministic_by_frame": true,
+        "reads_external_state": false
+      },
+      "phase_recipe": [
+        {
+          "phase": "enter",
+          "start_fraction": 0,
+          "end_fraction": 0.7
+        },
+        {
+          "phase": "hold",
+          "start_fraction": 0.7,
+          "end_fraction": 1
+        }
+      ],
+      "preview_fallback": "reduced_motion_fade_or_hold",
+      "geometry_requirement": "none"
     },
     {
       "preset_id": "parallax-layers",
       "version": "1.0.0",
       "compatible_layer_kinds": [
-        "map",
-        "territory",
-        "route",
         "portrait",
         "archival_photo",
         "document",
-        "headline",
-        "date",
-        "text",
-        "callout",
-        "camera",
         "decorative_paper"
       ],
       "default_duration_frames": 12,
@@ -394,7 +792,89 @@
         }
       },
       "reduced_motion": "fade_or_hold",
-      "source_notice": "In-house design; Motion Prompt naming used as a reference only. No copied source code."
+      "source_notice": "In-house design; Motion Prompt naming used as a reference only. No copied source code.",
+      "parameter_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "near_layer_ids": {
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+            }
+          },
+          "far_layer_ids": {
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+            }
+          },
+          "near_strength": {
+            "type": "number",
+            "minimum": 0.1,
+            "maximum": 1
+          },
+          "far_strength": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 0.5
+          },
+          "max_drift_px": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 180
+          }
+        },
+        "required": [
+          "near_layer_ids",
+          "far_layer_ids",
+          "near_strength",
+          "far_strength",
+          "max_drift_px"
+        ]
+      },
+      "default_params": {
+        "near_layer_ids": [
+          "layer_near"
+        ],
+        "far_layer_ids": [
+          "layer_far"
+        ],
+        "near_strength": 0.8,
+        "far_strength": 0.25,
+        "max_drift_px": 55
+      },
+      "render_recipe": {
+        "primitive": "layer_depth_separation",
+        "transform_space": "group_local",
+        "deterministic_by_frame": true,
+        "reads_external_state": false
+      },
+      "phase_recipe": [
+        {
+          "phase": "enter",
+          "start_fraction": 0,
+          "end_fraction": 0.12
+        },
+        {
+          "phase": "track",
+          "start_fraction": 0.12,
+          "end_fraction": 0.82
+        },
+        {
+          "phase": "hold",
+          "start_fraction": 0.82,
+          "end_fraction": 1
+        }
+      ],
+      "preview_fallback": "reduced_motion_fade_or_hold",
+      "geometry_requirement": "reviewed_separable_layers"
     },
     {
       "preset_id": "mask-transition",
@@ -447,7 +927,65 @@
         }
       },
       "reduced_motion": "fade_or_hold",
-      "source_notice": "In-house design; Motion Prompt naming used as a reference only. No copied source code."
+      "source_notice": "In-house design; Motion Prompt naming used as a reference only. No copied source code.",
+      "parameter_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "mask_shape": {
+            "type": "string",
+            "enum": [
+              "rect",
+              "circle",
+              "diagonal"
+            ]
+          },
+          "wipe_direction": {
+            "type": "string",
+            "enum": [
+              "left",
+              "right",
+              "up",
+              "down"
+            ]
+          },
+          "feather_px": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 60
+          }
+        },
+        "required": [
+          "mask_shape",
+          "wipe_direction",
+          "feather_px"
+        ]
+      },
+      "default_params": {
+        "mask_shape": "rect",
+        "wipe_direction": "right",
+        "feather_px": 6
+      },
+      "render_recipe": {
+        "primitive": "two_scene_mask_wipe",
+        "transform_space": "screen",
+        "deterministic_by_frame": true,
+        "reads_external_state": false
+      },
+      "phase_recipe": [
+        {
+          "phase": "enter",
+          "start_fraction": 0,
+          "end_fraction": 0.7
+        },
+        {
+          "phase": "hold",
+          "start_fraction": 0.7,
+          "end_fraction": 1
+        }
+      ],
+      "preview_fallback": "reduced_motion_fade_or_hold",
+      "geometry_requirement": "none"
     },
     {
       "preset_id": "camera-pan",
@@ -492,7 +1030,66 @@
         }
       },
       "reduced_motion": "fade_or_hold",
-      "source_notice": "In-house design; Motion Prompt naming used as a reference only. No copied source code."
+      "source_notice": "In-house design; Motion Prompt naming used as a reference only. No copied source code.",
+      "parameter_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "start_target_layer_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+          },
+          "end_target_layer_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+          },
+          "max_translate_px": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 350
+          },
+          "keep_context_visible": {
+            "const": true
+          }
+        },
+        "required": [
+          "start_target_layer_id",
+          "end_target_layer_id",
+          "max_translate_px",
+          "keep_context_visible"
+        ]
+      },
+      "default_params": {
+        "start_target_layer_id": "layer_a",
+        "end_target_layer_id": "layer_b",
+        "max_translate_px": 150,
+        "keep_context_visible": true
+      },
+      "render_recipe": {
+        "primitive": "camera_focus_tracking",
+        "transform_space": "screen",
+        "deterministic_by_frame": true,
+        "reads_external_state": false
+      },
+      "phase_recipe": [
+        {
+          "phase": "enter",
+          "start_fraction": 0,
+          "end_fraction": 0.12
+        },
+        {
+          "phase": "track",
+          "start_fraction": 0.12,
+          "end_fraction": 0.86
+        },
+        {
+          "phase": "hold",
+          "start_fraction": 0.86,
+          "end_fraction": 1
+        }
+      ],
+      "preview_fallback": "reduced_motion_fade_or_hold",
+      "geometry_requirement": "none"
     },
     {
       "preset_id": "camera-push",
@@ -537,7 +1134,69 @@
         }
       },
       "reduced_motion": "fade_or_hold",
-      "source_notice": "In-house design; Motion Prompt naming used as a reference only. No copied source code."
+      "source_notice": "In-house design; Motion Prompt naming used as a reference only. No copied source code.",
+      "parameter_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "focus_layer_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+          },
+          "from_scale": {
+            "type": "number",
+            "minimum": 0.85,
+            "maximum": 1.25
+          },
+          "to_scale": {
+            "type": "number",
+            "minimum": 0.85,
+            "maximum": 1.25
+          },
+          "max_drift_px": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 300
+          }
+        },
+        "required": [
+          "focus_layer_id",
+          "from_scale",
+          "to_scale",
+          "max_drift_px"
+        ]
+      },
+      "default_params": {
+        "focus_layer_id": "layer_a",
+        "from_scale": 1,
+        "to_scale": 1.08,
+        "max_drift_px": 60
+      },
+      "render_recipe": {
+        "primitive": "camera_focus_push",
+        "transform_space": "screen",
+        "deterministic_by_frame": true,
+        "reads_external_state": false
+      },
+      "phase_recipe": [
+        {
+          "phase": "enter",
+          "start_fraction": 0,
+          "end_fraction": 0.1
+        },
+        {
+          "phase": "track",
+          "start_fraction": 0.1,
+          "end_fraction": 0.85
+        },
+        {
+          "phase": "hold",
+          "start_fraction": 0.85,
+          "end_fraction": 1
+        }
+      ],
+      "preview_fallback": "reduced_motion_fade_or_hold",
+      "geometry_requirement": "none"
     },
     {
       "preset_id": "freeze-hold",
@@ -590,7 +1249,44 @@
         }
       },
       "reduced_motion": "fade_or_hold",
-      "source_notice": "In-house design; Motion Prompt naming used as a reference only. No copied source code."
+      "source_notice": "In-house design; Motion Prompt naming used as a reference only. No copied source code.",
+      "parameter_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "hold_frames": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 1000
+          },
+          "preserve_voice": {
+            "const": true
+          }
+        },
+        "required": [
+          "hold_frames",
+          "preserve_voice"
+        ]
+      },
+      "default_params": {
+        "hold_frames": 24,
+        "preserve_voice": true
+      },
+      "render_recipe": {
+        "primitive": "static_hold",
+        "transform_space": "layer_local",
+        "deterministic_by_frame": true,
+        "reads_external_state": false
+      },
+      "phase_recipe": [
+        {
+          "phase": "hold",
+          "start_fraction": 0,
+          "end_fraction": 1
+        }
+      ],
+      "preview_fallback": "reduced_motion_fade_or_hold",
+      "geometry_requirement": "none"
     },
     {
       "preset_id": "whip-pan",
@@ -643,7 +1339,67 @@
         }
       },
       "reduced_motion": "fade_or_hold",
-      "source_notice": "In-house design; Motion Prompt naming used as a reference only. No copied source code."
+      "source_notice": "In-house design; Motion Prompt naming used as a reference only. No copied source code.",
+      "parameter_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "direction": {
+            "type": "string",
+            "enum": [
+              "left",
+              "right"
+            ]
+          },
+          "sweep_px": {
+            "type": "number",
+            "minimum": 40,
+            "maximum": 480
+          },
+          "motion_blur_px": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 40
+          },
+          "max_use_per_minute": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 3
+          }
+        },
+        "required": [
+          "direction",
+          "sweep_px",
+          "motion_blur_px",
+          "max_use_per_minute"
+        ]
+      },
+      "default_params": {
+        "direction": "left",
+        "sweep_px": 150,
+        "motion_blur_px": 8,
+        "max_use_per_minute": 1
+      },
+      "render_recipe": {
+        "primitive": "short_transition_pan",
+        "transform_space": "screen",
+        "deterministic_by_frame": true,
+        "reads_external_state": false
+      },
+      "phase_recipe": [
+        {
+          "phase": "enter",
+          "start_fraction": 0,
+          "end_fraction": 0.7
+        },
+        {
+          "phase": "hold",
+          "start_fraction": 0.7,
+          "end_fraction": 1
+        }
+      ],
+      "preview_fallback": "reduced_motion_fade_or_hold",
+      "geometry_requirement": "none"
     },
     {
       "preset_id": "cross-dissolve",
@@ -696,7 +1452,58 @@
         }
       },
       "reduced_motion": "fade_or_hold",
-      "source_notice": "In-house design; Motion Prompt naming used as a reference only. No copied source code."
+      "source_notice": "In-house design; Motion Prompt naming used as a reference only. No copied source code.",
+      "parameter_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "out_layer_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+          },
+          "in_layer_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+          },
+          "mix_curve": {
+            "type": "string",
+            "enum": [
+              "linear",
+              "ease_in_out"
+            ]
+          }
+        },
+        "required": [
+          "out_layer_id",
+          "in_layer_id",
+          "mix_curve"
+        ]
+      },
+      "default_params": {
+        "out_layer_id": "layer_a",
+        "in_layer_id": "layer_b",
+        "mix_curve": "ease_in_out"
+      },
+      "render_recipe": {
+        "primitive": "dual_opacity_mix",
+        "transform_space": "screen",
+        "deterministic_by_frame": true,
+        "reads_external_state": false
+      },
+      "phase_recipe": [
+        {
+          "phase": "enter",
+          "start_fraction": 0,
+          "end_fraction": 0.7
+        },
+        {
+          "phase": "hold",
+          "start_fraction": 0.7,
+          "end_fraction": 1
+        }
+      ],
+      "preview_fallback": "reduced_motion_fade_or_hold",
+      "geometry_requirement": "none"
     },
     {
       "preset_id": "hard-cut",
@@ -749,24 +1556,50 @@
         }
       },
       "reduced_motion": "none",
-      "source_notice": "In-house design; Motion Prompt naming used as a reference only. No copied source code."
+      "source_notice": "In-house design; Motion Prompt naming used as a reference only. No copied source code.",
+      "parameter_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "cut_reason": {
+            "type": "string",
+            "enum": [
+              "semantic_change",
+              "editorial_emphasis",
+              "chronology_reset"
+            ]
+          }
+        },
+        "required": [
+          "cut_reason"
+        ]
+      },
+      "default_params": {
+        "cut_reason": "semantic_change"
+      },
+      "render_recipe": {
+        "primitive": "frame_cut",
+        "transform_space": "screen",
+        "deterministic_by_frame": true,
+        "reads_external_state": false
+      },
+      "phase_recipe": [
+        {
+          "phase": "enter",
+          "start_fraction": 0,
+          "end_fraction": 1
+        }
+      ],
+      "preview_fallback": "reduced_motion_fade_or_hold",
+      "geometry_requirement": "none"
     },
     {
       "preset_id": "text-highlight",
       "version": "1.0.0",
       "compatible_layer_kinds": [
-        "map",
-        "territory",
-        "route",
-        "portrait",
-        "archival_photo",
-        "document",
-        "headline",
-        "date",
         "text",
-        "callout",
-        "camera",
-        "decorative_paper"
+        "headline",
+        "date"
       ],
       "default_duration_frames": 13,
       "min_duration_frames": 1,
@@ -802,7 +1635,67 @@
         }
       },
       "reduced_motion": "fade_or_hold",
-      "source_notice": "In-house design; Motion Prompt naming used as a reference only. No copied source code."
+      "source_notice": "In-house design; Motion Prompt naming used as a reference only. No copied source code.",
+      "parameter_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "source_word_ids": {
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+            }
+          },
+          "highlight_color_token": {
+            "type": "string",
+            "enum": [
+              "gold",
+              "red",
+              "slate"
+            ]
+          },
+          "hold_after_frames": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 80
+          }
+        },
+        "required": [
+          "source_word_ids",
+          "highlight_color_token",
+          "hold_after_frames"
+        ]
+      },
+      "default_params": {
+        "source_word_ids": [
+          "word_001"
+        ],
+        "highlight_color_token": "gold",
+        "hold_after_frames": 15
+      },
+      "render_recipe": {
+        "primitive": "word_mask_highlight",
+        "transform_space": "layer_local",
+        "deterministic_by_frame": true,
+        "reads_external_state": false
+      },
+      "phase_recipe": [
+        {
+          "phase": "enter",
+          "start_fraction": 0,
+          "end_fraction": 0.7
+        },
+        {
+          "phase": "hold",
+          "start_fraction": 0.7,
+          "end_fraction": 1
+        }
+      ],
+      "preview_fallback": "reduced_motion_fade_or_hold",
+      "geometry_requirement": "none"
     },
     {
       "preset_id": "map-region-wipe",
@@ -845,7 +1738,73 @@
         }
       },
       "reduced_motion": "fade_or_hold",
-      "source_notice": "In-house design; Motion Prompt naming used as a reference only. No copied source code."
+      "source_notice": "In-house design; Motion Prompt naming used as a reference only. No copied source code.",
+      "parameter_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "historical_map_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+          },
+          "approved_feature_ids": {
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+            }
+          },
+          "wipe_direction": {
+            "type": "string",
+            "enum": [
+              "left",
+              "right",
+              "center_out"
+            ]
+          },
+          "era_year": {
+            "type": "integer",
+            "minimum": -10000,
+            "maximum": 3000
+          }
+        },
+        "required": [
+          "historical_map_id",
+          "approved_feature_ids",
+          "wipe_direction",
+          "era_year"
+        ]
+      },
+      "default_params": {
+        "historical_map_id": "map_001",
+        "approved_feature_ids": [
+          "feature_001"
+        ],
+        "wipe_direction": "center_out",
+        "era_year": 1914
+      },
+      "render_recipe": {
+        "primitive": "verified_geometry_mask",
+        "transform_space": "map_world",
+        "deterministic_by_frame": true,
+        "reads_external_state": false
+      },
+      "phase_recipe": [
+        {
+          "phase": "enter",
+          "start_fraction": 0,
+          "end_fraction": 0.7
+        },
+        {
+          "phase": "hold",
+          "start_fraction": 0.7,
+          "end_fraction": 1
+        }
+      ],
+      "preview_fallback": "reduced_motion_fade_or_hold",
+      "geometry_requirement": "approved_period_features"
     },
     {
       "preset_id": "photo-card-enter",
@@ -889,7 +1848,71 @@
         }
       },
       "reduced_motion": "fade_or_hold",
-      "source_notice": "In-house design; Motion Prompt naming used as a reference only. No copied source code."
+      "source_notice": "In-house design; Motion Prompt naming used as a reference only. No copied source code.",
+      "parameter_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "border_px": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 28
+          },
+          "shadow_px": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 70
+          },
+          "start_rotation_deg": {
+            "type": "number",
+            "minimum": -4,
+            "maximum": 4
+          },
+          "end_rotation_deg": {
+            "type": "number",
+            "minimum": -4,
+            "maximum": 4
+          },
+          "source_original_sha256": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          }
+        },
+        "required": [
+          "border_px",
+          "shadow_px",
+          "start_rotation_deg",
+          "end_rotation_deg",
+          "source_original_sha256"
+        ]
+      },
+      "default_params": {
+        "border_px": 9,
+        "shadow_px": 18,
+        "start_rotation_deg": -2,
+        "end_rotation_deg": 0,
+        "source_original_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "render_recipe": {
+        "primitive": "paper_card_transform",
+        "transform_space": "layer_local",
+        "deterministic_by_frame": true,
+        "reads_external_state": false
+      },
+      "phase_recipe": [
+        {
+          "phase": "enter",
+          "start_fraction": 0,
+          "end_fraction": 0.7
+        },
+        {
+          "phase": "hold",
+          "start_fraction": 0.7,
+          "end_fraction": 1
+        }
+      ],
+      "preview_fallback": "reduced_motion_fade_or_hold",
+      "geometry_requirement": "none"
     }
   ]
 }
