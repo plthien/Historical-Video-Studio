@@ -51,5 +51,5 @@ class ArtifactStore:
         except FileNotFoundError as exc:
             raise ContractViolation("ARTIFACT_MISSING", sha256, "Restore immutable original media bytes.") from exc
         if hashlib.sha256(data).hexdigest() != sha256:
-            raise ContractViolation("ARTIFACT_CORRUPT", sha256, "Original bytes changed; recover original file.") 
+            raise ContractViolation("ARTIFACT_CORRUPT", sha256, "Original bytes changed; recover original file.")
         return data
