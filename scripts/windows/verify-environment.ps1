@@ -31,6 +31,8 @@ try {
     Run-Checked "Visual contract" "py" @("-3.12", "scripts/validate_visual_design.py")
     Run-Checked "Generate Python/TypeScript types" "py" @("-3.12", "scripts/generate_contract_types.py")
     Run-Checked "Check Python/TypeScript types" "py" @("-3.12", "scripts/generate_contract_types.py", "--check")
+    Run-Checked "Story import local smoke" "py" @("-3.12", "-m", "backend.tools.smoke", "--case", "story-import", "--mode", "local")
+    Run-Checked "SQLite cold reopen smoke" "py" @("-3.12", "-m", "backend.tools.smoke", "--case", "reopen-project", "--mode", "local")
     Run-Checked "Foundation behavioral tests" "py" @("-3.12", "-m", "pytest", "-q", "tests/backend/test_foundation.py")
     foreach ($dir in @("frontend", "renderer")) {
         Run-Checked "$dir Node major" "npm.cmd" @("run", "verify:toolchain", "--prefix", $dir)
