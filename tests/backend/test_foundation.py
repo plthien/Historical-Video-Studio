@@ -194,3 +194,94 @@ def test_artifact_race_cannot_overwrite_sha_path(tmp_path, monkeypatch):
     with pytest.raises(ContractViolation, match="ARTIFACT_CORRUPT"):
         originals.put(data)
     assert originals.path(digest).read_bytes() == b"competing corrupt bytes"
+
+
+def test_gate_review_critical_claim_and_crop_invalidation(story, store):
+    from backend.app.projects.gates import GateService
+    from backend.app.projects.revisions import invalidate
+    project_id = story["project"]["project_id"]
+    store.create_project(project_id, "Review")
+    store.import_story(StoryCandidate.parse(story), 0)
+    gates = GateService(store)
+    sha = store.get_story(project_id).sha256
+    decision = {"decision": "APPROVED", "candidate_sha256": sha,
+                "dependency_fingerprint": sha, "expected_revision": 1}
+    with pytest.raises(ContractViolation, match="CLAIM_CRITICAL_UNRESOLVED"):
+        gates.decide(project_id, "G1", decision)
+    rev = 1
+    for claim in story["claims"]:
+        if claim["critical"]:
+            rev = gates.review_claim(project_id, claim["claim_id"], "REVIEWED",
+                                     "Human verification pending external evidence", rev)
+    decision["expected_revision"] = rev
+    result = gates.decide(project_id, "G1", decision)
+    assert result["state"] == "APPROVED"
+    # Approval increased project revision but must not hide the last imported StoryPackage.
+    assert store.get_story(project_id).sha256 == sha
+    states = {g["gate_id"]: g["state"] for g in gates.board(project_id)}
+    assert states["G1"] == "APPROVED"
+    changed = invalidate(gates, project_id, "scene_crop", result["project_revision"])
+    assert changed["stale_gates"] == ["G4", "G5"]
+    states = {g["gate_id"]: g["state"] for g in gates.board(project_id)}
+    assert states["G1"] == "APPROVED"
+    assert states["G4"] == "STALE"
+    with pytest.raises(ContractViolation, match="APPROVAL_REVISION_CONFLICT"):
+        gates.decide(project_id, "G1", decision)
+
+
+def test_queue_restart_preserves_provider_task_and_scoped_cancel(store):
+    from backend.app.jobs import JobQueue, recover_interrupted
+    store.create_project("proj_one", "One")
+    q = JobQueue(store)
+    first = q.submit("proj_one", "provider", "idem-operation-one", {"request": 1}, 0)
+    second = q.submit("proj_one", "provider", "idem-operation-two", {"request": 2}, 0)
+    assert q.submit("proj_one", "provider", "idem-operation-one", {"request": 1}, 0)["job_id"] == first["job_id"]
+    with pytest.raises(ContractViolation, match="IDEMPOTENCY_CONFLICT"):
+        q.submit("proj_one", "provider", "idem-operation-one", {"request": 3}, 0)
+    running = q.claim()
+    q.attach_provider_task(running["job_id"], running["lease_token"], "external-123")
+    canceled = q.cancel(second["job_id"])
+    assert canceled["state"] == "CANCELLED"
+    assert q.get(first["job_id"])["state"] == "RUNNING"
+    assert recover_interrupted(JobQueue(store))["resume_existing_provider_task"] == 1
+    resumed = q.claim()
+    assert resumed["job_id"] == first["job_id"]
+    assert resumed["provider_task_id"] == "external-123"
+    assert resumed["resume_only"] == 1
+    with pytest.raises(ContractViolation, match="PROVIDER_TASK_CONFLICT"):
+        q.attach_provider_task(resumed["job_id"], resumed["lease_token"], "new-task")
+    assert q.fail(resumed["job_id"], resumed["lease_token"], "HTTP_503", True)["error_code"] == "HTTP_503"
+    retried = q.retry(first["job_id"])
+    assert retried["retry_count"] == 1
+    assert retried["provider_task_id"] == "external-123"
+
+
+def test_api_gates_review_and_idempotent_mutation(story, tmp_path):
+    from fastapi.testclient import TestClient
+    from backend.app.api.server import create_app
+    client = TestClient(create_app(tmp_path / "api.sqlite", tmp_path / "artifacts"))
+    created = client.post("/api/v1/projects", json={
+        "title": "Real project", "language": "en", "style_id": "HistoryEditorialPaper.v1"
+    })
+    assert created.status_code == 201
+    project_id = created.json()["project_id"]
+    story["project"]["project_id"] = project_id
+    uri = f"/api/v1/projects/{project_id}"
+    request = client.post(uri + "/story/import?expected_revision=0",
+                          json=story, headers={"Idempotency-Key": "one-story-import"})
+    assert request.status_code == 200
+    assert client.post(uri + "/story/import?expected_revision=0",
+                       json=story, headers={"Idempotency-Key": "one-story-import"}).json() == request.json()
+    changed = copy.deepcopy(story)
+    changed["sections"][0]["narration"] = "An entirely different historical narrative for this section."
+    assert client.post(uri + "/story/import?expected_revision=0", json=changed,
+                       headers={"Idempotency-Key": "one-story-import"}).status_code == 409
+    gate = client.get(uri + "/gates").json()[0]
+    assert gate["state"] == "READY_FOR_REVIEW" if not any(x["critical"] for x in story["claims"]) else gate["state"] == "BLOCKED"
+    assert client.post(uri + "/gates/G1/decision", headers={"Idempotency-Key": "approve-story-1"},
+                       json={"decision": "APPROVED", "candidate_sha256": request.json()["candidate_sha256"],
+                             "dependency_fingerprint": request.json()["candidate_sha256"],
+                             "expected_revision": 1}).status_code == 422
+    future = client.post(uri + "/voice/generate", json={}, headers={"Idempotency-Key": "voice-request-1"})
+    assert future.status_code == 501
+    assert future.json()["code"] == "OPERATION_NOT_IMPLEMENTED"
