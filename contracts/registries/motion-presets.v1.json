@@ -1,0 +1,895 @@
+{
+  "registry_version": "1.0.0",
+  "design_status": "frozen_design_not_rendered",
+  "presets": [
+    {
+      "preset_id": "pop-in",
+      "version": "1.0.0",
+      "compatible_layer_kinds": [
+        "map",
+        "territory",
+        "route",
+        "portrait",
+        "archival_photo",
+        "document",
+        "headline",
+        "date",
+        "text",
+        "callout",
+        "camera",
+        "decorative_paper"
+      ],
+      "default_duration_frames": 12,
+      "min_duration_frames": 1,
+      "max_duration_frames": 60,
+      "allowed_easing": [
+        "linear",
+        "ease_in",
+        "ease_out",
+        "ease_in_out",
+        "cubic_soft",
+        "spring_subtle"
+      ],
+      "parameters": {
+        "opacity": {
+          "min": 0,
+          "max": 1
+        },
+        "scale": {
+          "min": 0.9,
+          "max": 1.2
+        },
+        "translate_x_px": {
+          "min": -300,
+          "max": 300
+        },
+        "translate_y_px": {
+          "min": -300,
+          "max": 300
+        },
+        "rotation_deg": {
+          "min": -4,
+          "max": 4
+        }
+      },
+      "reduced_motion": "fade_or_hold",
+      "source_notice": "In-house design; Motion Prompt naming used as a reference only. No copied source code."
+    },
+    {
+      "preset_id": "stagger-reveal",
+      "version": "1.0.0",
+      "compatible_layer_kinds": [
+        "map",
+        "territory",
+        "route",
+        "portrait",
+        "archival_photo",
+        "document",
+        "headline",
+        "date",
+        "text",
+        "callout",
+        "camera",
+        "decorative_paper"
+      ],
+      "default_duration_frames": 13,
+      "min_duration_frames": 1,
+      "max_duration_frames": 60,
+      "allowed_easing": [
+        "linear",
+        "ease_in",
+        "ease_out",
+        "ease_in_out",
+        "cubic_soft",
+        "spring_subtle"
+      ],
+      "parameters": {
+        "opacity": {
+          "min": 0,
+          "max": 1
+        },
+        "scale": {
+          "min": 0.9,
+          "max": 1.2
+        },
+        "translate_x_px": {
+          "min": -300,
+          "max": 300
+        },
+        "translate_y_px": {
+          "min": -300,
+          "max": 300
+        },
+        "rotation_deg": {
+          "min": -4,
+          "max": 4
+        }
+      },
+      "reduced_motion": "fade_or_hold",
+      "source_notice": "In-house design; Motion Prompt naming used as a reference only. No copied source code."
+    },
+    {
+      "preset_id": "route-line-draw",
+      "version": "1.0.0",
+      "compatible_layer_kinds": [
+        "route"
+      ],
+      "default_duration_frames": 14,
+      "min_duration_frames": 1,
+      "max_duration_frames": 60,
+      "allowed_easing": [
+        "linear",
+        "ease_in",
+        "ease_out",
+        "ease_in_out",
+        "cubic_soft",
+        "spring_subtle"
+      ],
+      "parameters": {
+        "opacity": {
+          "min": 0,
+          "max": 1
+        },
+        "scale": {
+          "min": 0.9,
+          "max": 1.2
+        },
+        "translate_x_px": {
+          "min": -300,
+          "max": 300
+        },
+        "translate_y_px": {
+          "min": -300,
+          "max": 300
+        },
+        "rotation_deg": {
+          "min": -4,
+          "max": 4
+        }
+      },
+      "reduced_motion": "fade_or_hold",
+      "source_notice": "In-house design; Motion Prompt naming used as a reference only. No copied source code."
+    },
+    {
+      "preset_id": "title-mask-reveal",
+      "version": "1.0.0",
+      "compatible_layer_kinds": [
+        "map",
+        "territory",
+        "route",
+        "portrait",
+        "archival_photo",
+        "document",
+        "headline",
+        "date",
+        "text",
+        "callout",
+        "camera",
+        "decorative_paper"
+      ],
+      "default_duration_frames": 15,
+      "min_duration_frames": 1,
+      "max_duration_frames": 60,
+      "allowed_easing": [
+        "linear",
+        "ease_in",
+        "ease_out",
+        "ease_in_out",
+        "cubic_soft",
+        "spring_subtle"
+      ],
+      "parameters": {
+        "opacity": {
+          "min": 0,
+          "max": 1
+        },
+        "scale": {
+          "min": 0.9,
+          "max": 1.2
+        },
+        "translate_x_px": {
+          "min": -300,
+          "max": 300
+        },
+        "translate_y_px": {
+          "min": -300,
+          "max": 300
+        },
+        "rotation_deg": {
+          "min": -4,
+          "max": 4
+        }
+      },
+      "reduced_motion": "fade_or_hold",
+      "source_notice": "In-house design; Motion Prompt naming used as a reference only. No copied source code."
+    },
+    {
+      "preset_id": "typewriter",
+      "version": "1.0.0",
+      "compatible_layer_kinds": [
+        "text",
+        "headline"
+      ],
+      "default_duration_frames": 16,
+      "min_duration_frames": 1,
+      "max_duration_frames": 60,
+      "allowed_easing": [
+        "linear",
+        "ease_in",
+        "ease_out",
+        "ease_in_out",
+        "cubic_soft",
+        "spring_subtle"
+      ],
+      "parameters": {
+        "opacity": {
+          "min": 0,
+          "max": 1
+        },
+        "scale": {
+          "min": 0.9,
+          "max": 1.2
+        },
+        "translate_x_px": {
+          "min": -300,
+          "max": 300
+        },
+        "translate_y_px": {
+          "min": -300,
+          "max": 300
+        },
+        "rotation_deg": {
+          "min": -4,
+          "max": 4
+        }
+      },
+      "reduced_motion": "fade_or_hold",
+      "source_notice": "In-house design; Motion Prompt naming used as a reference only. No copied source code."
+    },
+    {
+      "preset_id": "number-count",
+      "version": "1.0.0",
+      "compatible_layer_kinds": [
+        "date",
+        "text",
+        "headline"
+      ],
+      "default_duration_frames": 17,
+      "min_duration_frames": 1,
+      "max_duration_frames": 60,
+      "allowed_easing": [
+        "linear",
+        "ease_in",
+        "ease_out",
+        "ease_in_out",
+        "cubic_soft",
+        "spring_subtle"
+      ],
+      "parameters": {
+        "opacity": {
+          "min": 0,
+          "max": 1
+        },
+        "scale": {
+          "min": 0.9,
+          "max": 1.2
+        },
+        "translate_x_px": {
+          "min": -300,
+          "max": 300
+        },
+        "translate_y_px": {
+          "min": -300,
+          "max": 300
+        },
+        "rotation_deg": {
+          "min": -4,
+          "max": 4
+        }
+      },
+      "reduced_motion": "fade_or_hold",
+      "source_notice": "In-house design; Motion Prompt naming used as a reference only. No copied source code."
+    },
+    {
+      "preset_id": "kinetic-type",
+      "version": "1.0.0",
+      "compatible_layer_kinds": [
+        "map",
+        "territory",
+        "route",
+        "portrait",
+        "archival_photo",
+        "document",
+        "headline",
+        "date",
+        "text",
+        "callout",
+        "camera",
+        "decorative_paper"
+      ],
+      "default_duration_frames": 18,
+      "min_duration_frames": 1,
+      "max_duration_frames": 60,
+      "allowed_easing": [
+        "linear",
+        "ease_in",
+        "ease_out",
+        "ease_in_out",
+        "cubic_soft",
+        "spring_subtle"
+      ],
+      "parameters": {
+        "opacity": {
+          "min": 0,
+          "max": 1
+        },
+        "scale": {
+          "min": 0.9,
+          "max": 1.2
+        },
+        "translate_x_px": {
+          "min": -300,
+          "max": 300
+        },
+        "translate_y_px": {
+          "min": -300,
+          "max": 300
+        },
+        "rotation_deg": {
+          "min": -4,
+          "max": 4
+        }
+      },
+      "reduced_motion": "fade_or_hold",
+      "source_notice": "In-house design; Motion Prompt naming used as a reference only. No copied source code."
+    },
+    {
+      "preset_id": "parallax-layers",
+      "version": "1.0.0",
+      "compatible_layer_kinds": [
+        "map",
+        "territory",
+        "route",
+        "portrait",
+        "archival_photo",
+        "document",
+        "headline",
+        "date",
+        "text",
+        "callout",
+        "camera",
+        "decorative_paper"
+      ],
+      "default_duration_frames": 12,
+      "min_duration_frames": 1,
+      "max_duration_frames": 60,
+      "allowed_easing": [
+        "linear",
+        "ease_in",
+        "ease_out",
+        "ease_in_out",
+        "cubic_soft",
+        "spring_subtle"
+      ],
+      "parameters": {
+        "opacity": {
+          "min": 0,
+          "max": 1
+        },
+        "scale": {
+          "min": 0.9,
+          "max": 1.2
+        },
+        "translate_x_px": {
+          "min": -300,
+          "max": 300
+        },
+        "translate_y_px": {
+          "min": -300,
+          "max": 300
+        },
+        "rotation_deg": {
+          "min": -4,
+          "max": 4
+        }
+      },
+      "reduced_motion": "fade_or_hold",
+      "source_notice": "In-house design; Motion Prompt naming used as a reference only. No copied source code."
+    },
+    {
+      "preset_id": "mask-transition",
+      "version": "1.0.0",
+      "compatible_layer_kinds": [
+        "map",
+        "territory",
+        "route",
+        "portrait",
+        "archival_photo",
+        "document",
+        "headline",
+        "date",
+        "text",
+        "callout",
+        "camera",
+        "decorative_paper"
+      ],
+      "default_duration_frames": 13,
+      "min_duration_frames": 1,
+      "max_duration_frames": 60,
+      "allowed_easing": [
+        "linear",
+        "ease_in",
+        "ease_out",
+        "ease_in_out",
+        "cubic_soft",
+        "spring_subtle"
+      ],
+      "parameters": {
+        "opacity": {
+          "min": 0,
+          "max": 1
+        },
+        "scale": {
+          "min": 0.9,
+          "max": 1.2
+        },
+        "translate_x_px": {
+          "min": -300,
+          "max": 300
+        },
+        "translate_y_px": {
+          "min": -300,
+          "max": 300
+        },
+        "rotation_deg": {
+          "min": -4,
+          "max": 4
+        }
+      },
+      "reduced_motion": "fade_or_hold",
+      "source_notice": "In-house design; Motion Prompt naming used as a reference only. No copied source code."
+    },
+    {
+      "preset_id": "camera-pan",
+      "version": "1.0.0",
+      "compatible_layer_kinds": [
+        "camera",
+        "map",
+        "archival_photo",
+        "portrait"
+      ],
+      "default_duration_frames": 14,
+      "min_duration_frames": 1,
+      "max_duration_frames": 60,
+      "allowed_easing": [
+        "linear",
+        "ease_in",
+        "ease_out",
+        "ease_in_out",
+        "cubic_soft",
+        "spring_subtle"
+      ],
+      "parameters": {
+        "opacity": {
+          "min": 0,
+          "max": 1
+        },
+        "scale": {
+          "min": 0.9,
+          "max": 1.2
+        },
+        "translate_x_px": {
+          "min": -300,
+          "max": 300
+        },
+        "translate_y_px": {
+          "min": -300,
+          "max": 300
+        },
+        "rotation_deg": {
+          "min": -4,
+          "max": 4
+        }
+      },
+      "reduced_motion": "fade_or_hold",
+      "source_notice": "In-house design; Motion Prompt naming used as a reference only. No copied source code."
+    },
+    {
+      "preset_id": "camera-push",
+      "version": "1.0.0",
+      "compatible_layer_kinds": [
+        "camera",
+        "map",
+        "archival_photo",
+        "portrait"
+      ],
+      "default_duration_frames": 15,
+      "min_duration_frames": 1,
+      "max_duration_frames": 60,
+      "allowed_easing": [
+        "linear",
+        "ease_in",
+        "ease_out",
+        "ease_in_out",
+        "cubic_soft",
+        "spring_subtle"
+      ],
+      "parameters": {
+        "opacity": {
+          "min": 0,
+          "max": 1
+        },
+        "scale": {
+          "min": 0.9,
+          "max": 1.2
+        },
+        "translate_x_px": {
+          "min": -300,
+          "max": 300
+        },
+        "translate_y_px": {
+          "min": -300,
+          "max": 300
+        },
+        "rotation_deg": {
+          "min": -4,
+          "max": 4
+        }
+      },
+      "reduced_motion": "fade_or_hold",
+      "source_notice": "In-house design; Motion Prompt naming used as a reference only. No copied source code."
+    },
+    {
+      "preset_id": "freeze-hold",
+      "version": "1.0.0",
+      "compatible_layer_kinds": [
+        "map",
+        "territory",
+        "route",
+        "portrait",
+        "archival_photo",
+        "document",
+        "headline",
+        "date",
+        "text",
+        "callout",
+        "camera",
+        "decorative_paper"
+      ],
+      "default_duration_frames": 24,
+      "min_duration_frames": 1,
+      "max_duration_frames": 300,
+      "allowed_easing": [
+        "linear",
+        "ease_in",
+        "ease_out",
+        "ease_in_out",
+        "cubic_soft",
+        "spring_subtle"
+      ],
+      "parameters": {
+        "opacity": {
+          "min": 0,
+          "max": 1
+        },
+        "scale": {
+          "min": 0.9,
+          "max": 1.2
+        },
+        "translate_x_px": {
+          "min": -300,
+          "max": 300
+        },
+        "translate_y_px": {
+          "min": -300,
+          "max": 300
+        },
+        "rotation_deg": {
+          "min": -4,
+          "max": 4
+        }
+      },
+      "reduced_motion": "fade_or_hold",
+      "source_notice": "In-house design; Motion Prompt naming used as a reference only. No copied source code."
+    },
+    {
+      "preset_id": "whip-pan",
+      "version": "1.0.0",
+      "compatible_layer_kinds": [
+        "map",
+        "territory",
+        "route",
+        "portrait",
+        "archival_photo",
+        "document",
+        "headline",
+        "date",
+        "text",
+        "callout",
+        "camera",
+        "decorative_paper"
+      ],
+      "default_duration_frames": 17,
+      "min_duration_frames": 1,
+      "max_duration_frames": 60,
+      "allowed_easing": [
+        "linear",
+        "ease_in",
+        "ease_out",
+        "ease_in_out",
+        "cubic_soft",
+        "spring_subtle"
+      ],
+      "parameters": {
+        "opacity": {
+          "min": 0,
+          "max": 1
+        },
+        "scale": {
+          "min": 0.9,
+          "max": 1.2
+        },
+        "translate_x_px": {
+          "min": -300,
+          "max": 300
+        },
+        "translate_y_px": {
+          "min": -300,
+          "max": 300
+        },
+        "rotation_deg": {
+          "min": -4,
+          "max": 4
+        }
+      },
+      "reduced_motion": "fade_or_hold",
+      "source_notice": "In-house design; Motion Prompt naming used as a reference only. No copied source code."
+    },
+    {
+      "preset_id": "cross-dissolve",
+      "version": "1.0.0",
+      "compatible_layer_kinds": [
+        "map",
+        "territory",
+        "route",
+        "portrait",
+        "archival_photo",
+        "document",
+        "headline",
+        "date",
+        "text",
+        "callout",
+        "camera",
+        "decorative_paper"
+      ],
+      "default_duration_frames": 18,
+      "min_duration_frames": 1,
+      "max_duration_frames": 60,
+      "allowed_easing": [
+        "linear",
+        "ease_in",
+        "ease_out",
+        "ease_in_out",
+        "cubic_soft",
+        "spring_subtle"
+      ],
+      "parameters": {
+        "opacity": {
+          "min": 0,
+          "max": 1
+        },
+        "scale": {
+          "min": 0.9,
+          "max": 1.2
+        },
+        "translate_x_px": {
+          "min": -300,
+          "max": 300
+        },
+        "translate_y_px": {
+          "min": -300,
+          "max": 300
+        },
+        "rotation_deg": {
+          "min": -4,
+          "max": 4
+        }
+      },
+      "reduced_motion": "fade_or_hold",
+      "source_notice": "In-house design; Motion Prompt naming used as a reference only. No copied source code."
+    },
+    {
+      "preset_id": "hard-cut",
+      "version": "1.0.0",
+      "compatible_layer_kinds": [
+        "map",
+        "territory",
+        "route",
+        "portrait",
+        "archival_photo",
+        "document",
+        "headline",
+        "date",
+        "text",
+        "callout",
+        "camera",
+        "decorative_paper"
+      ],
+      "default_duration_frames": 1,
+      "min_duration_frames": 1,
+      "max_duration_frames": 60,
+      "allowed_easing": [
+        "linear",
+        "ease_in",
+        "ease_out",
+        "ease_in_out",
+        "cubic_soft",
+        "spring_subtle"
+      ],
+      "parameters": {
+        "opacity": {
+          "min": 0,
+          "max": 1
+        },
+        "scale": {
+          "min": 0.9,
+          "max": 1.2
+        },
+        "translate_x_px": {
+          "min": -300,
+          "max": 300
+        },
+        "translate_y_px": {
+          "min": -300,
+          "max": 300
+        },
+        "rotation_deg": {
+          "min": -4,
+          "max": 4
+        }
+      },
+      "reduced_motion": "none",
+      "source_notice": "In-house design; Motion Prompt naming used as a reference only. No copied source code."
+    },
+    {
+      "preset_id": "text-highlight",
+      "version": "1.0.0",
+      "compatible_layer_kinds": [
+        "map",
+        "territory",
+        "route",
+        "portrait",
+        "archival_photo",
+        "document",
+        "headline",
+        "date",
+        "text",
+        "callout",
+        "camera",
+        "decorative_paper"
+      ],
+      "default_duration_frames": 13,
+      "min_duration_frames": 1,
+      "max_duration_frames": 60,
+      "allowed_easing": [
+        "linear",
+        "ease_in",
+        "ease_out",
+        "ease_in_out",
+        "cubic_soft",
+        "spring_subtle"
+      ],
+      "parameters": {
+        "opacity": {
+          "min": 0,
+          "max": 1
+        },
+        "scale": {
+          "min": 0.9,
+          "max": 1.2
+        },
+        "translate_x_px": {
+          "min": -300,
+          "max": 300
+        },
+        "translate_y_px": {
+          "min": -300,
+          "max": 300
+        },
+        "rotation_deg": {
+          "min": -4,
+          "max": 4
+        }
+      },
+      "reduced_motion": "fade_or_hold",
+      "source_notice": "In-house design; Motion Prompt naming used as a reference only. No copied source code."
+    },
+    {
+      "preset_id": "map-region-wipe",
+      "version": "1.0.0",
+      "compatible_layer_kinds": [
+        "map",
+        "territory"
+      ],
+      "default_duration_frames": 14,
+      "min_duration_frames": 1,
+      "max_duration_frames": 60,
+      "allowed_easing": [
+        "linear",
+        "ease_in",
+        "ease_out",
+        "ease_in_out",
+        "cubic_soft",
+        "spring_subtle"
+      ],
+      "parameters": {
+        "opacity": {
+          "min": 0,
+          "max": 1
+        },
+        "scale": {
+          "min": 0.9,
+          "max": 1.2
+        },
+        "translate_x_px": {
+          "min": -300,
+          "max": 300
+        },
+        "translate_y_px": {
+          "min": -300,
+          "max": 300
+        },
+        "rotation_deg": {
+          "min": -4,
+          "max": 4
+        }
+      },
+      "reduced_motion": "fade_or_hold",
+      "source_notice": "In-house design; Motion Prompt naming used as a reference only. No copied source code."
+    },
+    {
+      "preset_id": "photo-card-enter",
+      "version": "1.0.0",
+      "compatible_layer_kinds": [
+        "portrait",
+        "archival_photo",
+        "document"
+      ],
+      "default_duration_frames": 15,
+      "min_duration_frames": 1,
+      "max_duration_frames": 60,
+      "allowed_easing": [
+        "linear",
+        "ease_in",
+        "ease_out",
+        "ease_in_out",
+        "cubic_soft",
+        "spring_subtle"
+      ],
+      "parameters": {
+        "opacity": {
+          "min": 0,
+          "max": 1
+        },
+        "scale": {
+          "min": 0.9,
+          "max": 1.2
+        },
+        "translate_x_px": {
+          "min": -300,
+          "max": 300
+        },
+        "translate_y_px": {
+          "min": -300,
+          "max": 300
+        },
+        "rotation_deg": {
+          "min": -4,
+          "max": 4
+        }
+      },
+      "reduced_motion": "fade_or_hold",
+      "source_notice": "In-house design; Motion Prompt naming used as a reference only. No copied source code."
+    }
+  ]
+}
