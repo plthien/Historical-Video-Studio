@@ -95,8 +95,8 @@ class ProjectStore:
         with self._connection() as db:
             if revision is None:
                 row = db.execute("SELECT s.sha256, s.story_json FROM story_candidates s "
-                                 "JOIN projects p ON p.project_id=s.project_id AND p.revision=s.revision "
-                                 "WHERE s.project_id=?", (project_id,)).fetchone()
+                                 "JOIN projects p ON p.project_id=s.project_id AND s.revision<=p.revision "
+                                 "WHERE s.project_id=? ORDER BY s.revision DESC LIMIT 1", (project_id,)).fetchone()
             else:
                 row = db.execute("SELECT sha256, story_json FROM story_candidates WHERE project_id=? AND revision=?",
                                  (project_id, revision)).fetchone()
