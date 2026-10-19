@@ -37,11 +37,11 @@ class FullFlowDesignTests(unittest.TestCase):
             keys.add(key)
         self.assertEqual(keys,{(f"T{i:02}",v) for i in range(1,11) for v in "ABC"})
 
-    def test_eighteen_motion_presets_valid_and_unique(self):
+    def test_nineteen_motion_presets_valid_and_unique(self):
         reg=json.loads((ROOT/"contracts"/"registries"/"motion-presets.v1.json").read_text(encoding="utf-8"))
         presets=reg["presets"]
         self.assertEqual(len(presets),19)
-        self.assertEqual(len({p["preset_id"] for p in presets}),18)
+        self.assertEqual(len({p["preset_id"] for p in presets}),19)
         for p in presets:
             self.assertLessEqual(p["min_duration_frames"],p["default_duration_frames"])
             self.assertLessEqual(p["default_duration_frames"],p["max_duration_frames"])
