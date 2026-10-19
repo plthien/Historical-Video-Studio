@@ -13,7 +13,7 @@ type Regenerate = APIRequestBodies["post__projects_project_id_voice_sections_sec
 type VerifiedFocal = Assert<Equals<Focal, [number, number]>>;
 type VerifiedTemplateTag = Assert<Equals<T01["template_id"], "T01">>;
 type VerifiedRevision = Assert<Equals<Regenerate["expected_revision"], number>>;
-type VerifiedProvider = Assert<Equals<Regenerate["provider_id"], "kokoro_local" | "elevenlabs_tts">;
+type VerifiedProvider = Assert<Equals<Regenerate["provider_id"], "kokoro_local" | "elevenlabs_tts">>;
 
 const good: Focal = [0.25, 0.75];
 // @ts-expect-error tuple has exactly two elements
