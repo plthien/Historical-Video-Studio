@@ -223,8 +223,33 @@ def validate_blueprint(story: dict, blueprint: dict) -> None:
                 or set(plan["claim_refs"]) != set(source["claim_refs"])
                 or set(plan["requirement_refs"]) != set(source["requirement_refs"])):
             _fail("BLUEPRINT_SOURCE_DRIFT", plan["setup_id"], "Do not silently alter G1 story references.")
-        if plan["editorial_direction"] != source["direction"]:
-            _fail("BLUEPRINT_DIRECTION_DRIFT", plan["setup_id"], "Authoring direction must be inherited from frozen G1.")
+        current = plan["editorial_direction"]
+        original = source["direction"]
+        rev = plan.get("direction_revision")
+        if rev is not None:
+            if rev["source_story_revision_sha256"] != blueprint["story_revision_sha256"]:
+                _fail("DIRECTION_SOURCE_STALE", plan["setup_id"], "Visual edit must cite current approved G1 story hash.")
+            changed = {key for key in original if current.get(key) != original[key]}
+            if rev["kind"] == "inherited":
+                if changed or rev["edited_paths"] or rev["operator_confirmed"]:
+                    _fail("BLUEPRINT_DIRECTION_DRIFT", plan["setup_id"], "Inherited direction cannot contain unrecorded edits.")
+            else:
+                allowed = {"visual_beats", "camera_intent", "composition_intent",
+                           "layout_variant_hint", "transition_intent", "reuse_setup_id"}
+                if (not rev["operator_confirmed"] or not rev["edit_reason"]
+                        or not changed or changed != set(rev["edited_paths"]) or not changed <= allowed):
+                    _fail("G4_EDIT_UNAUTHORIZED", plan["setup_id"], "Operator must confirm and itemize presentation-only changes.")
+                before = {b["beat_id"]: b for b in original["visual_beats"]}
+                after = {b["beat_id"]: b for b in current["visual_beats"]}
+                if set(before) != set(after):
+                    _fail("G1_SEMANTICS_PROTECTED", plan["setup_id"], "Visual draft cannot create/delete G1 factual beats.")
+                for beat_id, b in before.items():
+                    new = after[beat_id]
+                    for protected in ("beat_id", "section_ref", "cue", "source_claim_refs"):
+                        if b[protected] != new[protected]:
+                            _fail("G1_SEMANTICS_PROTECTED", beat_id, "Narration/claim/cue changes require G1 revision.")
+        elif current != original:
+            _fail("BLUEPRINT_DIRECTION_DRIFT", plan["setup_id"], "Changed editorial direction needs signed G4 draft provenance.")
         _verify_payload(plan, story, claims)
 
 
@@ -285,9 +310,16 @@ def validate_visual_timeline(blueprint: dict, timeline: dict, layouts: dict, mot
             if not role["min_count"] <= cnt[role["role"]] <= role["max_count"]:
                 _fail("LAYOUT_REQUIRED_ROLE_MISSING", loc, f"Role {role['role']} count outside valid range.")
         layers = {x["layer_id"]: x for x in scene["layers"]}
-        _unique(list(layers), "LAYER_DUPLICATE", loc)
+        _unique([x["layer_id"] for x in scene["layers"]], "LAYER_DUPLICATE", loc)
+        slot_index = {x["slot_id"]: x for x in layout["slots"]}
+        approved_slot_ids = {x["slot_id"] for x in plan["editorial_direction"]["asset_slots"]}
         group_ids = set(scene["staging"]["composition_graph"]["group_ids"])
         for l in scene["layers"]:
+            template_slot = slot_index.get(l["template_slot_id"])
+            if template_slot is None or template_slot["role"] != l["layer_kind"]:
+                _fail("TEMPLATE_LAYER_SLOT_DRIFT", l["layer_id"], "Render layer must bind a declared same-role template slot.")
+            if l["asset_id"] and l["source_asset_slot_id"] not in approved_slot_ids:
+                _fail("RENDER_SOURCE_SLOT_MISSING", l["layer_id"], "Asset layer must cite authored source slot and G3 binding.")
             if l["group_id"] is not None and l["group_id"] not in group_ids:
                 _fail("RENDER_GROUP_UNKNOWN", loc, "Layer group must exist.")
             if l["parent_layer_id"] is not None:
