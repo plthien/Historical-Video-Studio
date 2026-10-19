@@ -95,3 +95,17 @@ def test_artifact_mismatched_sha_leaves_no_metadata(store):
         store.put_artifact(b"original", "original", "0" * 64)
     with sqlite3.connect(store.database) as db:
         assert db.execute("SELECT COUNT(*) FROM artifacts").fetchone()[0] == 0
+
+
+def test_storage_partial_sqlite_revision_rollback(story, store):
+    project_id = story["project"]["project_id"]
+    store.create_project(project_id, "Fixture")
+    candidate = StoryCandidate.parse(story)
+    with sqlite3.connect(store.database) as db:
+        db.execute("CREATE TRIGGER reject_revision BEFORE UPDATE OF revision ON projects "
+                   "BEGIN SELECT RAISE(ABORT, 'simulated disk transaction failure'); END;")
+    with pytest.raises(sqlite3.IntegrityError):
+        store.import_story(candidate, 0)
+    assert store.revision(project_id) == 0
+    with sqlite3.connect(store.database) as db:
+        assert db.execute("SELECT COUNT(*) FROM story_candidates").fetchone()[0] == 0
