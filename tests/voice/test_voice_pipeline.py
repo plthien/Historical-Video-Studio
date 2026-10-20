@@ -721,28 +721,41 @@ def test_alignment_multiline_uses_frozen_section_manifest(tmp_path, first, secon
 
 
 def test_exact_job_background_chain_skips_other_queued_assemblies(tmp_path):
-    """R03/C14-C16: approval A assembles AND aligns A despite earlier unrelated B."""
-    from backend.tools.voice_final_smoke import setup, approval, mock_alignment
-    from backend.app.voice.workflow import FinalVoiceWorkflow
+    """R03/C14-C16: two real project G2 approvals, exact independent job lineage."""
+    from unittest.mock import patch
+    from backend.tools.voice_final_smoke import setup, approval, mock_alignment, wav_fixture
+    from backend.app.projects.models import StoryCandidate
     store,gates,voice,workflow,project,story=setup(tmp_path)
     other="proj_queued_other"
-    store.create_project(other,"Unrelated earlier queued assembly")
-    queued=workflow.queue.submit(other,"final_assembly","other-queued-before-a",
-                                 {"approval_id":"unrelated"},0)
+    other_story=copy.deepcopy(story)
+    other_story["project"]["project_id"]=other
+    store.create_project(other,"Earlier approved independent voice project")
+    store.import_story(StoryCandidate.parse(other_story),0)
+    g1=gates.board(other)[0]
+    gates.decide(other,"G1",{"decision":"APPROVED",
+        "candidate_sha256":g1["candidate_sha256"],
+        "dependency_fingerprint":g1["dependency_fingerprint"],
+        "expected_revision":store.revision(other)})
+    with patch.object(attempts,"_provider_identity",return_value={"model_id":"fixture_only"}):
+        for section,duration in zip(other_story["sections"],(2.5,3.5)):
+            voice.enqueue(other,section["section_id"],"kokoro_local","am_adam",1.0,
+                          "synthetic other project",store.revision(other),
+                          "other-project-"+section["section_id"]+"-tts")
+            assert voice.process_one(lambda req,ident,seconds=duration:wav_fixture(seconds))["state"]=="SUCCEEDED"
+    other_decision=approval(store,gates,other)
     decision=approval(store,gates,project)
-    response=workflow.process_pending(decision["job_id"],
-        provider=lambda wav,transcript:mock_alignment({
-            "sample_rate":24000,
-            "section_offsets":[{"section_id":"sec_001","start_sample":0,"end_sample":60000},
-                               {"section_id":"sec_002","start_sample":60000,"end_sample":144000}]},
-            transcript))
-    assert workflow.status(project)["final_audio"] is not None
+    workflow.process_pending(decision["job_id"],
+        provider=lambda wav,transcript:mock_alignment(workflow.status(project)["final_audio"],transcript))
     assert workflow.status(project)["g4_ready_dependency"] is True
-    assert workflow.queue.get(queued["job_id"])["state"]=="QUEUED"
+    assert workflow.queue.get(other_decision["job_id"])["state"]=="QUEUED"
     assert workflow.queue.get(decision["job_id"])["state"]=="SUCCEEDED"
+    assert workflow.status(other)["final_audio"] is None
+    workflow.process_pending(other_decision["job_id"],
+        provider=lambda wav,transcript:mock_alignment(workflow.status(other)["final_audio"],transcript))
+    assert workflow.status(other)["g4_ready_dependency"] is True
     with store._connection() as db:
-        count=db.execute("SELECT COUNT(*) FROM jobs WHERE project_id=? AND kind='final_alignment'",(project,)).fetchone()[0]
-    assert count==1
+        assert db.execute("SELECT COUNT(*) FROM jobs WHERE kind='final_alignment'").fetchone()[0]==2
+        assert db.execute("SELECT COUNT(*) FROM gate_events WHERE gate_id='G2'").fetchone()[0]==2
     workflow.process_pending(decision["job_id"],provider=lambda *_:pytest.fail("duplicate provider call"))
     with store._connection() as db:
-        assert db.execute("SELECT COUNT(*) FROM jobs WHERE project_id=? AND kind='final_alignment'",(project,)).fetchone()[0]==1
+        assert db.execute("SELECT COUNT(*) FROM jobs WHERE kind='final_alignment'").fetchone()[0]==2
