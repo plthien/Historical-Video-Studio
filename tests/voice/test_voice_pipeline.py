@@ -567,6 +567,10 @@ def test_alignment_api_status_and_media_bytes_on_real_store(tmp_path):
         assert incompatible.status_code==200
         assert incompatible.json()["word_map"] is None
         assert incompatible.json()["g4_ready_dependency"] is False
+        # These are two *independent* malformed-fixture scenarios for the same
+        # approval. Only one immutable map lineage per approval may exist.
+        with store._transaction() as db:
+            db.execute("DELETE FROM word_maps WHERE approval_id=?", (approved["approval_id"],))
         # A schema-valid map inserted without a successfully owned alignment job is
         # not provider evidence and must not unlock the G4 dependency.
         from backend.tools.voice_final_smoke import mock_alignment
