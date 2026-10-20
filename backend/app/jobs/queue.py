@@ -11,10 +11,6 @@ from backend.app.projects.storage import ProjectStore
 STATES = frozenset(("QUEUED", "RUNNING", "SUCCEEDED", "FAILED_RETRYABLE",
                     "FAILED_TERMINAL", "CANCELLED", "BLOCKED_REVIEW"))
 
-def job_cancel_pending(db, job_id):
-    row=db.execute("SELECT cancel_requested,kind FROM jobs WHERE job_id=?",(job_id,)).fetchone()
-    return bool(row and row[0] and row[1]=="glabs_image")
-
 
 class JobQueue:
     def __init__(self, store: ProjectStore):
@@ -190,10 +186,13 @@ class JobQueue:
         if not error_code:
             raise ContractViolation("JOB_ERROR_REQUIRED", job_id, "Persist an actionable error code.")
         with self.store._transaction() as db:
-            self._owned(db, job_id, lease_token)
-            state = ("BLOCKED_REVIEW" if job_cancel_pending(db, job_id) or error_code in
-                     ("CANCELLATION_NOT_CONFIRMED","JOB_CANCEL_PENDING","GLABS_UNCERTAIN_SUBMISSION")
-                     else "FAILED_RETRYABLE" if retryable else "FAILED_TERMINAL")
+            owned=self._owned(db, job_id, lease_token)
+            needs_reconciliation=(owned["kind"]=="glabs_image" and
+                                  (owned["cancel_requested"] or error_code in
+                                   ("CANCELLATION_NOT_CONFIRMED","JOB_CANCEL_PENDING",
+                                    "GLABS_UNCERTAIN_SUBMISSION")))
+            state=("BLOCKED_REVIEW" if needs_reconciliation else
+                   "FAILED_RETRYABLE" if retryable else "FAILED_TERMINAL")
             db.execute("UPDATE jobs SET state=?,error_code=?,lease_token=NULL WHERE job_id=?",
                        (state, error_code, job_id))
             return self._row(db, job_id)
