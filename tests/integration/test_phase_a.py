@@ -209,8 +209,9 @@ def test_phase_a_empty_asset_requirements_explicit_g3_and_restart(tmp_path):
     assert GateService(ProjectStore(store.database,store.artifacts.root)).board(pid)[2]["state"]=="APPROVED"
     with store._transaction() as db:
         db.execute("UPDATE story_candidates SET story_json=? WHERE project_id=?", (b'{}',pid))
-    with pytest.raises(ContractViolation,match="STORY_SHA_MISMATCH"):
-        GateService(store).board(pid)
+    with store._connection() as db:
+        with pytest.raises(ContractViolation,match="STORY_SHA_MISMATCH"):
+            AssetResolution.gate_candidate(db,pid,store)
 
 
 def test_phase_a_real_g1_g2_g3_reopen_independence(tmp_path):
