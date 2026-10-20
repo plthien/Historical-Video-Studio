@@ -60,7 +60,23 @@ test("asset-review: zero requirements still needs an explicit G3 decision",async
   story.project.project_id=project;
   story.asset_requirements=[];
   story.sections.forEach((s:{asset_requirement_refs:string[]})=>{s.asset_requirement_refs=[];});
-  story.visual_setups.forEach((s:{requirement_refs:string[]})=>{s.requirement_refs=[];});
+  story.visual_setups=story.visual_setups.slice(0,1);
+  const setup=story.visual_setups[0];
+  setup.requirement_refs=[];
+  setup.preferred_template="T08";
+  const direction=setup.direction;
+  direction.asset_slots=[];
+  direction.historical_map_requirement_id=null;
+  const textId=direction.on_screen_text[0].text_id;
+  direction.visual_beats.forEach((beat: {
+    focus_ref:string;relationships:unknown[];staging:unknown[];
+    continuity:{carry_refs:string[]};
+  })=>{
+    beat.focus_ref=textId;beat.relationships=[];
+    beat.staging=[{ref:textId,operation:"enter",after_ref:null,motion_hint:"none",priority:1}];
+    beat.continuity.carry_refs=[];
+  });
+  direction.reveal_plan.forEach((beat:{target_role:string})=>{beat.target_role="headline";});
   story.claims.forEach((c:{critical:boolean})=>{c.critical=false;});
   await page.getByLabel("StoryPackage JSON").fill(JSON.stringify(story));
   await page.getByRole("button",{name:"Import and validate story"}).click();
