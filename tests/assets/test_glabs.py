@@ -201,7 +201,10 @@ def test_generate_source_snapshot_blocks_presubmit_and_completion_staleness(tmp_
     changed_again["asset_requirements"][0]["subject"] += " changed again"
     store.import_story(StoryCandidate.parse(changed_again), store.revision(pid))
     service.provider.client = httpx.Client(transport=httpx.MockTransport(handler))
-    finished = service.poll(paid["job_id"], started["lease_token"])
+    recover_interrupted(service.queue)
+    reopened = GTaskService(ProjectStore(store.database,store.artifacts.root),
+                            JobQueue(store),service.provider)
+    finished = reopened.process_one(paid["job_id"])
     assert finished["state"] == "FAILED_TERMINAL"
     assert finished["error_code"] == "GLABS_SOURCE_STALE"
     assert finished["provider_task_id"] == "cafeaffe"
@@ -244,7 +247,13 @@ def test_poll_error_classifies_terminal_quota_vs_transient_http(tmp_path, http_f
         assert db.execute("SELECT last_error_code FROM glabs_task_observations "
                           "WHERE job_id=?", (job["job_id"],)).fetchone()[0] == expected
         assert db.execute("SELECT COUNT(*) FROM asset_candidates").fetchone()[0] == 0
-    if not http_failure:
+    if http_failure:
+        # Retrying transient HTTP polling reclaims the same known paid task, not POST.
+        resumed=svc.queue.retry(job["job_id"])
+        assert resumed["resume_only"]==1 and resumed["provider_task_id"]=="fedcba98"
+        again=svc.process_one(job["job_id"])
+        assert again["state"]=="FAILED_RETRYABLE" and again["error_code"]==expected
+    else:
         with pytest.raises(ContractViolation, match="JOB_RETRY_FORBIDDEN"):
             svc.queue.retry(job["job_id"])
     assert submits == ["/api/image/generate"]

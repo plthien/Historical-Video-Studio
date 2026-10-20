@@ -193,6 +193,12 @@ def test_original_requires_exact_requirement_and_rechecks_after_download(tmp_pat
     approved = candidates.original(project_id, req_a, candidate_id, transport(media))
     assert store.get_artifact(approved["original_sha256"]) == PNG
     assert not approved["user_approved"]
+    # Sharing bytes is legitimate only after another independently owned candidate exists.
+    with store._transaction() as db:
+        independently_scoped = candidates._save(db,project_id,req_b,source)
+    shared = candidates.original(project_id,req_b,independently_scoped,transport(media))
+    assert shared["original_sha256"] == approved["original_sha256"]
+    assert shared["candidate_id"] != approved["candidate_id"]
 
     # External download finishes after original source requirement was replaced.
     def race(request):
@@ -208,6 +214,6 @@ def test_original_requires_exact_requirement_and_rechecks_after_download(tmp_pat
     assert len(store.get_artifact(approved["original_sha256"])) == before
     with store._connection() as db:
         assert db.execute("SELECT COUNT(*) FROM asset_candidates WHERE project_id=?",
-                          (project_id,)).fetchone()[0] == 2
+                          (project_id,)).fetchone()[0] == 4
     assert AssetCandidates(ProjectStore(store.database, store.artifacts.root)).get(
         project_id, candidate_id)["original_sha256"] is None
