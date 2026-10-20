@@ -90,10 +90,12 @@ export function App() {
   }
   async function decide(gate: Gate, decision: GateDecision["decision"]) {
     if (!project || !gate.candidate_sha256 || !gate.dependency_fingerprint) return;
+    const candidateSha = gate.candidate_sha256;
+    const fingerprint = gate.dependency_fingerprint;
     await execute(`G1 ${decision.toLowerCase()}`, async () => {
       await api.decide(project.project_id, "G1", {
-        decision, candidate_sha256: gate.candidate_sha256,
-        dependency_fingerprint: gate.dependency_fingerprint,
+        decision, candidate_sha256: candidateSha,
+        dependency_fingerprint: fingerprint,
         expected_revision: project.project_revision, comment: decisionComment,
         affected_ids: []
       }, idKey());

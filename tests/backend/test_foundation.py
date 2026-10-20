@@ -286,7 +286,8 @@ def test_api_gates_review_and_idempotent_mutation(story, tmp_path):
     assert future.status_code == 501
     assert future.json()["code"] == "OPERATION_NOT_IMPLEMENTED"
 
-def test_gate_rejection_recovery_and_story_reapproval(story, store):
+@pytest.mark.parametrize("rejected_state", ["REJECTED", "CHANGES_REQUESTED"])
+def test_gate_rejection_recovery_and_story_reapproval(story, store, rejected_state):
     """R01/R02: real transactions recover only with a different reviewed story."""
     from backend.app.projects.gates import GateService
     project_id = story["project"]["project_id"]
@@ -304,8 +305,8 @@ def test_gate_rejection_recovery_and_story_reapproval(story, store):
         "decision": kind, "candidate_sha256": sha,
         "dependency_fingerprint": sha, "expected_revision": rev,
     }
-    rejected = gates.decide(project_id, "G1", decision(first.sha256, revision, "REJECTED"))
-    assert gates.board(project_id)[0]["state"] == "REJECTED"
+    rejected = gates.decide(project_id, "G1", decision(first.sha256, revision, rejected_state))
+    assert gates.board(project_id)[0]["state"] == rejected_state
     with pytest.raises(ContractViolation, match="GATE_ILLEGAL_TRANSITION"):
         gates.decide(project_id, "G1", decision(first.sha256, rejected["project_revision"]))
     second_story = copy.deepcopy(story)

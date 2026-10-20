@@ -163,7 +163,11 @@ class GateService:
             candidate[0] != last["candidate_sha256"] or
             candidate[1] != last["dependency_fingerprint"]))
         changed_head = bool(head and candidate and tuple(head) != tuple(candidate))
-        if stale or changed_head:
+        if last and last["decision"] in ("CHANGES_REQUESTED", "REJECTED") and not changed_since:
+            state = last["decision"]
+            if stale:
+                blockers.append(stale[0])
+        elif stale or changed_head:
             # Only a fresh reviewed candidate can exit stale status; the marker
             # itself is removed by the next successful approval, not publication.
             if candidate and changed_since and not missing:
