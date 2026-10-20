@@ -54,7 +54,8 @@ def word_map_ready(db, project: str) -> bool:
         return False
     row = db.execute("SELECT f.audio_sha256,f.transcript_sha256,w.audio_sha256 "
                      "FROM final_audio f LEFT JOIN word_maps w ON w.audio_sha256=f.audio_sha256 "
-                     "AND w.project_id=f.project_id WHERE f.project_id=? AND f.approval_id=?",
+                     "AND w.transcript_sha256=f.transcript_sha256 AND w.project_id=f.project_id "
+                     "WHERE f.project_id=? AND f.approval_id=?",
                      (project, head[0])).fetchone()
     return bool(row and row[2] == row[0])
 
@@ -75,7 +76,7 @@ class FinalVoiceWorkflow:
                     transcript_sha256 TEXT NOT NULL,
                     map_sha256 TEXT NOT NULL, map_json TEXT NOT NULL,
                     job_id TEXT UNIQUE NOT NULL,
-                    PRIMARY KEY(project_id,audio_sha256)
+                    PRIMARY KEY(project_id,audio_sha256,transcript_sha256)
                 );
             """)
 
@@ -202,8 +203,9 @@ class FinalVoiceWorkflow:
                 "ORDER BY rowid DESC LIMIT 1", (project, kind)).fetchone()
             assembly, alignment_job = latest("final_assembly"), latest("final_alignment")
             final = json.loads(final_row[0]) if final_row and current else None
-            row = (db.execute("SELECT map_json,map_sha256 FROM word_maps WHERE project_id=? AND audio_sha256=?",
-                              (project, final["audio_sha256"])).fetchone() if final else None)
+            row = (db.execute("SELECT map_json,map_sha256 FROM word_maps "
+                              "WHERE project_id=? AND audio_sha256=? AND transcript_sha256=?",
+                              (project, final["audio_sha256"], final["transcript_sha256"])).fetchone() if final else None)
             word = json.loads(row[0]) if row else None
         if final:
             self.store.get_artifact(final["audio_sha256"])
