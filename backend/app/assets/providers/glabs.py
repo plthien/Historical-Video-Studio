@@ -37,7 +37,13 @@ def validate_request(prompt,model,ratio,refs,upscale=(),mode=None,keep=1):
             raise ContractViolation("GLABS_INPUT_INVALID","keep/upscale","Invalid Pics keep or upscale.")
     elif len(refs)>10 or mode or any(x not in ("2K","4K") for x in upscale):
         raise ContractViolation("GLABS_INPUT_INVALID","references/upscale","Unsupported Flow image settings.")
+    if "4K" in upscale and os.getenv("HVS_GLABS_4K_ENTITLEMENT_CONFIRMED")!="1":
+        raise ContractViolation("GLABS_UPSCALE_ENTITLEMENT_UNVERIFIED","upscale",
+                                "Confirm 4K plan entitlement before provider submission.")
     for ref in refs:
+        if model=="nano_pics" and isinstance(ref,dict) and set(ref)!={"data"}:
+            raise ContractViolation("GLABS_REFERENCE_INVALID","references",
+                                    "Pics accepts positional images without Flow named tags.")
         data=ref if isinstance(ref,str) else ref.get("data") if isinstance(ref,dict) else None
         if not isinstance(data,str) or not data.startswith("data:image/") or ";base64," not in data:
             raise ContractViolation("GLABS_REFERENCE_INVALID","references","Use inline base64 images.")
@@ -45,7 +51,11 @@ def validate_request(prompt,model,ratio,refs,upscale=(),mode=None,keep=1):
             part=base64.b64decode(data.partition(";base64,")[2],validate=True)
         except (ValueError,base64.binascii.Error):
             raise ContractViolation("GLABS_REFERENCE_INVALID","references","Invalid base64 reference.")
-        inspect(part)
+        actual=inspect(part)
+        claimed=data[5:].partition(";base64,")[0]
+        if claimed!=actual["mime_type"]:
+            raise ContractViolation("GLABS_REFERENCE_INVALID","references",
+                                    "Reference MIME label differs from actual image bytes.")
     body={"prompt":prompt,"model":model,"aspect_ratio":ratio,"reference_images":refs}
     if model=="nano_pics":
         body.update(mode=mode,keep=keep)
