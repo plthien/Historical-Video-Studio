@@ -284,3 +284,60 @@ def test_tts_kokoro_local_worker_timeout_and_missing_assets(tmp_path, monkeypatc
     monkeypatch.setattr(kokoro.subprocess, "run", timeout)
     with pytest.raises(ContractViolation, match="PROVIDER_TIMEOUT"):
         kokoro.synthesize("Offline test sample.", "am_adam", 1.0, settings)
+
+
+def test_gate_state_first_voice_and_unapproved_candidate_invalidation(ctx):
+    """V01/V02/V04/V05/V06/V08/V11: selecting audio never creates a fake prior G2/G4/G5 approval."""
+    store, gates, voice, project, _ = ctx
+    assert {g["gate_id"]: g["state"] for g in gates.board(project)} == {
+        "G1": "APPROVED", "G2": "DRAFT", "G3": "DRAFT", "G4": "DRAFT", "G5": "DRAFT"}
+    queue_one(ctx)
+    assert voice.process_one(lambda req, settings: audio_fixture())["state"] == "SUCCEEDED"
+    board = {g["gate_id"]: g["state"] for g in gates.board(project)}
+    assert board["G1"] == "APPROVED" and board["G3"] == "DRAFT"
+    assert all(board[gate] == "DRAFT" for gate in ("G2", "G4", "G5"))
+    old = voice.list_attempts(project, "sec_001")["selected_attempt_id"]
+    artifact = store.put_artifact(b"unapproved G2 candidate", "voice_candidate")
+    gates.publish_candidate(project, "G2", artifact, "0" * 64, store.revision(project))
+    queue_one(ctx, section="sec_002", key="voice-gate-second-001")
+    assert voice.process_one(lambda req, settings: audio_fixture(2))["state"] == "SUCCEEDED"
+    assert gates.board(project)[1]["state"] != "READY_FOR_REVIEW"
+    assert gates.board(project)[1]["state"] != "STALE"
+    assert voice.list_attempts(project, "sec_001")["selected_attempt_id"] == old
+    assert {g["gate_id"]: g["state"] for g in gates.board(project)}["G4"] == "DRAFT"
+
+
+def test_history_read_independent_of_g1_and_story_sha(ctx):
+    """V13–V19: read only persists across G1 invalidation; restore and correction still fail closed."""
+    store, gates, voice, project, story = ctx
+    queue_one(ctx)
+    assert voice.process_one(lambda req, ident: audio_fixture())["state"] == "SUCCEEDED"
+    old = voice.list_attempts(project, "sec_001")["attempts"][0]
+    with sqlite3.connect(store.database) as db:
+        count = db.execute("SELECT COUNT(*) FROM voice_selection_events").fetchone()[0]
+    replacement = copy.deepcopy(story)
+    replacement["sections"][1]["narration"] += " Later evidence changes the overall story hash."
+    store.import_story(StoryCandidate.parse(replacement), store.revision(project))
+    assert gates.board(project)[0]["state"] != "APPROVED"
+    history = voice.list_attempts(project, "sec_001")
+    assert history["selected_attempt_id"] == old["attempt_id"]
+    assert len(history["attempts"]) == 1
+    assert history["attempts"][0]["compatible_source"] is False
+    assert history["attempts"][0]["story_sha256"] == old["story_sha256"]
+    assert history["attempts"][0]["text_sha256"] == old["text_sha256"]
+    with pytest.raises(ContractViolation, match="G1_APPROVAL_REQUIRED"):
+        voice.restore(project, "sec_001", old["attempt_id"], old["audio_sha256"],
+                      store.revision(project), "try stale restore")
+    with pytest.raises(ContractViolation, match="G1_APPROVAL_REQUIRED"):
+        voice.apply_correction(project, "sec_001", old["attempt_id"], "ffmpeg_tempo",
+                               150, store.revision(project))
+    with pytest.raises(ContractViolation, match="G1_APPROVAL_REQUIRED"):
+        queue_one(ctx, key="voice-invalid-g1-001")
+    assert not voice.list_attempts(project, "sec_002")["attempts"]
+    with pytest.raises(ContractViolation, match="VOICE_ATTEMPT_NOT_FOUND"):
+        voice.list_attempts("proj_no_such", "sec_001")
+    with sqlite3.connect(store.database) as db:
+        assert db.execute("SELECT COUNT(*) FROM voice_selection_events").fetchone()[0] == count
+    assert VoiceService(ProjectStore(store.database, store.artifacts.root),
+                        GateService(store), JobQueue(store)).list_attempts(project, "sec_001")["attempts"][0][
+                            "compatible_source"] is False
