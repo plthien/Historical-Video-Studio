@@ -442,10 +442,12 @@ def test_queued_unsubmitted_cancel_has_no_provider_side_effect(tmp_path):
 def test_actual_original_download_guard_blocks_europeana_third_party(tmp_path):
     """V01: do not relax trusted host restrictions to pass thumbnail tests."""
     from backend.app.assets.download import verify_url
-    wrong={"provider":"europeana",
-           "original_download_url":"https://images.unknown-archive.example/media/original.jpg"}
+    from backend.app.archives.europeana import Europeana
+    record={"id":"/abc/123","title":["Original third-party media"],
+            "edmIsShownBy":["https://images.unknown-archive.example/media/original.jpg"]}
+    candidate=Europeana(key="fixture-key")._norm(record,record,hydrated=True)
     with pytest.raises(ContractViolation,match="ORIGINAL_HOST_FORBIDDEN"):
-        verify_url(wrong)
+        verify_url(candidate)
     with pytest.raises(ContractViolation,match="ORIGINAL_NOT_VERIFIED"):
         verify_url({"provider":"europeana",
                     "original_download_url":"https://www.europeana.eu/thumb/preview.jpg"})
