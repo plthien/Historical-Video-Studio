@@ -114,6 +114,23 @@ class GTaskService:
             self._observe(job_id,"failed",exc.code)
             return self.queue.fail(job_id,token,exc.code,
                                    retryable=exc.code in ("GLABS_RATE_LIMITED","GLABS_NETWORK_ERROR"))
+    def run_until_terminal(self,job_id,*,poll_seconds=3,max_polls=180):
+        """Bounded 3–5 second provider polling; resume persisted task, never resubmit."""
+        import time
+        if max_polls<1 or max_polls>300 or (poll_seconds not in (3,4,5) and
+                not (poll_seconds==0 and getattr(self.provider,"offline_fixture",False))):
+            raise ContractViolation("GLABS_POLL_SETTINGS_INVALID",job_id,
+                                    "Use 3–5s polls and a bounded number of attempts.")
+        current=self.process_one(job_id)
+        for _ in range(max_polls):
+            if current is None or current["state"]!="RUNNING":
+                return current
+            if poll_seconds: time.sleep(poll_seconds)
+            current=self.poll(job_id,current["lease_token"])
+        if current is not None and current["state"]=="RUNNING":
+            return self.queue.fail(job_id,current["lease_token"],"GLABS_POLL_TIMEOUT",retryable=True)
+        return current
+
     def cancel(self,project,job_id):
         job=self.queue.get(job_id)
         if job["project_id"]!=project or job["kind"]!="glabs_image":
