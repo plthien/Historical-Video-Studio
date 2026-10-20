@@ -11,6 +11,10 @@ from backend.app.projects.storage import ProjectStore
 STATES = frozenset(("QUEUED", "RUNNING", "SUCCEEDED", "FAILED_RETRYABLE",
                     "FAILED_TERMINAL", "CANCELLED", "BLOCKED_REVIEW"))
 
+def job_cancel_pending(db, job_id):
+    row=db.execute("SELECT cancel_requested FROM jobs WHERE job_id=?",(job_id,)).fetchone()
+    return bool(row and row[0])
+
 
 class JobQueue:
     def __init__(self, store: ProjectStore):
@@ -115,12 +119,50 @@ class JobQueue:
     def cancel(self, job_id: str) -> dict:
         with self.store._transaction() as db:
             row = self._row(db, job_id)
-            if row["state"] == "QUEUED":
-                db.execute("UPDATE jobs SET state='CANCELLED',cancel_requested=1 WHERE job_id=?", (job_id,))
-            elif row["state"] == "RUNNING":
-                # Provider cancellation is not complete until the worker acknowledges it.
-                db.execute("UPDATE jobs SET cancel_requested=1 WHERE job_id=?", (job_id,))
+            if row["state"] in ("QUEUED","RUNNING","FAILED_RETRYABLE","BLOCKED_REVIEW"):
+                if row["state"] == "QUEUED" and not row["provider_task_id"] and not row["resume_only"]:
+                    db.execute("UPDATE jobs SET state='CANCELLED',cancel_requested=1 WHERE job_id=?", (job_id,))
+                else:
+                    # Remote-owned work is never locally cancelled before a verified stop.
+                    db.execute("UPDATE jobs SET cancel_requested=1 WHERE job_id=?", (job_id,))
             return self._row(db, job_id)
+
+    def confirm_remote_stop(self, job_id: str, task_id: str) -> dict:
+        """Stop receipt is task-specific. Never overwrite a worker's terminal result."""
+        with self.store._transaction() as db:
+            job=self._row(db,job_id)
+            if job["state"] in ("SUCCEEDED","CANCELLED","FAILED_TERMINAL"):
+                return job
+            if job["provider_task_id"]!=task_id or not job["cancel_requested"]:
+                raise ContractViolation("PROVIDER_CANCEL_UNCONFIRMED",job_id,"Task-specific stop is required.")
+            db.execute("UPDATE jobs SET state='CANCELLED',cancel_requested=1,"
+                       "lease_token=NULL,error_code='STOPPED_BY_CLIENT' WHERE job_id=?",
+                       (job_id,))
+            return self._row(db,job_id)
+
+    def cancellation_uncertain(self, job_id: str, error: str) -> dict:
+        with self.store._transaction() as db:
+            job=self._row(db,job_id)
+            if job["state"] in ("SUCCEEDED","CANCELLED","FAILED_TERMINAL"):
+                return job
+            db.execute("UPDATE jobs SET state='BLOCKED_REVIEW',cancel_requested=1,"
+                       "lease_token=NULL,error_code=? WHERE job_id=?",(error,job_id))
+            return self._row(db,job_id)
+
+    def reconcile_cancel(self, job_id: str) -> dict:
+        """A skipped stop is not cancellation; allow exact-ID provider reconciliation."""
+        with self.store._transaction() as db:
+            job=self._row(db,job_id)
+            if job["state"] in ("SUCCEEDED","CANCELLED","FAILED_TERMINAL"):
+                return job
+            if not job["provider_task_id"]:
+                raise ContractViolation("PROVIDER_TASK_INVALID",job_id,"Cannot reconcile without original remote task ID.")
+            if job["state"]=="RUNNING":
+                db.execute("UPDATE jobs SET cancel_requested=0 WHERE job_id=?",(job_id,))
+            else:
+                db.execute("UPDATE jobs SET state='QUEUED',resume_only=1,cancel_requested=0,"
+                           "lease_token=NULL,error_code=NULL WHERE job_id=?",(job_id,))
+            return self._row(db,job_id)
 
     def acknowledge_cancel(self, job_id: str, lease_token: str, *, provider_confirmed: bool = False) -> dict:
         with self.store._transaction() as db:
@@ -149,7 +191,8 @@ class JobQueue:
             raise ContractViolation("JOB_ERROR_REQUIRED", job_id, "Persist an actionable error code.")
         with self.store._transaction() as db:
             self._owned(db, job_id, lease_token)
-            state = ("BLOCKED_REVIEW" if error_code == "CANCELLATION_NOT_CONFIRMED"
+            state = ("BLOCKED_REVIEW" if job_cancel_pending(db, job_id) or error_code in
+                     ("CANCELLATION_NOT_CONFIRMED","JOB_CANCEL_PENDING","GLABS_UNCERTAIN_SUBMISSION")
                      else "FAILED_RETRYABLE" if retryable else "FAILED_TERMINAL")
             db.execute("UPDATE jobs SET state=?,error_code=?,lease_token=NULL WHERE job_id=?",
                        (state, error_code, job_id))
