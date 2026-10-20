@@ -99,3 +99,126 @@ def test_phase_a_complete_g3_requires_g1_and_all_exact_sources(tmp_path):
     assert result["state"]=="APPROVED"
     assert GateService(ProjectStore(store.database,store.artifacts.root)).board(pid)[2]["state"]=="APPROVED"
     assert gates.board(pid)[3]["state"]!="APPROVED"
+
+
+def test_phase_a_g3_stale_requires_new_review_even_for_same_original(tmp_path):
+    """F01: an A→B→A selection never silently revives historical G3."""
+    from backend.app.assets.provenance import AssetCandidates
+    from backend.tools.asset_smoke import PNG
+    story=json.loads((Path(__file__).resolve().parents[2]/
+        "contracts/examples/longform/StoryPackage.longform.synthetic.json").read_text())
+    rid=story["asset_requirements"][0]["requirement_id"]
+    story["asset_requirements"]=story["asset_requirements"][:1]
+    for section in story["sections"]:
+        section["asset_requirement_refs"]=[x for x in section["asset_requirement_refs"] if x==rid]
+    for setup in story["visual_setups"]:
+        setup["requirement_refs"]=[x for x in setup["requirement_refs"] if x==rid]
+    for claim in story["claims"]:claim["critical"]=False
+    store=ProjectStore(tmp_path/"state.sqlite",tmp_path/"media")
+    pid=story["project"]["project_id"]
+    store.create_project(pid,"G3 stale cycle")
+    store.import_story(StoryCandidate.parse(story),0)
+    gates=GateService(store)
+    g1=gates.board(pid)[0]
+    gates.decide(pid,"G1",{"decision":"APPROVED","candidate_sha256":g1["candidate_sha256"],
+        "dependency_fingerprint":g1["dependency_fingerprint"],"expected_revision":store.revision(pid)})
+    resolver=AssetResolution(store)
+    resolver.choose(pid,rid,"MANUAL_UPLOAD","Licensed original",store.revision(pid))
+    candidate=AssetCandidates(store).manual(pid,rid,PNG,"Reviewed image","Checked date","Licensed")
+    review={"requirement_id":rid,"candidate_id":candidate["candidate_id"],
+            "original_sha256":candidate["original_sha256"],"rights_status":"ELIGIBLE",
+            "rights_evidence_note":"Fixture license review","historical_context_note":"Fixture period check"}
+    resolver.approve_batch(pid,[review],store.revision(pid))
+    g3=gates.board(pid)[2]
+    gates.decide(pid,"G3",{"decision":"APPROVED","candidate_sha256":g3["candidate_sha256"],
+        "dependency_fingerprint":g3["dependency_fingerprint"],"expected_revision":store.revision(pid)})
+    old=gates.board(pid)[2]
+    assert old["state"]=="APPROVED"
+    resolver.choose(pid,rid,"MANAGED_FALLBACK","Changed selection",store.revision(pid))
+    resolver.choose(pid,rid,"MANUAL_UPLOAD","Licensed original",store.revision(pid))
+    assert gates.board(pid)[2]["state"]!="APPROVED"
+    resolver.approve_batch(pid,[review],store.revision(pid))
+    fresh=gates.board(pid)[2]
+    assert fresh["state"]=="READY_FOR_REVIEW",fresh
+    assert (fresh["candidate_sha256"],fresh["dependency_fingerprint"])!=(
+        old["candidate_sha256"],old["dependency_fingerprint"])
+    gates.decide(pid,"G3",{"decision":"APPROVED","candidate_sha256":fresh["candidate_sha256"],
+        "dependency_fingerprint":fresh["dependency_fingerprint"],"expected_revision":store.revision(pid)})
+    assert GateService(ProjectStore(store.database,store.artifacts.root)).board(pid)[2]["state"]=="APPROVED"
+    with store._connection() as db:
+        assert db.execute("SELECT COUNT(*) FROM gate_events WHERE gate_id='G3'").fetchone()[0]==2
+        assert db.execute("SELECT COUNT(*) FROM asset_approval_events").fetchone()[0]==2
+    assert store.get_artifact(candidate["original_sha256"])==PNG
+
+
+def test_phase_a_empty_asset_requirements_explicit_g3_and_restart(tmp_path):
+    """F06: valid zero-asset StoryPackage requires real operator G3 confirmation."""
+    story=json.loads((Path(__file__).resolve().parents[2]/
+        "contracts/examples/longform/StoryPackage.longform.synthetic.json").read_text())
+    story["asset_requirements"]=[]
+    for section in story["sections"]:section["asset_requirement_refs"]=[]
+    for setup in story["visual_setups"]:setup["requirement_refs"]=[]
+    for claim in story["claims"]:claim["critical"]=False
+    store=ProjectStore(tmp_path/"db.sqlite",tmp_path/"media")
+    pid=story["project"]["project_id"]
+    store.create_project(pid,"Zero media")
+    store.import_story(StoryCandidate.parse(story),0)
+    gates=GateService(store)
+    assert gates.board(pid)[2]["state"]=="BLOCKED"
+    g1=gates.board(pid)[0]
+    gates.decide(pid,"G1",{"decision":"APPROVED","candidate_sha256":g1["candidate_sha256"],
+        "dependency_fingerprint":g1["dependency_fingerprint"],"expected_revision":store.revision(pid)})
+    g3=gates.board(pid)[2]
+    assert g3["state"]=="READY_FOR_REVIEW"
+    with TestClient(create_app(store.database,store.artifacts.root)) as client:
+        assert client.get("/api/v1/projects/"+pid+"/assets/requirements").json()["requirements"]==[]
+        response=client.post("/api/v1/projects/"+pid+"/gates/G3/decision",
+            headers={"Idempotency-Key":"empty-assets-g3-approve-001"},json={
+            "decision":"APPROVED","candidate_sha256":g3["candidate_sha256"],
+            "dependency_fingerprint":g3["dependency_fingerprint"],
+            "expected_revision":store.revision(pid),
+            "comment":"Reviewed StoryPackage: no historical media required"})
+        assert response.status_code==200,response.text
+    assert GateService(ProjectStore(store.database,store.artifacts.root)).board(pid)[2]["state"]=="APPROVED"
+
+
+def test_phase_a_real_g1_g2_g3_reopen_independence(tmp_path):
+    """F04: controlled TTS+alignment and exact reviewed image survive the same SQLite restart."""
+    from backend.tools.voice_final_smoke import setup,approval,mock_alignment
+    from backend.app.voice.workflow import FinalVoiceWorkflow
+    from backend.app.jobs.queue import JobQueue
+    from backend.app.assets.provenance import AssetCandidates
+    from backend.tools.asset_smoke import PNG
+    store,gates,voice,workflow,pid,story=setup(tmp_path)
+    approved_g2=approval(store,gates,pid)
+    assert approved_g2["state"]=="APPROVED"
+    assert workflow.process_one()["state"]=="SUCCEEDED"
+    audio=workflow.status(pid)["final_audio"]
+    assert workflow.process_one(lambda raw,text:mock_alignment(audio,text))["state"]=="SUCCEEDED"
+    assert workflow.status(pid)["g4_ready_dependency"]
+    resolver=AssetResolution(store)
+    media=AssetCandidates(store)
+    reviews=[]
+    for requirement in story["asset_requirements"]:
+        rid=requirement["requirement_id"]
+        resolver.choose(pid,rid,"MANUAL_UPLOAD","Reviewed owned source",store.revision(pid))
+        asset=media.manual(pid,rid,PNG,"Local original","Period checked","Operator license review")
+        reviews.append({"requirement_id":rid,"candidate_id":asset["candidate_id"],
+          "original_sha256":asset["original_sha256"],"rights_status":"ELIGIBLE",
+          "rights_evidence_note":"Controlled fixture license","historical_context_note":"Controlled period"})
+    resolver.approve_batch(pid,reviews,store.revision(pid))
+    board=gates.board(pid)
+    assert board[1]["state"]=="APPROVED"
+    assert board[2]["state"]=="READY_FOR_REVIEW"
+    g3=board[2]
+    gates.decide(pid,"G3",{"decision":"APPROVED","candidate_sha256":g3["candidate_sha256"],
+        "dependency_fingerprint":g3["dependency_fingerprint"],"expected_revision":store.revision(pid)})
+    reopened=ProjectStore(store.database,store.artifacts.root)
+    board=GateService(reopened).board(pid)
+    assert [board[i]["state"] for i in (0,1,2)]==["APPROVED"]*3
+    from backend.app.voice.workflow import word_map_ready
+    with reopened._connection() as db:
+        assert word_map_ready(db,pid)
+    assert FinalVoiceWorkflow(reopened,GateService(reopened),JobQueue(reopened)).status(pid)["g4_ready_dependency"]
+    assert reopened.get_artifact(audio["audio_sha256"])
+    assert board[3]["state"]!="APPROVED"
