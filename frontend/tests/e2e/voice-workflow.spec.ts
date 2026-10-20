@@ -34,7 +34,7 @@ test("voice-workflow: two selected sections, one G2 approval and truthful alignm
   await expect(page.getByRole("button",{name:"Approve G2"})).toBeEnabled({timeout:30000});
   await page.getByRole("button",{name:"Approve G2"}).click();
   await expect(page.getByText(/Final WAV: \d+ samples/)).toBeVisible({timeout:60000});
-  await expect(page.locator(".voice-studio")).toContainText("PROVIDER_CREDENTIALS_MISSING"({timeout:60000});
+  await expect(page.locator(".voice-studio")).toContainText("PROVIDER_CREDENTIALS_MISSING",{timeout:60000});
   await expect(page.getByText(/G4 dependency: BLOCKED/)).toBeVisible();
   await expect(page.getByRole("button",{name:"Approve G2"})).toBeDisabled();
   await expect(page.getByRole("button",{name:/Assemble final WAV|^Align final WAV$/})).toHaveCount(0);
@@ -44,5 +44,5 @@ test("voice-workflow: two selected sections, one G2 approval and truthful alignm
   await page.getByRole("button",{name:"Open existing project"}).click();
   await page.getByRole("navigation").getByRole("button",{name:/Voice Studio/i}).click();
   await expect(page.getByRole("article",{name:"Voice section sec_001"}).getByText(/Selected am_adam/)).toBeVisible();
-  await expect(page.locator(".voice-studio")).toContainText("PROVIDER_CREDENTIALS_MISSING"();
+  await expect(page.locator(".voice-studio")).toContainText("PROVIDER_CREDENTIALS_MISSING");
 });
