@@ -10,6 +10,7 @@ _DOWNSTREAM = {
     "voice_audio": ("G2", "G4", "G5"),
     "asset_replace": ("G3", "G4", "G5"),
     "story_text": ("G1", "G2", "G4", "G5"),
+    "story_assets": ("G3", "G4", "G5"),
 }
 
 

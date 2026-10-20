@@ -26,6 +26,7 @@ export function App() {
   const [storyView, setStoryView] = useState<StoryView | null>(null);
   const [jobs, setJobs] = useState<JobInfo[]>([]);
   const [title, setTitle] = useState("Historical documentary");
+  const [existingId, setExistingId] = useState("");
   const [storyText, setStoryText] = useState("");
   const [notes, setNotes] = useState<Record<string, string>>({});
   const [urls, setUrls] = useState<Record<string, string>>({});
@@ -141,6 +142,15 @@ export function App() {
             <input id="new-title" value={title} onChange={e => setTitle(e.target.value)} disabled={!!pending}/>
             <button disabled={!!pending || title.trim().length < 4} onClick={() => void createProject()}>
               {pending === "Project creation" ? "Creating…" : "Create project"}</button>
+            <div className="panel">
+              <h3>Open an existing local project</h3>
+              <label htmlFor="existing-id">Project ID</label>
+              <input id="existing-id" value={existingId} onChange={e => setExistingId(e.target.value)}
+                placeholder="proj_..." disabled={!!pending}/>
+              <button disabled={!!pending || !existingId.trim()} onClick={() => void execute("Open project", async () => {
+                await refresh(existingId.trim());
+              })}>Open existing project</button>
+            </div>
             {project && <div className="panel">
               <h3>Import external ChatGPT StoryPackage JSON</h3>
               <p>Set <code>project.project_id</code> in your StoryPackage to <code>{project.project_id}</code>. The import is a draft, not G1 approval.</p>

@@ -415,3 +415,23 @@ def test_api_invalid_import_never_poisoned_replay_and_no_fake_gate(story, tmp_pa
                            json={"decision": "APPROVED", "candidate_sha256": "0" * 64,
                                  "dependency_fingerprint": "0" * 64, "expected_revision": 1},
                            headers={"Idempotency-Key": "same-gate-key-001"}).status_code in (409, 422)
+
+def test_story_asset_relevance_selectively_stales_g3(story, store):
+    """R02: changing narration does not stale G3; asset requirement changes do."""
+    from backend.app.projects.gates import GateService
+    project_id = story["project"]["project_id"]
+    store.create_project(project_id, "Selective invalidation")
+    store.import_story(StoryCandidate.parse(story), 0)
+    service = GateService(store)
+    narration = copy.deepcopy(story)
+    narration["sections"][0]["narration"] += " New historical context."
+    revision = store.import_story(StoryCandidate.parse(narration), 1)
+    assert service.board(project_id)[2]["state"] == "DRAFT"
+    changed = copy.deepcopy(narration)
+    changed["asset_requirements"][0]["subject"] += " revised asset scope"
+    store.import_story(StoryCandidate.parse(changed), revision)
+    states = {gate["gate_id"]: gate["state"] for gate in service.board(project_id)}
+    assert states["G3"] == "STALE"
+    assert states["G1"] == "STALE"
+    with sqlite3.connect(store.database) as db:
+        assert db.execute("SELECT COUNT(*) FROM story_candidates").fetchone()[0] == 3

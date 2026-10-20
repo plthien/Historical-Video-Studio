@@ -33,6 +33,11 @@ test("project-shell: six destinations, real import and G1 human review", async (
   await expect(page.getByRole("button", {name: "Approve G1"})).toBeEnabled();
   await page.getByRole("button", {name: "Approve G1"}).click();
   await expect(page.getByRole("status")).toContainText("G1 approved completed");
+  await page.reload();
+  await page.getByLabel("Project ID").fill(id);
+  await page.getByRole("button", {name: "Open existing project"}).click();
+  await expect(page.getByText("Revision:")).toBeVisible();
+  await expect(page.locator(".gateboard")).toContainText("APPROVED");
   await expect(page.getByRole("navigation").getByRole("button", {name: /Voice Studio/})).toBeVisible();
   await page.getByRole("navigation").getByRole("button", {name: /Voice Studio/}).click();
   await expect(page.getByText("Not available in A1")).toBeVisible();

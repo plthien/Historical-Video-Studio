@@ -85,7 +85,7 @@ class ProjectStore:
             if checked.sha256 != candidate.sha256 or checked.project_id != candidate.project_id:
                 raise ContractViolation("STORY_SHA_MISMATCH", candidate.project_id,
                                         "Re-validate the story candidate against original content.")
-            previous = db.execute("SELECT sha256 FROM story_candidates WHERE project_id=? "
+            previous = db.execute("SELECT sha256,story_json FROM story_candidates WHERE project_id=? "
                                   "ORDER BY revision DESC LIMIT 1", (candidate.project_id,)).fetchone()
             if previous and previous[0] == candidate.sha256:
                 return row[0]  # same canonical content: keep approval and current revision
@@ -95,6 +95,14 @@ class ProjectStore:
                 # Relevance-specific G3 invalidation remains owned by its asset binding logic.
                 from backend.app.projects.revisions import mark_stale
                 mark_stale(db, candidate.project_id, "story_text")
+                old_story, new_story = json.loads(previous[1]), checked.data()
+                # Only asset-relevant edits stale G3. Preserve independent approved source bytes.
+                def relevance(story):
+                    return (story["asset_requirements"],
+                            [(s["section_id"], s["asset_requirement_refs"]) for s in story["sections"]],
+                            [(s["setup_id"], s["requirement_refs"]) for s in story["visual_setups"]])
+                if relevance(old_story) != relevance(new_story):
+                    mark_stale(db, candidate.project_id, "story_assets")
             db.execute("INSERT INTO story_candidates (project_id, revision, sha256, story_json)"
                        " VALUES (?, ?, ?, ?)",
                        (candidate.project_id, new_revision, candidate.sha256, candidate.canonical_bytes))
