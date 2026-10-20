@@ -449,6 +449,11 @@ def test_gate_2_final_wav_assemble_alignment_and_cold_reopen(tmp_path):
     assert inspect_wav(store.get_artifact(final["audio_sha256"]))["sample_count"]==final["duration_samples"]
     assert store.get_artifact(first["audio_sha256"])==original
     assert current["g4_ready_dependency"] is False
+    # An owner draft alone cannot make G4 eligible before verified alignment.
+    draft=store.put_artifact(b"unapproved G4 candidate bytes","voice_candidate")
+    gates.publish_candidate(project,"G4",draft,"b"*64,store.revision(project))
+    assert gates.board(project)[3]["state"]=="BLOCKED"
+    assert "WORD_MAP_MISSING_OR_STALE" in gates.board(project)[3]["blockers"]
     failed=workflow.process_one(lambda *_:{"words":[]})
     assert failed["state"]=="FAILED_TERMINAL" and failed["error_code"]=="ALIGNMENT_TRANSCRIPT_MISMATCH"
     assert workflow.status(project)["word_map"] is None
@@ -462,6 +467,7 @@ def test_gate_2_final_wav_assemble_alignment_and_cold_reopen(tmp_path):
     assert done["state"]=="SUCCEEDED",done
     stable=workflow.status(project)
     assert stable["g4_ready_dependency"]
+    assert gates.board(project)[3]["state"]=="READY_FOR_REVIEW"
     words=stable["word_map"]["words"]
     assert len(words)==len("\n".join(s["narration"] for s in story["sections"]).split())
     assert all(words[i]["end_sample"]<=words[i+1]["start_sample"] for i in range(len(words)-1))
