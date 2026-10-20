@@ -71,8 +71,20 @@ def create_app(database: str | Path | None = None, media_root: str | Path | None
 
     @asynccontextmanager
     async def lifespan(application: FastAPI):
+        import asyncio
         application.state.recovery = recover_interrupted(queue)
-        yield
+        # Recover persisted A3 jobs on restart; never submit a second provider task
+        # when a durable task_id or uncertain first POST already exists.
+        with store._connection() as db:
+            queued = [row[0] for row in db.execute(
+                "SELECT job_id FROM jobs WHERE kind='glabs_image' AND state='QUEUED'")]
+        tasks = [asyncio.create_task(asyncio.to_thread(application.state.run_glabs_job,job_id))
+                 for job_id in queued if hasattr(application.state,"run_glabs_job")]
+        try:
+            yield
+        finally:
+            for task in tasks:
+                task.cancel()
 
     app = FastAPI(title="Historical Video Studio Local API", version="1.0.0", lifespan=lifespan)
     app.add_middleware(CORSMiddleware, allow_origins=["http://127.0.0.1:5173", "http://localhost:5173"],
