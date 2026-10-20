@@ -49,14 +49,30 @@ class AssetCandidates:
     def search(self,project,requirement,query,adapter,cursor=None,page_size=20):
         self._requirement(project,requirement)
         from backend.app.archives.interfaces import digest
-        result=adapter.search(query,cursor,page_size)
+        from backend.app.archives.interfaces import digest
+        inner=None
+        if cursor:
+            try:
+                token=json.loads(cursor)
+                if (token["project"]!=project or token["requirement"]!=requirement or
+                        token["provider"]!=adapter.provider or token["query_sha256"]!=digest(query)):
+                    raise ValueError("scope")
+                inner=token["inner"]
+            except (ValueError,TypeError,KeyError):
+                raise ContractViolation("ARCHIVE_CURSOR_MISMATCH",requirement,
+                                        "Cursor belongs to another project, requirement or query.")
+        result=adapter.search(query,inner,page_size)
+        continuation=(json.dumps({"project":project,"requirement":requirement,
+                      "provider":adapter.provider,"query_sha256":digest(query),
+                      "inner":result["next_cursor"]},separators=(",",":"),sort_keys=True)
+                      if result["next_cursor"] else None)
         with self.store._transaction() as db:
             ids=[self._save(db,project,requirement,x) for x in result["candidates"]]
             db.execute("INSERT INTO archive_discovery VALUES(?,?,?,?,?,?) ON CONFLICT"
                        "(project_id,requirement_id,provider,query_sha) DO UPDATE SET "
                        "next_cursor=excluded.next_cursor,candidate_ids_json=excluded.candidate_ids_json",
-                       (project,requirement,adapter.provider,digest(query),result["next_cursor"],json.dumps(ids)))
-        return {"candidate_ids":ids,"next_cursor":result["next_cursor"]}
+                       (project,requirement,adapter.provider,digest(query),continuation,json.dumps(ids)))
+        return {"candidate_ids":ids,"next_cursor":continuation}
     def get(self,project,candidate_id):
         self.store.revision(project)
         with self.store._connection() as db:
