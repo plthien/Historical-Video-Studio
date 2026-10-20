@@ -97,6 +97,13 @@ def test_generate_model_rules_http_errors_and_stop_scope(tmp_path):
     assert "/api/stop/abcddcba" in calls and "/api/stop" not in calls
     with pytest.raises(ContractViolation,match="GLABS_TASK_NOT_FOUND"):
         service.cancel("proj_other",job["job_id"])
-    with pytest.raises(ContractViolation,match="GLABS_AUTH_REQUIRED"):
+    with pytest.raises(ContractViolation,match="GLABS_AUTH_REQUIRED") as err:
         GLabs(httpx.Client(transport=httpx.MockTransport(lambda req:httpx.Response(401))),
               api_key="wrong").submit({"prompt":"x"})
+    assert "wrong" not in str(err.value)
+    with pytest.raises(ContractViolation,match="GLABS_STATUS_INVALID"):
+        GLabs(httpx.Client(transport=httpx.MockTransport(lambda req:httpx.Response(200,
+               json={"task_id":"abcddcba","status":"teleported"}))),
+              api_key="offline-secret").poll("abcddcba")
+    with pytest.raises(ContractViolation,match="GLABS_TASK_ID_INVALID"):
+        service.provider.stop("../../stop")

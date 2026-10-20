@@ -75,6 +75,9 @@ def test_search_paging_hydrate_three_archives_and_null_rights(tmp_path):
     service=AssetCandidates(store)
     ids=service.search(pid,req,"history",w)["candidate_ids"]
     assert len(ids)==1 and service.get(pid,ids[0])["user_approved"] is False
+    second_req=store.get_story(pid).data()["asset_requirements"][1]["requirement_id"]
+    with pytest.raises(ContractViolation,match="ARCHIVE_CURSOR_MISMATCH"):
+        service.search(pid,second_req,"history",w,cursor=service.search(pid,req,"history",w)["next_cursor"])
     assert AssetCandidates(ProjectStore(store.database,store.artifacts.root)).get(pid,ids[0])["creator"]=="Map Maker"
     assert len(seen)>=6
 
@@ -108,6 +111,12 @@ def test_download_rights_manual_provenance_and_original_bytes(tmp_path):
     assert store.get_artifact(one["original_sha256"])==PNG
     two=service.original(pid,req,cid,transport(handler))
     assert two["original_sha256"]==one["original_sha256"]
+    changed=service.original(pid,req,cid,
+             transport(lambda request:httpx.Response(200,content=_png(50),
+                                headers={"content-type":"image/png"})))
+    assert changed["original_sha256"]!=one["original_sha256"]
+    assert store.get_artifact(one["original_sha256"])==PNG
+    assert store.get_artifact(changed["original_sha256"])==_png(50)
     reread=AssetCandidates(ProjectStore(store.database,store.artifacts.root))
     assert reread.get(pid,one["candidate_id"])["original_sha256"]==one["original_sha256"]
     manual=service.manual(pid,req,PNG,"Unreviewed manual asset","Owner supplied","Rights unverified")
