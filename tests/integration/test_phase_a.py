@@ -1,5 +1,7 @@
 """A3-06 Phase A: real local SQLite/API gate and restart behavior, no live-provider claims."""
 import json
+import pytest
+from backend.app.contracts import ContractViolation
 from pathlib import Path
 from fastapi.testclient import TestClient
 from backend.app.api.server import create_app
@@ -188,6 +190,10 @@ def test_phase_a_empty_asset_requirements_explicit_g3_and_restart(tmp_path):
             "comment":"Reviewed StoryPackage: no historical media required"})
         assert response.status_code==200,response.text
     assert GateService(ProjectStore(store.database,store.artifacts.root)).board(pid)[2]["state"]=="APPROVED"
+    with store._transaction() as db:
+        db.execute("UPDATE story_candidates SET story_json=? WHERE project_id=?", (b'{}',pid))
+    with pytest.raises(ContractViolation,match="STORY_SHA_MISMATCH"):
+        GateService(store).board(pid)
 
 
 def test_phase_a_real_g1_g2_g3_reopen_independence(tmp_path):
