@@ -301,8 +301,13 @@ def test_gate_state_first_voice_and_unapproved_candidate_invalidation(ctx):
     gates.publish_candidate(project, "G2", artifact, "0" * 64, store.revision(project))
     queue_one(ctx, section="sec_002", key="voice-gate-second-001")
     assert voice.process_one(lambda req, settings: audio_fixture(2))["state"] == "SUCCEEDED"
-    assert gates.board(project)[1]["state"] != "READY_FOR_REVIEW"
-    assert gates.board(project)[1]["state"] != "STALE"
+    assert gates.board(project)[1]["state"] == "DRAFT"
+    with sqlite3.connect(store.database) as db:
+        assert db.execute("SELECT COUNT(*) FROM gate_candidates WHERE project_id=? AND gate_id='G2'",
+                          (project,)).fetchone()[0] == 0
+        assert db.execute("SELECT COUNT(*) FROM gate_staleness WHERE project_id=? AND gate_id IN ('G2','G4','G5')",
+                          (project,)).fetchone()[0] == 0
+    assert store.get_artifact(artifact) == b"unapproved G2 candidate"
     assert voice.list_attempts(project, "sec_001")["selected_attempt_id"] == old
     assert {g["gate_id"]: g["state"] for g in gates.board(project)}["G4"] == "DRAFT"
 
@@ -334,10 +339,45 @@ def test_history_read_independent_of_g1_and_story_sha(ctx):
     with pytest.raises(ContractViolation, match="G1_APPROVAL_REQUIRED"):
         queue_one(ctx, key="voice-invalid-g1-001")
     assert not voice.list_attempts(project, "sec_002")["attempts"]
-    with pytest.raises(ContractViolation, match="VOICE_ATTEMPT_NOT_FOUND"):
+    # Review and approve replacement: identical narration text does NOT revive old source SHA.
+    review_revision = gates.review_claim(project, replacement["claims"][0]["claim_id"],
+                                         "REVIEWED", "Human reviewed replacement", store.revision(project))
+    approved_board = gates.board(project)[0]
+    assert approved_board["state"] == "READY_FOR_REVIEW"
+    gates.decide(project, "G1", {"decision": "APPROVED",
+        "candidate_sha256": approved_board["candidate_sha256"],
+        "dependency_fingerprint": approved_board["dependency_fingerprint"],
+        "expected_revision": review_revision})
+    assert gates.board(project)[0]["state"] == "APPROVED"
+    assert voice.list_attempts(project, "sec_001")["attempts"][0]["compatible_source"] is False
+    with pytest.raises(ContractViolation, match="VOICE_SOURCE_STALE"):
+        voice.restore(project, "sec_001", old["attempt_id"], old["audio_sha256"],
+                      store.revision(project), "old story restore forbidden")
+    with pytest.raises(ContractViolation, match="PROJECT_NOT_FOUND"):
         voice.list_attempts("proj_no_such", "sec_001")
     with sqlite3.connect(store.database) as db:
         assert db.execute("SELECT COUNT(*) FROM voice_selection_events").fetchone()[0] == count
     assert VoiceService(ProjectStore(store.database, store.artifacts.root),
                         GateService(store), JobQueue(store)).list_attempts(project, "sec_001")["attempts"][0][
                             "compatible_source"] is False
+
+
+def test_previously_approved_head_only_is_genuinely_stale(ctx):
+    """V10/V12: simulated historical approved heads, not fabricated operator acceptance."""
+    store, gates, voice, project, _ = ctx
+    artifact = store.put_artifact(b"future stage candidate", "voice_candidate")
+    with store._transaction() as db:
+        for gate in ("G2", "G4", "G5"):
+            db.execute("INSERT INTO gate_heads VALUES(?,?,?,?,?)",
+                       (project, gate, artifact, "a" * 64, "synthetic_history_" + gate))
+    queue_one(ctx)
+    assert voice.process_one(lambda req, ident: audio_fixture())["state"] == "SUCCEEDED"
+    state = {gate["gate_id"]: gate["state"] for gate in gates.board(project)}
+    assert state == {"G1": "APPROVED", "G2": "STALE", "G3": "DRAFT",
+                     "G4": "STALE", "G5": "STALE"}
+    with sqlite3.connect(store.database) as db:
+        assert {r[0] for r in db.execute("SELECT gate_id FROM gate_staleness WHERE project_id=?",
+                                         (project,))} == {"G2", "G4", "G5"}
+    queue_one(ctx, key="voice-second-approved-head-0002")
+    assert voice.process_one(lambda req, ident: audio_fixture(2))["state"] == "SUCCEEDED"
+    assert gates.board(project)[1]["state"] == "STALE"  # never silently clear a real stale head

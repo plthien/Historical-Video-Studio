@@ -139,8 +139,15 @@ class VoiceService:
         db.execute("INSERT INTO voice_selection_events VALUES(?,?,?,?,?,?)",
                    ("selection_" + uuid4().hex, project_id, section_id, attempt_id, reason, revision))
 
+    @staticmethod
+    def _matches_source(row: dict, current: tuple[str, str, str] | None) -> bool:
+        # Single source identity predicate shared by historical visibility and
+        # strict restore/correction eligibility. Voice/settings are checked later.
+        return bool(current and row["story_sha256"] == current[0]
+                    and row["text_sha256"] == current[2])
+
     def list_attempts(self, project_id: str, section_id: str) -> dict:
-        _, text, text_sha = self._source(project_id, section_id)
+        self.store.revision(project_id)  # Must be an existing project, not a global artifact lookup.
         with self.store._connection() as db:
             db.row_factory = sqlite3.Row
             rows = [dict(r) for r in db.execute(
@@ -148,20 +155,29 @@ class VoiceService:
                 (project_id, section_id))]
             selected = db.execute("SELECT attempt_id FROM voice_selected WHERE project_id=? AND section_id=?",
                                   (project_id, section_id)).fetchone()
+        # A historical read never needs a current human approval.
+        story = self.store.get_story(project_id)
+        section = next((s for s in story.data()["sections"] if s["section_id"] == section_id), None)
+        if section is None and not rows:
+            raise ContractViolation("VOICE_SECTION_NOT_FOUND", section_id,
+                                    "Section does not exist in the current story or prior voice history.")
+        current = ((story.sha256, section["narration"], _hash(section["narration"]))
+                   if section is not None and self.gates.board(project_id)[0]["state"] == "APPROVED"
+                   else None)
         for row in rows:
             row["settings"] = json.loads(row.pop("settings_json"))
             row["correction"] = json.loads(row["correction_json"]) if row["correction_json"] else None
             row.pop("correction_json")
             row["selected"] = bool(selected and row["attempt_id"] == selected[0])
-            row["compatible_source"] = row["text_sha256"] == text_sha
+            row["compatible_source"] = self._matches_source(row, current)
         return {"section_id": section_id, "attempts": rows, "selected_attempt_id": selected[0] if selected else None}
 
     def _source_matches(self, project_id: str, section_id: str, row: dict) -> str:
-        current_story, text, text_sha = self._source(project_id, section_id)
-        if (row["story_sha256"] != current_story or row["text_sha256"] != text_sha):
+        current = self._source(project_id, section_id)  # Write guard: effective G1 is mandatory.
+        if not self._matches_source(row, current):
             raise ContractViolation("VOICE_SOURCE_STALE", section_id,
                                     "This attempt predates current G1 story/text; regenerate.")
-        return text
+        return current[1]
 
     def restore(self, project_id: str, section_id: str, attempt_id: str,
                 expected_audio_sha256: str, expected_revision: int, reason: str) -> dict:

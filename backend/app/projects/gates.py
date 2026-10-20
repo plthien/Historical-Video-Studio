@@ -210,6 +210,19 @@ class GateService:
                 state = "READY_FOR_REVIEW"
             return state, candidate, blockers, last
 
+        # Only a previously APPROVED head can become STALE. Drafts carrying
+        # historical false markers are blocked (if a candidate remains), never
+        # represented as a revoked approval.
+        if not head and stale:
+            if candidate:
+                blockers.append("CANDIDATE_DEPENDENCY_CHANGED")
+                return "BLOCKED", candidate, blockers, last
+            return "DRAFT", None, blockers, last
+        if not head and candidate and gate in ("G2", "G4", "G5") and (
+                self._status(db, project_id, "G1")[0] != "APPROVED"):
+            blockers.append("G1_APPROVAL_REQUIRED")
+            return "BLOCKED", candidate, blockers, last
+
         # Current G1 authorization, never just a historical gate_heads row, is
         # required before any dependent gate becomes effectively approved.
         if gate in ("G4", "G5") and head and self._status(db, project_id, "G1")[0] != "APPROVED":

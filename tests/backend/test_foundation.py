@@ -225,7 +225,7 @@ def test_gate_review_critical_claim_and_crop_invalidation(story, store):
     assert changed["stale_gates"] == ["G4", "G5"]
     states = {g["gate_id"]: g["state"] for g in gates.board(project_id)}
     assert states["G1"] == "APPROVED"
-    assert states["G4"] == "STALE"
+    assert states["G4"] == "DRAFT"
     with pytest.raises(ContractViolation, match="APPROVAL_REVISION_CONFLICT"):
         gates.decide(project_id, "G1", decision)
 
@@ -333,7 +333,7 @@ def test_gate_rejection_recovery_and_story_reapproval(story, store, rejected_sta
     third = StoryCandidate.parse(third_story)
     revision = store.import_story(third, approved["project_revision"])
     assert gates.board(project_id)[0]["state"] == "BLOCKED"
-    assert gates.board(project_id)[3]["state"] == "STALE"
+    assert gates.board(project_id)[3]["state"] == "DRAFT"
     for claim in third_story["claims"]:
         if claim["critical"]:
             revision = gates.review_claim(project_id, claim["claim_id"], "REVIEWED",
@@ -434,7 +434,7 @@ def test_story_asset_relevance_selectively_stales_g3(story, store):
     changed["asset_requirements"][0]["subject"] += " revised asset scope"
     store.import_story(StoryCandidate.parse(changed), revision)
     states = {gate["gate_id"]: gate["state"] for gate in service.board(project_id)}
-    assert states["G3"] == "STALE"
+    assert states["G3"] == "DRAFT"
     assert states["G1"] == "BLOCKED"
     with sqlite3.connect(store.database) as db:
         assert db.execute("SELECT COUNT(*) FROM story_candidates").fetchone()[0] == 3
@@ -529,7 +529,7 @@ def test_gate_review_dependency_generation_snapshots_and_reapproval(story, store
     edited = gates.board(project)[0]
     assert edited["state"] != "APPROVED" and edited["dependency_fingerprint"] != original_fp
     states = {row["gate_id"]: row["state"] for row in gates.board(project)}
-    assert states["G4"] == "STALE" and states["G2"] == "READY_FOR_REVIEW"
+    assert states["G4"] == "DRAFT" and states["G2"] == "BLOCKED"
     with pytest.raises(ContractViolation, match="GATE_ILLEGAL_TRANSITION"):
         gates.decide(project, "G2", {"decision": "CHANGES_REQUESTED",
             "candidate_sha256": audio, "dependency_fingerprint": original_fp,
@@ -598,7 +598,7 @@ def test_gate_effective_head_blocks_dependent_decisions_and_import_rollback(stor
         gates.decide(project, "G2", {"decision": "CHANGES_REQUESTED", "candidate_sha256": fake,
             "dependency_fingerprint": current["dependency_fingerprint"], "expected_revision": rev})
     assert GateService(ProjectStore(store.database, store.artifacts.root)).board(project)[0]["state"] == "BLOCKED"
-    assert gates.board(project)[1]["candidate_sha256"] == fake
+    assert gates.board(project)[1]["candidate_sha256"] is None
 
 
 def test_api_g1_saved_review_fingerprint_idempotency_and_cas(story, tmp_path):
