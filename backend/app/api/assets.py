@@ -3,7 +3,9 @@ from __future__ import annotations
 import base64
 import binascii
 import os
+import hashlib
 from fastapi import Header, BackgroundTasks
+from fastapi.responses import Response
 from pydantic import BaseModel, ConfigDict, Field
 from backend.app.contracts import ContractViolation
 from backend.app.assets.resolution import AssetResolution
@@ -55,6 +57,10 @@ class Search(Input):
 class Original(Input):
     expected_revision: int = Field(ge=0)
     requirement_id: str
+    candidate_id: str
+
+class Hydrate(Input):
+    expected_revision: int = Field(ge=0)
     candidate_id: str
 
 class Generation(Input):
@@ -186,6 +192,52 @@ def mount(app, store, gates, queue, idempotent):
                 raise ContractViolation("REVISION_CONFLICT",project_id,"Reload project.")
             return assets.original(project_id,body.requirement_id,body.candidate_id)
         return idempotent(project_id,"asset-original",key,body.model_dump(),action)
+
+    @app.post("/api/v1/projects/{project_id}/assets/{requirement_id}/hydrate")
+    def hydrate_record(project_id:str,requirement_id:str,body:Hydrate,
+                       key:str=Header(alias="Idempotency-Key")):
+        def action():
+            with store._connection() as db:
+                resolver._revision(db,project_id,body.expected_revision)
+                source=assets._source_tx(db,project_id,requirement_id)
+                chosen=assets._owned_tx(db,project_id,requirement_id,body.candidate_id)
+                assets._assert_source(source,{"project_id":project_id,
+                    "story_sha256":chosen.get("source_story_sha256"),
+                    "story_revision":chosen.get("source_story_revision"),
+                    "requirement_sha256":chosen.get("source_requirement_sha256")})
+                if chosen.get("provider")!="europeana" or chosen.get("hydrated"):
+                    raise ContractViolation("SOURCE_HYDRATION_REQUIRED",body.candidate_id,
+                                            "Select an unhydrated Europeana search candidate.")
+                item_id=chosen.get("item_id")
+            api_key,_=stored_provider_key("europeana")
+            return assets.hydrate(project_id,requirement_id,Europeana(key=api_key),item_id)
+        return idempotent(project_id,"asset-hydrate:"+requirement_id,key,body.model_dump(),action)
+
+    @app.get("/api/v1/projects/{project_id}/assets/{requirement_id}/candidates/{candidate_id}/original-preview")
+    def original_preview(project_id:str,requirement_id:str,candidate_id:str):
+        with store._connection() as db:
+            current=assets._source_tx(db,project_id,requirement_id)
+            chosen=assets._owned_tx(db,project_id,requirement_id,candidate_id)
+            assets._assert_source(current,{"project_id":project_id,
+                "story_sha256":chosen.get("source_story_sha256"),
+                "story_revision":chosen.get("source_story_revision"),
+                "requirement_sha256":chosen.get("source_requirement_sha256")})
+        sha=chosen.get("original_sha256")
+        if not sha:
+            raise ContractViolation("ORIGINAL_NOT_VERIFIED",candidate_id,
+                                    "Hydrate and download the exact original before reviewing.")
+        raw=store.get_artifact(sha)
+        if hashlib.sha256(raw).hexdigest()!=sha:
+            raise ContractViolation("ARTIFACT_SHA_MISMATCH",candidate_id,
+                                    "Stored original does not match its immutable SHA.")
+        from backend.app.assets.download import inspect
+        media=inspect(raw)["mime_type"]
+        if media not in ("image/png","image/jpeg","image/webp") or media!=chosen["mime_type"]:
+            raise ContractViolation("ORIGINAL_MIME_INVALID",candidate_id,
+                                    "Only a verified original image can be previewed.")
+        return Response(raw,media_type=media,headers={
+            "Cache-Control":"no-store","X-Content-Type-Options":"nosniff",
+            "Content-Security-Policy":"default-src 'none'"})
 
     @app.post("/api/v1/projects/{project_id}/assets/{requirement_id}/approve")
     def approve(project_id:str,requirement_id:str,body:Approval,
