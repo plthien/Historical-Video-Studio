@@ -12,8 +12,8 @@ STATES = frozenset(("QUEUED", "RUNNING", "SUCCEEDED", "FAILED_RETRYABLE",
                     "FAILED_TERMINAL", "CANCELLED", "BLOCKED_REVIEW"))
 
 def job_cancel_pending(db, job_id):
-    row=db.execute("SELECT cancel_requested FROM jobs WHERE job_id=?",(job_id,)).fetchone()
-    return bool(row and row[0])
+    row=db.execute("SELECT cancel_requested,kind FROM jobs WHERE job_id=?",(job_id,)).fetchone()
+    return bool(row and row[0] and row[1]=="glabs_image")
 
 
 class JobQueue:
