@@ -131,7 +131,10 @@ export function VoiceStudio({project,story,onRefresh}:{
       const selected=data?.attempts.find(a=>a.selected);
       const words=section.narration.trim().split(/\s+/).length;
       return <article key={section.section_id} className="panel" aria-label={"Voice section "+section.section_id}>
-        <h3>{section.section_id}</h3><p>{section.narration}</p>
+        <h3>{section.section_id}</h3>
+        {busy?.includes(section.section_id)&&
+          <p className="voice-section-pending" aria-live="polite">Processing {section.section_id}: {busy}</p>}
+        <p>{section.narration}</p>
         <p>{selected?"Selected "+selected.voice_id+" · "+selected.duration_seconds.toFixed(2)+"s · "+
           Math.round(words*60/selected.duration_seconds)+" WPM · "+selected.sample_rate+" Hz · "+
           (selected.compatible_source?"Current":"Historical incompatible"):"No selected audio"}</p>
