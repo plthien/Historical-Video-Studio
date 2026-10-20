@@ -230,3 +230,64 @@ def test_phase_a_real_g1_g2_g3_reopen_independence(tmp_path):
     assert FinalVoiceWorkflow(reopened,GateService(reopened),JobQueue(reopened)).status(pid)["g4_ready_dependency"]
     assert reopened.get_artifact(audio["audio_sha256"])
     assert board[3]["state"]!="APPROVED"
+
+
+def test_phase_a_europeana_record_hydrate_original_preview_and_stale(tmp_path,monkeypatch):
+    """F02/F03: archived search candidate -> record hydration -> original bytes -> local preview."""
+    from backend.app.assets.provenance import AssetCandidates
+    store=ProjectStore(tmp_path/"db.sqlite",tmp_path/"media")
+    story=json.loads((Path(__file__).resolve().parents[2]/
+        "contracts/examples/longform/StoryPackage.longform.synthetic.json").read_text())
+    pid=story["project"]["project_id"]
+    rid=story["asset_requirements"][0]["requirement_id"]
+    other=story["asset_requirements"][1]["requirement_id"]
+    store.create_project(pid,"Europeana fixture")
+    store.import_story(StoryCandidate.parse(story),0)
+    assets=AssetCandidates(store)
+    source_candidate={"provider":"europeana","item_id":"/abc/123",
+        "title":"Historical source","rights_status":"UNKNOWN",
+        "original_download_url":None,"hydrated":False}
+    with store._transaction() as db:
+        cid=assets._save(db,pid,rid,source_candidate)
+    hydrated={**source_candidate,"original_download_url":"https://example.org/original.png",
+              "hydrated":True,"rights_status":"REVIEW_REQUIRED"}
+    from backend.app.archives.europeana import Europeana
+    def fake_hydrate(self,item_id):
+        assert item_id=="/abc/123"
+        return hydrated
+    monkeypatch.setattr(Europeana,"hydrate",fake_hydrate)
+    def fake_download(meta,client=None):
+        assert meta["hydrated"] is True
+        return _png_fixture(),{"mime_type":"image/png"},"https://example.org/original.png"
+    monkeypatch.setattr("backend.app.assets.provenance.download",fake_download)
+    with TestClient(create_app(store.database,store.artifacts.root)) as http:
+        base="/api/v1/projects/"+pid
+        wrong=http.post(base+"/assets/"+other+"/hydrate",
+            headers={"Idempotency-Key":"europeana-wrong-req-001"},
+            json={"expected_revision":1,"candidate_id":cid})
+        assert wrong.status_code==422
+        response=http.post(base+"/assets/"+rid+"/hydrate",
+            headers={"Idempotency-Key":"europeana-hydrate-001"},
+            json={"expected_revision":1,"candidate_id":cid})
+        assert response.status_code==200,response.text
+        ready=response.json()
+        assert ready["hydrated"] is True and ready["original_sha256"] is None
+        response=http.post(base+"/assets/original",
+            headers={"Idempotency-Key":"europeana-original-001"},
+            json={"expected_revision":1,"requirement_id":rid,"candidate_id":ready["candidate_id"]})
+        assert response.status_code==200,response.text
+        verified=response.json()
+        assert verified["original_sha256"]
+        url=base+"/assets/"+rid+"/candidates/"+verified["candidate_id"]+"/original-preview"
+        preview=http.get(url)
+        assert preview.status_code==200,preview.text
+        assert preview.headers["content-type"]=="image/png"
+        assert preview.content==_png_fixture()
+        assert http.get(base+"/assets/"+other+"/candidates/"+verified["candidate_id"]+
+                        "/original-preview").status_code==422
+        assert http.get(base+"/assets/"+rid+"/candidates/"+cid+
+                        "/original-preview").status_code==422
+        changed=json.loads(json.dumps(story))
+        changed["sections"][0]["narration"]+=" Updated context."
+        store.import_story(StoryCandidate.parse(changed),store.revision(pid))
+        assert http.get(url).status_code==422
