@@ -82,6 +82,14 @@ def test_search_paging_hydrate_three_archives_and_null_rights(tmp_path):
     with pytest.raises(ContractViolation,match="ARCHIVE_CURSOR_MISMATCH"):
         service.search(pid,second_req,"history",w,cursor=service.search(pid,req,"history",w)["next_cursor"])
     assert AssetCandidates(ProjectStore(store.database,store.artifacts.root)).get(pid,ids[0])["creator"]=="Map Maker"
+    eu=service.search(pid,req,"history",e)["candidate_ids"][0]
+    with pytest.raises(ContractViolation,match="SOURCE_HYDRATION_REQUIRED"):
+        service.original(pid,req,eu,transport(lambda req:httpx.Response(200,content=PNG)))
+    ready=service.hydrate(pid,req,e,"/abc/123")
+    assert ready["hydrated"] is True and not ready["user_approved"]
+    original=service.original(pid,req,ready["candidate_id"],
+        transport(lambda req:httpx.Response(200,content=PNG,headers={"content-type":"image/png"})))
+    assert store.get_artifact(original["original_sha256"])==PNG
     assert len(seen)>=6
 
 def test_search_errors_hydrate_404_and_key_redacted():
