@@ -342,8 +342,13 @@ def test_provider_identity_is_pinned_before_first_paid_post(tmp_path):
     assert "offline-secret" not in service.queue.get(job["job_id"])["payload_json"]
     service.provider.key="rotated-credential"
     outcome=service.process_one(job["job_id"])
-    assert outcome["state"]=="FAILED_TERMINAL"
+    assert outcome["state"]=="FAILED_RETRYABLE"
     assert outcome["error_code"]=="GLABS_PROVIDER_IDENTITY_STALE"
     assert calls==[]
+    service.provider.key="offline-secret"
+    recovered=service.queue.retry(job["job_id"])
+    assert recovered["state"]=="QUEUED"
+    assert service.process_one(job["job_id"])["error_code"]=="GLABS_SERVER_ERROR"
+    assert calls==["/api/image/generate"]  # only after original identity restored
     with store._connection() as db:
         assert db.execute("SELECT COUNT(*) FROM asset_candidates").fetchone()[0]==0
