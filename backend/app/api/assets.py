@@ -3,7 +3,7 @@ from __future__ import annotations
 import base64
 import binascii
 import os
-from fastapi import Header
+from fastapi import Header, BackgroundTasks
 from pydantic import BaseModel, ConfigDict, Field
 from backend.app.contracts import ContractViolation
 from backend.app.assets.resolution import AssetResolution
@@ -189,11 +189,12 @@ def mount(app, store, gates, queue, idempotent):
             lambda:resolver.approve_batch(project_id,[x.model_dump() for x in body.reviews],body.expected_revision))
 
     @app.post("/api/v1/projects/{project_id}/assets/generate")
-    def generate(project_id:str,body:Generation,key:str=Header(alias="Idempotency-Key")):
+    def generate(project_id:str,body:Generation,background:BackgroundTasks,key:str=Header(alias="Idempotency-Key")):
         k,base=stored_provider_key("glabs_webhook")
         service=GTaskService(store,queue,GLabs(base_url=base or None,api_key=k))
         job=service.enqueue(project_id,body.requirement_id,body.model,body.prompt,
                             body.aspect_ratio,expected_revision=body.expected_revision,
                             idempotency_key=key)
-        # Don't perform paid generation inline with a request; persistent queue worker owns submission.
+        # Worker runs only after the durable queue transaction; restart preserves provider identity.
+        background.add_task(service.run_until_terminal,job["job_id"])
         return {"job_id":job["job_id"],"state":job["state"],"project_revision":store.revision(project_id)}
