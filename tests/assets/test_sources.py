@@ -81,6 +81,15 @@ def test_search_paging_hydrate_three_archives_and_null_rights(tmp_path):
     second_req=store.get_story(pid).data()["asset_requirements"][1]["requirement_id"]
     with pytest.raises(ContractViolation,match="ARCHIVE_CURSOR_MISMATCH"):
         service.search(pid,second_req,"history",w,cursor=service.search(pid,req,"history",w)["next_cursor"])
+    imported=store.get_story(pid).data()
+    imported["project"]["project_id"]="proj_other_a3"
+    store.create_project("proj_other_a3","Independent project")
+    store.import_story(StoryCandidate.parse(imported),0)
+    with pytest.raises(ContractViolation,match="ARCHIVE_CURSOR_MISMATCH"):
+        service.search("proj_other_a3",req,"history",w,
+            cursor=service.search(pid,req,"history",w)["next_cursor"])
+    with pytest.raises(ContractViolation,match="ASSET_CANDIDATE_NOT_FOUND"):
+        service.get("proj_other_a3",ids[0])
     assert AssetCandidates(ProjectStore(store.database,store.artifacts.root)).get(pid,ids[0])["creator"]=="Map Maker"
     eu=service.search(pid,req,"history",e)["candidate_ids"][0]
     with pytest.raises(ContractViolation,match="SOURCE_HYDRATION_REQUIRED"):
@@ -103,6 +112,16 @@ def test_search_errors_hydrate_404_and_key_redacted():
         LOC(transport(bad)).search("war","{}")
     with pytest.raises(ContractViolation,match="ARCHIVE_JSON_INVALID"):
         Wikimedia(transport(lambda req:httpx.Response(200,text="<html>"))).search("war")
+    count=[0]
+    def retry(request):
+        count[0]+=1
+        if count[0]<3: return httpx.Response(503)
+        return httpx.Response(200,json={"query":{"pages":[]}})
+    assert Wikimedia(transport(retry)).search("war")["candidates"]==[]
+    assert count[0]==3
+    def timeout(request): raise httpx.TimeoutException("offline simulated timeout")
+    with pytest.raises(ContractViolation,match="ARCHIVE_NETWORK_ERROR"):
+        LOC(transport(timeout)).search("war")
 
 def test_download_rights_manual_provenance_and_original_bytes(tmp_path):
     from backend.app.assets.download import inspect,download
@@ -146,3 +165,8 @@ def test_download_rights_manual_provenance_and_original_bytes(tmp_path):
         inspect(bytes(corrupt))
     with pytest.raises(ContractViolation,match="ORIGINAL_SIZE_INVALID"):
         inspect(b"x"*(20*1024*1024+1))
+    from backend.app.contracts import ContractViolation
+    path=store.artifacts.path(one["original_sha256"])
+    path.write_bytes(b"tampered media")
+    with pytest.raises(ContractViolation,match="ARTIFACT_CORRUPT"):
+        reread.store.get_artifact(one["original_sha256"])

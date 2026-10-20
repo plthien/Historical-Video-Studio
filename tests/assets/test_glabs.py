@@ -116,6 +116,11 @@ def test_generate_model_rules_http_errors_and_stop_scope(tmp_path):
               api_key="offline-secret").poll("abcddcba")
     with pytest.raises(ContractViolation,match="GLABS_TASK_ID_INVALID"):
         service.provider.stop("../../stop")
+    with pytest.raises(ContractViolation,match="GLABS_UPSCALE_ENTITLEMENT_UNVERIFIED"):
+        validate_request("x","nano_banana_2","16:9",[],upscale=["4K"])
+    with pytest.raises(ContractViolation,match="GLABS_REFERENCE_INVALID"):
+        validate_request("x","nano_pics","16:9",
+            [{"data":"data:image/jpeg;base64,"+base64.b64encode(PNG).decode()}],mode="image_to_image")
 
 
 def test_poll_error_499_marks_cancelled_and_never_creates_original(tmp_path):
