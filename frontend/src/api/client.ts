@@ -62,6 +62,14 @@ export const api = {
   cancelJob(id: string, key: string) {
     return request<JobInfo>(`/jobs/${safe(id)}/cancel`, "POST", undefined, key);
   },
+  cancelManaged(projectId:string, jobId:string,key:string) {
+    return request<JobInfo>(`/projects/${safe(projectId)}/jobs/${safe(jobId)}/cancel`,
+      "POST",undefined,key);
+  },
+  retryManaged(projectId:string, jobId:string,key:string) {
+    return request<JobInfo>(`/projects/${safe(projectId)}/jobs/${safe(jobId)}/retry`,
+      "POST",undefined,key);
+  },
   async importStory(id: string, story: unknown, revision: number, key: string) {
     return request<{project_revision: number; candidate_sha256: string}>(
       `/projects/${safe(id)}/story/import?expected_revision=${revision}`, "POST", story, key);
