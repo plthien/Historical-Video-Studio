@@ -54,8 +54,9 @@ test("asset-review: operator choice persists and never auto-approves G3",async({
     nodes.map(n=>(n as HTMLOptionElement).value));
   expect(options.length).toBeGreaterThan(1);
   await page.locator(".asset-studio input[type=checkbox]").first().check();
-  await page.getByText("Rights/license evidence (required)").locator("..").locator("textarea").first().fill("Reviewed rights");
-  await page.getByText("Period, geography, exactness evidence (required)").locator("..").locator("textarea").first().fill("Reviewed period");
+  const article=page.locator(".asset-studio article.claim").filter({hasText:"Original media fixture"});
+  await article.locator("textarea").nth(0).fill("Reviewed rights");
+  await article.locator("textarea").nth(1).fill("Reviewed period");
   await page.getByRole("button",{name:"Stage selected for batch"}).click();
   await expect(page.locator(".asset-studio")).toContainText("1 staged;");
   await requirementSelect.selectOption(options.find(value=>value!==original)!);
