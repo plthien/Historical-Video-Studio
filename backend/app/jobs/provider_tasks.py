@@ -195,8 +195,10 @@ class GTaskService:
         except ContractViolation as exc:
             if exc.code=="STOPPED_BY_CLIENT":
                 self.queue.cancel(job_id)
-                self._observe(job_id,"failed","STOPPED_BY_CLIENT")
-                return self.queue.confirm_remote_stop(job_id,job["provider_task_id"])
+                result=self.queue.confirm_remote_stop(job_id,job["provider_task_id"])
+                if result["state"]=="CANCELLED":
+                    self._observe(job_id,"failed","STOPPED_BY_CLIENT")
+                return result
             if exc.code=="GLABS_SOURCE_STALE":
                 # Provider completed successfully; only Studio publication is stale.
                 self._observe(job_id,"completed",exc.code)
@@ -254,8 +256,10 @@ class GTaskService:
             self._assert_job_provider(job,json.loads(job["payload_json"]))
             outcome=self.provider.stop(job["provider_task_id"])
             if outcome=="stopped":
-                self._observe(job_id,"failed","STOPPED_BY_CLIENT")
-                return self.queue.confirm_remote_stop(job_id,job["provider_task_id"])
+                result=self.queue.confirm_remote_stop(job_id,job["provider_task_id"])
+                if result["state"]=="CANCELLED":
+                    self._observe(job_id,"failed","STOPPED_BY_CLIENT")
+                return result
             # Skipped means already finished, not cancelled. Reconcile original task.
             self.queue.reconcile_cancel(job_id)
             fresh=self.queue.get(job_id)
