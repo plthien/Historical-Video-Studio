@@ -88,6 +88,13 @@ def test_tts_identity_transport_rejects_invalid_or_empty_audio(ctx, monkeypatch)
     assert failed["state"] == "FAILED_TERMINAL"
     assert failed["error_code"] == "PROVIDER_AUDIO_INVALID"
     assert service.list_attempts(project, "sec_001")["attempts"] == []
+    queue_one(ctx, key="voice-silent-attempt-0002")
+    silent = io.BytesIO()
+    with wave.open(silent, "wb") as handle:
+        handle.setnchannels(1); handle.setsampwidth(2); handle.setframerate(24000)
+        handle.writeframes(b"\x00\x00" * 24000)
+    failed = service.process_one(lambda request, identity: silent.getvalue())
+    assert failed["state"] == "FAILED_TERMINAL" and failed["error_code"] == "VOICE_AUDIO_SILENT"
     with sqlite3.connect(store.database) as db:
         assert db.execute("SELECT COUNT(*) FROM voice_attempts").fetchone()[0] == 0
 
@@ -142,6 +149,12 @@ def test_regenerate_attempt_selection_restore_exact_identity(ctx):
     reopened = VoiceService(ProjectStore(store.database, store.artifacts.root),
                             GateService(store), JobQueue(store))
     assert reopened.list_attempts(project, "sec_001")["selected_attempt_id"] == first["attempt_id"]
+    service.enqueue(project, "sec_001", "kokoro_local", "af_heart", 1.0,
+                    "different voice", store.revision(project), "voice-different-0004")
+    assert service.process_one(lambda req, ident: audio_fixture(3))["state"] == "SUCCEEDED"
+    with pytest.raises(ContractViolation, match="VOICE_ATTEMPT_IDENTITY_CONFLICT"):
+        service.restore(project, "sec_001", first["attempt_id"], first["audio_sha256"],
+                        store.revision(project), "wrong voice lineage")
 
 
 def test_correction_ffmpeg_real_samples_failure_keeps_selection(ctx, monkeypatch):

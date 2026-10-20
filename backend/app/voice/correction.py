@@ -23,6 +23,8 @@ def inspect_wav(data: bytes) -> dict:
                                 "Require nonempty 24 kHz mono 16-bit PCM WAV, at most one hour.")
     if len(frames) != count * channels * width:
         raise ContractViolation("VOICE_AUDIO_TRUNCATED", "audio", "WAV samples do not match the declared frame count.")
+    if not any(frames):
+        raise ContractViolation("VOICE_AUDIO_SILENT", "audio", "All decoded PCM samples are silent.")
     return {"sample_rate": rate, "channels": channels, "sample_count": count,
             "duration_seconds": count / rate, "sample_width": width}
 
