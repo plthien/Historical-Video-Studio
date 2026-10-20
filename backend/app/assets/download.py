@@ -1,6 +1,7 @@
 """A3-02 original-only download: bounded media, allowlisted HTTPS, no previews."""
 import os
 import struct
+import zlib
 from urllib.parse import urlparse
 from ipaddress import ip_address
 import httpx
@@ -40,6 +41,24 @@ def inspect(data):
         width,height=struct.unpack(">II",data[16:24])
         if data[12:16]!=b"IHDR" or not data.endswith(b"IEND\xaeB`\x82"):
             raise ContractViolation("ORIGINAL_MEDIA_INVALID","media","Invalid PNG.")
+        # Check complete chunk sequence and CRC, not just the PNG extension/magic.
+        offset=8
+        saw_data=False
+        while offset+12<=len(data):
+            n=struct.unpack(">I",data[offset:offset+4])[0]
+            end=offset+12+n
+            if end>len(data) or n>MAX_BYTES:
+                raise ContractViolation("ORIGINAL_MEDIA_INVALID","media","Truncated PNG chunk.")
+            kind=data[offset+4:offset+8]
+            body=data[offset+8:offset+8+n]
+            expected=struct.unpack(">I",data[offset+8+n:end])[0]
+            if zlib.crc32(kind+body)!=expected:
+                raise ContractViolation("ORIGINAL_MEDIA_INVALID","media","PNG checksum mismatch.")
+            if kind==b"IDAT": saw_data=True
+            offset=end
+            if kind==b"IEND": break
+        if not saw_data or offset!=len(data):
+            raise ContractViolation("ORIGINAL_MEDIA_INVALID","media","Incomplete PNG image data.")
         mime="image/png"
     elif data.startswith(b"\xff\xd8\xff") and data.endswith(b"\xff\xd9") and len(data)>32:
         width=height=None

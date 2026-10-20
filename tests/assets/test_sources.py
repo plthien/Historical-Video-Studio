@@ -13,7 +13,13 @@ from pathlib import Path
 import json
 
 ROOT=Path(__file__).resolve().parents[2]
-PNG=base64.b64decode("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+/1XcAAAAASUVORK5CYII=")
+def _png(red=0):
+    import struct,zlib
+    def chunk(name,body):
+        return struct.pack(">I",len(body))+name+body+struct.pack(">I",zlib.crc32(name+body))
+    return (b"\x89PNG\r\n\x1a\n"+chunk(b"IHDR",struct.pack(">IIBBBBB",1,1,8,2,0,0,0))+
+            chunk(b"IDAT",zlib.compress(bytes([0,red,10,30])))+chunk(b"IEND",b""))
+PNG=_png()
 
 def project(tmp_path):
     story=json.loads((ROOT/"contracts/examples/longform/StoryPackage.longform.synthetic.json").read_text())
@@ -114,5 +120,9 @@ def test_download_rights_manual_provenance_and_original_bytes(tmp_path):
         download(cand,transport(lambda req:httpx.Response(302,headers={"Location":"https://evil.org/x"})))
     with pytest.raises(ContractViolation,match="ORIGINAL_MEDIA_INVALID"):
         inspect(b"fake image")
+    corrupt=bytearray(PNG)
+    corrupt[45]^=1
+    with pytest.raises(ContractViolation,match="ORIGINAL_MEDIA_INVALID"):
+        inspect(bytes(corrupt))
     with pytest.raises(ContractViolation,match="ORIGINAL_SIZE_INVALID"):
         inspect(b"x"*(20*1024*1024+1))

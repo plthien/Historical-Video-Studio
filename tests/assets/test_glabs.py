@@ -13,7 +13,13 @@ from backend.app.projects.storage import ProjectStore
 from backend.app.projects.models import StoryCandidate
 
 ROOT=Path(__file__).resolve().parents[2]
-PNG=base64.b64decode("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+/1XcAAAAASUVORK5CYII=")
+def _png(red=0):
+    import struct,zlib
+    def chunk(name,body):
+        return struct.pack(">I",len(body))+name+body+struct.pack(">I",zlib.crc32(name+body))
+    return (b"\x89PNG\r\n\x1a\n"+chunk(b"IHDR",struct.pack(">IIBBBBB",1,1,8,2,0,0,0))+
+            chunk(b"IDAT",zlib.compress(bytes([0,red,10,30])))+chunk(b"IEND",b""))
+PNG=_png()
 
 def setup(tmp_path,handler):
     story=json.loads((ROOT/"contracts/examples/longform/StoryPackage.longform.synthetic.json").read_text())
