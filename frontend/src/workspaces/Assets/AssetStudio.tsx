@@ -22,10 +22,13 @@ export function AssetStudio({projectId,onRefresh}:{projectId:string;onRefresh:()
   const [reviewNotes,setReviewNotes]=useState<Record<string,{rights:string;history:string}>>({});
   const [checks,setChecks]=useState<Record<string,boolean>>({});
   const [staged,setStaged]=useState<AssetReview[]>([]);
+  const [preview,setPreview]=useState<Record<string,"loading"|"ok"|"error">>({});
+  const [previewAttempt,setPreviewAttempt]=useState<Record<string,number>>({});
   const [prompt,setPrompt]=useState("");
   const [gate,setGate]=useState<Gate|null>(null);
   const reload=useCallback(async(rid?:string)=>{
     const res=await assetApi.requirements(projectId);setRequirements(res.requirements);setRevision(res.project_revision);
+    setStaged([]);setChecks({});setReviewNotes({});setPreview({});
     const preferred=rid||selected;
     const active=res.requirements.some(r=>r.requirement_id===preferred)
       ? preferred : (res.requirements[0]?.requirement_id||"");
@@ -35,7 +38,8 @@ export function AssetStudio({projectId,onRefresh}:{projectId:string;onRefresh:()
     setGate((await api.gates(projectId)).find(x=>x.gate_id==="G3")||null);
     await onRefresh();
   },[projectId,selected,onRefresh]);
-  useEffect(()=>{void reload().catch(e=>setProblem(String(e)));},[projectId]);
+  useEffect(()=>{setStaged([]);setChecks({});setReviewNotes({});setPreview({});
+    setSelected("");setCandidates([]);void reload().catch(e=>setProblem(String(e)));},[projectId]);
   async function action(label:string,call:()=>Promise<unknown>){
     if(pending)return;setPending(label);setProblem("");setNotice("");
     try{await call();await reload();setNotice(label+" completed. Updated backend state loaded.");}
@@ -56,6 +60,7 @@ export function AssetStudio({projectId,onRefresh}:{projectId:string;onRefresh:()
     if(ids.length!==1)throw new Error("Select only one candidate per requirement.");
     const id=ids[0],c=candidates.find(x=>x.candidate_id===id);
     if(!c?.original_sha256||!c.current_source)throw new Error("Candidate needs verified original and current StoryPackage.");
+    if(preview[id]!=="ok")throw new Error("Inspect the verified original preview before staging approval.");
     const rights=reviewNotes[id]?.rights?.trim()||"",history=reviewNotes[id]?.history?.trim()||"";
     if(!rights||!history)throw new Error("Provide rights and historical suitability notes.");
     return {requirement_id:selected,candidate_id:id,original_sha256:c.original_sha256,rights_status:"ELIGIBLE",
@@ -92,7 +97,7 @@ export function AssetStudio({projectId,onRefresh}:{projectId:string;onRefresh:()
     <div className="panel">
       <label htmlFor="asset-requirement">Asset requirement</label>
       <select id="asset-requirement" value={selected} disabled={!!pending} onChange={e=>{
-        const rid=e.target.value;setSelected(rid);setChecks({});setCursor(null);
+        const rid=e.target.value;setSelected(rid);setStaged([]);setChecks({});setReviewNotes({});setPreview({});setCursor(null);
         void assetApi.candidates(projectId,rid).then(r=>setCandidates(r.candidates)).catch(e=>setProblem(String(e)));
       }}>
         {requirements.map(r=><option value={r.requirement_id} key={r.requirement_id}>{r.requirement_id} · {r.status} ({r.candidate_count})</option>)}
@@ -136,13 +141,20 @@ export function AssetStudio({projectId,onRefresh}:{projectId:string;onRefresh:()
       <h4>Candidate review</h4>
       {candidates.length===0?<p>No candidates yet.</p>:candidates.map(c=><article className="claim" key={c.candidate_id}>
         <strong>{c.title||c.candidate_id}</strong> · {c.provider} {c.asset_class||""}
-        <p>Original SHA: {c.original_sha256||"NOT DOWNLOADED"} · Rights: {c.rights_status||"UNKNOWN"} · {c.current_source?"Current":"STALE"} {c.approved?"· G3 reviewed":""}</p>
+        <p>Original SHA: {c.original_sha256||"NOT DOWNLOADED"} · Rights: {c.rights_status||"UNKNOWN"} · {c.current_source?"Current":"STALE"} {c.approved?"· G3 reviewed":"· Review needed"}</p>
+        <p>Creator: {c.creator||"not provided"} · Date: {c.creation_date||"not provided"} · Period: {c.historical_exactness||"not provided"} · Region: {c.place||"not provided"}</p>
+        <p>Rights statement: {c.rights_statement||"not provided"} · License: {c.rights_uri||"not provided"} · Historical context: {c.historical_context_note||"not provided"}</p>
         {c.source_page_url&&<p><a href={c.source_page_url} target="_blank" rel="noreferrer">Source metadata</a> (not original bytes)</p>}
         {c.original_sha256&&c.current_source&&
           <figure><img className="asset-original-preview"
-            src={assetApi.previewUrl(projectId,selected,c.candidate_id)}
+            src={assetApi.previewUrl(projectId,selected,c.candidate_id)+"?attempt="+(previewAttempt[c.candidate_id]||0)}
+            onLoad={()=>setPreview(old=>({...old,[c.candidate_id]:"ok"}))}
+            onError={()=>setPreview(old=>({...old,[c.candidate_id]:"error"}))}
             alt={"Verified original candidate "+c.candidate_id}/>
-          <figcaption>Stored original preview · exact SHA {c.original_sha256} · {c.mime_type||"image"}</figcaption></figure>}
+          <figcaption>Stored original preview · exact SHA {c.original_sha256} · {c.mime_type||"image"} · {preview[c.candidate_id]==="ok"?"Image loaded; review rights separately":preview[c.candidate_id]==="error"?"PREVIEW FAILED — not visually inspected":"Checking preview"}</figcaption>
+          {preview[c.candidate_id]==="error"&&<><p role="alert">Original image could not be loaded. Review disabled until a successful preview.</p>
+            <button onClick={()=>{setPreview(old=>({...old,[c.candidate_id]:"loading"}));setPreviewAttempt(old=>({...old,[c.candidate_id]:(old[c.candidate_id]||0)+1}));}}>Retry original preview</button></>}
+          </figure>}
         {c.provider==="europeana"&&!c.hydrated&&c.current_source&&
           <button disabled={!!pending} onClick={()=>void action("Hydrate Europeana record",
             ()=>assetApi.hydrate(projectId,revision,selected,c.candidate_id))}>
@@ -150,7 +162,7 @@ export function AssetStudio({projectId,onRefresh}:{projectId:string;onRefresh:()
           </button>}
         {!c.original_sha256&&c.provider!=="glabs_webhook"&&c.provider!=="manual_upload"&&(c.provider!=="europeana"||c.hydrated)&&
           <button disabled={!!pending||!c.current_source} onClick={()=>void action("Download original",()=>assetApi.original(projectId,revision,selected,c.candidate_id))}>Verify original bytes</button>}
-        <label><input type="checkbox" disabled={!c.original_sha256||!c.current_source||!!pending} checked={!!checks[c.candidate_id]}
+        <label><input type="checkbox" disabled={!c.original_sha256||!c.current_source||preview[c.candidate_id]!=="ok"||!!pending} checked={!!checks[c.candidate_id]}
           onChange={e=>setChecks(old=>({...old,[c.candidate_id]:e.target.checked}))}/> Select for independent rights review</label>
         {checks[c.candidate_id]&&<>
           <label>Rights/license evidence (required)</label><textarea value={reviewNotes[c.candidate_id]?.rights||""} onChange={e=>setReviewNotes(old=>({...old,[c.candidate_id]:{...old[c.candidate_id],rights:e.target.value,history:old[c.candidate_id]?.history||""}}))}/>
