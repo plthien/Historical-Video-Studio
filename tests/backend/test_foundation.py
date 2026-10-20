@@ -491,6 +491,10 @@ def test_gate_review_dependency_generation_snapshots_and_reapproval(story, store
     critical = next(c["claim_id"] for c in story["claims"] if c["critical"])
     base = ("REVIEWED", "Initial source analysis", "https://www.loc.gov/item/001")
     rev = gates.review_claim(project, critical, *base[:2], 1, base[2])
+    for claim in story["claims"]:
+        if claim["critical"] and claim["claim_id"] != critical:
+            rev = gates.review_claim(project, claim["claim_id"], "REVIEWED",
+                                     "Reviewed other critical claim", rev, base[2])
     first = gates.board(project)[0]
     assert first["state"] == "READY_FOR_REVIEW" and first["dependency_fingerprint"] != first["candidate_sha256"]
     def decision(board, expected, action="APPROVED"):
@@ -611,18 +615,29 @@ def test_api_g1_saved_review_fingerprint_idempotency_and_cas(story, tmp_path):
                         headers={"Idempotency-Key": key})
         response = submit_review(1, "First review", "review-current-0001")
         assert response.status_code == 200
+        rev = response.json()["project_revision"]
+        for other in story["claims"]:
+            if other["critical"] and other["claim_id"] != claim:
+                other_result = client.post(root + f"/story/claims/{other['claim_id']}/review",
+                    json={"expected_revision": rev, "status": "REVIEWED",
+                          "evidence_note": "Reviewed additional critical claim",
+                          "source_url": "https://www.loc.gov/"},
+                    headers={"Idempotency-Key": f"review-other-{other['claim_id']}-v1"})
+                assert other_result.status_code == 200
+                rev = other_result.json()["project_revision"]
         current = client.get(root + "/gates").json()[0]
         def decide(board, rev, key):
             return client.post(root + "/gates/G1/decision", json={
                 "decision": "APPROVED", "candidate_sha256": board["candidate_sha256"],
                 "dependency_fingerprint": board["dependency_fingerprint"], "expected_revision": rev},
                 headers={"Idempotency-Key": key})
-        approved = decide(current, 2, "decision-current-0001")
+        approved = decide(current, rev, "decision-current-0001")
         assert approved.status_code == 200
-        assert decide(current, 2, "decision-current-0001").json() == approved.json()
-        assert submit_review(3, "First review", "review-current-0002").json()["project_revision"] == 3
+        assert decide(current, rev, "decision-current-0001").json() == approved.json()
+        approved_rev = approved.json()["project_revision"]
+        assert submit_review(approved_rev, "First review", "review-current-0002").json()["project_revision"] == approved_rev
         assert client.get(root + "/gates").json()[0]["state"] == "APPROVED"
-        changed = submit_review(3, "Re-evaluated historical evidence", "review-current-0003")
+        changed = submit_review(approved_rev, "Re-evaluated historical evidence", "review-current-0003")
         assert changed.status_code == 200
         board = client.get(root + "/gates").json()[0]
         assert board["state"] == "READY_FOR_REVIEW"
