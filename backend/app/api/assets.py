@@ -120,6 +120,13 @@ def mount(app, store, gates, queue, idempotent):
         return GTaskService(store,queue,GLabs(base_url=base or None,api_key=secret)).cancel(project_id,job_id)
     app.state.cancel_glabs=cancel_glabs
 
+    def run_glabs_job(job_id):
+        secret,base=stored_provider_key("glabs_webhook")
+        if not secret:
+            return None  # Do not fail a resumable task merely because credentials are unavailable.
+        return GTaskService(store,queue,GLabs(base_url=base or None,api_key=secret)).run_until_terminal(job_id)
+    app.state.run_glabs_job=run_glabs_job
+
     @app.get("/api/v1/projects/{project_id}/assets/requirements")
     def requirements(project_id:str):
         return resolver.requirements(project_id)
