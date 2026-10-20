@@ -11,6 +11,19 @@ ROOT=Path(__file__).resolve().parents[2]
 def run(case,mode):
     if mode!="local":
         raise RuntimeError("A3 Phase A smoke supports local only; live evidence is separate.")
+    if case=="phase-a":
+        # Execute the already-owned integrated real SQLite/FFmpeg/WAV/word-map,
+        # G1/G2/G3/cold-reopen regression AND G-Labs provider task recovery.
+        # A nonzero pytest status fails this smoke; no synthetic green label.
+        import subprocess,sys
+        selected=[
+          "tests/integration/test_phase_a.py::test_phase_a_real_g1_g2_g3_reopen_independence",
+          "tests/integration/test_phase_a.py::test_phase_a_g3_stale_requires_new_review_even_for_same_original",
+          "tests/assets/test_glabs.py::test_generate_poll_result_restart_no_duplicate_submission",
+          "tests/assets/test_glabs.py::test_managed_authorization_revoked_before_publication"]
+        subprocess.run([sys.executable,"-m","pytest","-q",*selected],cwd=ROOT,check=True)
+        print("phase-a: LOCAL_PASS integrated SQLite, FFmpeg WAV+word-map, G1/G2/G3, source and G-Labs restart fixtures; live providers NOT_RUN")
+        return
     source=json.loads((ROOT/"contracts/examples/longform/StoryPackage.longform.synthetic.json").read_text())
     with TemporaryDirectory() as directory:
         root=Path(directory);db=root/"state.sqlite";media=root/"media"
