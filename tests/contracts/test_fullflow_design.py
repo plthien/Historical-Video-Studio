@@ -46,6 +46,15 @@ class FullFlowDesignTests(unittest.TestCase):
             for method,op in verbs.items():
                 self.assertTrue(op["summary"])
                 if method not in {"get","head"}:
+                    # Two project-scoped job controls are intentionally bodyless.
+                    # Keep requestBody and expected_revision assertions for every
+                    # existing operation; idempotency binds job identity in the path.
+                    if p in ("/projects/{project_id}/jobs/{job_id}/retry",
+                             "/projects/{project_id}/jobs/{job_id}/cancel"):
+                        self.assertEqual(method,"post")
+                        self.assertNotIn("requestBody",op)
+                        self.assertIn("Idempotency-Key",[x["name"] for x in op["parameters"]])
+                        continue
                     self.assertIn("requestBody",op)
                     request_name=op["requestBody"]["content"]["application/json"]["schema"]["$ref"].rsplit("/",1)[-1]
                     if request_name!="ProviderSettings":
