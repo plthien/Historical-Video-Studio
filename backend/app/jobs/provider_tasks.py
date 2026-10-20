@@ -247,6 +247,8 @@ class GTaskService:
             fresh=self.queue.get(job_id)
             if fresh["provider_task_id"]:
                 return self.cancel(project,job_id)
+            if flagged["state"]=="QUEUED" and flagged["resume_only"]:
+                return self.queue.cancellation_uncertain(job_id,"GLABS_UNCERTAIN_SUBMISSION")
             return flagged
         try:
             self._assert_job_provider(job,json.loads(job["payload_json"]))
