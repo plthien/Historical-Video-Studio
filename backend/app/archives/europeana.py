@@ -51,6 +51,13 @@ class Europeana:
             raise ContractViolation("ARCHIVE_ITEM_INVALID","europeana","Expected dataset/record ID.")
         raw=self.http.json(BASE+"/record"+quote(item_id,safe="/")+".json",{"wskey":self._key()},secret=True)
         record=raw.get("object") or raw
+        # The Record API may include a canonical "about" URL. Never let the
+        # request-supplied ID overwrite a conflicting provider-owned identity.
+        declared=record.get("id") or record.get("about")
+        if declared is not None and (not isinstance(declared,str) or not
+                (declared==item_id or declared.endswith("/item"+item_id))):
+            raise ContractViolation("ARCHIVE_ITEM_MISMATCH",item_id,
+                                    "Record API returned metadata for a different Europeana item.")
         agg=(record.get("aggregations") or [{}])[0]
         merged={**record,**agg,"id":item_id}
         if not merged.get("rights"): merged["rights"]=agg.get("edmRights")
