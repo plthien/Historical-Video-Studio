@@ -90,7 +90,11 @@ class GTaskService:
                            (digests[0][0],job_id,token))
             return self.queue.get(job_id)
         except ContractViolation as exc:
-            return self.queue.fail(job_id,token,exc.code,retryable=exc.code=="GLABS_RATE_LIMITED")
+            if exc.code=="STOPPED_BY_CLIENT":
+                self.queue.cancel(job_id)
+                return self.queue.acknowledge_cancel(job_id,token,provider_confirmed=True)
+            return self.queue.fail(job_id,token,exc.code,
+                                   retryable=exc.code in ("GLABS_RATE_LIMITED","GLABS_NETWORK_ERROR"))
     def cancel(self,project,job_id):
         job=self.queue.get(job_id)
         if job["project_id"]!=project or job["kind"]!="glabs_image":
