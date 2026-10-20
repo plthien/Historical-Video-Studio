@@ -542,3 +542,60 @@ def test_known_remote_provider_rotation_restores_id_without_duplicate_post(tmp_p
     assert done["provider_task_id"]=="cafe1234"
     assert calls.count("/api/image/generate")==1
     assert store.get_artifact(done["output_sha256"])==PNG
+
+
+
+def test_cancel_during_uncertain_first_post_preserves_remote_identity(tmp_path):
+    """R02/R04: request cancellation inside provider submit; never false CANCELLED."""
+    service_ref={}
+    calls=[]
+    def handler(req):
+        calls.append(req.url.path)
+        if req.url.path=="/api/image/generate":
+            svc=service_ref["svc"]
+            running=svc.queue.get(service_ref["job_id"])
+            assert running["state"]=="RUNNING" and not running["provider_task_id"]
+            flagged=svc.cancel(service_ref["pid"],service_ref["job_id"])
+            assert flagged["cancel_requested"]==1 and flagged["state"]=="RUNNING"
+            return httpx.Response(202,json={"task_id":"ab12cd34","status":"pending"})
+        if req.url.path=="/api/stop/ab12cd34":
+            return httpx.Response(200,json={"stopped":["ab12cd34"],"skipped":[],"count":1})
+        if req.url.path=="/api/status/ab12cd34":
+            return httpx.Response(200,json={"task_id":"ab12cd34","status":"running"})
+        return httpx.Response(404)
+    store,svc,pid,rid=setup(tmp_path,handler)
+    job=svc.enqueue(pid,rid,"nano_banana_2","Stop while sending",
+        expected_revision=1,idempotency_key="cancel-unknown-post-001",controlled_offline=True)
+    service_ref.update(svc=svc,pid=pid,job_id=job["job_id"])
+    pending=svc.process_one(job["job_id"])
+    assert pending["state"]=="BLOCKED_REVIEW",pending
+    assert pending["provider_task_id"]=="ab12cd34"
+    assert calls.count("/api/image/generate")==1
+    confirmed=svc.cancel(pid,job["job_id"])
+    assert confirmed["state"]=="CANCELLED"
+    assert calls.count("/api/stop/ab12cd34")==1
+
+
+def test_remote_cancel_terminal_cas_preserves_worker_success(tmp_path):
+    """R04: when a remote task completed before operator cancellation, do not stop or overwrite."""
+    calls=[]
+    def handler(req):
+        calls.append(req.url.path)
+        if req.url.path=="/api/image/generate":
+            return httpx.Response(202,json={"task_id":"ab12ab12","status":"pending"})
+        if req.url.path=="/api/status/ab12ab12":
+            return httpx.Response(200,json={"task_id":"ab12ab12","status":"completed"})
+        if req.url.path=="/api/result/ab12ab12":
+            return httpx.Response(200,json={"task_id":"ab12ab12","status":"completed",
+                "results":["http://127.0.0.1:8765/api/files/finished.png"]})
+        if req.url.path=="/api/files/finished.png":
+            return httpx.Response(200,content=PNG)
+        return httpx.Response(500)
+    store,svc,pid,rid=setup(tmp_path,handler)
+    job=svc.enqueue(pid,rid,"nano_banana_2","Finish before cancel",
+        expected_revision=1,idempotency_key="terminal-worker-win-001",controlled_offline=True)
+    finished=svc.process_one(job["job_id"])
+    assert finished["state"]=="SUCCEEDED"
+    assert svc.cancel(pid,job["job_id"])["state"]=="SUCCEEDED"
+    assert "/api/stop/ab12ab12" not in calls
+    assert svc.queue.get(job["job_id"])["output_sha256"]==finished["output_sha256"]
