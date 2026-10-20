@@ -279,10 +279,22 @@ def test_managed_authorization_revoked_before_publication(tmp_path):
     store,service,pid,rid=setup(tmp_path,handler)
     service.provider.offline_fixture=False
     resolver=AssetResolution(store)
+    from backend.app.projects.gates import GateService
+    gates=GateService(store)
+    story=store.get_story(pid).data()
+    for claim in story["claims"]:
+        if claim["critical"]:
+            gates.review_claim(pid,claim["claim_id"],"REVIEWED","Fixture review only",
+                               store.revision(pid),source_url="https://example.org/mock-evidence")
+    g1=gates.board(pid)[0]
+    gates.decide(pid,"G1",{"decision":"APPROVED",
+        "candidate_sha256":g1["candidate_sha256"],
+        "dependency_fingerprint":g1["dependency_fingerprint"],
+        "expected_revision":store.revision(pid)})
     with pytest.raises(ContractViolation,match="GLABS_FALLBACK_AUTH_REQUIRED"):
-        service.enqueue(pid,rid,"nano_banana_2","Historical illustration",expected_revision=1,
+        service.enqueue(pid,rid,"nano_banana_2","Historical illustration",expected_revision=store.revision(pid),
                         idempotency_key="managed-not-authorized-01")
-    revision=resolver.choose(pid,rid,"MANAGED_FALLBACK","Operator authorizes billable candidate",1)["project_revision"]
+    revision=resolver.choose(pid,rid,"MANAGED_FALLBACK","Operator authorizes billable candidate",store.revision(pid))["project_revision"]
     job=service.enqueue(pid,rid,"nano_banana_2","Historical illustration",expected_revision=revision,
                         idempotency_key="managed-authorized-001")
     assert service.process_one(job["job_id"])["state"]=="RUNNING"
