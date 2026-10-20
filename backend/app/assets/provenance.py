@@ -93,6 +93,9 @@ class AssetCandidates:
         metadata=self.get(project,candidate_id)
         if metadata["provider"] not in ("wikimedia_commons","loc","europeana"):
             raise ContractViolation("ORIGINAL_NOT_VERIFIED","candidate","Must originate from an archive.")
+        if metadata["provider"]=="europeana" and not metadata.get("hydrated"):
+            raise ContractViolation("SOURCE_HYDRATION_REQUIRED","candidate",
+                                    "Europeana Record hydration required before original intake.")
         original,info,url=download(metadata,client)
         stored=self.store.put_artifact(original,"original")
         raw={k:v for k,v in metadata.items() if k not in

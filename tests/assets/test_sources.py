@@ -68,7 +68,10 @@ def test_search_paging_hydrate_three_archives_and_null_rights(tmp_path):
     assert pages[1]["candidates"][0]["original_download_url"] is None
     assert pages[2]["candidates"][0]["original_download_url"] is None
     assert l.hydrate("12345")["original_download_url"].endswith("full.jpg")
-    assert e.hydrate("/abc/123")["original_download_url"].endswith("full.png")
+    hydrated=e.hydrate("/abc/123")
+    assert hydrated["original_download_url"].endswith("full.png")
+    assert hydrated["hydrated"] is True
+    assert pages[2]["candidates"][0].get("hydrated") is not True
     with pytest.raises(ContractViolation,match="ARCHIVE_CURSOR_MISMATCH"):
         w.search("different",pages[0]["next_cursor"])
     store,pid,req=project(tmp_path)

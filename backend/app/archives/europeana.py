@@ -14,7 +14,7 @@ class Europeana:
         if not self.key:
             raise ContractViolation("ARCHIVE_AUTH_REQUIRED","europeana","Configure Europeana API key locally.")
         return self.key
-    def _norm(self,record,raw):
+    def _norm(self,record,raw,*,hydrated=False):
         # Search responses may echo request URLs; a wskey must never enter
         # persisted provenance or later operator metadata, even if echoed.
         import json
@@ -31,6 +31,7 @@ class Europeana:
              rights_uri=first(record.get("rights") or record.get("edmRights")),
              original=shown,preview=first(record.get("edmPreview")))
         normalized["raw_source"]=sanitized
+        normalized["hydrated"]=hydrated
         return normalized
     def search(self,query,cursor=None,page_size=20):
         checked_query(query,page_size)
@@ -54,4 +55,4 @@ class Europeana:
         merged={**record,**agg,"id":item_id}
         if not merged.get("rights"): merged["rights"]=agg.get("edmRights")
         if not merged.get("title"): merged["title"]=first((record.get("proxies") or [{}])[0].get("dcTitle"))
-        return self._norm(merged,raw)
+        return self._norm(merged,raw,hydrated=True)
