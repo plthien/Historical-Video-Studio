@@ -16,12 +16,14 @@ def main():
     store=ProjectStore(Path(os.getenv("HVS_DB","data/historical-studio.sqlite")),
                        Path(os.getenv("HVS_MEDIA","data/media")))
     workflow=FinalVoiceWorkflow(store,GateService(store),JobQueue(store))
+    job_id = None
     if args.retry_assembly_project:
         job_id=workflow.retry_assembly(args.retry_assembly_project,
                                       store.revision(args.retry_assembly_project),
                                       "assembly-retry-"+uuid4().hex)
         print("final-voice-worker: explicit technical retry queued",job_id)
-    outcome=workflow.process_one()
+        workflow.process_pending(job_id)
+    outcome=workflow.queue.get(job_id) if job_id else workflow.process_one()
     if not outcome:
         print("final-voice-worker: NO_JOB")
         return

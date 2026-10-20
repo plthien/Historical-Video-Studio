@@ -53,11 +53,13 @@ def word_map_ready(db, project: str) -> bool:
     if not expected or tuple(approved) != tuple(expected):
         return False
     row = db.execute("SELECT f.audio_sha256,w.map_sha256,w.map_json "
-                     "FROM final_audio f JOIN word_maps w ON w.audio_sha256=f.audio_sha256 "
+                     "FROM final_audio f JOIN word_maps w ON w.approval_id=f.approval_id "
+                     "AND w.audio_sha256=f.audio_sha256 "
                      "AND w.transcript_sha256=f.transcript_sha256 AND w.project_id=f.project_id "
                      "JOIN jobs j ON j.job_id=w.job_id AND j.project_id=f.project_id "
                      "AND j.kind='final_alignment' AND j.state='SUCCEEDED' "
                      "AND j.output_sha256=w.map_sha256 "
+                     "AND json_extract(j.payload_json,'$.approval_id')=f.approval_id "
                      "WHERE f.project_id=? AND f.approval_id=?",
                      (project, head[0])).fetchone()
     if not row:
@@ -83,14 +85,13 @@ class FinalVoiceWorkflow:
                     approval_id TEXT PRIMARY KEY, project_id TEXT NOT NULL,
                     audio_sha256 TEXT NOT NULL, transcript_sha256 TEXT NOT NULL,
                     final_json TEXT NOT NULL, transcript TEXT NOT NULL,
-                    selection_sha256 TEXT NOT NULL
+                    section_texts_json TEXT NOT NULL, selection_sha256 TEXT NOT NULL
                 );
                 CREATE TABLE IF NOT EXISTS word_maps(
-                    project_id TEXT NOT NULL, audio_sha256 TEXT NOT NULL,
-                    transcript_sha256 TEXT NOT NULL,
+                    approval_id TEXT PRIMARY KEY, project_id TEXT NOT NULL,
+                    audio_sha256 TEXT NOT NULL, transcript_sha256 TEXT NOT NULL,
                     map_sha256 TEXT NOT NULL, map_json TEXT NOT NULL,
-                    job_id TEXT UNIQUE NOT NULL,
-                    PRIMARY KEY(project_id,audio_sha256,transcript_sha256)
+                    job_id TEXT UNIQUE NOT NULL
                 );
             """)
 
@@ -106,7 +107,19 @@ class FinalVoiceWorkflow:
             raise ContractViolation("FINAL_AUDIO_INVALID", project, "Selected WAV contains no audio.")
         return snapshot
 
-    def process_one(self, provider=None) -> dict | None:
+    def process_one(self, provider=None, *, job_id: str | None = None) -> dict | None:
+        if job_id is not None:
+            if self.queue.get(job_id)["kind"] not in ("final_assembly", "final_alignment"):
+                raise ContractViolation("JOB_KIND_INVALID", job_id,
+                                        "This callback may claim only its exact final voice job.")
+            job = self.queue.claim(job_id=job_id)
+            if job is None:
+                return None  # already owned, finished or cancelled
+            if job["kind"] == "final_assembly":
+                return self._assemble(job)
+            if job["kind"] == "final_alignment":
+                return self._align(job, provider)
+            raise ContractViolation("JOB_KIND_INVALID", job_id, "Not a final voice job.")
         job = self.queue.claim("final_assembly")
         if job is not None:
             return self._assemble(job)
@@ -115,10 +128,21 @@ class FinalVoiceWorkflow:
             return self._align(job, provider)
         return None
 
-    def process_pending(self, provider=None) -> None:
-        # One assembly + its downstream alignment, if queued.
-        self.process_one(provider)
-        self.process_one(provider)
+    def process_pending(self, job_id: str, provider=None) -> None:
+        """Follow exact durable approval lineage, never two unrelated global jobs."""
+        self.process_one(provider, job_id=job_id)
+        parent = self.queue.get(job_id)
+        if parent["kind"] != "final_assembly" or parent["state"] != "SUCCEEDED":
+            return
+        approval_id = json.loads(parent["payload_json"])["approval_id"]
+        with self.store._connection() as db:
+            child = db.execute(
+                "SELECT job_id FROM jobs WHERE project_id=? AND kind='final_alignment' "
+                "AND idempotency_key=? ORDER BY rowid DESC LIMIT 1",
+                (parent["project_id"], "align-" + approval_id)).fetchone()
+            if child is None:
+                return
+        self.process_one(provider, job_id=child[0])
 
     def _fail(self, job: dict, code: str) -> dict:
         return self.queue.fail(job["job_id"], job["lease_token"], code, retryable=False)
@@ -144,9 +168,10 @@ class FinalVoiceWorkflow:
                 if not head or head[0] != approval or selection_snapshot(db, project) != snapshot:
                     raise ContractViolation("FINAL_AUDIO_SOURCE_STALE", project,
                                             "Voice selections or G1 changed before final WAV commit.")
-                db.execute("INSERT INTO final_audio VALUES(?,?,?,?,?,?,?)",
+                db.execute("INSERT INTO final_audio VALUES(?,?,?,?,?,?,?,?)",
                            (approval, project, result["audio_sha256"], result["transcript_sha256"],
-                            result_json, transcript, manifest_sha))
+                            result_json, transcript, canonical(snapshot["section_texts"]).decode("utf-8"),
+                            manifest_sha))
                 enqueue_tx(db, project, "final_alignment", "align-" + approval,
                            {"approval_id": approval, "audio_sha256": result["audio_sha256"],
                             "transcript_sha256": result["transcript_sha256"]})
@@ -167,20 +192,20 @@ class FinalVoiceWorkflow:
             payload = json.loads(job["payload_json"])
             project, approval = job["project_id"], payload["approval_id"]
             with self.store._connection() as db:
-                row = db.execute("SELECT final_json,transcript FROM final_audio "
+                row = db.execute("SELECT final_json,transcript,section_texts_json FROM final_audio "
                                  "WHERE project_id=? AND approval_id=?", (project, approval)).fetchone()
                 head = db.execute("SELECT approval_id FROM gate_heads WHERE project_id=? AND gate_id='G2'",
                                   (project,)).fetchone()
                 if not row or not head or head[0] != approval or not word_map_source_current(db, project):
                     raise ContractViolation("WORD_MAP_STALE", project,
                                             "Final WAV no longer matches current approved G2 selection.")
-            final, transcript = json.loads(row[0]), row[1]
+            final, transcript, sections = json.loads(row[0]), row[1], json.loads(row[2])
             if (final["audio_sha256"] != payload["audio_sha256"] or
                     final["transcript_sha256"] != payload["transcript_sha256"]):
                 raise ContractViolation("WORD_MAP_STALE", project, "Alignment payload identity differs.")
             wav = self.store.get_artifact(final["audio_sha256"])
             response = (align_audio(wav, transcript) if provider is None else provider(wav, transcript))
-            result = word_map(project, final, transcript, response)
+            result = word_map(project, final, transcript, response, sections)
             doc = canonical(result)
             digest = self.store.put_artifact(doc, "word_map")
             with self.store._transaction() as db:
@@ -191,8 +216,8 @@ class FinalVoiceWorkflow:
                                   (project,)).fetchone()
                 if not head or head[0] != approval:
                     raise ContractViolation("WORD_MAP_STALE", project, "Approval changed while aligning.")
-                db.execute("INSERT INTO word_maps VALUES(?,?,?,?,?,?)",
-                           (project, final["audio_sha256"], final["transcript_sha256"],
+                db.execute("INSERT INTO word_maps VALUES(?,?,?,?,?,?,?)",
+                           (approval, project, final["audio_sha256"], final["transcript_sha256"],
                             digest, doc.decode("utf-8"), job["job_id"]))
                 db.execute("UPDATE jobs SET state='SUCCEEDED',output_sha256=?,lease_token=NULL,"
                            "error_code=NULL WHERE job_id=? AND lease_token=? AND state='RUNNING'",
@@ -214,12 +239,13 @@ class FinalVoiceWorkflow:
             current = bool(approval and word_map_source_current(db, project))
             latest = lambda kind: db.execute(
                 "SELECT job_id,state,error_code,retry_count FROM jobs WHERE project_id=? AND kind=? "
-                "ORDER BY rowid DESC LIMIT 1", (project, kind)).fetchone()
+                "AND json_extract(payload_json,'$.approval_id')=? "
+                "ORDER BY rowid DESC LIMIT 1", (project, kind, approval)).fetchone()
             assembly, alignment_job = latest("final_assembly"), latest("final_alignment")
             final = json.loads(final_row[0]) if final_row and current else None
             row = (db.execute("SELECT map_json,map_sha256 FROM word_maps "
-                              "WHERE project_id=? AND audio_sha256=? AND transcript_sha256=?",
-                              (project, final["audio_sha256"], final["transcript_sha256"])).fetchone() if final else None)
+                              "WHERE approval_id=? AND project_id=? AND audio_sha256=? AND transcript_sha256=?",
+                              (approval, project, final["audio_sha256"], final["transcript_sha256"])).fetchone() if final else None)
             word = json.loads(row[0]) if row else None
         if final:
             self.store.get_artifact(final["audio_sha256"])
@@ -245,8 +271,9 @@ class FinalVoiceWorkflow:
                 raise ContractViolation("FINAL_AUDIO_SOURCE_STALE", project,
                                         "G2 selection changed; a technical retry cannot revive stale audio.")
             current = db.execute("SELECT job_id,state,payload_json FROM jobs WHERE project_id=? "
-                                 "AND kind='final_assembly' ORDER BY rowid DESC LIMIT 1",
-                                 (project,)).fetchone()
+                                 "AND kind='final_assembly' AND json_extract(payload_json,'$.approval_id')=? "
+                                 "ORDER BY rowid DESC LIMIT 1",
+                                 (project, head[0])).fetchone()
             if (not current or current[1] not in ("FAILED_TERMINAL","FAILED_RETRYABLE","BLOCKED_REVIEW")
                     or json.loads(current[2])["approval_id"] != head[0]):
                 raise ContractViolation("FINAL_AUDIO_RETRY_FORBIDDEN", project,
@@ -269,7 +296,11 @@ class FinalVoiceWorkflow:
             if not row or tuple(row) != (audio_sha, transcript_sha):
                 raise ContractViolation("WORD_MAP_STALE", project, "Retry requires exact frozen final WAV and transcript.")
             previous = db.execute("SELECT state FROM jobs WHERE project_id=? AND kind='final_alignment' "
-                                  "ORDER BY rowid DESC LIMIT 1", (project,)).fetchone()
+                                  "AND json_extract(payload_json,'$.approval_id')=? "
+                                  "ORDER BY rowid DESC LIMIT 1", (project, head[0])).fetchone()
+            if db.execute("SELECT 1 FROM word_maps WHERE approval_id=?", (head[0],)).fetchone():
+                raise ContractViolation("ALIGNMENT_RETRY_FORBIDDEN", project,
+                                        "This approval already has verified alignment; no overwrite.")
             if not previous or previous[0] not in ("FAILED_TERMINAL","FAILED_RETRYABLE","BLOCKED_REVIEW"):
                 raise ContractViolation("ALIGNMENT_RETRY_FORBIDDEN", project,
                                         "Retry is available only after a failed or review-blocked attempt.")

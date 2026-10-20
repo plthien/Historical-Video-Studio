@@ -526,13 +526,13 @@ def test_alignment_word_map_rejects_malformed_overlap_and_wrong_section(tmp_path
     answer=mock_alignment(final,transcript)
     broken=copy.deepcopy(answer);broken["words"][0]["end"]=broken["words"][1]["end"]+1
     with pytest.raises(ContractViolation,match="ALIGNMENT_TIME_INVALID"):
-        word_map(project,final,transcript,broken)
+        word_map(project,final,transcript,broken,story["sections"])
     broken=copy.deepcopy(answer);broken["words"][0]["text"]="unrelated"
     with pytest.raises(ContractViolation,match="ALIGNMENT_TRANSCRIPT_MISMATCH"):
-        word_map(project,final,transcript,broken)
+        word_map(project,final,transcript,broken,story["sections"])
     broken=copy.deepcopy(answer);broken["words"][0]["start"]=-1.0
     with pytest.raises(ContractViolation,match="ALIGNMENT_TIME_INVALID"):
-        word_map(project,final,transcript,broken)
+        word_map(project,final,transcript,broken,story["sections"])
     from backend.app.voice import alignment
     from unittest.mock import patch
     with patch.dict("os.environ",{"HVS_ELEVENLABS_API_KEY":"offline-test-token"}):
@@ -560,8 +560,8 @@ def test_alignment_api_status_and_media_bytes_on_real_store(tmp_path):
         assert metadata["g4_ready_dependency"] is False
         # S11: identical WAV with another transcript must never inherit a prior word map.
         with store._transaction() as db:
-            db.execute("INSERT INTO word_maps VALUES(?,?,?,?,?,?)",
-                       (project,final["audio_sha256"],"0"*64,"1"*64,"{}",
+            db.execute("INSERT INTO word_maps VALUES(?,?,?,?,?,?,?)",
+                       (approved["approval_id"],project,final["audio_sha256"],"0"*64,"1"*64,"{}",
                         "wrong-transcript-mock-job"))
         incompatible=client.get(base+"/alignment")
         assert incompatible.status_code==200
@@ -573,12 +573,12 @@ def test_alignment_api_status_and_media_bytes_on_real_store(tmp_path):
         from backend.app.voice.word_map import word_map
         from backend.app.voice.assemble import canonical,sha
         transcript="\n".join(s["narration"] for s in story["sections"])
-        forged=word_map(project,final,transcript,mock_alignment(final,transcript))
+        forged=word_map(project,final,transcript,mock_alignment(final,transcript),story["sections"])
         doc=canonical(forged)
         digest=store.put_artifact(doc,"word_map")
         with store._transaction() as db:
-            db.execute("INSERT INTO word_maps VALUES(?,?,?,?,?,?)",
-                       (project,final["audio_sha256"],final["transcript_sha256"],
+            db.execute("INSERT INTO word_maps VALUES(?,?,?,?,?,?,?)",
+                       (approved["approval_id"],project,final["audio_sha256"],final["transcript_sha256"],
                         digest,doc.decode("utf-8"),"no_successful_provider_job"))
         assert client.get(base+"/alignment").json()["g4_ready_dependency"] is False
         assert client.get(base+"/alignment").json()["word_map"] is None
@@ -618,6 +618,7 @@ def test_gate_2_reapproval_after_restore_same_wav_keeps_distinct_alignment_linea
     from backend.app.voice.workflow import FinalVoiceWorkflow
     store, gates, voice, workflow, project, story = setup(tmp_path)
     first = voice.list_attempts(project, "sec_001")["attempts"][0]
+    old_candidate = gates.board(project)[1]
     initial = approval(store, gates, project)
     assert workflow.process_one()["state"] == "SUCCEEDED"
     frozen = workflow.status(project)["final_audio"]
@@ -642,7 +643,8 @@ def test_gate_2_reapproval_after_restore_same_wav_keeps_distinct_alignment_linea
     assert voice.list_attempts(project, "sec_001")["selected_attempt_id"] != b
     with pytest.raises(ContractViolation, match="APPROVAL_REVISION_CONFLICT"):
         gates.decide(project, "G2", {"decision": "APPROVED",
-            "candidate_sha256": frozen["audio_sha256"], "dependency_fingerprint": "0"*64,
+            "candidate_sha256": old_candidate["candidate_sha256"],
+            "dependency_fingerprint": old_candidate["dependency_fingerprint"],
             "expected_revision": store.revision(project)})
     renewed = approval(store, gates, project)
     assert renewed["approval_id"] != initial["approval_id"]
@@ -670,12 +672,9 @@ def test_alignment_multiline_uses_frozen_section_manifest(tmp_path, first, secon
     from backend.tools.voice_final_smoke import setup, approval
     from backend.app.voice.word_map import word_map
     from backend.app.voice.assemble import transcript_for
-    # Test the full approved StoryPackage by changing its section text BEFORE import.
-    from backend.app.projects.models import StoryCandidate
     from backend.app.voice.assemble import sha
-    from backend.app.voice.word_map import normalized
     import copy
-    store, gates, voice, workflow, project, story = setup(tmp_path)
+    store, gates, voice, workflow, project, story = setup(tmp_path, (first, second))
     final_audio = {"audio_sha256": "a"*64, "transcript_sha256": sha((first+"\n"+second).encode()),
                    "sample_rate": 24000, "duration_samples": 144000,
                    "section_offsets": [
@@ -693,6 +692,21 @@ def test_alignment_multiline_uses_frozen_section_manifest(tmp_path, first, secon
             b=off["start_sample"]+round(width*(i+.75)/len(words))
             provider_words.append({"text":w,"start":a/24000,"end":b/24000,"loss":0.1})
     mapped=word_map(project,final_audio,transcript,{"words":provider_words},sections)
+    # Same texts through approved G2 assembly and a provider-shaped response:
+    # real WAV sample offsets and frozen section texts must survive SQLite reopen.
+    from backend.tools.voice_final_smoke import approval
+    approval(store,gates,project)
+    assert workflow.process_one()["state"]=="SUCCEEDED"
+    actual=workflow.status(project)["final_audio"]
+    assert actual["duration_samples"]==144000
+    assert actual["transcript_sha256"]==final_audio["transcript_sha256"]
+    assert actual["section_offsets"]==final_audio["section_offsets"]
+    assert workflow.process_one(lambda wav,txt:{"words":provider_words})["state"]=="SUCCEEDED"
+    actual_map=word_map(project,actual,transcript,{"words":provider_words},sections)
+    assert workflow.status(project)["word_map"]==actual_map
+    reopened=__import__("backend.app.voice.workflow",fromlist=["FinalVoiceWorkflow"]).FinalVoiceWorkflow(
+        ProjectStore(store.database,store.artifacts.root),GateService(store),JobQueue(store))
+    assert reopened.status(project)["word_map"]==actual_map
     assert len(mapped["words"])==len(first.split())+len(second.split())
     assert [x["section_id"] for x in mapped["words"]] == (
         ["sec_001"]*len(first.split())+["sec_002"]*len(second.split()))

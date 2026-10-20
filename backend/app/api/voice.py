@@ -81,7 +81,7 @@ def mount(app: FastAPI, service: VoiceService, idempotent, final_voice) -> None:
         result = idempotent(project_id, "alignment-retry", idempotency_key, payload,
             lambda: final_voice.retry_alignment(project_id, body.expected_revision,
                 body.audio_sha256, body.transcript_sha256, idempotency_key))
-        background.add_task(final_voice.process_pending)
+        background.add_task(final_voice.process_pending, result["job_id"])
         return result
 
     @app.get("/api/v1/projects/{project_id}/voice/audio/{audio_sha256}")

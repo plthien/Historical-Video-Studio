@@ -30,12 +30,14 @@ def wav_fixture(seconds:float) -> bytes:
     return buf.getvalue()
 
 
-def setup(directory:Path):
+def setup(directory:Path, narrations:tuple[str,str]|None=None):
     story=json.loads((ROOT/"contracts/examples/longform/StoryPackage.longform.synthetic.json").read_text("utf-8"))
     story["sections"]=story["sections"][:2]
     story["visual_setups"]=story["visual_setups"][:4]
-    story["sections"][0]["narration"]="History offers a curious puzzle about this place."
-    story["sections"][1]["narration"]="The next chapter explains what the people decided."
+    first, second = narrations or ("History offers a curious puzzle about this place.",
+                                    "The next chapter explains what the people decided.")
+    story["sections"][0]["narration"]=first
+    story["sections"][1]["narration"]=second
     for c in story["claims"]:c["critical"]=False
     store=ProjectStore(directory/"state.sqlite",directory/"media")
     project=story["project"]["project_id"]

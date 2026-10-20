@@ -11,10 +11,17 @@ def normalized(value: str) -> str:
     return _PUNCT.sub("", value).casefold()
 
 
-def word_map(project: str, final: dict, transcript: str, response: dict) -> dict:
-    tokens = [(t, o["section_id"]) for o, part in zip(
-        final["section_offsets"], transcript.split("\n"))
-        for t in part.split()]
+def word_map(project: str, final: dict, transcript: str, response: dict,
+             sections: list[dict]) -> dict:
+    from backend.app.voice.assemble import transcript_for, sha
+    if (len(sections) != len(final["section_offsets"]) or
+            [s["section_id"] for s in sections] !=
+            [o["section_id"] for o in final["section_offsets"]] or
+            transcript_for(sections) != transcript or
+            sha(transcript.encode("utf-8")) != final["transcript_sha256"]):
+        raise ContractViolation("ALIGNMENT_TRANSCRIPT_MISMATCH", project,
+                                "Frozen section manifest or transcript SHA differs from FinalAudio.")
+    tokens = [(token, s["section_id"]) for s in sections for token in s["narration"].split()]
     raw = response.get("words")
     if not isinstance(raw, list) or len(raw) != len(tokens) or not raw:
         raise ContractViolation("ALIGNMENT_TRANSCRIPT_MISMATCH", project,

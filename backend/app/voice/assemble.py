@@ -50,9 +50,13 @@ def selection_snapshot(db, project_id: str) -> dict | None:
         selected.append({"section_id": section["section_id"], "attempt_id": row[0],
                          "audio_sha256": row[3], "sample_rate": row[4],
                          "channels": row[5], "sample_count": row[6]})
+    generation = db.execute(
+        "SELECT COALESCE(MAX(committed_revision),0) FROM voice_selection_events "
+        "WHERE project_id=?", (project_id,)).fetchone()[0]
     return {"story_sha256": story_sha, "g1_fingerprint": fp,
             "transcript_sha256": sha(transcript_for(sections).encode("utf-8")),
-            "selected": selected}
+            "section_texts": [{"section_id": s["section_id"], "narration": s["narration"]} for s in sections],
+            "selection_generation": generation, "selected": selected}
 
 
 def selection_identity(db, project_id: str) -> tuple[str, str] | None:
@@ -72,6 +76,10 @@ def assemble_frozen(store, project_id: str, snapshot: dict) -> tuple[dict, bytes
     if [s["section_id"] for s in sections] != [s["section_id"] for s in snapshot["selected"]]:
         raise ContractViolation("FINAL_AUDIO_SECTIONS_INVALID", project_id,
                                 "Section order/set changed during assembly.")
+    if snapshot["section_texts"] != [
+            {"section_id": s["section_id"], "narration": s["narration"]} for s in sections]:
+        raise ContractViolation("FINAL_AUDIO_SOURCE_STALE", project_id,
+                                "Frozen section transcript/order differs from approved story.")
     transcript = transcript_for(sections)
     if sha(transcript.encode("utf-8")) != snapshot["transcript_sha256"]:
         raise ContractViolation("FINAL_AUDIO_SOURCE_STALE", project_id, "Transcript hash changed.")

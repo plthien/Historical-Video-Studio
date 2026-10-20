@@ -193,7 +193,7 @@ def create_app(database: str | Path | None = None, media_root: str | Path | None
                             lambda: gates.decide(project_id, gate_id, data))
         if gate_id == "G2" and result.get("job_id"):
             # Durable job commit precedes scheduling; recovery owns interrupted jobs.
-            background.add_task(final_voice.process_pending)
+            background.add_task(final_voice.process_pending, result["job_id"])
         return result
 
     @app.get("/api/v1/projects/{project_id}/jobs")
