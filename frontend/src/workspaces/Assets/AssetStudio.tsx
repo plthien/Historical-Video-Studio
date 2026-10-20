@@ -85,7 +85,7 @@ export function AssetStudio({projectId,onRefresh}:{projectId:string;onRefresh:()
       <select id="resolution-mode" value={mode} onChange={e=>setMode(e.target.value as typeof mode)}>
         <option value="MANUAL_UPLOAD">Upload my original</option><option value="MANAGED_FALLBACK">Authorize managed G-Labs fallback</option>
       </select>
-      <button disabled={!!pending||!reason.trim()} onClick={()=>void action("Save resolution",()=>assetApi.choose(projectId,revision,selected,mode,reason))}>
+      <button disabled={!!pending||!reason.trim()} onClick={()=>void action("Save resolution",()=>assetApi.choose(projectId,selected,revision,mode,reason))}>
         {pending==="Save resolution"?"Saving…":"Save explicit choice"}</button>
       <hr/>
       <label htmlFor="source-query">Archive search</label>
