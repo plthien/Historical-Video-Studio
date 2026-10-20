@@ -21,6 +21,22 @@ class GTaskService:
                     last_error_code TEXT,
                     FOREIGN KEY(job_id) REFERENCES jobs(job_id));
             """)
+    def _provider_identity(self):
+        # Store only a fingerprint of the endpoint+credential, never the API key.
+        key=getattr(self.provider,"key","")
+        base=getattr(self.provider,"base","")
+        if not key or not base:
+            raise ContractViolation("GLABS_KEY_MISSING","glabs",
+                                    "Configure the original local webhook and API key before enqueue.")
+        return sha256((base+"\\n"+key).encode("utf-8")).hexdigest()
+
+    def _assert_job_provider(self,job,payload):
+        if payload.get("authorization")=="MANAGED_FALLBACK_AUTHORIZED":
+            actual=self._provider_identity()
+            if payload.get("provider_identity")!=actual:
+                raise ContractViolation("GLABS_PROVIDER_IDENTITY_STALE",job["job_id"],
+                    "Webhook endpoint/key changed; restore original job credentials before continuing.")
+
     def _observe(self,job_id,status,error=None):
         with self.store._transaction() as db:
             db.execute("INSERT INTO glabs_task_observations VALUES(?,?,?) "
@@ -68,13 +84,15 @@ class GTaskService:
                                         "Operator must explicitly select managed fallback.")
             authorization="MANAGED_FALLBACK_AUTHORIZED"
         body=validate_request(prompt,model,ratio,refs or [],upscale,mode,keep)
+        provider_identity=self._provider_identity() if not controlled_offline else None
         payload={"project_id":project,"requirement_id":requirement,
                  "story_sha256":source["story_sha256"],
                  "story_revision":source["story_revision"],
                  "requirement_sha256":source["requirement_sha256"],
                  "request":body,
                  "request_sha256":sha256(json.dumps(body,sort_keys=True).encode()).hexdigest(),
-                 "authorization":authorization}
+                 "authorization":authorization,
+                 "provider_identity":provider_identity}
         return self.queue.submit(project,"glabs_image",idempotency_key,payload,expected_revision)
     def process_one(self,job_id=None):
         job=self.queue.claim("glabs_image",job_id=job_id)
@@ -92,6 +110,7 @@ class GTaskService:
                     raise ContractViolation("GLABS_FALLBACK_AUTH_REQUIRED",job["job_id"],"Cannot bill mock fallback.")
             else:
                 raise ContractViolation("GLABS_FALLBACK_AUTH_REQUIRED",job["job_id"],"Explicit authorization missing.")
+            self._assert_job_provider(job,data)
             if not job["provider_task_id"]:
                 # This check is immediately before a potentially billable network request.
                 with self.store._connection() as db:
@@ -129,6 +148,7 @@ class GTaskService:
         if job["cancel_requested"]:
             raise ContractViolation("JOB_CANCEL_PENDING",job_id,"Task cancelled; confirm stop first.")
         try:
+            self._assert_job_provider(job,json.loads(job["payload_json"]))
             status=self.provider.poll(job["provider_task_id"])
             self._observe(job_id,status["status"])
             if status["status"]!="completed":
@@ -208,6 +228,8 @@ class GTaskService:
             raise ContractViolation("GLABS_TASK_NOT_FOUND",job_id,"Not this project's generation.")
         if job["state"] in ("SUCCEEDED","CANCELLED","FAILED_TERMINAL"):
             return job
+        if job["provider_task_id"] and job["state"]=="RUNNING":
+            self._assert_job_provider(job,json.loads(job["payload_json"]))
         flagged=self.queue.cancel(job_id)
         if job["provider_task_id"] and job["state"]=="RUNNING":
             self.provider.stop(job["provider_task_id"])
