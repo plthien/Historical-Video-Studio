@@ -202,6 +202,10 @@ class GTaskService:
                            (digests[0][0],job_id,token))
             return self.queue.get(job_id)
         except ContractViolation as exc:
+            current=self.queue.get(job_id)
+            if current["state"]!="RUNNING" or current["lease_token"]!=token:
+                # Remote stop/success won while provider polling; preserve CAS result.
+                return current
             if exc.code=="STOPPED_BY_CLIENT":
                 self.queue.cancel(job_id)
                 result=self.queue.confirm_remote_stop(job_id,job["provider_task_id"])
