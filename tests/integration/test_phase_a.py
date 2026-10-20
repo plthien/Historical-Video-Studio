@@ -119,6 +119,8 @@ def test_phase_a_g3_stale_requires_new_review_even_for_same_original(tmp_path):
         "contracts/examples/longform/StoryPackage.longform.synthetic.json").read_text())
     rid=story["asset_requirements"][0]["requirement_id"]
     story["asset_requirements"]=story["asset_requirements"][:1]
+    story["visual_setups"]=[v for v in story["visual_setups"]
+        if all(slot["requirement_id"]==rid for slot in v["direction"]["asset_slots"])]
     for section in story["sections"]:
         section["asset_requirement_refs"]=[x for x in section["asset_requirement_refs"] if x==rid]
     for setup in story["visual_setups"]:
@@ -167,7 +169,22 @@ def test_phase_a_empty_asset_requirements_explicit_g3_and_restart(tmp_path):
         "contracts/examples/longform/StoryPackage.longform.synthetic.json").read_text())
     story["asset_requirements"]=[]
     for section in story["sections"]:section["asset_requirement_refs"]=[]
-    for setup in story["visual_setups"]:setup["requirement_refs"]=[]
+    # One real contract-valid text-only visual setup; no historical asset slots.
+    story["visual_setups"]=story["visual_setups"][:1]
+    setup=story["visual_setups"][0]
+    setup["preferred_template"]="T08"
+    setup["requirement_refs"]=[]
+    direction=setup["direction"]
+    direction["asset_slots"]=[]
+    direction["historical_map_requirement_id"]=None
+    focus=direction["on_screen_text"][0]["text_id"]
+    for beat in direction["visual_beats"]:
+        beat["focus_ref"]=focus
+        beat["relationships"]=[]
+        beat["staging"]=[{"ref":focus,"operation":"enter","after_ref":None,
+                          "motion_hint":"none","priority":1}]
+        beat["continuity"]["carry_refs"]=[]
+    for reveal in direction["reveal_plan"]:reveal["target_role"]="headline"
     for claim in story["claims"]:claim["critical"]=False
     store=ProjectStore(tmp_path/"db.sqlite",tmp_path/"media")
     pid=story["project"]["project_id"]
