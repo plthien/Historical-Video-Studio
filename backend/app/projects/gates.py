@@ -185,8 +185,6 @@ class GateService:
             return _g1_identity(db, project_id)[:2]
         if gate == "G3":
             from backend.app.assets.resolution import AssetResolution
-            if not db.execute("SELECT 1 FROM sqlite_master WHERE name='asset_approval_heads'").fetchone():
-                return None
             return AssetResolution.gate_candidate(db, project_id, self.store)
         if gate == "G2":
             from backend.app.voice.assemble import selection_identity
