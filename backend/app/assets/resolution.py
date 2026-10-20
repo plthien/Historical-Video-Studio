@@ -186,7 +186,15 @@ class AssetResolution:
             revision=self._revision(db,project,expected_revision)
             planned=[(item,*self._review_tx(db,project,item)) for item in items]
             created=[]
+            changed=False
             for item,requirement_sha,evidence in planned:
+                previous=self._head(db,project,item["requirement_id"],requirement_sha)
+                if previous and previous["candidate_id"]==item["candidate_id"] and previous["evidence"]==evidence:
+                    created.append({"requirement_id":item["requirement_id"],
+                                    "approval_record_id":previous["approval_record_id"],
+                                    "approved_candidate_sha256":previous["approved_candidate_sha256"]})
+                    continue
+                changed=True
                 approved_sha=_digest(evidence)
                 approval_id="approval_"+uuid4().hex
                 db.execute("INSERT INTO asset_approval_events VALUES(?,?,?,?,?,?,?,?,?)",
@@ -198,9 +206,10 @@ class AssetResolution:
                            (project,item["requirement_id"],approval_id))
                 created.append({"requirement_id":item["requirement_id"],"approval_record_id":approval_id,
                                 "approved_candidate_sha256":approved_sha})
-            mark_stale(db,project,"asset_replace")
-            db.execute("UPDATE projects SET revision=? WHERE project_id=?",(revision+1,project))
-            return {"project_revision": revision+1, "approved":created}
+            if changed:
+                mark_stale(db,project,"asset_replace")
+                db.execute("UPDATE projects SET revision=? WHERE project_id=?",(revision+1,project))
+            return {"project_revision": revision+int(changed), "approved":created}
 
     @staticmethod
     def gate_candidate(db, project, store):
