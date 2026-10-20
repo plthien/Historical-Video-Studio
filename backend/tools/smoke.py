@@ -51,20 +51,22 @@ def main() -> None:
                                                   "Synthetic test disposition only", revision)
             sha = store.get_story(project_id).sha256
             decision = {"decision": "APPROVED", "candidate_sha256": sha,
-                        "dependency_fingerprint": sha, "expected_revision": revision}
+                        "dependency_fingerprint": gates.board(project_id)[0]["dependency_fingerprint"],
+                        "expected_revision": revision}
             approved = gates.decide(project_id, "G1", decision)
             revised = json.loads(data)
             revised["sections"][0]["narration"] += " Corrected historical context."
             version_b = StoryCandidate.parse(revised)
             next_rev = store.import_story(version_b, approved["project_revision"])
-            if gates.board(project_id)[0]["state"] != "STALE":
+            if gates.board(project_id)[0]["state"] != "BLOCKED":
                 raise RuntimeError("Old approved StoryPackage was not invalidated")
             for claim in revised["claims"]:
                 if claim["critical"]:
                     next_rev = gates.review_claim(project_id, claim["claim_id"], "REVIEWED",
                                                   "Synthetic revised claim review only", next_rev)
             renewed = gates.decide(project_id, "G1", {"decision": "APPROVED",
-                "candidate_sha256": version_b.sha256, "dependency_fingerprint": version_b.sha256,
+                "candidate_sha256": version_b.sha256,
+                "dependency_fingerprint": gates.board(project_id)[0]["dependency_fingerprint"],
                 "expected_revision": next_rev})
             if gates.board(project_id)[0]["state"] != "APPROVED" or renewed["project_revision"] <= next_rev:
                 raise RuntimeError("New candidate was not reapproved")

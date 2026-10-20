@@ -205,7 +205,7 @@ def test_gate_review_critical_claim_and_crop_invalidation(story, store):
     gates = GateService(store)
     sha = store.get_story(project_id).sha256
     decision = {"decision": "APPROVED", "candidate_sha256": sha,
-                "dependency_fingerprint": sha, "expected_revision": 1}
+                "dependency_fingerprint": gates.board(project_id)[0]["dependency_fingerprint"], "expected_revision": 1}
     with pytest.raises(ContractViolation, match="CLAIM_CRITICAL_UNRESOLVED"):
         gates.decide(project_id, "G1", decision)
     rev = 1
@@ -214,6 +214,7 @@ def test_gate_review_critical_claim_and_crop_invalidation(story, store):
             rev = gates.review_claim(project_id, claim["claim_id"], "REVIEWED",
                                      "Human verification pending external evidence", rev)
     decision["expected_revision"] = rev
+    decision["dependency_fingerprint"] = gates.board(project_id)[0]["dependency_fingerprint"]
     result = gates.decide(project_id, "G1", decision)
     assert result["state"] == "APPROVED"
     # Approval increased project revision but must not hide the last imported StoryPackage.
@@ -280,7 +281,7 @@ def test_api_gates_review_and_idempotent_mutation(story, tmp_path):
     assert gate["state"] == "READY_FOR_REVIEW" if not any(x["critical"] for x in story["claims"]) else gate["state"] == "BLOCKED"
     assert client.post(uri + "/gates/G1/decision", headers={"Idempotency-Key": "approve-story-1"},
                        json={"decision": "APPROVED", "candidate_sha256": request.json()["candidate_sha256"],
-                             "dependency_fingerprint": request.json()["candidate_sha256"],
+                             "dependency_fingerprint": gate["dependency_fingerprint"],
                              "expected_revision": 1}).status_code == 422
     future = client.post(uri + "/voice/generate", json={}, headers={"Idempotency-Key": "voice-request-1"})
     assert future.status_code == 501
@@ -303,7 +304,9 @@ def test_gate_rejection_recovery_and_story_reapproval(story, store, rejected_sta
     assert gates.reviews(project_id)[0]["source_url"] == "https://www.loc.gov/"
     decision = lambda sha, rev, kind="APPROVED": {
         "decision": kind, "candidate_sha256": sha,
-        "dependency_fingerprint": sha, "expected_revision": rev,
+        "dependency_fingerprint": (gates.board(project_id)[0]["dependency_fingerprint"]
+                                   if sha == store.get_story(project_id).sha256 else "0" * 64),
+        "expected_revision": rev,
     }
     rejected = gates.decide(project_id, "G1", decision(first.sha256, revision, rejected_state))
     assert gates.board(project_id)[0]["state"] == rejected_state
@@ -313,7 +316,7 @@ def test_gate_rejection_recovery_and_story_reapproval(story, store, rejected_sta
     second_story["sections"][0]["narration"] += " Updated for human review."
     second = StoryCandidate.parse(second_story)
     revision = store.import_story(second, rejected["project_revision"])
-    assert gates.board(project_id)[0]["state"] == "STALE"
+    assert gates.board(project_id)[0]["state"] == "BLOCKED"
     for claim in second_story["claims"]:
         if claim["critical"]:
             revision = gates.review_claim(project_id, claim["claim_id"], "REVIEWED",
@@ -329,7 +332,7 @@ def test_gate_rejection_recovery_and_story_reapproval(story, store, rejected_sta
     third_story["sections"][1]["narration"] += " Further correction."
     third = StoryCandidate.parse(third_story)
     revision = store.import_story(third, approved["project_revision"])
-    assert gates.board(project_id)[0]["state"] == "STALE"
+    assert gates.board(project_id)[0]["state"] == "BLOCKED"
     assert gates.board(project_id)[3]["state"] == "STALE"
     for claim in third_story["claims"]:
         if claim["critical"]:
@@ -407,7 +410,7 @@ def test_api_invalid_import_never_poisoned_replay_and_no_fake_gate(story, tmp_pa
         assert client.get(f"/api/v1/projects/{p}/story").json()["claim_reviews"] == []
         bad = client.post(f"/api/v1/projects/{p}/gates/G1/decision",
                           json={"decision": "APPROVED", "candidate_sha256": okay.json()["candidate_sha256"],
-                                "dependency_fingerprint": okay.json()["candidate_sha256"],
+                                "dependency_fingerprint": client.get(f"/api/v1/projects/{p}/gates").json()[0]["dependency_fingerprint"],
                                 "expected_revision": 1},
                           headers={"Idempotency-Key": "same-gate-key-001"})
         assert bad.status_code == 422
@@ -432,7 +435,7 @@ def test_story_asset_relevance_selectively_stales_g3(story, store):
     store.import_story(StoryCandidate.parse(changed), revision)
     states = {gate["gate_id"]: gate["state"] for gate in service.board(project_id)}
     assert states["G3"] == "STALE"
-    assert states["G1"] == "STALE"
+    assert states["G1"] == "BLOCKED"
     with sqlite3.connect(store.database) as db:
         assert db.execute("SELECT COUNT(*) FROM story_candidates").fetchone()[0] == 3
 
@@ -474,3 +477,164 @@ def test_gate_review_edit_after_approval_invalidates_effective_head(story, store
     critical_id = next(c["claim_id"] for c in story["claims"] if c["critical"])
     gates.review_claim(project_id, critical_id, "REVIEWED", "Corrected evidence note", store.revision(project_id))
     assert gates.board(project_id)[0]["state"] != "APPROVED"
+
+
+@pytest.mark.parametrize("change", ["disposition", "note", "source_url"])
+def test_gate_review_dependency_generation_snapshots_and_reapproval(story, store, change):
+    """A1-04: evidence lineage, no-op, A->B->A and selective preservation on real SQLite."""
+    import hashlib
+    from backend.app.projects.gates import GateService
+    project = story["project"]["project_id"]
+    store.create_project(project, "G1 approval evidence")
+    store.import_story(StoryCandidate.parse(story), 0)
+    gates = GateService(store)
+    critical = next(c["claim_id"] for c in story["claims"] if c["critical"])
+    base = ("REVIEWED", "Initial source analysis", "https://www.loc.gov/item/001")
+    rev = gates.review_claim(project, critical, *base[:2], 1, base[2])
+    first = gates.board(project)[0]
+    assert first["state"] == "READY_FOR_REVIEW" and first["dependency_fingerprint"] != first["candidate_sha256"]
+    def decision(board, expected, action="APPROVED"):
+        return {"decision": action, "candidate_sha256": board["candidate_sha256"],
+                "dependency_fingerprint": board["dependency_fingerprint"], "expected_revision": expected}
+    approved = gates.decide(project, "G1", decision(first, rev))
+    original_fp = first["dependency_fingerprint"]
+    with sqlite3.connect(store.database) as db:
+        first_snapshot = db.execute("SELECT snapshot_json FROM gate_approval_reviews WHERE approval_id=?",
+                                    (approved["approval_id"],)).fetchone()[0]
+    assert hashlib.sha256(first_snapshot.encode()).hexdigest() == original_fp
+    assert gates.review_claim(project, critical, *base[:2], approved["project_revision"], base[2]) == approved["project_revision"]
+    assert gates.board(project)[0]["state"] == "APPROVED"
+    audio = store.put_artifact(b"existing audio bytes", "voice_candidate")
+    gates.publish_candidate(project, "G2", audio, first["dependency_fingerprint"], approved["project_revision"])
+    archive = store.put_artifact(b"approved archive original", "original")
+    revised_values = {
+        "disposition": ("VERIFIED", base[1], base[2]),
+        "note": ("REVIEWED", "Revised conclusion", base[2]),
+        "source_url": ("REVIEWED", base[1], "https://www.loc.gov/item/002"),
+    }[change]
+    current = store.revision(project)
+    rev = gates.review_claim(project, critical, revised_values[0], revised_values[1],
+                             current, revised_values[2])
+    edited = gates.board(project)[0]
+    assert edited["state"] != "APPROVED" and edited["dependency_fingerprint"] != original_fp
+    states = {row["gate_id"]: row["state"] for row in gates.board(project)}
+    assert states["G4"] == "STALE" and states["G2"] == "READY_FOR_REVIEW"
+    with pytest.raises(ContractViolation, match="GATE_ILLEGAL_TRANSITION"):
+        gates.decide(project, "G2", {"decision": "CHANGES_REQUESTED",
+            "candidate_sha256": audio, "dependency_fingerprint": original_fp,
+            "expected_revision": rev})
+    with pytest.raises(ContractViolation, match="APPROVAL_REVISION_CONFLICT"):
+        gates.decide(project, "G1", decision(first, rev))
+    with sqlite3.connect(store.database) as db:
+        assert db.execute("SELECT COUNT(*) FROM gate_events WHERE gate_id='G1'").fetchone()[0] == 1
+        assert db.execute("SELECT snapshot_json FROM gate_approval_reviews WHERE approval_id=?",
+                          (approved["approval_id"],)).fetchone()[0] == first_snapshot
+    # Old evidence text restored is a new generation; old approval remains ineffective.
+    rev = gates.review_claim(project, critical, *base[:2], rev, base[2])
+    reversed_board = gates.board(project)[0]
+    assert reversed_board["state"] == "READY_FOR_REVIEW"
+    assert reversed_board["dependency_fingerprint"] != original_fp
+    with pytest.raises(ContractViolation, match="APPROVAL_REVISION_CONFLICT"):
+        gates.decide(project, "G1", decision(first, rev))
+    new_approval = gates.decide(project, "G1", decision(reversed_board, rev))
+    assert gates.board(project)[0]["state"] == "APPROVED"
+    assert store.get_artifact(audio) == b"existing audio bytes"
+    assert store.get_artifact(archive) == b"approved archive original"
+    with sqlite3.connect(store.database) as db:
+        assert db.execute("SELECT COUNT(*) FROM gate_events WHERE gate_id='G1'").fetchone()[0] == 2
+        assert db.execute("SELECT generation FROM claim_reviews WHERE project_id=? AND claim_id=?",
+                          (project, critical)).fetchone()[0] == 3
+        assert db.execute("SELECT snapshot_json FROM gate_approval_reviews WHERE approval_id=?",
+                          (approved["approval_id"],)).fetchone()[0] == first_snapshot
+        assert db.execute("SELECT approval_id FROM gate_heads WHERE project_id=? AND gate_id='G1'",
+                          (project,)).fetchone()[0] == new_approval["approval_id"]
+    assert GateService(ProjectStore(store.database, store.artifacts.root)).board(project)[0]["state"] == "APPROVED"
+
+
+def test_gate_effective_head_blocks_dependent_decisions_and_import_rollback(story, store):
+    """A1-04: stale historical head never authorizes G2, and failed imports cannot alter ledger."""
+    from backend.app.projects.gates import GateService
+    project = story["project"]["project_id"]
+    store.create_project(project, "Transactional lifecycle")
+    first_story = StoryCandidate.parse(story)
+    store.import_story(first_story, 0)
+    gates = GateService(store)
+    rev = 1
+    for claim in story["claims"]:
+        if claim["critical"]:
+            rev = gates.review_claim(project, claim["claim_id"], "REVIEWED", "Reviewed", rev)
+    current = gates.board(project)[0]
+    approved = gates.decide(project, "G1", {"decision": "APPROVED",
+        "candidate_sha256": current["candidate_sha256"],
+        "dependency_fingerprint": current["dependency_fingerprint"], "expected_revision": rev})
+    fake = store.put_artifact(b"some unapproved voice", "voice_candidate")
+    gates.publish_candidate(project, "G2", fake, current["dependency_fingerprint"], approved["project_revision"])
+    modified = copy.deepcopy(story)
+    modified["sections"][0]["narration"] += " Other historical source context."
+    with sqlite3.connect(store.database) as db:
+        db.execute("CREATE TRIGGER reject_story_change BEFORE UPDATE OF revision ON projects "
+                   "BEGIN SELECT RAISE(ABORT, 'forced transaction failure'); END;")
+    with pytest.raises(sqlite3.IntegrityError):
+        store.import_story(StoryCandidate.parse(modified), approved["project_revision"])
+    with sqlite3.connect(store.database) as db:
+        assert db.execute("SELECT COUNT(*) FROM story_candidates").fetchone()[0] == 1
+        assert db.execute("SELECT COUNT(*) FROM gate_events WHERE gate_id='G1'").fetchone()[0] == 1
+        assert db.execute("SELECT COUNT(*) FROM gate_staleness WHERE gate_id='G1'").fetchone()[0] == 0
+        db.execute("DROP TRIGGER reject_story_change")
+    rev = store.import_story(StoryCandidate.parse(modified), approved["project_revision"])
+    assert gates.board(project)[0]["state"] == "BLOCKED"
+    with pytest.raises(ContractViolation, match="GATE_ILLEGAL_TRANSITION"):
+        gates.decide(project, "G2", {"decision": "CHANGES_REQUESTED", "candidate_sha256": fake,
+            "dependency_fingerprint": current["dependency_fingerprint"], "expected_revision": rev})
+    assert GateService(ProjectStore(store.database, store.artifacts.root)).board(project)[0]["state"] == "BLOCKED"
+    assert gates.board(project)[1]["candidate_sha256"] == fake
+
+
+def test_api_g1_saved_review_fingerprint_idempotency_and_cas(story, tmp_path):
+    """A1-04: HTTP uses same persisted fingerprint as GateService and durable ledger."""
+    from fastapi.testclient import TestClient
+    from backend.app.api.server import create_app
+    db, media = tmp_path / "state.sqlite", tmp_path / "media"
+    project = story["project"]["project_id"]
+    store = ProjectStore(db, media)
+    store.create_project(project, "G1 HTTP review")
+    with TestClient(create_app(db, media)) as client:
+        root = f"/api/v1/projects/{project}"
+        imported = client.post(root + "/story/import?expected_revision=0", json=story,
+                               headers={"Idempotency-Key": "story-current-0001"})
+        assert imported.status_code == 200
+        claim = next(c["claim_id"] for c in story["claims"] if c["critical"])
+        url = root + f"/story/claims/{claim}/review"
+        def submit_review(rev, note, key):
+            return client.post(url, json={"expected_revision": rev, "status": "REVIEWED",
+                        "evidence_note": note, "source_url": "https://www.loc.gov/"},
+                        headers={"Idempotency-Key": key})
+        response = submit_review(1, "First review", "review-current-0001")
+        assert response.status_code == 200
+        current = client.get(root + "/gates").json()[0]
+        def decide(board, rev, key):
+            return client.post(root + "/gates/G1/decision", json={
+                "decision": "APPROVED", "candidate_sha256": board["candidate_sha256"],
+                "dependency_fingerprint": board["dependency_fingerprint"], "expected_revision": rev},
+                headers={"Idempotency-Key": key})
+        approved = decide(current, 2, "decision-current-0001")
+        assert approved.status_code == 200
+        assert decide(current, 2, "decision-current-0001").json() == approved.json()
+        assert submit_review(3, "First review", "review-current-0002").json()["project_revision"] == 3
+        assert client.get(root + "/gates").json()[0]["state"] == "APPROVED"
+        changed = submit_review(3, "Re-evaluated historical evidence", "review-current-0003")
+        assert changed.status_code == 200
+        board = client.get(root + "/gates").json()[0]
+        assert board["state"] == "READY_FOR_REVIEW"
+        assert board["candidate_sha256"] == current["candidate_sha256"]
+        assert board["dependency_fingerprint"] != current["dependency_fingerprint"]
+        stale_decision = decide(current, changed.json()["project_revision"], "decision-current-0002")
+        assert stale_decision.status_code == 409
+        assert stale_decision.json()["code"] == "APPROVAL_REVISION_CONFLICT"
+        assert decide(board, changed.json()["project_revision"] - 1, "decision-current-0003").status_code == 409
+        assert decide(board, changed.json()["project_revision"], "decision-current-0004").status_code == 200
+        assert client.get(root + "/gates").json()[0]["state"] == "APPROVED"
+    with sqlite3.connect(db) as sql:
+        assert sql.execute("SELECT COUNT(*) FROM gate_events WHERE gate_id='G1'").fetchone()[0] == 2
+        assert sql.execute("SELECT COUNT(*) FROM gate_approval_reviews").fetchone()[0] == 2
+    assert GateService(ProjectStore(db, media)).board(project)[0]["state"] == "APPROVED"

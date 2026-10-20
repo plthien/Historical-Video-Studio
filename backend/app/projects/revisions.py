@@ -10,6 +10,7 @@ _DOWNSTREAM = {
     "voice_audio": ("G2", "G4", "G5"),
     "asset_replace": ("G3", "G4", "G5"),
     "story_text": ("G1", "G2", "G4", "G5"),
+    "claim_review": ("G1", "G4", "G5"),
     "story_assets": ("G3", "G4", "G5"),
 }
 
@@ -17,6 +18,10 @@ _DOWNSTREAM = {
 def mark_stale(db, project_id: str, change_kind: str) -> tuple[str, ...]:
     gates = _DOWNSTREAM[change_kind]
     for gate in gates:
+        if gate == "G1" and not db.execute(
+                "SELECT 1 FROM gate_heads WHERE project_id=? AND gate_id='G1'",
+                (project_id,)).fetchone():
+            continue  # never-approved G1 draft does not own a stale authorization
         db.execute("INSERT INTO gate_staleness VALUES(?,?,?) "
                    "ON CONFLICT(project_id,gate_id) DO UPDATE SET cause=excluded.cause",
                    (project_id, gate, change_kind))

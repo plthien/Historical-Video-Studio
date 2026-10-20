@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+import hashlib
 import re
 import sqlite3
 from datetime import datetime, timezone
@@ -26,6 +27,21 @@ def _story(db: sqlite3.Connection, project_id: str):
     return row[0], json.loads(row[1])
 
 
+def _g1_identity(db: sqlite3.Connection, project_id: str):
+    """One authority for candidate SHA, saved human review generation and fingerprint."""
+    sha, _ = _story(db, project_id)
+    reviews = [dict(claim_id=r[0], disposition=r[1], evidence_note=r[2],
+                    source_url=r[3], generation=r[4])
+               for r in db.execute(
+                   "SELECT claim_id,disposition,note,source_url,generation FROM claim_reviews "
+                   "WHERE project_id=? AND story_sha256=? ORDER BY claim_id",
+                   (project_id, sha))]
+    snapshot = json.dumps({"story_sha256": sha, "reviews": reviews},
+                          sort_keys=True, ensure_ascii=False, separators=(",", ":"))
+    fingerprint = hashlib.sha256(snapshot.encode("utf-8")).hexdigest()
+    return sha, fingerprint, snapshot
+
+
 def _head(db, project_id: str, gate: str):
     return db.execute("SELECT candidate_sha256,dependency_fingerprint FROM gate_heads "
                       "WHERE project_id=? AND gate_id=?", (project_id, gate)).fetchone()
@@ -46,6 +62,7 @@ class GateService:
                     project_id TEXT NOT NULL, story_sha256 TEXT NOT NULL,
                     claim_id TEXT NOT NULL, disposition TEXT NOT NULL,
                     note TEXT NOT NULL, source_url TEXT,
+                    generation INTEGER NOT NULL DEFAULT 1,
                     PRIMARY KEY(project_id,story_sha256,claim_id)
                 );
                 CREATE TABLE IF NOT EXISTS gate_candidates (
@@ -68,11 +85,19 @@ class GateService:
                     project_id TEXT NOT NULL, gate_id TEXT NOT NULL,
                     cause TEXT NOT NULL, PRIMARY KEY(project_id,gate_id)
                 );
+                CREATE TABLE IF NOT EXISTS gate_approval_reviews (
+                    approval_id TEXT PRIMARY KEY,
+                    snapshot_json TEXT NOT NULL,
+                    FOREIGN KEY(approval_id) REFERENCES gate_events(approval_id)
+                );
             """)
             # Fresh V1 compatibility with the first A1-04 implementation, not old-tool migration.
             fields = {row[1] for row in db.execute("PRAGMA table_info(claim_reviews)")}
             if "source_url" not in fields:
                 db.execute("ALTER TABLE claim_reviews ADD COLUMN source_url TEXT")
+            if "generation" not in fields:
+                # Extend existing A1-04 DBs in place without migrating old-tool data.
+                db.execute("ALTER TABLE claim_reviews ADD COLUMN generation INTEGER NOT NULL DEFAULT 1")
 
     @staticmethod
     def _check_revision(db, project_id, expected_revision):
@@ -111,10 +136,20 @@ class GateService:
                 _fail("CLAIM_NOT_FOUND", claim_id, "Choose a claim in the current story.", "G1")
             if claim["critical"] and not claim["source_leads"] and not source_url:
                 _fail("CLAIM_CRITICAL_UNRESOLVED", claim_id, "Critical claim requires a source link.", "G1")
-            db.execute("INSERT INTO claim_reviews VALUES(?,?,?,?,?,?) "
-                       "ON CONFLICT(project_id,story_sha256,claim_id) DO UPDATE SET "
-                       "disposition=excluded.disposition,note=excluded.note,source_url=excluded.source_url",
-                       (project_id, story_sha, claim_id, disposition, note, source_url))
+            previous = db.execute(
+                "SELECT disposition,note,source_url FROM claim_reviews "
+                "WHERE project_id=? AND story_sha256=? AND claim_id=?",
+                (project_id, story_sha, claim_id)).fetchone()
+            if previous == (disposition, note, source_url):
+                return revision  # saved evidence identical: no new generation or invalidation
+            db.execute(
+                "INSERT INTO claim_reviews(project_id,story_sha256,claim_id,disposition,note,source_url,generation) "
+                "VALUES (?,?,?,?,?,?,1) ON CONFLICT(project_id,story_sha256,claim_id) "
+                "DO UPDATE SET disposition=excluded.disposition,note=excluded.note,"
+                "source_url=excluded.source_url,generation=claim_reviews.generation+1",
+                (project_id, story_sha, claim_id, disposition, note, source_url))
+            from backend.app.projects.revisions import mark_stale
+            mark_stale(db, project_id, "claim_review")
             db.execute("UPDATE projects SET revision=? WHERE project_id=?", (revision + 1, project_id))
             return revision + 1
 
@@ -141,8 +176,7 @@ class GateService:
 
     def _candidate(self, db, project_id, gate):
         if gate == "G1":
-            sha, _ = _story(db, project_id)
-            return (sha, sha)
+            return _g1_identity(db, project_id)[:2]
         return db.execute("SELECT candidate_sha256,dependency_fingerprint FROM gate_candidates "
                           "WHERE project_id=? AND gate_id=?", (project_id, gate)).fetchone()
 
@@ -158,7 +192,29 @@ class GateService:
             story_sha, story = _story(db, project_id)
             missing = self._critical_missing(db, project_id, story_sha, story)
         blockers = [] if candidate else ["CANDIDATE_NOT_READY"]
-        blockers += ["CLAIM_CRITICAL_UNRESOLVED:" + claim for claim in missing]
+        blockers.extend("CLAIM_CRITICAL_UNRESOLVED:" + claim for claim in missing)
+        if gate == "G1":
+            # A draft changing is not evidence of an invalidated approval.
+            # Historical decisions only bind their exact candidate + persisted review fingerprint.
+            if not candidate:
+                state = "DRAFT"
+            elif missing:
+                state = "BLOCKED"
+            elif last and last["decision"] in ("CHANGES_REQUESTED", "REJECTED") and (
+                    candidate[0], candidate[1]) == (
+                    last["candidate_sha256"], last["dependency_fingerprint"]):
+                state = last["decision"]
+            elif head and tuple(head) == tuple(candidate) and not stale:
+                state = "APPROVED"
+            else:
+                state = "READY_FOR_REVIEW"
+            return state, candidate, blockers, last
+
+        # Current G1 authorization, never just a historical gate_heads row, is
+        # required before any dependent gate becomes effectively approved.
+        if gate in ("G4", "G5") and head and self._status(db, project_id, "G1")[0] != "APPROVED":
+            blockers.append("G1_APPROVAL_STALE")
+            return "STALE", candidate, blockers, last
         changed_since = bool(last and candidate and (
             candidate[0] != last["candidate_sha256"] or
             candidate[1] != last["dependency_fingerprint"]))
@@ -168,8 +224,6 @@ class GateService:
             if stale:
                 blockers.append(stale[0])
         elif stale or changed_head:
-            # Only a fresh reviewed candidate can exit stale status; the marker
-            # itself is removed by the next successful approval, not publication.
             if candidate and changed_since and not missing:
                 state = "READY_FOR_REVIEW"
             else:
@@ -221,8 +275,8 @@ class GateService:
                 # No generic artifact, schema-valid fixture, or invented table can authorize them.
                 if payload["decision"] == "APPROVED":
                     _fail("GATE_ILLEGAL_TRANSITION", gate, "Owner pipeline approval evidence is not implemented.", gate)
-                if not _head(db, project_id, "G1"):
-                    _fail("GATE_ILLEGAL_TRANSITION", gate, "Approve G1 first.", gate)
+                if self._status(db, project_id, "G1")[0] != "APPROVED":
+                    _fail("GATE_ILLEGAL_TRANSITION", gate, "Approve the CURRENT G1 review dependencies first.", gate)
             record = {
                 "schema_version": "ApprovalRecord.v1",
                 "approval_id": approval_id or "approval_" + uuid4().hex,
@@ -235,6 +289,12 @@ class GateService:
             validate_document("ApprovalRecord.v1", record)
             db.execute("INSERT INTO gate_events VALUES(?,?,?,?,?)",
                        (record["approval_id"], project_id, gate, json.dumps(record, sort_keys=True), revision + 1))
+            if gate == "G1":
+                _, fingerprint, evidence = _g1_identity(db, project_id)
+                if fingerprint != candidate[1]:
+                    _fail("APPROVAL_REVISION_CONFLICT", gate, "Review evidence changed during approval.", gate)
+                db.execute("INSERT INTO gate_approval_reviews(approval_id,snapshot_json) VALUES(?,?)",
+                           (record["approval_id"], evidence))
             if record["decision"] == "APPROVED":
                 db.execute("INSERT INTO gate_heads VALUES(?,?,?,?,?) ON CONFLICT(project_id,gate_id) "
                            "DO UPDATE SET candidate_sha256=excluded.candidate_sha256,"
