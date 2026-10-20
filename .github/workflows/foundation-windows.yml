@@ -33,17 +33,6 @@ jobs:
             }
             if (-not $installed) { throw "FFmpeg and ffprobe could not be installed after bounded retries" }
           }
-      - name: Temporary generate frontend lock for dependency capture
-        shell: pwsh
-        run: |
-          Push-Location frontend
-          try {
-            npm install --package-lock-only --ignore-scripts --no-audit --no-fund
-            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          } finally { Pop-Location }
-          Write-Host "__FRONTEND_LOCK_START__"
-          Get-Content frontend/package-lock.json -Raw
-          Write-Host "__FRONTEND_LOCK_END__"
       - name: Check branch diff whitespace against main
         shell: pwsh
         run: |
