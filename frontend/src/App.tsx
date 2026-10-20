@@ -110,7 +110,16 @@ export function App() {
   async function cancelJob(jobId: string) {
     if (!project) return;
     await execute(`Cancel request ${jobId}`, async () => {
-      await api.cancelJob(jobId, idKey());
+      const job=jobs.find(x=>x.job_id===jobId);
+      if(job?.kind==="glabs_image")await api.cancelManaged(project.project_id,jobId,idKey());
+      else await api.cancelJob(jobId,idKey());
+      await refresh(project.project_id);
+    });
+  }
+  async function retryJob(jobId:string){
+    if(!project)return;
+    await execute(`Retry managed task ${jobId}`,async()=>{
+      await api.retryManaged(project.project_id,jobId,idKey());
       await refresh(project.project_id);
     });
   }
@@ -196,9 +205,13 @@ export function App() {
           <ul>{jobs.map(job => <li key={job.job_id}>
             <strong>{job.job_id}</strong> — {job.kind}: {job.state}
             {job.error_code && <span> · {job.error_code}</span>}
-            {(job.state === "QUEUED" || job.state === "RUNNING") &&
-              <button disabled={!!pending || !!job.cancel_requested} onClick={() => void cancelJob(job.job_id)}>
-                {job.cancel_requested ? "Cancellation requested" : "Request cancellation"}</button>}
+            {["QUEUED","RUNNING","FAILED_RETRYABLE","BLOCKED_REVIEW"].includes(job.state) &&
+              <button disabled={!!pending} onClick={() => void cancelJob(job.job_id)}>
+                {job.cancel_requested ? "Reconcile cancellation with provider" : "Request cancellation"}</button>}
+            {job.kind==="glabs_image"&&job.state==="FAILED_RETRYABLE"&&!job.cancel_requested&&
+              <button disabled={!!pending} onClick={()=>void retryJob(job.job_id)}>Retry / resume original task</button>}
+            {job.kind==="glabs_image"&&job.state==="BLOCKED_REVIEW"&&
+              <small>Restore original webhook credentials, then reconcile cancellation. No automatic paid resubmission.</small>}
           </li>)}</ul>}
       </section>}
     </main>
