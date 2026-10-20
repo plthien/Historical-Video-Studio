@@ -70,6 +70,8 @@ class ProjectStore:
         return row[0]
 
     def import_story(self, candidate: StoryCandidate, expected_revision: int) -> int:
+        from backend.app.projects.gates import GateService
+        GateService(self)  # ensure the gate ledger exists before same-transaction invalidation
         with self._transaction() as db:
             row = db.execute("SELECT revision FROM projects WHERE project_id=?",
                              (candidate.project_id,)).fetchone()
@@ -83,7 +85,16 @@ class ProjectStore:
             if checked.sha256 != candidate.sha256 or checked.project_id != candidate.project_id:
                 raise ContractViolation("STORY_SHA_MISMATCH", candidate.project_id,
                                         "Re-validate the story candidate against original content.")
+            previous = db.execute("SELECT sha256 FROM story_candidates WHERE project_id=? "
+                                  "ORDER BY revision DESC LIMIT 1", (candidate.project_id,)).fetchone()
+            if previous and previous[0] == candidate.sha256:
+                return row[0]  # same canonical content: keep approval and current revision
             new_revision = row[0] + 1
+            if previous:
+                # New source truth invalidates dependent snapshots in this SAME transaction.
+                # Relevance-specific G3 invalidation remains owned by its asset binding logic.
+                from backend.app.projects.revisions import mark_stale
+                mark_stale(db, candidate.project_id, "story_text")
             db.execute("INSERT INTO story_candidates (project_id, revision, sha256, story_json)"
                        " VALUES (?, ?, ?, ?)",
                        (candidate.project_id, new_revision, candidate.sha256, candidate.canonical_bytes))
