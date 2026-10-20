@@ -652,22 +652,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "additionalProperties": false,
-                "required": [
-                  "expected_revision",
-                  "candidate_id"
-                ],
-                "properties": {
-                  "expected_revision": {
-                    "type": "integer",
-                    "minimum": 0
-                  },
-                  "candidate_id": {
-                    "type": "string",
-                    "minLength": 1
-                  }
-                }
+                "$ref": "#/components/schemas/AssetHydrate"
               }
             }
           }
@@ -1989,6 +1974,24 @@
             }
           }
         }
+      },
+      "AssetHydrate": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "expected_revision": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "candidate_id": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "expected_revision",
+          "candidate_id"
+        ]
       }
     }
   }
