@@ -552,6 +552,15 @@ def test_alignment_api_status_and_media_bytes_on_real_store(tmp_path):
         metadata=client.get(base+"/alignment").json()
         final=metadata["final_audio"]
         assert metadata["g4_ready_dependency"] is False
+        # S11: identical WAV with another transcript must never inherit a prior word map.
+        with store._transaction() as db:
+            db.execute("INSERT INTO word_maps VALUES(?,?,?,?,?,?)",
+                       (project,final["audio_sha256"],"0"*64,"1"*64,"{}",
+                        "wrong-transcript-mock-job"))
+        incompatible=client.get(base+"/alignment")
+        assert incompatible.status_code==200
+        assert incompatible.json()["word_map"] is None
+        assert incompatible.json()["g4_ready_dependency"] is False
         assert client.get(base+"/audio/"+final["audio_sha256"]).content==store.get_artifact(final["audio_sha256"])
         assert client.get("/api/v1/projects/proj_foreign/voice/audio/"+final["audio_sha256"]).status_code==404
         assert client.get(base+"/audio/"+"0"*64).status_code==404
