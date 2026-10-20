@@ -603,3 +603,33 @@ def test_remote_cancel_terminal_cas_preserves_worker_success(tmp_path):
     assert svc.cancel(pid,job["job_id"])["state"]=="SUCCEEDED"
     assert "/api/stop/ab12ab12" not in calls
     assert svc.queue.get(job["job_id"])["output_sha256"]==finished["output_sha256"]
+
+
+def test_cancel_wins_during_poll_http_error_keeps_remote_verified_cancel(tmp_path):
+    """R04: a late transient 429 must not overwrite or crash a CAS-won stop."""
+    state={"stop_during_poll":False}
+    calls=[]
+    svc_holder={}
+    def handler(req):
+        calls.append(req.url.path)
+        if req.url.path=="/api/image/generate":
+            return httpx.Response(202,json={"task_id":"abcdd123","status":"pending"})
+        if req.url.path=="/api/status/abcdd123":
+            if state["stop_during_poll"]:
+                result=svc_holder["service"].cancel(svc_holder["pid"],svc_holder["job"])
+                assert result["state"]=="CANCELLED"
+                return httpx.Response(429)
+            return httpx.Response(200,json={"task_id":"abcdd123","status":"running"})
+        if req.url.path=="/api/stop/abcdd123":
+            return httpx.Response(200,json={"stopped":["abcdd123"],"skipped":[],"count":1})
+        return httpx.Response(404)
+    store,service,pid,rid=setup(tmp_path,handler)
+    job=service.enqueue(pid,rid,"nano_banana_2","Historical note",
+        expected_revision=1,idempotency_key="stop-wins-poll-error-01",controlled_offline=True)
+    assert service.process_one(job["job_id"])["state"]=="RUNNING"
+    svc_holder.update(service=service,pid=pid,job=job["job_id"])
+    state["stop_during_poll"]=True
+    active=service.queue.get(job["job_id"])
+    assert service.poll(job["job_id"],active["lease_token"])["state"]=="CANCELLED"
+    assert service.queue.get(job["job_id"])["state"]=="CANCELLED"
+    assert calls.count("/api/image/generate")==1 and calls.count("/api/stop/abcdd123")==1
