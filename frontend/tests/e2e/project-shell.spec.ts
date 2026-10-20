@@ -49,6 +49,7 @@ test("project-shell: malformed JSON and stale revision are visible", async ({pag
   await page.goto("/");
   await page.getByLabel("Project title").fill("Conflict Documentary");
   await page.getByRole("button", {name: "Create project"}).click();
+  await expect(page.getByRole("status")).toContainText("Project creation completed");
   const id = (await page.locator(".topline strong").innerText()).trim();
   await page.getByLabel("StoryPackage JSON").fill("this is not JSON");
   await page.getByRole("button", {name: "Import and validate story"}).click();
@@ -58,6 +59,7 @@ test("project-shell: malformed JSON and stale revision are visible", async ({pag
   story.claims.forEach((c: {critical: boolean}) => {c.critical = false;});
   await page.getByLabel("StoryPackage JSON").fill(JSON.stringify(story));
   await page.getByRole("button", {name: "Import and validate story"}).click();
+  await expect(page.getByRole("status")).toContainText("Story import completed");
   await expect(page.getByRole("button", {name: "Approve G1"})).toBeEnabled();
   const result = await request.post(`http://127.0.0.1:8000/api/v1/projects/${id}/story/claims/claim_001/review`, {
     headers: {"Idempotency-Key": crypto.randomUUID()},
