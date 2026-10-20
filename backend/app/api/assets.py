@@ -72,8 +72,9 @@ class Generation(Input):
 
 class Settings(Input):
     provider: str
-    api_key: str = ""
+    api_key: str | None = None
     base_url: str = ""
+    clear_key: bool = False
 
 def mount(app, store, gates, queue, idempotent):
     assets=AssetCandidates(store)
@@ -101,19 +102,35 @@ def mount(app, store, gates, queue, idempotent):
 
     @app.put("/api/v1/providers/settings")
     def provider_settings(body: Settings, key: str=Header(alias="Idempotency-Key")):
-        if len(key)<12:
-            raise ContractViolation("IDEMPOTENCY_KEY_INVALID","provider","Provide a unique request key.")
         if body.provider not in ("glabs_webhook","europeana"):
             raise ContractViolation("PROVIDER_SETTINGS_INVALID",body.provider,"Supported providers: Europeana and G-Labs.")
+        if body.clear_key and body.api_key:
+            raise ContractViolation("PROVIDER_SETTINGS_INVALID",body.provider,
+                                    "Explicit clear cannot also rotate the key.")
         if body.provider=="glabs_webhook":
-            GLabs(base_url=body.base_url or "http://127.0.0.1:8765",api_key=body.api_key)
+            GLabs(base_url=body.base_url or "http://127.0.0.1:8765")
         elif body.base_url:
             raise ContractViolation("PROVIDER_SETTINGS_INVALID","europeana","Europeana endpoint is fixed.")
-        with store._transaction() as db:
-            db.execute("INSERT INTO local_provider_settings VALUES(?,?,?) "
-                       "ON CONFLICT(provider) DO UPDATE SET api_key=excluded.api_key,base_url=excluded.base_url",
-                       (body.provider,body.api_key,body.base_url))
-        return {"provider":body.provider,"configured":bool(body.api_key),"live_status":"NOT_RUN"}
+        # Journal only hashed credential inputs, never a raw secret.
+        digest=__import__("hashlib").sha256((body.api_key or "").encode()).hexdigest()
+        journal={"provider":body.provider,"key_digest":digest,
+                 "base_url":body.base_url,"clear_key":body.clear_key}
+        def action():
+            with store._transaction() as db:
+                row=db.execute("SELECT api_key,base_url FROM local_provider_settings WHERE provider=?",
+                               (body.provider,)).fetchone()
+                existing_key=row[0] if row else (os.getenv("HVS_GLABS_API_KEY","") if body.provider=="glabs_webhook"
+                                                 else os.getenv("HVS_EUROPEANA_API_KEY",""))
+                secret=("" if body.clear_key else body.api_key or existing_key)
+                old_base=row[1] if row else os.getenv("HVS_GLABS_BASE_URL","")
+                base=body.base_url or (old_base if body.provider=="glabs_webhook" else "")
+                db.execute("INSERT INTO local_provider_settings VALUES(?,?,?) "
+                           "ON CONFLICT(provider) DO UPDATE SET api_key=excluded.api_key,base_url=excluded.base_url",
+                           (body.provider,secret,base))
+            return {"provider":body.provider,"configured":bool(secret),
+                    "live_status":"NOT_RUN"}
+        return idempotent("__local_provider_settings__","provider-settings:"+body.provider,
+                          key,journal,action)
 
     def stored_provider_key(name):
         with store._connection() as db:
