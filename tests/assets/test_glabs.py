@@ -295,6 +295,13 @@ def test_managed_authorization_revoked_before_publication(tmp_path):
         service.enqueue(pid,rid,"nano_banana_2","Historical illustration",expected_revision=store.revision(pid),
                         idempotency_key="managed-not-authorized-01")
     revision=resolver.choose(pid,rid,"MANAGED_FALLBACK","Operator authorizes billable candidate",store.revision(pid))["project_revision"]
+    service.provider.key=""
+    with pytest.raises(ContractViolation,match="GLABS_KEY_MISSING"):
+        service.enqueue(pid,rid,"nano_banana_2","Historical illustration",expected_revision=revision,
+                        idempotency_key="managed-missing-key-001")
+    with store._connection() as db:
+        assert db.execute("SELECT COUNT(*) FROM jobs WHERE kind='glabs_image'").fetchone()[0]==0
+    service.provider.key="offline-secret"
     job=service.enqueue(pid,rid,"nano_banana_2","Historical illustration",expected_revision=revision,
                         idempotency_key="managed-authorized-001")
     assert service.process_one(job["job_id"])["state"]=="RUNNING"
@@ -306,5 +313,37 @@ def test_managed_authorization_revoked_before_publication(tmp_path):
     assert result["error_code"]=="GLABS_FALLBACK_AUTH_REQUIRED"
     assert result["provider_task_id"]=="abcd9999"
     assert calls.count("/api/image/generate")==1
+    with store._connection() as db:
+        assert db.execute("SELECT COUNT(*) FROM asset_candidates").fetchone()[0]==0
+
+
+def test_provider_identity_is_pinned_before_first_paid_post(tmp_path):
+    """F05: settings rotation cannot silently redirect persisted billable task."""
+    from backend.app.assets.resolution import AssetResolution
+    from backend.app.projects.gates import GateService
+    calls=[]
+    store,service,pid,rid=setup(tmp_path,lambda req:calls.append(req.url.path) or httpx.Response(500))
+    service.provider.offline_fixture=False
+    gates=GateService(store)
+    story=store.get_story(pid).data()
+    for claim in story["claims"]:
+        if claim["critical"]:
+            gates.review_claim(pid,claim["claim_id"],"REVIEWED","Synthetic human review",
+                               store.revision(pid),source_url="https://example.org/mock-evidence")
+    g1=gates.board(pid)[0]
+    gates.decide(pid,"G1",{"decision":"APPROVED","candidate_sha256":g1["candidate_sha256"],
+        "dependency_fingerprint":g1["dependency_fingerprint"],
+        "expected_revision":store.revision(pid)})
+    resolver=AssetResolution(store)
+    revision=resolver.choose(pid,rid,"MANAGED_FALLBACK","Authorized original endpoint",
+                             store.revision(pid))["project_revision"]
+    job=service.enqueue(pid,rid,"nano_banana_2","Illustration",
+        expected_revision=revision,idempotency_key="provider-identity-pin-001")
+    assert "offline-secret" not in service.queue.get(job["job_id"])["payload_json"]
+    service.provider.key="rotated-credential"
+    outcome=service.process_one(job["job_id"])
+    assert outcome["state"]=="FAILED_TERMINAL"
+    assert outcome["error_code"]=="GLABS_PROVIDER_IDENTITY_STALE"
+    assert calls==[]
     with store._connection() as db:
         assert db.execute("SELECT COUNT(*) FROM asset_candidates").fetchone()[0]==0
