@@ -186,6 +186,7 @@ def create_app(database: str | Path | None = None, media_root: str | Path | None
 
     @app.post("/api/v1/projects/{project_id}/gates/{gate_id}/decision")
     def gate_decision(project_id: str, gate_id: str, body: GateDecision,
+                      background: BackgroundTasks,
                       idempotency_key: str = Header(alias="Idempotency-Key")):
         data = body.model_dump()
         result = idempotent(project_id, f"gate:{gate_id}", idempotency_key, data,
