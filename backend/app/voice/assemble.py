@@ -25,6 +25,8 @@ def selection_snapshot(db, project_id: str) -> dict | None:
     # Foundation GateService may exist before A2 voice tables are initialized.
     if not db.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name='voice_selected'").fetchone():
         return None
+    if not db.execute("SELECT 1 FROM story_candidates WHERE project_id=? LIMIT 1", (project_id,)).fetchone():
+        return None
     current_sha, fp, _ = _g1_identity(db, project_id)
     head = _head(db, project_id, "G1")
     stale = db.execute("SELECT 1 FROM gate_staleness WHERE project_id=? AND gate_id='G1'",
