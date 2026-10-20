@@ -72,3 +72,18 @@ def test_batch_approval_is_all_or_nothing(tmp_path):
     assert len(done["approved"])==2
     with store._connection() as db:
         assert db.execute("SELECT COUNT(*) FROM asset_approval_heads").fetchone()[0]==2
+        previous_events=db.execute("SELECT COUNT(*) FROM asset_approval_events").fetchone()[0]
+    # R01: one identical + one materially amended review is exactly one new event.
+    changed=dict(reviews[1],historical_context_note="Updated genuine review note")
+    mixed=resolver.approve_batch(pid,[reviews[0],changed],store.revision(pid))
+    assert mixed["approved"][0]["approval_record_id"]==done["approved"][0]["approval_record_id"]
+    assert mixed["approved"][1]["approval_record_id"]!=done["approved"][1]["approval_record_id"]
+    with store._connection() as db:
+        assert db.execute("SELECT COUNT(*) FROM asset_approval_events").fetchone()[0]==previous_events+1
+    before=store.revision(pid)
+    # Validation of every item precedes writes; unchanged item cannot be partially committed.
+    with pytest.raises(ContractViolation,match="ASSET_CANDIDATE"):
+        resolver.approve_batch(pid,[reviews[0],dict(changed,candidate_id=reviews[0]["candidate_id"])],before)
+    assert store.revision(pid)==before
+    with store._connection() as db:
+        assert db.execute("SELECT COUNT(*) FROM asset_approval_events").fetchone()[0]==previous_events+1
