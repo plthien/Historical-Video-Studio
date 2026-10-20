@@ -137,6 +137,10 @@ class GTaskService:
             retryable=(exc.code=="GLABS_PROVIDER_IDENTITY_STALE" or
                        (bool(current["provider_task_id"]) and
                         exc.code in ("GLABS_RATE_LIMITED","GLABS_NETWORK_ERROR")))
+            if current["state"] in ("CANCELLED","SUCCEEDED","FAILED_TERMINAL","BLOCKED_REVIEW"):
+                return current
+            if exc.code=="JOB_LEASE_CONFLICT":
+                return current
             return self.queue.fail(job["job_id"],job["lease_token"],exc.code,
                                    retryable=retryable)
         except Exception:
@@ -192,7 +196,7 @@ class GTaskService:
             if exc.code=="STOPPED_BY_CLIENT":
                 self.queue.cancel(job_id)
                 self._observe(job_id,"failed","STOPPED_BY_CLIENT")
-                return self.queue.acknowledge_cancel(job_id,token,provider_confirmed=True)
+                return self.queue.confirm_remote_stop(job_id,job["provider_task_id"])
             if exc.code=="GLABS_SOURCE_STALE":
                 # Provider completed successfully; only Studio publication is stale.
                 self._observe(job_id,"completed",exc.code)
@@ -224,18 +228,58 @@ class GTaskService:
             return self.queue.fail(job_id,current["lease_token"],"GLABS_POLL_TIMEOUT",retryable=True)
         return current
 
-    def cancel(self,project,job_id):
+    def _scoped(self,project,job_id):
         job=self.queue.get(job_id)
         if job["project_id"]!=project or job["kind"]!="glabs_image":
             raise ContractViolation("GLABS_TASK_NOT_FOUND",job_id,"Not this project's generation.")
+        return job
+
+    def cancel(self,project,job_id):
+        job=self._scoped(project,job_id)
         if job["state"] in ("SUCCEEDED","CANCELLED","FAILED_TERMINAL"):
             return job
-        if job["provider_task_id"] and job["state"]=="RUNNING":
-            self._assert_job_provider(job,json.loads(job["payload_json"]))
+        # QUEUED with a recovered remote ID is remote-owned, not local-only work.
         flagged=self.queue.cancel(job_id)
-        if job["provider_task_id"] and job["state"]=="RUNNING":
-            self.provider.stop(job["provider_task_id"])
-            result=self.queue.acknowledge_cancel(job_id,job["lease_token"],provider_confirmed=True)
-            self._observe(job_id,"failed","STOPPED_BY_CLIENT")
-            return result
-        return flagged
+        if not job["provider_task_id"]:
+            if flagged["state"]=="CANCELLED":
+                return flagged
+            # Worker may have just submitted while we requested cancellation.
+            fresh=self.queue.get(job_id)
+            if fresh["provider_task_id"]:
+                return self.cancel(project,job_id)
+            return flagged
+        try:
+            self._assert_job_provider(job,json.loads(job["payload_json"]))
+            outcome=self.provider.stop(job["provider_task_id"])
+            if outcome=="stopped":
+                self._observe(job_id,"failed","STOPPED_BY_CLIENT")
+                return self.queue.confirm_remote_stop(job_id,job["provider_task_id"])
+            # Skipped means already finished, not cancelled. Reconcile original task.
+            self.queue.reconcile_cancel(job_id)
+            fresh=self.queue.get(job_id)
+            if fresh["state"]=="RUNNING":
+                result=self.poll(job_id,fresh["lease_token"])
+            else:
+                result=self.process_one(job_id)
+            if result and result["state"]=="RUNNING":
+                return self.queue.cancellation_uncertain(job_id,"GLABS_STOP_SKIPPED_NOT_TERMINAL")
+            return result or self.queue.get(job_id)
+        except ContractViolation as exc:
+            current=self.queue.get(job_id)
+            if current["state"] in ("SUCCEEDED","CANCELLED","FAILED_TERMINAL"):
+                return current
+            # An unknown stop response or credential rotation must be explicitly reconciled.
+            self._observe(job_id,"cancel_unknown",exc.code)
+            return self.queue.cancellation_uncertain(job_id,
+                     "CANCELLATION_NOT_CONFIRMED" if exc.code!="GLABS_PROVIDER_IDENTITY_STALE" else exc.code)
+
+    def retry(self,project,job_id):
+        job=self._scoped(project,job_id)
+        if job["state"]!="FAILED_RETRYABLE":
+            raise ContractViolation("JOB_RETRY_FORBIDDEN",job_id,
+                                    "Only retryable provider jobs can be resumed.")
+        payload=json.loads(job["payload_json"])
+        self._assert_job_provider(job,payload)
+        if job["cancel_requested"]:
+            raise ContractViolation("JOB_CANCEL_PENDING",job_id,"Reconcile cancellation first.")
+        return self.queue.retry(job_id)
