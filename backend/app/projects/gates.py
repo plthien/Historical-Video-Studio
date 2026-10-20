@@ -308,8 +308,8 @@ class GateService:
                     from backend.app.voice.assemble import selection_snapshot, canonical, sha, assemble_frozen
                     snapshot = selection_snapshot(db, project_id)
                     if not snapshot or sha(canonical(snapshot)) != candidate[0]:
-                        _fail("FINAL_AUDIO_SELECTION_INCOMPLETE", gate,
-                              "Select a current compatible attempt in every narrated section.", gate)
+                        _fail("GATE_ILLEGAL_TRANSITION", gate,
+                              "A G2 owner candidate must bind selected current audio in every section.", gate)
                     # Validate real audio samples before creating immutable approval intent.
                     assemble_frozen(self.store, project_id, snapshot)
                 if self._status(db, project_id, "G1")[0] != "APPROVED":
