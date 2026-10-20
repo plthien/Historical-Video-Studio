@@ -48,6 +48,13 @@ test("project-shell: six destinations, real import and G1 human review", async (
   await page.getByRole("button", {name: "Approve G1"}).click();
   await expect(page.getByRole("status")).toContainText("G1 approved completed");
   await expect(page.locator(".gateboard")).toContainText("APPROVED");
+  // Source-only edits must retain the existing saved note, invalidate G1 and allow reapproval.
+  await page.getByLabel("Additional source URL (optional)").first().fill("https://www.loc.gov/item/002");
+  await page.getByRole("button", {name: "Record reviewed"}).first().click();
+  await expect(page.getByRole("status")).toContainText("Claim claim_001 review completed");
+  await expect(page.locator(".gateboard")).toContainText("READY_FOR_REVIEW");
+  await page.getByRole("button", {name: "Approve G1"}).click();
+  await expect(page.locator(".gateboard")).toContainText("APPROVED");
 
   await expect(page.getByRole("navigation").getByRole("button", {name: /Voice Studio/})).toBeVisible();
   await page.getByRole("navigation").getByRole("button", {name: /Voice Studio/}).click();
