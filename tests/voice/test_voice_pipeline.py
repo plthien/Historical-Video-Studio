@@ -561,6 +561,21 @@ def test_alignment_api_status_and_media_bytes_on_real_store(tmp_path):
         assert incompatible.status_code==200
         assert incompatible.json()["word_map"] is None
         assert incompatible.json()["g4_ready_dependency"] is False
+        # A schema-valid map inserted without a successfully owned alignment job is
+        # not provider evidence and must not unlock the G4 dependency.
+        from backend.tools.voice_final_smoke import mock_alignment
+        from backend.app.voice.word_map import word_map
+        from backend.app.voice.assemble import canonical,sha
+        transcript="\n".join(s["narration"] for s in story["sections"])
+        forged=word_map(project,final,transcript,mock_alignment(final,transcript))
+        doc=canonical(forged)
+        digest=store.put_artifact(doc,"word_map")
+        with store._transaction() as db:
+            db.execute("INSERT INTO word_maps VALUES(?,?,?,?,?,?)",
+                       (project,final["audio_sha256"],final["transcript_sha256"],
+                        digest,doc.decode("utf-8"),"no_successful_provider_job"))
+        assert client.get(base+"/alignment").json()["g4_ready_dependency"] is False
+        assert client.get(base+"/alignment").json()["word_map"] is None
         assert client.get(base+"/audio/"+final["audio_sha256"]).content==store.get_artifact(final["audio_sha256"])
         assert client.get("/api/v1/projects/proj_foreign/voice/audio/"+final["audio_sha256"]).status_code==404
         assert client.get(base+"/audio/"+"0"*64).status_code==404
