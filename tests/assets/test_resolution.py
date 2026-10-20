@@ -58,7 +58,7 @@ def test_batch_approval_is_all_or_nothing(tmp_path):
     a=assets.manual(pid,rid,PNG,"One","Period confirmed","Permission one")
     b=assets.manual(pid,rid2,PNG,"Two","Period confirmed","Permission two")
     reviews=[dict(requirement_id=rid,candidate_id=a["candidate_id"],original_sha256=a["original_sha256"],
-                  rights_status="ELIGIBLE",rights_evidence_note="Owned","historical_context_note":"Period verified"),
+                  rights_status="ELIGIBLE",rights_evidence_note="Owned",historical_context_note="Period verified"),
              dict(requirement_id=rid2,candidate_id=b["candidate_id"],original_sha256=b["original_sha256"],
                   rights_status="ELIGIBLE",rights_evidence_note="Owned","historical_context_note":"Period verified")]
     start=store.revision(pid)
