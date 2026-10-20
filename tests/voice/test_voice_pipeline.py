@@ -553,7 +553,7 @@ def test_alignment_api_status_and_media_bytes_on_real_store(tmp_path):
         final=metadata["final_audio"]
         assert metadata["g4_ready_dependency"] is False
         assert client.get(base+"/audio/"+final["audio_sha256"]).content==store.get_artifact(final["audio_sha256"])
-        assert client.get("/api/v1/projects/proj_foreign/audio/"+final["audio_sha256"]).status_code==404
+        assert client.get("/api/v1/projects/proj_foreign/voice/audio/"+final["audio_sha256"]).status_code==404
         assert client.get(base+"/audio/"+"0"*64).status_code==404
         assert client.post(base+"/alignment/retry",json={
             "expected_revision":store.revision(project),"audio_sha256":final["audio_sha256"],
