@@ -40,7 +40,7 @@ test("project-shell: six destinations, real import and G1 human review", async (
   await expect(page.locator(".gateboard")).toContainText("APPROVED");
   await page.screenshot({path: testInfo.outputPath("g1-approved.png")});
   // A saved evidence change invalidates the old G1 head without changing the story SHA.
-  await page.getByRole("navigation").getByRole("button", {name: /Story Review/}).click();
+  await page.getByRole("navigation").getByRole("button", {name: /Story review/i}).click();
   await page.getByLabel("Evidence review note").first().fill("Corrected archival interpretation");
   await page.getByRole("button", {name: "Record reviewed"}).first().click();
   await expect(page.getByRole("status")).toContainText("Claim claim_001 review completed");
