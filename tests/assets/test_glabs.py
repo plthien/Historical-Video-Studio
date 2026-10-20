@@ -155,3 +155,96 @@ def test_poll_error_499_marks_cancelled_and_never_creates_original(tmp_path):
     with store._connection() as db:
         assert db.execute("SELECT COUNT(*) FROM asset_candidates WHERE project_id=?",
                           (project,)).fetchone()[0]==0
+
+
+def test_generate_source_snapshot_blocks_presubmit_and_completion_staleness(tmp_path):
+    calls = []
+    def handler(req):
+        calls.append(req.url.path)
+        if req.url.path == "/api/image/generate":
+            return httpx.Response(202, json={"task_id": "cafeaffe", "status": "pending"})
+        if req.url.path == "/api/status/cafeaffe":
+            return httpx.Response(200, json={"task_id": "cafeaffe", "status": "completed"})
+        if req.url.path == "/api/result/cafeaffe":
+            return httpx.Response(200, json={"task_id": "cafeaffe", "status": "completed",
+                    "results": ["http://127.0.0.1:8765/api/files/r.png"]})
+        if req.url.path == "/api/files/r.png":
+            return httpx.Response(200, content=PNG)
+        return httpx.Response(404)
+    store, service, pid, req = setup(tmp_path, handler)
+    before = service.enqueue(pid, req, "nano_banana_2", "Ancient illustration",
+                expected_revision=store.revision(pid), idempotency_key="snapshot-before-001",
+                controlled_offline=True)
+    payload = json.loads(before["payload_json"])
+    assert payload["story_sha256"] == store.get_story(pid).sha256
+    assert len(payload["requirement_sha256"]) == 64
+    changed = store.get_story(pid).data()
+    changed["asset_requirements"][0]["subject"] += " changed"
+    store.import_story(StoryCandidate.parse(changed), store.revision(pid))
+    blocked = service.process_one(before["job_id"])
+    assert blocked["state"] == "FAILED_TERMINAL"
+    assert blocked["error_code"] == "GLABS_SOURCE_STALE"
+    assert "/api/image/generate" not in calls
+
+    # Generation in progress must never remap an old requirement ID.
+    paid = service.enqueue(pid, req, "nano_banana_2", "New illustration",
+                expected_revision=store.revision(pid), idempotency_key="snapshot-during-001",
+                controlled_offline=True)
+    def pending(req_http):
+        if req_http.url.path == "/api/status/cafeaffe":
+            return httpx.Response(200, json={"task_id": "cafeaffe", "status": "running"})
+        return handler(req_http)
+    service.provider.client = httpx.Client(transport=httpx.MockTransport(pending))
+    started = service.process_one(paid["job_id"])
+    assert started["provider_task_id"] == "cafeaffe"
+    changed_again = store.get_story(pid).data()
+    changed_again["asset_requirements"][0]["subject"] += " changed again"
+    store.import_story(StoryCandidate.parse(changed_again), store.revision(pid))
+    service.provider.client = httpx.Client(transport=httpx.MockTransport(handler))
+    finished = service.poll(paid["job_id"], started["lease_token"])
+    assert finished["state"] == "FAILED_TERMINAL"
+    assert finished["error_code"] == "GLABS_SOURCE_STALE"
+    assert finished["provider_task_id"] == "cafeaffe"
+    with store._connection() as db:
+        assert db.execute("SELECT COUNT(*) FROM asset_candidates WHERE project_id=?",
+                          (pid,)).fetchone()[0] == 0
+        assert db.execute("SELECT provider_status, last_error_code FROM glabs_task_observations "
+                          "WHERE job_id=?", (paid["job_id"],)).fetchone() == (
+                          "completed", "GLABS_SOURCE_STALE")
+
+
+@pytest.mark.parametrize("http_failure,code,expected", [
+    (False, 429, "GLABS_QUOTA_EXCEEDED"),
+    (False, 403, "GLABS_PLAN_REQUIRED"),
+    (False, 500, "GLABS_SERVER_ERROR"),
+    (False, 700, "GLABS_PROVIDER_FAILED"),
+    (True, 429, "GLABS_RATE_LIMITED"),
+])
+def test_poll_error_classifies_terminal_quota_vs_transient_http(tmp_path, http_failure, code, expected):
+    submits = []
+    def handler(req):
+        if req.url.path == "/api/image/generate":
+            submits.append(req.url.path)
+            return httpx.Response(202, json={"task_id": "fedcba98", "status": "pending"})
+        if req.url.path == "/api/status/fedcba98":
+            if http_failure:
+                return httpx.Response(429)
+            return httpx.Response(200, json={"task_id": "fedcba98",
+                   "status": "failed", "error_code": code,
+                   "error": "someone@example.com quota or account detail"})
+        return httpx.Response(404)
+    store, svc, project_id, requirement = setup(tmp_path, handler)
+    job = svc.enqueue(project_id, requirement, "nano_banana_2", "Test image",
+          expected_revision=store.revision(project_id),
+          idempotency_key=f"glabs-classification-{code}-{http_failure}", controlled_offline=True)
+    outcome = svc.process_one(job["job_id"])
+    assert outcome["error_code"] == expected
+    assert outcome["state"] == ("FAILED_RETRYABLE" if http_failure else "FAILED_TERMINAL")
+    with store._connection() as db:
+        assert db.execute("SELECT last_error_code FROM glabs_task_observations "
+                          "WHERE job_id=?", (job["job_id"],)).fetchone()[0] == expected
+        assert db.execute("SELECT COUNT(*) FROM asset_candidates").fetchone()[0] == 0
+    if not http_failure:
+        with pytest.raises(ContractViolation, match="JOB_RETRY_FORBIDDEN"):
+            svc.queue.retry(job["job_id"])
+    assert submits == ["/api/image/generate"]

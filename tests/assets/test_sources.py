@@ -169,3 +169,45 @@ def test_download_rights_manual_provenance_and_original_bytes(tmp_path):
     path.write_bytes(b"tampered media")
     with pytest.raises(ContractViolation,match="ARTIFACT_CORRUPT"):
         reread.store.get_artifact(one["original_sha256"])
+
+
+def test_original_requires_exact_requirement_and_rechecks_after_download(tmp_path):
+    store, project_id, req_a = project(tmp_path)
+    req_b = store.get_story(project_id).data()["asset_requirements"][1]["requirement_id"]
+    candidates = AssetCandidates(store)
+    source = dict(provider="wikimedia_commons", item_id="File:Period.png",
+                  original_download_url="https://upload.wikimedia.org/period/original.png",
+                  thumbnail_url=None, rights_status="UNKNOWN", user_approved=False)
+    with store._transaction() as db:
+        candidate_id = candidates._save(db, project_id, req_a, source)
+    calls = []
+    def media(request):
+        calls.append(request.url.path)
+        return httpx.Response(200, content=PNG, headers={"content-type": "image/png"})
+    with pytest.raises(ContractViolation, match="ASSET_CANDIDATE_REQUIREMENT_MISMATCH"):
+        candidates.original(project_id, req_b, candidate_id, transport(media))
+    assert not calls
+    with store._connection() as db:
+        assert db.execute("SELECT COUNT(*) FROM asset_candidates WHERE requirement_id=?",
+                          (req_b,)).fetchone()[0] == 0
+    approved = candidates.original(project_id, req_a, candidate_id, transport(media))
+    assert store.get_artifact(approved["original_sha256"]) == PNG
+    assert not approved["user_approved"]
+
+    # External download finishes after original source requirement was replaced.
+    def race(request):
+        changed = store.get_story(project_id).data()
+        changed["asset_requirements"][0]["subject"] += " — revised identity"
+        store.import_story(StoryCandidate.parse(changed), store.revision(project_id))
+        return httpx.Response(200, content=_png(83),
+                              headers={"content-type": "image/png"})
+    before = len(store.get_artifact(approved["original_sha256"]))
+    with pytest.raises(ContractViolation, match="ASSET_SOURCE_STALE"):
+        candidates.original(project_id, req_a, candidate_id, transport(race))
+    assert candidates.get(project_id, candidate_id)["original_sha256"] is None
+    assert len(store.get_artifact(approved["original_sha256"])) == before
+    with store._connection() as db:
+        assert db.execute("SELECT COUNT(*) FROM asset_candidates WHERE project_id=?",
+                          (project_id,)).fetchone()[0] == 2
+    assert AssetCandidates(ProjectStore(store.database, store.artifacts.root)).get(
+        project_id, candidate_id)["original_sha256"] is None
