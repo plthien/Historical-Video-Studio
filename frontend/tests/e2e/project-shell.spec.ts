@@ -10,7 +10,7 @@ test("project-shell: six destinations, real import and G1 human review", async (
   for (const name of ["Project & ChatGPT Import", "Story Review", "Voice Studio",
     "Historical Assets", "Motion Storyboard", "Render & Delivery"]) {
     await page.getByRole("navigation").getByRole("button", {name: new RegExp(name.split(" ")[0])}).click();
-    await expect(page.locator("main h2")).toContainText(name.split(" / ")[0]);
+    await expect(page.locator(".content[aria-label] h2")).toContainText(name.split(" / ")[0]);
   }
   await page.getByRole("navigation").getByRole("button", {name: /Project & ChatGPT/}).click();
   await page.getByLabel("Project title").fill("Sarajevo Documentary");

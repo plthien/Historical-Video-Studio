@@ -23,9 +23,24 @@ jobs:
         shell: pwsh
         run: |
           if (-not (Get-Command ffmpeg -ErrorAction SilentlyContinue) -or -not (Get-Command ffprobe -ErrorAction SilentlyContinue)) {
-            choco install ffmpeg --yes --no-progress
-            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+            $installed = $false
+            for ($attempt = 1; $attempt -le 3; $attempt++) {
+              choco install ffmpeg --yes --no-progress
+              if ($LASTEXITCODE -eq 0 -and (Get-Command ffmpeg -ErrorAction SilentlyContinue) -and (Get-Command ffprobe -ErrorAction SilentlyContinue)) {
+                $installed = $true; break
+              }
+              if ($attempt -lt 3) { Start-Sleep -Seconds (5 * $attempt) }
+            }
+            if (-not $installed) { throw "FFmpeg and ffprobe could not be installed after bounded retries" }
           }
+      - name: Temporary generate frontend lock for dependency capture
+        shell: pwsh
+        run: |
+          npm install --package-lock-only --prefix frontend --ignore-scripts --no-audit --no-fund
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          Write-Host "__FRONTEND_LOCK_START__"
+          Get-Content frontend/package-lock.json -Raw
+          Write-Host "__FRONTEND_LOCK_END__"
       - name: Check branch diff whitespace against main
         shell: pwsh
         run: |
@@ -37,3 +52,14 @@ jobs:
       - name: Repeat bootstrap in the same isolated environment
         shell: powershell
         run: powershell -NoProfile -ExecutionPolicy Bypass -File scripts/windows/verify-environment.ps1
+      - name: Chromium browser E2E (real local servers)
+        shell: pwsh
+        run: |
+          Push-Location frontend
+          try {
+            npx playwright install chromium
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+            npm run test:e2e -- --grep "project-shell"
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          }
+          finally { Pop-Location }

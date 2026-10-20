@@ -285,3 +285,132 @@ def test_api_gates_review_and_idempotent_mutation(story, tmp_path):
     future = client.post(uri + "/voice/generate", json={}, headers={"Idempotency-Key": "voice-request-1"})
     assert future.status_code == 501
     assert future.json()["code"] == "OPERATION_NOT_IMPLEMENTED"
+
+def test_gate_rejection_recovery_and_story_reapproval(story, store):
+    """R01/R02: real transactions recover only with a different reviewed story."""
+    from backend.app.projects.gates import GateService
+    project_id = story["project"]["project_id"]
+    store.create_project(project_id, "Gate lifecycle")
+    first = StoryCandidate.parse(story)
+    assert store.import_story(first, 0) == 1
+    gates = GateService(store)
+    revision = 1
+    for claim in story["claims"]:
+        if claim["critical"]:
+            revision = gates.review_claim(project_id, claim["claim_id"], "REVIEWED",
+                                          "Reviewed source leads", revision, "https://www.loc.gov/")
+    assert gates.reviews(project_id)[0]["source_url"] == "https://www.loc.gov/"
+    decision = lambda sha, rev, kind="APPROVED": {
+        "decision": kind, "candidate_sha256": sha,
+        "dependency_fingerprint": sha, "expected_revision": rev,
+    }
+    rejected = gates.decide(project_id, "G1", decision(first.sha256, revision, "REJECTED"))
+    assert gates.board(project_id)[0]["state"] == "REJECTED"
+    with pytest.raises(ContractViolation, match="GATE_ILLEGAL_TRANSITION"):
+        gates.decide(project_id, "G1", decision(first.sha256, rejected["project_revision"]))
+    second_story = copy.deepcopy(story)
+    second_story["sections"][0]["narration"] += " Updated for human review."
+    second = StoryCandidate.parse(second_story)
+    revision = store.import_story(second, rejected["project_revision"])
+    assert gates.board(project_id)[0]["state"] == "STALE"
+    for claim in second_story["claims"]:
+        if claim["critical"]:
+            revision = gates.review_claim(project_id, claim["claim_id"], "REVIEWED",
+                                          "Reviewed revised story", revision)
+    assert gates.board(project_id)[0]["state"] == "READY_FOR_REVIEW"
+    with pytest.raises(ContractViolation, match="APPROVAL_REVISION_CONFLICT"):
+        gates.decide(project_id, "G1", decision(first.sha256, revision))
+    approved = gates.decide(project_id, "G1", decision(second.sha256, revision))
+    assert gates.board(project_id)[0]["state"] == "APPROVED"
+    assert store.import_story(second, approved["project_revision"]) == approved["project_revision"]
+    assert gates.board(project_id)[0]["state"] == "APPROVED"
+    third_story = copy.deepcopy(second_story)
+    third_story["sections"][1]["narration"] += " Further correction."
+    third = StoryCandidate.parse(third_story)
+    revision = store.import_story(third, approved["project_revision"])
+    assert gates.board(project_id)[0]["state"] == "STALE"
+    assert gates.board(project_id)[3]["state"] == "STALE"
+    for claim in third_story["claims"]:
+        if claim["critical"]:
+            revision = gates.review_claim(project_id, claim["claim_id"], "REVIEWED",
+                                          "Reviewed third story", revision)
+    reap = gates.decide(project_id, "G1", decision(third.sha256, revision))
+    assert gates.board(project_id)[0]["state"] == "APPROVED"
+    assert store.get_story(project_id).sha256 == third.sha256
+    with sqlite3.connect(store.database) as db:
+        assert db.execute("SELECT COUNT(*) FROM gate_events WHERE project_id=? AND gate_id='G1'",
+                          (project_id,)).fetchone()[0] == 3
+        assert db.execute("SELECT COUNT(*) FROM story_candidates").fetchone()[0] == 3
+    fake = store.put_artifact(b"pretend voice", "voice_candidate")
+    gates.publish_candidate(project_id, "G2", fake, third.sha256, reap["project_revision"])
+    with pytest.raises(ContractViolation, match="GATE_ILLEGAL_TRANSITION"):
+        gates.decide(project_id, "G2", decision(fake, reap["project_revision"]) |
+                     {"dependency_fingerprint": third.sha256})
+
+
+def test_startup_recovers_jobs_without_replay_and_requires_cancel_confirmation(tmp_path):
+    """R03: actual FastAPI lifespan reopen, never a direct recovery helper call."""
+    from fastapi.testclient import TestClient
+    from backend.app.api.server import create_app
+    from backend.app.jobs import JobQueue
+    database, media = tmp_path / "state.sqlite", tmp_path / "media"
+    app = create_app(database, media)
+    store = app.state.store
+    store.create_project("proj_restart", "Restart")
+    queue = JobQueue(store)
+    a = queue.submit("proj_restart", "provider", "recovery-known-task", {"a": 1}, 0)
+    b = queue.submit("proj_restart", "provider", "recovery-unknown-task", {"b": 1}, 0)
+    known = queue.claim()
+    queue.attach_provider_task(known["job_id"], known["lease_token"], "external-original-id")
+    unknown = queue.claim()
+    assert known["job_id"] == a["job_id"] and unknown["job_id"] == b["job_id"]
+    with TestClient(create_app(database, media)) as client:
+        assert client.app.state.recovery == {
+            "resume_existing_provider_task": 1, "blocked_uncertain_operation": 1
+        }
+        assert client.get("/api/v1/jobs/" + b["job_id"]).json()["state"] == "BLOCKED_REVIEW"
+        assert client.get("/api/v1/jobs/" + a["job_id"]).json()["state"] == "QUEUED"
+        q2 = client.app.state.queue
+        resumed = q2.claim()
+        assert resumed["provider_task_id"] == "external-original-id"
+        assert resumed["resume_only"] == 1
+        q2.cancel(a["job_id"])
+        with pytest.raises(ContractViolation, match="PROVIDER_CANCEL_UNCONFIRMED"):
+            q2.acknowledge_cancel(a["job_id"], resumed["lease_token"])
+        assert q2.acknowledge_cancel(a["job_id"], resumed["lease_token"],
+                                    provider_confirmed=True)["state"] == "CANCELLED"
+        assert q2.get(b["job_id"])["state"] == "BLOCKED_REVIEW"
+    with TestClient(create_app(database, media)) as reopened:
+        assert reopened.app.state.recovery == {
+            "resume_existing_provider_task": 0, "blocked_uncertain_operation": 0
+        }
+
+
+def test_api_invalid_import_never_poisoned_replay_and_no_fake_gate(story, tmp_path):
+    from fastapi.testclient import TestClient
+    from backend.app.api.server import create_app
+    with TestClient(create_app(tmp_path / "state.sqlite", tmp_path / "media")) as client:
+        p = client.post("/api/v1/projects", json={"title": "Validation project"}).json()["project_id"]
+        story["project"]["project_id"] = p
+        url = f"/api/v1/projects/{p}/story/import?expected_revision=0"
+        headers = {"Idempotency-Key": "same-validating-key"}
+        for value in (None, [], "nonsense", 42):
+            assert client.post(url, json=value, headers=headers).status_code == 422
+        raw = json.dumps(story)
+        corrupted = raw.replace('"schema_version": "StoryPackage.v1"',
+                                '"schema_version": "StoryPackage.v1", "schema_version": "StoryPackage.v1"', 1)
+        assert client.post(url, data=corrupted, headers=headers).status_code == 422
+        okay = client.post(url, json=story, headers=headers)
+        assert okay.status_code == 200
+        assert client.post(url, json=story, headers=headers).json() == okay.json()
+        assert client.get(f"/api/v1/projects/{p}/story").json()["claim_reviews"] == []
+        bad = client.post(f"/api/v1/projects/{p}/gates/G1/decision",
+                          json={"decision": "APPROVED", "candidate_sha256": okay.json()["candidate_sha256"],
+                                "dependency_fingerprint": okay.json()["candidate_sha256"],
+                                "expected_revision": 1},
+                          headers={"Idempotency-Key": "same-gate-key-001"})
+        assert bad.status_code == 422
+        assert client.post(f"/api/v1/projects/{p}/gates/G1/decision",
+                           json={"decision": "APPROVED", "candidate_sha256": "0" * 64,
+                                 "dependency_fingerprint": "0" * 64, "expected_revision": 1},
+                           headers={"Idempotency-Key": "same-gate-key-001"}).status_code in (409, 422)
