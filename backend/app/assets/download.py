@@ -61,11 +61,32 @@ def inspect(data):
             raise ContractViolation("ORIGINAL_MEDIA_INVALID","media","Incomplete PNG image data.")
         mime="image/png"
     elif data.startswith(b"\xff\xd8\xff") and data.endswith(b"\xff\xd9") and len(data)>32:
+        # Require real JPEG structure and a Start of Frame before Start of Scan.
+        offset=2
         width=height=None
+        scanned=False
+        while offset+4<=len(data):
+            if data[offset]!=255:
+                break
+            marker=data[offset+1]
+            if marker==0xda:
+                scanned=True
+                break
+            length=int.from_bytes(data[offset+2:offset+4],"big")
+            if length<2 or offset+2+length>len(data):
+                break
+            if marker in (0xc0,0xc1,0xc2,0xc3,0xc5,0xc6,0xc7,0xc9,0xca,0xcb):
+                if length<7: break
+                height,width=struct.unpack(">HH",data[offset+5:offset+9])
+            offset+=2+length
+        if not scanned or not width or not height:
+            raise ContractViolation("ORIGINAL_MEDIA_INVALID","media","Incomplete JPEG structure.")
         mime="image/jpeg"
     elif data[:4]==b"RIFF" and data[8:12]==b"WEBP" and len(data)>24:
         if int.from_bytes(data[4:8],"little")+8!=len(data):
             raise ContractViolation("ORIGINAL_MEDIA_INVALID","media","Invalid WebP length.")
+        if data[12:16] not in (b"VP8 ",b"VP8L",b"VP8X"):
+            raise ContractViolation("ORIGINAL_MEDIA_INVALID","media","Invalid WebP bitstream chunk.")
         width=height=None
         mime="image/webp"
     else:
@@ -86,7 +107,9 @@ def download(candidate,client=None):
                 if r.status_code>=400:
                     raise ContractViolation("ORIGINAL_DOWNLOAD_FAILED","source","Provider media HTTP failure.")
                 try: advertised=int(r.headers.get("content-length","0"))
-                except ValueError: advertised=0
+                except ValueError as exc:
+                    raise ContractViolation("ORIGINAL_LENGTH_INVALID","media",
+                                            "Malformed provider Content-Length.") from exc
                 if advertised>MAX_BYTES:
                     raise ContractViolation("ORIGINAL_SIZE_INVALID","media","Advertised file too large.")
                 chunks=bytearray()
