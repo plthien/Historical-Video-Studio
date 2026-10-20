@@ -20,11 +20,11 @@ test("asset-review: operator choice persists and never auto-approves G3",async({
   await expect(page.getByRole("status")).toContainText("Story import completed");
   await page.getByRole("navigation").getByRole("button",{name:/Historical Assets/}).click();
   await expect(page.getByText("Historical sources · G3")).toBeVisible();
-  await expect(page.getByText("ARCHIVE_ASSET_UNRESOLVED").first()).toBeVisible();
+  await expect(page.locator(".asset-studio")).toContainText("ARCHIVE_ASSET_UNRESOLVED");
   await page.getByLabel("Explicit missing-source reason").fill("Need an owned image");
   await page.getByRole("button",{name:"Save explicit choice"}).click();
-  await expect(page.getByRole("status")).toContainText("Save resolution completed");
-  await expect(page.getByText("MANUAL_UPLOAD").first()).toBeVisible();
+  await expect(page.locator(".asset-studio").getByRole("status")).toContainText("Save resolution completed");
+  await expect(page.locator(".asset-studio")).toContainText("MANUAL_UPLOAD");
   await expect(page.getByRole("button",{name:"Approve complete G3 snapshot"})).toBeDisabled();
   await page.screenshot({path:testInfo.outputPath("g3-manual-choice.png")});
   await page.reload();
