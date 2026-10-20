@@ -1,7 +1,5 @@
 name: A1 Foundation (Windows)
 on:
-  push:
-    branches: [feat/fullflow-v1-windows]
   pull_request:
     branches: [main]
   workflow_dispatch:
@@ -44,6 +42,22 @@ jobs:
       - name: Repeat bootstrap in the same isolated environment
         shell: powershell
         run: powershell -NoProfile -ExecutionPolicy Bypass -File scripts/windows/verify-environment.ps1
+      - name: Task-scoped Windows gate, recovery and API checks
+        shell: pwsh
+        run: |
+          $py = ".venv/Scripts/python.exe"
+          function Verify([string[]]$Args) {
+            & $py @Args
+            if ($LASTEXITCODE -ne 0) { throw "A1 owner command failed: $($Args -join ' ')" }
+          }
+          Verify @("-m","pytest","-q","tests/backend/test_foundation.py","-k","gate or invalidation or revision")
+          Verify @("-m","backend.tools.smoke","--case","gate-transitions","--mode","local")
+          Verify @("-m","pytest","-q","tests/backend/test_foundation.py","-k","queue or restart or cancel")
+          Verify @("-m","backend.tools.smoke","--case","restart-running-job","--mode","local")
+          Verify @("-m","pytest","-q","tests/backend/test_foundation.py","-k","api or idempotency")
+          Verify @("-m","backend.tools.smoke","--case","api-and-ui","--mode","local")
+          npm --prefix frontend run typecheck
+          if ($LASTEXITCODE -ne 0) { throw "A1 typed frontend check failed" }
       - name: Chromium browser E2E (real local servers)
         shell: pwsh
         run: |
