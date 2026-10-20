@@ -609,3 +609,121 @@ def test_gate_2_technical_assembly_retry_preserves_original_approval(tmp_path):
                           (project,)).fetchone()[0]==1
     with pytest.raises(ContractViolation,match="FINAL_AUDIO_RETRY_FORBIDDEN"):
         workflow.retry_assembly(project,store.revision(project),"invalid-second-technical-retry")
+
+
+def test_gate_2_reapproval_after_restore_same_wav_keeps_distinct_alignment_lineage(tmp_path):
+    """R01/C02-C06: A→B→A is a new review, never automatic old approval."""
+    from unittest.mock import patch
+    from backend.tools.voice_final_smoke import setup, approval, mock_alignment, wav_fixture
+    from backend.app.voice.workflow import FinalVoiceWorkflow
+    store, gates, voice, workflow, project, story = setup(tmp_path)
+    first = voice.list_attempts(project, "sec_001")["attempts"][0]
+    initial = approval(store, gates, project)
+    assert workflow.process_one()["state"] == "SUCCEEDED"
+    frozen = workflow.status(project)["final_audio"]
+    assert workflow.process_one(lambda wav, txt: mock_alignment(frozen, txt))["state"] == "SUCCEEDED"
+    first_map = workflow.status(project)["word_map"]
+    with patch.object(attempts, "_provider_identity", return_value={"model_id": "fixture_only"}):
+        voice.enqueue(project, "sec_001", "kokoro_local", "am_adam", 1.0,
+                      "new B voice", store.revision(project), "reapproval-voice-change-b")
+        assert voice.process_one(lambda *_: wav_fixture(2))["state"] == "SUCCEEDED"
+    assert gates.board(project)[1]["state"] == "STALE"
+    b = voice.list_attempts(project, "sec_001")["selected_attempt_id"]
+    voice.restore(project, "sec_001", first["attempt_id"], first["audio_sha256"],
+                  store.revision(project), "restore original A")
+    state = gates.board(project)[1]
+    assert state["state"] == "READY_FOR_REVIEW"
+    current_id = state["candidate_sha256"]
+    assert voice.list_attempts(project, "sec_001")["selected_attempt_id"] != b
+    with pytest.raises(ContractViolation, match="APPROVAL_REVISION_CONFLICT"):
+        gates.decide(project, "G2", {"decision": "APPROVED",
+            "candidate_sha256": frozen["audio_sha256"], "dependency_fingerprint": "0"*64,
+            "expected_revision": store.revision(project)})
+    renewed = approval(store, gates, project)
+    assert renewed["approval_id"] != initial["approval_id"]
+    assert workflow.process_one()["state"] == "SUCCEEDED"
+    second = workflow.status(project)["final_audio"]
+    assert second["audio_sha256"] == frozen["audio_sha256"]
+    assert second["transcript_sha256"] == frozen["transcript_sha256"]
+    assert workflow.status(project)["g4_ready_dependency"] is False
+    assert workflow.process_one(lambda wav, txt: mock_alignment(second, txt))["state"] == "SUCCEEDED"
+    assert workflow.status(project)["g4_ready_dependency"]
+    with store._connection() as db:
+        assert db.execute("SELECT COUNT(*) FROM gate_events WHERE project_id=? AND gate_id='G2'", (project,)).fetchone()[0] == 2
+        assert db.execute("SELECT COUNT(*) FROM final_audio WHERE project_id=?", (project,)).fetchone()[0] == 2
+    assert first_map == workflow.status(project)["word_map"]
+    assert current_id != "0"*64
+
+
+@pytest.mark.parametrize("first,second", [
+    ("First word.\n\nAgain word, word.", "Later again."),
+    ("First word.\r\nAgain word, word.", "Later\r\nagain."),
+    ("First\n\nword.", "Word,\nagain.\nFinal word.")
+])
+def test_alignment_multiline_uses_frozen_section_manifest(tmp_path, first, second):
+    """R02/C08-C13: embedded CRLF and blank lines never become artificial section boundaries."""
+    from backend.tools.voice_final_smoke import setup, approval
+    from backend.app.voice.word_map import word_map
+    from backend.app.voice.assemble import transcript_for
+    # Test the full approved StoryPackage by changing its section text BEFORE import.
+    from backend.app.projects.models import StoryCandidate
+    from backend.app.voice.assemble import sha
+    from backend.app.voice.word_map import normalized
+    import copy
+    store, gates, voice, workflow, project, story = setup(tmp_path)
+    final_audio = {"audio_sha256": "a"*64, "transcript_sha256": sha((first+"\n"+second).encode()),
+                   "sample_rate": 24000, "duration_samples": 144000,
+                   "section_offsets": [
+                      {"section_id":"sec_001","start_sample":0,"end_sample":60000},
+                      {"section_id":"sec_002","start_sample":60000,"end_sample":144000}]}
+    sections=[{"section_id":"sec_001","narration":first},
+              {"section_id":"sec_002","narration":second}]
+    transcript=transcript_for(sections)
+    provider_words=[]
+    for s,off in zip(sections,final_audio["section_offsets"]):
+        words=s["narration"].split()
+        width=off["end_sample"]-off["start_sample"]
+        for i,w in enumerate(words):
+            a=off["start_sample"]+round(width*(i+.05)/len(words))
+            b=off["start_sample"]+round(width*(i+.75)/len(words))
+            provider_words.append({"text":w,"start":a/24000,"end":b/24000,"loss":0.1})
+    mapped=word_map(project,final_audio,transcript,{"words":provider_words},sections)
+    assert len(mapped["words"])==len(first.split())+len(second.split())
+    assert [x["section_id"] for x in mapped["words"]] == (
+        ["sec_001"]*len(first.split())+["sec_002"]*len(second.split()))
+    bad=copy.deepcopy(provider_words)
+    bad[0]["text"]="wrong"
+    with pytest.raises(ContractViolation, match="ALIGNMENT_TRANSCRIPT_MISMATCH"):
+        word_map(project,final_audio,transcript,{"words":bad},sections)
+    bad=copy.deepcopy(provider_words)
+    bad[len(first.split())-1]["end"]=60001/24000
+    with pytest.raises(ContractViolation, match="ALIGNMENT_SECTION_MISMATCH|ALIGNMENT_TIME_INVALID"):
+        word_map(project,final_audio,transcript,{"words":bad},sections)
+
+
+def test_exact_job_background_chain_skips_other_queued_assemblies(tmp_path):
+    """R03/C14-C16: approval A assembles AND aligns A despite earlier unrelated B."""
+    from backend.tools.voice_final_smoke import setup, approval, mock_alignment
+    from backend.app.voice.workflow import FinalVoiceWorkflow
+    store,gates,voice,workflow,project,story=setup(tmp_path)
+    other="proj_queued_other"
+    store.create_project(other,"Unrelated earlier queued assembly")
+    queued=workflow.queue.submit(other,"final_assembly","other-queued-before-a",
+                                 {"approval_id":"unrelated"},0)
+    decision=approval(store,gates,project)
+    response=workflow.process_pending(decision["job_id"],
+        provider=lambda wav,transcript:mock_alignment({
+            "sample_rate":24000,
+            "section_offsets":[{"section_id":"sec_001","start_sample":0,"end_sample":60000},
+                               {"section_id":"sec_002","start_sample":60000,"end_sample":144000}]},
+            transcript))
+    assert workflow.status(project)["final_audio"] is not None
+    assert workflow.status(project)["g4_ready_dependency"] is True
+    assert workflow.queue.get(queued["job_id"])["state"]=="QUEUED"
+    assert workflow.queue.get(decision["job_id"])["state"]=="SUCCEEDED"
+    with store._connection() as db:
+        count=db.execute("SELECT COUNT(*) FROM jobs WHERE project_id=? AND kind='final_alignment'",(project,)).fetchone()[0]
+    assert count==1
+    workflow.process_pending(decision["job_id"],provider=lambda *_:pytest.fail("duplicate provider call"))
+    with store._connection() as db:
+        assert db.execute("SELECT COUNT(*) FROM jobs WHERE project_id=? AND kind='final_alignment'",(project,)).fetchone()[0]==1
