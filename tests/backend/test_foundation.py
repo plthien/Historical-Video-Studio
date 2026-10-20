@@ -603,6 +603,7 @@ def test_gate_effective_head_blocks_dependent_decisions_and_import_rollback(stor
 
 def test_api_g1_saved_review_fingerprint_idempotency_and_cas(story, tmp_path):
     """A1-04: HTTP uses same persisted fingerprint as GateService and durable ledger."""
+    from backend.app.projects.gates import GateService
     from fastapi.testclient import TestClient
     from backend.app.api.server import create_app
     db, media = tmp_path / "state.sqlite", tmp_path / "media"
