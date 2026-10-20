@@ -14,6 +14,7 @@ export function VoiceStudio({project,story,onRefresh}:{
   const [status,setStatus]=useState<AlignmentStatus|null>(null);
   const [busy,setBusy]=useState<string|null>(null);
   const [job,setJob]=useState<string|null>(null);
+  const [jobKind,setJobKind]=useState<"assembly"|"alignment"|"synthesis"|null>(null);
   const [notice,setNotice]=useState<string|null>(null);
   const [error,setError]=useState<string|null>(null);
   const sections=story?.story.sections??[];
@@ -33,15 +34,23 @@ export function VoiceStudio({project,story,onRefresh}:{
       try{
         const current=await voiceApi.job(job!);
         if(closed||current.state==="QUEUED"||current.state==="RUNNING")return;
-        setJob(null);setBusy(null);
-        if(current.state!=="SUCCEEDED")setError(current.error_code||current.state);
+        if(current.state==="SUCCEEDED"&&jobKind==="assembly"){
+          const next=await voiceApi.status(project.project_id);
+          const align=next.alignment_job;
+          if(align&&(align.state==="QUEUED"||align.state==="RUNNING")){
+            setJobKind("alignment");setJob(align.job_id);setBusy("Aligning final WAV…");
+            await read();await onRefresh();return;
+          }
+          if(align&&align.state!=="SUCCEEDED")setError(align.error_code||align.state);
+        }else if(current.state!=="SUCCEEDED")setError(current.error_code||current.state);
         else setNotice("Operation succeeded; durable media status refreshed.");
+        setJob(null);setJobKind(null);setBusy(null);
         await read();await onRefresh();
       }catch(e){if(!closed){setJob(null);setBusy(null);setError(errText(e));}}
     }
     void poll();const interval=setInterval(()=>void poll(),1250);
     return ()=>{closed=true;clearInterval(interval);};
-  },[job,read,onRefresh]);
+  },[job,jobKind,read,onRefresh,project.project_id]);
   function update(id:string,values:Partial<Params>){
     setSettings(old=>({...old,[id]:{...(old[id]||defaultParams()),...values}}));
   }
@@ -51,7 +60,12 @@ export function VoiceStudio({project,story,onRefresh}:{
     let queued=false;
     try{
       const id=await perform();
-      if(id){setJob(id);queued=true;}
+      if(id){
+        const kind=label.startsWith("Approving")?"assembly":
+                   label.startsWith("Aligning")?"alignment":"synthesis";
+        setJobKind(kind);setJob(id);queued=true;
+        if(kind==="assembly")setBusy("Assembling final WAV…");
+      }
       else setNotice(label+" completed and persisted.");
       await read();await onRefresh();
     }catch(e){setError(errText(e));
