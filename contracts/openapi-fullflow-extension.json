@@ -1269,6 +1269,28 @@
         }
       }
     },
+    "/projects/{project_id}/jobs/{job_id}/retry": {
+      "post": {
+        "operationId": "post_project_glabs_retry",
+        "tags": ["jobs"],
+        "summary": "Resume only a project-owned FAILED_RETRYABLE G-Labs job using original provider task ID; never resubmit uncertain work",
+        "parameters": [{"name":"project_id","in":"path","required":true,"schema":{"type":"string"}},{"name":"job_id","in":"path","required":true,"schema":{"type":"string"}},{"name":"Idempotency-Key","in":"header","required":true,"schema":{"type":"string","minLength":12}}],
+        "responses": {"200":{"description":"Durable scoped job state; external confirmation required before CANCELLED"},
+                      "409":{"description":"Operation conflict/idempotency replay conflict"},
+                      "422":{"description":"Foreign, nonretryable or unknown provider task"}}
+      }
+    },
+    "/projects/{project_id}/jobs/{job_id}/cancel": {
+      "post": {
+        "operationId": "post_project_glabs_cancel",
+        "tags": ["jobs"],
+        "summary": "Request project-owned G-Labs stop and reconcile stopped vs skipped against original endpoint",
+        "parameters": [{"name":"project_id","in":"path","required":true,"schema":{"type":"string"}},{"name":"job_id","in":"path","required":true,"schema":{"type":"string"}},{"name":"Idempotency-Key","in":"header","required":true,"schema":{"type":"string","minLength":12}}],
+        "responses": {"200":{"description":"Durable scoped job state; external confirmation required before CANCELLED"},
+                      "409":{"description":"Operation conflict/idempotency replay conflict"},
+                      "422":{"description":"Foreign, nonretryable or unknown provider task"}}
+      }
+    },
     "/providers/settings": {
       "put": {
         "operationId": "put__providers_settings",
@@ -1816,39 +1838,14 @@
       "ProviderSettings": {
         "type": "object",
         "additionalProperties": false,
-        "required": [
-          "provider_id",
-          "enabled"
-        ],
+        "required": ["provider"],
         "properties": {
-          "provider_id": {
-            "type": "string",
-            "enum": [
-              "kokoro_local",
-              "elevenlabs_tts",
-              "elevenlabs_forced_alignment",
-              "glabs_webhook",
-              "wikimedia_commons",
-              "loc",
-              "europeana"
-            ]
-          },
-          "enabled": {
-            "type": "boolean"
-          },
-          "base_url": {
-            "type": [
-              "string",
-              "null"
-            ]
-          },
-          "secret_value": {
-            "type": [
-              "string",
-              "null"
-            ],
-            "description": "write-only, never returned/exported"
-          }
+          "provider": {"type":"string","enum":["glabs_webhook","europeana"]},
+          "api_key": {"type":["string","null"],"writeOnly":true,
+                      "description":"Omitted or blank keeps existing secret; never returned"},
+          "base_url": {"type":"string","description":"Optional local G-Labs loopback endpoint"},
+          "clear_key": {"type":"boolean","default":false,
+                        "description":"Explicit irreversible local credential clear; cannot combine with a new key"}
         }
       },
       "VisualDirectionEdit": {
