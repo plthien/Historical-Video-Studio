@@ -21,6 +21,7 @@ export function AssetStudio({projectId,onRefresh}:{projectId:string;onRefresh:()
   const [file,setFile]=useState<File|null>(null);
   const [reviewNotes,setReviewNotes]=useState<Record<string,{rights:string;history:string}>>({});
   const [checks,setChecks]=useState<Record<string,boolean>>({});
+  const [staged,setStaged]=useState<AssetReview[]>([]);
   const [prompt,setPrompt]=useState("");
   const [gate,setGate]=useState<Gate|null>(null);
   const reload=useCallback(async(rid?:string)=>{
@@ -46,16 +47,32 @@ export function AssetStudio({projectId,onRefresh}:{projectId:string;onRefresh:()
     let binary=""; for(let i=0;i<bytes.length;i+=8192){binary+=String.fromCharCode(...bytes.subarray(i,i+8192));}
     await assetApi.upload(projectId,revision,selected,btoa(binary),title,sourceNote,rightsNote);
   }
-  async function batch(){
+  function selectedReview():AssetReview|null {
     const ids=Object.keys(checks).filter(k=>checks[k]);
-    const review:AssetReview[]=ids.map(id=>{
-      const c=candidates.find(x=>x.candidate_id===id);
-      if(!c?.original_sha256||!c.current_source)throw new Error("Candidate needs verified original and current StoryPackage.");
-      return {requirement_id:selected,candidate_id:id,original_sha256:c.original_sha256,rights_status:"ELIGIBLE",
-        rights_evidence_note:reviewNotes[id]?.rights||"",historical_context_note:reviewNotes[id]?.history||""};
-    });
-    if(review.length!==1)throw new Error("Select one candidate per requirement.");
-    await assetApi.batch(projectId,revision,review);setChecks({});
+    if(ids.length===0)return null;
+    if(ids.length!==1)throw new Error("Select only one candidate per requirement.");
+    const id=ids[0],c=candidates.find(x=>x.candidate_id===id);
+    if(!c?.original_sha256||!c.current_source)throw new Error("Candidate needs verified original and current StoryPackage.");
+    const rights=reviewNotes[id]?.rights?.trim()||"",history=reviewNotes[id]?.history?.trim()||"";
+    if(!rights||!history)throw new Error("Provide rights and historical suitability notes.");
+    return {requirement_id:selected,candidate_id:id,original_sha256:c.original_sha256,rights_status:"ELIGIBLE",
+      rights_evidence_note:rights,historical_context_note:history};
+  }
+  function stage(){
+    try{
+      const item=selectedReview();
+      if(!item)throw new Error("Select a verified candidate first.");
+      setStaged(old=>[...old.filter(x=>x.requirement_id!==item.requirement_id),item]);
+      setChecks({});
+      setNotice("Review staged; not approved until batch commit.");
+      setProblem("");
+    }catch(e){setProblem(e instanceof Error?e.message:String(e));}
+  }
+  async function batch(){
+    const current=selectedReview();
+    const reviews=current?[...staged.filter(x=>x.requirement_id!==current.requirement_id),current]:staged;
+    if(!reviews.length)throw new Error("Select or stage at least one candidate.");
+    await assetApi.batch(projectId,revision,reviews);setStaged([]);setChecks({});
   }
   async function approveGate(){
     if(!gate?.candidate_sha256||!gate.dependency_fingerprint)return;
@@ -126,7 +143,13 @@ export function AssetStudio({projectId,onRefresh}:{projectId:string;onRefresh:()
           <label>Period, geography, exactness evidence (required)</label><textarea value={reviewNotes[c.candidate_id]?.history||""} onChange={e=>setReviewNotes(old=>({...old,[c.candidate_id]:{...old[c.candidate_id],history:e.target.value,rights:old[c.candidate_id]?.rights||""}}))}/>
         </>}
       </article>)}
-      <button disabled={!approved||!!pending} onClick={()=>void action("Approve exact asset source",batch)}>Record selected rights/source approval</button>
+      <div className="buttonrow">
+        <button disabled={!approved||!!pending} onClick={stage}>Stage selected for batch</button>
+        <button disabled={(!approved&&!staged.length)||!!pending} onClick={()=>void action("Approve exact asset sources",batch)}>
+          Approve {staged.length+(approved?1:0)} selected/staged source(s)
+        </button>
+      </div>
+      {staged.length>0&&<p role="status">{staged.length} staged; no approval recorded yet. Commit as one atomic batch.</p>}
     </div>
     <div className="panel">
       <h4>G3 gate — {gate?.state||"DRAFT"}</h4>
