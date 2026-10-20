@@ -2,6 +2,7 @@ import {useCallback, useState} from "react";
 import {api, ApiError, type Gate, type GateDecision, type GateId, type JobInfo, type ProjectInfo, type StoryPayload, type StoryView} from "./api/client";
 import {workspaces} from "./routes/workspaces";
 import {VoiceStudio} from "./workspaces/Voice/VoiceStudio";
+import {AssetStudio} from "./workspaces/Assets/AssetStudio";
 
 type Notice = {kind: "success" | "error"; message: string};
 const idKey = () => crypto.randomUUID();
@@ -139,7 +140,8 @@ export function App() {
         {!active.enabled ? <div className="unavailable" role="note">
           <strong>Not available in A1</strong>
           <p>This workspace requires the {active.owner} owner implementation. No provider, approved media, alignment, render, or export result is simulated.</p>
-        </div> : workspace === "voice" && project ?
+        </div> : workspace === "assets" && project ?
+          <AssetStudio projectId={project.project_id} onRefresh={() => refresh(project.project_id)}/> : workspace === "voice" && project ?
           <VoiceStudio project={project} story={storyView} onRefresh={() => refresh(project.project_id)}/> : workspace === "project" ?
           <div className="stack">
             <label htmlFor="new-title">Project title</label>
