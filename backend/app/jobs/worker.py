@@ -16,7 +16,10 @@ def run_one(queue: JobQueue, handlers: dict, *, kind: str | None = None) -> dict
     try:
         # Real implementations receive original provider_task_id and are required to poll it.
         output_sha = handler(job, queue)
-        if queue.get(job_id)["cancel_requested"]:
+        latest = queue.get(job_id)
+        if latest["state"] == "CANCELLED":
+            return latest  # handler confirmed external cancellation using the leased task ID
+        if latest["cancel_requested"]:
             # Handler must actually cancel external operation before acknowledging;
             # otherwise preserve uncertain state for operator review.
             return queue.fail(job_id, token, "CANCELLATION_NOT_CONFIRMED", retryable=False)

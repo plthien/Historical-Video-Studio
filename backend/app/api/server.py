@@ -4,17 +4,19 @@ from __future__ import annotations
 import hashlib
 import json
 import os
-import sqlite3
+from contextlib import asynccontextmanager
 from pathlib import Path
 from uuid import uuid4
 
-from fastapi import FastAPI, Header, HTTPException, Request
+from fastapi import FastAPI, Header, Request
 from fastapi.responses import JSONResponse
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, ConfigDict, Field
 
 from backend.app.api.imports import import_story
+from backend.app.projects.models import StoryCandidate
 from backend.app.contracts import ContractViolation
-from backend.app.jobs import JobQueue
+from backend.app.jobs import JobQueue, recover_interrupted
 from backend.app.projects.gates import GateService
 from backend.app.projects.storage import ProjectStore
 
@@ -61,12 +63,20 @@ def create_app(database: str | Path | None = None, media_root: str | Path | None
             );
         """)
 
-    app = FastAPI(title="Historical Video Studio Local API", version="1.0.0")
+    @asynccontextmanager
+    async def lifespan(application: FastAPI):
+        application.state.recovery = recover_interrupted(queue)
+        yield
+
+    app = FastAPI(title="Historical Video Studio Local API", version="1.0.0", lifespan=lifespan)
+    app.add_middleware(CORSMiddleware, allow_origins=["http://127.0.0.1:5173", "http://localhost:5173"],
+                       allow_credentials=False, allow_methods=["GET", "POST"],
+                       allow_headers=["Content-Type", "Idempotency-Key"])
     app.state.store, app.state.gates, app.state.queue = store, gates, queue
 
     @app.exception_handler(ContractViolation)
     async def violation(_request: Request, exc: ContractViolation):
-        if "CONFLICT" in exc.code or exc.code in ("GATE_ILLEGAL_TRANSITION", "JOB_RETRY_FORBIDDEN"):
+        if "CONFLICT" in exc.code or exc.code in ("GATE_ILLEGAL_TRANSITION", "JOB_RETRY_FORBIDDEN", "IDEMPOTENCY_IN_PROGRESS"):
             status = 409
         elif exc.code in ("STORY_NOT_FOUND", "CANDIDATE_NOT_READY", "WORD_MAP_STALE"):
             status = 424
@@ -97,7 +107,16 @@ def create_app(database: str | Path | None = None, media_root: str | Path | None
             db.execute("INSERT INTO api_requests VALUES(?,?,?,?,'PENDING',NULL)",
                        (project_id, route, key, digest))
         # If the process dies after mutation but before DONE, leave PENDING rather than replaying.
-        result = operation()
+        try:
+            result = operation()
+        except ContractViolation:
+            # Known validation/transaction rejection cannot leave a half-mutated owner transaction.
+            with store._transaction() as db:
+                db.execute("DELETE FROM api_requests WHERE project_id=? AND route_key=? "
+                           "AND idempotency_key=? AND state='PENDING'",
+                           (project_id, route, key))
+            raise
+        # Unknown crashes remain PENDING and must be reconciled, never replayed.
         with store._transaction() as db:
             db.execute("UPDATE api_requests SET state='DONE',result_json=? "
                        "WHERE project_id=? AND route_key=? AND idempotency_key=?",
@@ -125,21 +144,19 @@ def create_app(database: str | Path | None = None, media_root: str | Path | None
     async def story_import(project_id: str, request: Request, expected_revision: int,
                            idempotency_key: str = Header(alias="Idempotency-Key")):
         raw = await request.body()
-        try:
-            obj = json.loads(raw)
-        except (ValueError, UnicodeError) as exc:
-            raise ContractViolation("STORY_JSON_INVALID", "/", "Submit valid StoryPackage JSON.") from exc
-        if obj.get("project", {}).get("project_id") != project_id:
+        candidate = StoryCandidate.parse(raw)  # validates duplicate keys, top-level and all crossrefs BEFORE replay
+        if candidate.project_id != project_id:
             raise ContractViolation("STORY_PROJECT_MISMATCH", project_id, "Story project_id must match route.")
         return idempotent(project_id, "story-import", idempotency_key,
-                          {"payload": obj, "expected_revision": expected_revision},
-                          lambda: import_story(store, raw, expected_revision))
+                          {"candidate_sha256": candidate.sha256, "expected_revision": expected_revision},
+                          lambda: import_story(store, candidate.canonical_bytes, expected_revision))
 
     @app.get("/api/v1/projects/{project_id}/story")
     def get_story(project_id: str):
         story = store.get_story(project_id)
         return {"project_revision": store.revision(project_id),
-                "candidate_sha256": story.sha256, "story": story.data()}
+                "candidate_sha256": story.sha256, "story": story.data(),
+                "claim_reviews": gates.reviews(project_id)}
 
     @app.post("/api/v1/projects/{project_id}/story/claims/{claim_id}/review")
     def review_claim(project_id: str, claim_id: str, body: ClaimReview,
@@ -149,7 +166,7 @@ def create_app(database: str | Path | None = None, media_root: str | Path | None
         payload = body.model_dump()
         return idempotent(project_id, f"claim:{claim_id}", idempotency_key, payload, lambda: {
             "project_revision": gates.review_claim(project_id, claim_id, body.status,
-                                                  body.evidence_note, body.expected_revision),
+                                                  body.evidence_note, body.expected_revision, body.source_url),
             "claim_id": claim_id, "status": body.status
         })
 

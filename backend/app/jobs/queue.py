@@ -121,11 +121,14 @@ class JobQueue:
                 db.execute("UPDATE jobs SET cancel_requested=1 WHERE job_id=?", (job_id,))
             return self._row(db, job_id)
 
-    def acknowledge_cancel(self, job_id: str, lease_token: str) -> dict:
+    def acknowledge_cancel(self, job_id: str, lease_token: str, *, provider_confirmed: bool = False) -> dict:
         with self.store._transaction() as db:
             job = self._owned(db, job_id, lease_token)
             if not job["cancel_requested"]:
                 raise ContractViolation("JOB_CANCEL_NOT_REQUESTED", job_id, "Request cancellation first.")
+            if job["provider_task_id"] and not provider_confirmed:
+                raise ContractViolation("PROVIDER_CANCEL_UNCONFIRMED", job_id,
+                                        "Confirm external task cancellation before marking cancelled.")
             db.execute("UPDATE jobs SET state='CANCELLED',lease_token=NULL WHERE job_id=?", (job_id,))
             return self._row(db, job_id)
 
@@ -133,7 +136,9 @@ class JobQueue:
         # Success is an immutable local artifact, not a mocked handler return value.
         self.store.get_artifact(output_sha256)
         with self.store._transaction() as db:
-            self._owned(db, job_id, lease_token)
+            job = self._owned(db, job_id, lease_token)
+            if job["cancel_requested"]:
+                raise ContractViolation("JOB_CANCEL_PENDING", job_id, "Resolve cancellation before success.")
             db.execute("UPDATE jobs SET state='SUCCEEDED',output_sha256=?,lease_token=NULL,"
                        "error_code=NULL WHERE job_id=?", (output_sha256, job_id))
             return self._row(db, job_id)
@@ -143,7 +148,8 @@ class JobQueue:
             raise ContractViolation("JOB_ERROR_REQUIRED", job_id, "Persist an actionable error code.")
         with self.store._transaction() as db:
             self._owned(db, job_id, lease_token)
-            state = "FAILED_RETRYABLE" if retryable else "FAILED_TERMINAL"
+            state = ("BLOCKED_REVIEW" if error_code == "CANCELLATION_NOT_CONFIRMED"
+                     else "FAILED_RETRYABLE" if retryable else "FAILED_TERMINAL")
             db.execute("UPDATE jobs SET state=?,error_code=?,lease_token=NULL WHERE job_id=?",
                        (state, error_code, job_id))
             return self._row(db, job_id)
