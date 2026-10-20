@@ -165,7 +165,6 @@ def test_download_rights_manual_provenance_and_original_bytes(tmp_path):
         inspect(bytes(corrupt))
     with pytest.raises(ContractViolation,match="ORIGINAL_SIZE_INVALID"):
         inspect(b"x"*(20*1024*1024+1))
-    from backend.app.contracts import ContractViolation
     path=store.artifacts.path(one["original_sha256"])
     path.write_bytes(b"tampered media")
     with pytest.raises(ContractViolation,match="ARTIFACT_CORRUPT"):
