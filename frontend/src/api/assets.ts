@@ -40,8 +40,9 @@ export const assetApi={
     request<{approved:{requirement_id:string;approval_record_id:string}[]}>("/projects/"+p(id)+"/assets/batch-approve","POST",
       {expected_revision:revision,reviews},crypto.randomUUID()),
   providers:()=>request<{providers:ProviderInfo[]}>("/providers"),
-  settings:(provider:string,api_key:string,base_url:string)=>
-    request<{configured:boolean}>("/providers/settings","PUT",{provider,api_key,base_url},crypto.randomUUID()),
+  settings:(provider:string,api_key:string|undefined,base_url:string,clear_key=false)=>
+    request<{configured:boolean}>("/providers/settings","PUT",
+      {provider,api_key:api_key||null,base_url,clear_key},crypto.randomUUID()),
   generate:(id:string,revision:number,requirement_id:string,model:string,prompt:string)=>
     request<{job_id:string;state:string}>("/projects/"+p(id)+"/assets/generate","POST",
       {expected_revision:revision,requirement_id,model,prompt,aspect_ratio:"16:9"},crypto.randomUUID())
