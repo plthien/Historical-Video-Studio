@@ -4,3 +4,8 @@ renderer/node_modules/
 # A1 build-generated contract types (never trusted unless generated+compiled).
 backend/app/contracts/generated.py
 frontend/src/api/generated/contracts.ts
+
+frontend/.e2e-data/
+frontend/playwright-report/
+frontend/test-results/
+frontend/dist/

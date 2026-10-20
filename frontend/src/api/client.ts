@@ -11,6 +11,20 @@ export interface Gate {
   dependency_fingerprint: string | null; blockers: string[]; revision: number;
 }
 export interface ProjectInfo { project_id: string; project_revision: number; gates: Gate[]; }
+export interface StoryPayload {
+  project: {project_id: string; title: string};
+  sections: {section_id: string; narration: string; claim_refs: string[]}[];
+  claims: {claim_id: string; text: string; critical: boolean; status: string;
+           source_leads: {url: string; title?: string}[]}[];
+}
+export interface StoryView {
+  project_revision: number; candidate_sha256: string; story: StoryPayload;
+  claim_reviews: {claim_id: string; status: string; evidence_note: string; source_url?: string}[];
+}
+export interface JobInfo {
+  job_id: string; kind: string; state: string; error_code: string | null;
+  provider_task_id: string | null; cancel_requested: number; retry_count: number;
+}
 export interface ProjectCreated { project_id: string; project_revision: number; next_action: string; }
 export interface GateDecision {
   decision: "APPROVED" | "CHANGES_REQUESTED" | "REJECTED";
@@ -43,15 +57,20 @@ export const api = {
   },
   project(id: string) { return request<ProjectInfo>(`/projects/${safe(id)}`); },
   gates(id: string) { return request<Gate[]>(`/projects/${safe(id)}/gates`); },
+  story(id: string) { return request<StoryView>(`/projects/${safe(id)}/story`); },
+  jobs(id: string) { return request<JobInfo[]>(`/projects/${safe(id)}/jobs`); },
+  cancelJob(id: string, key: string) {
+    return request<JobInfo>(`/jobs/${safe(id)}/cancel`, "POST", undefined, key);
+  },
   async importStory(id: string, story: unknown, revision: number, key: string) {
     return request<{project_revision: number; candidate_sha256: string}>(
       `/projects/${safe(id)}/story/import?expected_revision=${revision}`, "POST", story, key);
   },
   reviewClaim(id: string, claim: string, expected_revision: number, status: "REVIEWED" | "VERIFIED",
-              evidence_note: string, key: string) {
+              evidence_note: string, key: string, source_url: string | null = null) {
     return request<{project_revision: number}>(
       `/projects/${safe(id)}/story/claims/${safe(claim)}/review`,
-      "POST", {status, evidence_note, expected_revision}, key);
+      "POST", {status, evidence_note, source_url, expected_revision}, key);
   },
   decide(id: string, gate: GateId, decision: GateDecision, key: string) {
     return request<{approval_id: string; project_revision: number; state: string}>(
