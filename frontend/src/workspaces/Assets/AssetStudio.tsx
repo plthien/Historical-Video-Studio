@@ -26,9 +26,12 @@ export function AssetStudio({projectId,onRefresh}:{projectId:string;onRefresh:()
   const [gate,setGate]=useState<Gate|null>(null);
   const reload=useCallback(async(rid?:string)=>{
     const res=await assetApi.requirements(projectId);setRequirements(res.requirements);setRevision(res.project_revision);
-    const active=rid||selected||res.requirements[0]?.requirement_id||"";
+    const preferred=rid||selected;
+    const active=res.requirements.some(r=>r.requirement_id===preferred)
+      ? preferred : (res.requirements[0]?.requirement_id||"");
     setSelected(active);
     if(active)setCandidates((await assetApi.candidates(projectId,active)).candidates);
+    else setCandidates([]);
     setGate((await api.gates(projectId)).find(x=>x.gate_id==="G3")||null);
     await onRefresh();
   },[projectId,selected,onRefresh]);
