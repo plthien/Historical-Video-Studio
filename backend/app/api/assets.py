@@ -149,6 +149,25 @@ def mount(app, store, gates, queue, idempotent):
         return GTaskService(store,queue,GLabs(base_url=base or None,api_key=secret)).cancel(project_id,job_id)
     app.state.cancel_glabs=cancel_glabs
 
+    def retry_glabs(project_id,job_id):
+        secret,base=stored_provider_key("glabs_webhook")
+        return GTaskService(store,queue,GLabs(base_url=base or None,api_key=secret)).retry(project_id,job_id)
+    app.state.retry_glabs=retry_glabs
+
+    @app.post("/api/v1/projects/{project_id}/jobs/{job_id}/retry")
+    def retry_job(project_id:str,job_id:str,background:BackgroundTasks,
+                  key:str=Header(alias="Idempotency-Key")):
+        result=idempotent(project_id,"glabs-retry:"+job_id,key,{"job_id":job_id},
+                           lambda:retry_glabs(project_id,job_id))
+        if result["state"]=="QUEUED":
+            background.add_task(run_glabs_job,job_id)
+        return result
+
+    @app.post("/api/v1/projects/{project_id}/jobs/{job_id}/cancel")
+    def cancel_project_job(project_id:str,job_id:str,key:str=Header(alias="Idempotency-Key")):
+        return idempotent(project_id,"glabs-cancel:"+job_id,key,{"job_id":job_id},
+                          lambda:cancel_glabs(project_id,job_id))
+
     def run_glabs_job(job_id):
         secret,base=stored_provider_key("glabs_webhook")
         if not secret:
