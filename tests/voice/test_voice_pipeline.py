@@ -185,6 +185,7 @@ def test_correction_ffmpeg_real_samples_failure_keeps_selection(ctx, monkeypatch
     assert revised["audio"]["sample_count"] < old["sample_count"]
     assert store.get_artifact(old["audio_sha256"]) == old_wav
     assert service.list_attempts(project, "sec_001")["selected_attempt_id"] == revised["attempt_id"]
+    assert {g["gate_id"]: g["state"] for g in service.gates.board(project)}["G2"] == "DRAFT"
     with sqlite3.connect(store.database) as db:
         correction = db.execute("SELECT correction_json,source_attempt_id,raw_audio_sha256 FROM voice_attempts "
                                 "WHERE attempt_id=?", (revised["attempt_id"],)).fetchone()
@@ -308,6 +309,12 @@ def test_gate_state_first_voice_and_unapproved_candidate_invalidation(ctx):
         assert db.execute("SELECT COUNT(*) FROM gate_staleness WHERE project_id=? AND gate_id IN ('G2','G4','G5')",
                           (project,)).fetchone()[0] == 0
     assert store.get_artifact(artifact) == b"unapproved G2 candidate"
+    # Repair legacy false markers when a genuinely fresh owner candidate arrives.
+    with store._transaction() as db:
+        db.execute("INSERT INTO gate_staleness VALUES(?,?,?)", (project, "G2", "voice_audio"))
+    new_candidate = store.put_artifact(b"new G2 review draft", "voice_candidate")
+    gates.publish_candidate(project, "G2", new_candidate, "1" * 64, store.revision(project))
+    assert gates.board(project)[1]["state"] == "READY_FOR_REVIEW"
     assert voice.list_attempts(project, "sec_001")["selected_attempt_id"] == old
     assert {g["gate_id"]: g["state"] for g in gates.board(project)}["G4"] == "DRAFT"
 
@@ -360,6 +367,10 @@ def test_history_read_independent_of_g1_and_story_sha(ctx):
     assert VoiceService(ProjectStore(store.database, store.artifacts.root),
                         GateService(store), JobQueue(store)).list_attempts(project, "sec_001")["attempts"][0][
                             "compatible_source"] is False
+    changed_narration = copy.deepcopy(replacement)
+    changed_narration["sections"][0]["narration"] += " A new voice source now exists."
+    store.import_story(StoryCandidate.parse(changed_narration), store.revision(project))
+    assert voice.list_attempts(project, "sec_001")["attempts"][0]["compatible_source"] is False
 
 
 def test_previously_approved_head_only_is_genuinely_stale(ctx):

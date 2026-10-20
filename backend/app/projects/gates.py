@@ -173,6 +173,12 @@ class GateService:
                        "candidate_sha256=excluded.candidate_sha256,"
                        "dependency_fingerprint=excluded.dependency_fingerprint",
                        (project_id, gate, candidate_sha256, dependency_fingerprint))
+            if not _head(db, project_id, gate):
+                # Legacy false STALE markers from unapproved drafts must not
+                # block the first fresh owner candidate; real approved heads
+                # retain their staleness until actual reapproval.
+                db.execute("DELETE FROM gate_staleness WHERE project_id=? AND gate_id=?",
+                           (project_id, gate))
 
     def _candidate(self, db, project_id, gate):
         if gate == "G1":
