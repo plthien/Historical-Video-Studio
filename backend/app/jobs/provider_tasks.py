@@ -15,6 +15,18 @@ class GTaskService:
         self.store,self.queue=store,queue
         self.provider=provider or GLabs()
         self.assets=AssetCandidates(store)
+        with store._connection() as db:
+            db.executescript("""
+                CREATE TABLE IF NOT EXISTS glabs_task_observations(
+                    job_id TEXT PRIMARY KEY, provider_status TEXT NOT NULL,
+                    last_error_code TEXT,
+                    FOREIGN KEY(job_id) REFERENCES jobs(job_id));
+            """)
+    def _observe(self,job_id,status,error=None):
+        with self.store._transaction() as db:
+            db.execute("INSERT INTO glabs_task_observations VALUES(?,?,?) "
+                       "ON CONFLICT(job_id) DO UPDATE SET provider_status=excluded.provider_status, "
+                       "last_error_code=excluded.last_error_code",(job_id,status,error))
     def enqueue(self,project,requirement,model,prompt,ratio="16:9",refs=None,upscale=(),
                 mode=None,keep=1,*,expected_revision,idempotency_key,controlled_offline=False):
         self.assets._requirement(project,requirement)
@@ -44,6 +56,7 @@ class GTaskService:
                 tid=self.provider.submit(data["request"])
                 self.queue.attach_provider_task(job["job_id"],job["lease_token"],tid)
                 job=self.queue.get(job["job_id"])
+                self._observe(job["job_id"],"pending")
             return self.poll(job["job_id"],job["lease_token"])
         except ContractViolation as exc:
             return self.queue.fail(job["job_id"],job["lease_token"],exc.code,
@@ -59,6 +72,7 @@ class GTaskService:
             raise ContractViolation("JOB_CANCEL_PENDING",job_id,"Task cancelled; confirm stop first.")
         try:
             status=self.provider.poll(job["provider_task_id"])
+            self._observe(job_id,status["status"])
             if status["status"]!="completed":
                 return self.queue.get(job_id)
             files=self.provider.result(job["provider_task_id"])
@@ -85,6 +99,9 @@ class GTaskService:
                         provider_task_id=job["provider_task_id"],user_approved=False)
                     self.assets._save(db,job["project_id"],payload["requirement_id"],metadata,
                                       digest,info["mime_type"],info["byte_count"])
+                db.execute("INSERT INTO glabs_task_observations VALUES(?,?,NULL) "
+                           "ON CONFLICT(job_id) DO UPDATE SET provider_status='completed',last_error_code=NULL",
+                           (job_id,"completed"))
                 db.execute("UPDATE jobs SET state='SUCCEEDED',output_sha256=?,lease_token=NULL,"
                            "error_code=NULL WHERE job_id=? AND lease_token=? AND state='RUNNING'",
                            (digests[0][0],job_id,token))
@@ -92,7 +109,9 @@ class GTaskService:
         except ContractViolation as exc:
             if exc.code=="STOPPED_BY_CLIENT":
                 self.queue.cancel(job_id)
+                self._observe(job_id,"failed","STOPPED_BY_CLIENT")
                 return self.queue.acknowledge_cancel(job_id,token,provider_confirmed=True)
+            self._observe(job_id,"failed",exc.code)
             return self.queue.fail(job_id,token,exc.code,
                                    retryable=exc.code in ("GLABS_RATE_LIMITED","GLABS_NETWORK_ERROR"))
     def cancel(self,project,job_id):
@@ -104,5 +123,7 @@ class GTaskService:
         flagged=self.queue.cancel(job_id)
         if job["provider_task_id"] and job["state"]=="RUNNING":
             self.provider.stop(job["provider_task_id"])
-            return self.queue.acknowledge_cancel(job_id,job["lease_token"],provider_confirmed=True)
+            result=self.queue.acknowledge_cancel(job_id,job["lease_token"],provider_confirmed=True)
+            self._observe(job_id,"failed","STOPPED_BY_CLIENT")
+            return result
         return flagged
