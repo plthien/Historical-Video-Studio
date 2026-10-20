@@ -185,7 +185,9 @@ class GateService:
             return _g1_identity(db, project_id)[:2]
         if gate == "G3":
             from backend.app.assets.resolution import AssetResolution
-            return AssetResolution(self.store).gate_candidate(db, project_id)
+            if not db.execute("SELECT 1 FROM sqlite_master WHERE name='asset_approval_heads'").fetchone():
+                return None
+            return AssetResolution.gate_candidate(db, project_id, self.store)
         if gate == "G2":
             from backend.app.voice.assemble import selection_identity
             current = selection_identity(db, project_id)
@@ -309,7 +311,7 @@ class GateService:
                     _fail("GATE_ILLEGAL_TRANSITION", gate, "Owner pipeline approval evidence is not implemented.", gate)
                 if gate == "G3" and payload["decision"] == "APPROVED":
                     from backend.app.assets.resolution import AssetResolution
-                    actual = AssetResolution(self.store).gate_candidate(db,project_id)
+                    actual = AssetResolution.gate_candidate(db,project_id,self.store)
                     if actual is None or tuple(actual)!=tuple(candidate):
                         _fail("G3_SOURCE_STALE",gate,"Every asset needs current exact source/rights approval.",gate)
                 if gate == "G2" and payload["decision"] == "APPROVED":
