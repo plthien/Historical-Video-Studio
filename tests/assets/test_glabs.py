@@ -118,6 +118,24 @@ def test_generate_model_rules_http_errors_and_stop_scope(tmp_path):
         service.provider.stop("../../stop")
     with pytest.raises(ContractViolation,match="GLABS_UPSCALE_ENTITLEMENT_UNVERIFIED"):
         validate_request("x","nano_banana_2","16:9",[],upscale=["4K"])
+    # A timeout before receiving a task ID is an uncertain paid side effect.
+    # Never replay it silently, even after another worker looks for queued jobs.
+    submits=[]
+    def uncertain(request):
+        submits.append(request.url.path)
+        raise httpx.ReadTimeout("unknown whether provider accepted paid work")
+    fail_provider=GLabs(httpx.Client(transport=httpx.MockTransport(uncertain)),
+                        api_key="fixture-secret")
+    fail_provider.offline_fixture=True
+    uncertain_svc=GTaskService(store,JobQueue(store),fail_provider)
+    uncertain_job=uncertain_svc.enqueue(pid,req,"nano_banana_2","Old town",
+        expected_revision=store.revision(pid),idempotency_key="glabs-uncertain-submit-001",
+        controlled_offline=True)
+    failed=uncertain_svc.process_one(uncertain_job["job_id"])
+    assert failed["state"]=="FAILED_TERMINAL"
+    assert failed["provider_task_id"] is None
+    assert uncertain_svc.process_one(uncertain_job["job_id"]) is None
+    assert submits==["/api/image/generate"]
     with pytest.raises(ContractViolation,match="GLABS_REFERENCE_INVALID"):
         validate_request("x","nano_pics","16:9",
             [{"data":"data:image/jpeg;base64,"+base64.b64encode(PNG).decode()}],mode="image_to_image")
