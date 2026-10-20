@@ -241,6 +241,21 @@ def test_regenerate_http_is_durable_job_and_not_fake_voice_success(tmp_path, mon
                                   "expected_audio_sha256": job["output_sha256"]},
                             headers={"Idempotency-Key": "voice-api-restore-000"})
         assert wrong.status_code == 404
+        updated = copy.deepcopy(story)
+        updated["sections"][1]["narration"] += " The archive source has changed."
+        replaced = client.post(root + "/story/import?expected_revision=4", json=updated,
+                               headers={"Idempotency-Key": "voice-story-replaced-0002"})
+        assert replaced.status_code == 200
+        history = client.get(root + f"/voice/sections/{section}/attempts")
+        assert history.status_code == 200
+        assert history.json()["selected_attempt_id"] == listed.json()["selected_attempt_id"]
+        assert history.json()["attempts"][0]["compatible_source"] is False
+        rejected = client.post(root + f"/voice/sections/{section}/select-attempt",
+                               json={"expected_revision": 5,
+                                     "attempt_id": listed.json()["selected_attempt_id"],
+                                     "expected_audio_sha256": job["output_sha256"]},
+                               headers={"Idempotency-Key": "voice-stale-restore-0003"})
+        assert rejected.status_code == 424
 
 
 def test_tts_elevenlabs_http_boundary_identity_and_quota(monkeypatch):
