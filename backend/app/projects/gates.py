@@ -183,6 +183,9 @@ class GateService:
     def _candidate(self, db, project_id, gate):
         if gate == "G1":
             return _g1_identity(db, project_id)[:2]
+        if gate == "G3":
+            from backend.app.assets.resolution import AssetResolution
+            return AssetResolution(self.store).gate_candidate(db, project_id)
         if gate == "G2":
             from backend.app.voice.assemble import selection_identity
             current = selection_identity(db, project_id)
@@ -302,8 +305,13 @@ class GateService:
             if gate != "G1":
                 # A2/A3/B1–B3 must supply real pipeline evidence before approval.
                 # No generic artifact, schema-valid fixture, or invented table can authorize them.
-                if payload["decision"] == "APPROVED" and gate != "G2":
+                if payload["decision"] == "APPROVED" and gate not in ("G2","G3"):
                     _fail("GATE_ILLEGAL_TRANSITION", gate, "Owner pipeline approval evidence is not implemented.", gate)
+                if gate == "G3" and payload["decision"] == "APPROVED":
+                    from backend.app.assets.resolution import AssetResolution
+                    actual = AssetResolution(self.store).gate_candidate(db,project_id)
+                    if actual is None or tuple(actual)!=tuple(candidate):
+                        _fail("G3_SOURCE_STALE",gate,"Every asset needs current exact source/rights approval.",gate)
                 if gate == "G2" and payload["decision"] == "APPROVED":
                     from backend.app.voice.assemble import selection_snapshot, canonical, sha, assemble_frozen
                     snapshot = selection_snapshot(db, project_id)
