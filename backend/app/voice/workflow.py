@@ -52,12 +52,26 @@ def word_map_ready(db, project: str) -> bool:
     approved = _head(db, project, "G2")
     if not expected or tuple(approved) != tuple(expected):
         return False
-    row = db.execute("SELECT f.audio_sha256,f.transcript_sha256,w.audio_sha256 "
-                     "FROM final_audio f LEFT JOIN word_maps w ON w.audio_sha256=f.audio_sha256 "
+    row = db.execute("SELECT f.audio_sha256,w.map_sha256,w.map_json "
+                     "FROM final_audio f JOIN word_maps w ON w.audio_sha256=f.audio_sha256 "
                      "AND w.transcript_sha256=f.transcript_sha256 AND w.project_id=f.project_id "
+                     "JOIN jobs j ON j.job_id=w.job_id AND j.project_id=f.project_id "
+                     "AND j.kind='final_alignment' AND j.state='SUCCEEDED' "
+                     "AND j.output_sha256=w.map_sha256 "
                      "WHERE f.project_id=? AND f.approval_id=?",
                      (project, head[0])).fetchone()
-    return bool(row and row[2] == row[0])
+    if not row:
+        return False
+    try:
+        document = json.loads(row[2])
+        validate_document("WordTimingMap.v1", document)
+        return (sha(canonical(document)) == row[1]
+                and document["audio_sha256"] == row[0]
+                and document["transcript_sha256"] == db.execute(
+                    "SELECT transcript_sha256 FROM final_audio WHERE approval_id=?",
+                    (head[0],)).fetchone()[0])
+    except (KeyError, TypeError, ValueError, ContractViolation):
+        return False
 
 
 class FinalVoiceWorkflow:
@@ -211,10 +225,13 @@ class FinalVoiceWorkflow:
             self.store.get_artifact(final["audio_sha256"])
         if word:
             self.store.get_artifact(row[1])
-        return {"approval_id": approval, "current": current, "final_audio": final, "word_map": word,
+        with self.store._connection() as db:
+            aligned = word_map_ready(db, project)
+        return {"approval_id": approval, "current": current, "final_audio": final,
+                "word_map": word if aligned else None,
                 "assembly_job": dict(zip(("job_id","state","error_code","retry_count"), assembly)) if assembly else None,
                 "alignment_job": dict(zip(("job_id","state","error_code","retry_count"), alignment_job)) if alignment_job else None,
-                "g4_ready_dependency": bool(current and word)}
+                "g4_ready_dependency": bool(current and aligned and word)}
 
     def retry_assembly(self, project: str, expected_revision: int, key: str) -> str:
         """Explicit technical recovery of a failed/interrupted frozen G2 job; no second approval."""
