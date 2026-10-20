@@ -214,6 +214,29 @@ class FinalVoiceWorkflow:
                 "alignment_job": dict(zip(("job_id","state","error_code","retry_count"), alignment_job)) if alignment_job else None,
                 "g4_ready_dependency": bool(current and word)}
 
+    def retry_assembly(self, project: str, expected_revision: int, key: str) -> str:
+        """Explicit technical recovery of a failed/interrupted frozen G2 job; no second approval."""
+        with self.store._transaction() as db:
+            self.gates._check_revision(db, project, expected_revision)
+            head = db.execute("SELECT approval_id FROM gate_heads WHERE project_id=? AND gate_id='G2'",
+                              (project,)).fetchone()
+            snapshot = selection_snapshot(db, project)
+            approved = _head(db, project, "G2")
+            if not head or not snapshot or tuple(approved) != selection_identity(db, project):
+                raise ContractViolation("FINAL_AUDIO_SOURCE_STALE", project,
+                                        "G2 selection changed; a technical retry cannot revive stale audio.")
+            current = db.execute("SELECT job_id,state,payload_json FROM jobs WHERE project_id=? "
+                                 "AND kind='final_assembly' ORDER BY rowid DESC LIMIT 1",
+                                 (project,)).fetchone()
+            if (not current or current[1] not in ("FAILED_TERMINAL","FAILED_RETRYABLE","BLOCKED_REVIEW")
+                    or json.loads(current[2])["approval_id"] != head[0]):
+                raise ContractViolation("FINAL_AUDIO_RETRY_FORBIDDEN", project,
+                                        "Retry is allowed only after an actual failed/blocked assembly job.")
+            if db.execute("SELECT 1 FROM final_audio WHERE approval_id=?", (head[0],)).fetchone():
+                raise ContractViolation("FINAL_AUDIO_RETRY_FORBIDDEN", project, "Final WAV already exists.")
+            return enqueue_tx(db, project, "final_assembly", key,
+                              {"approval_id": head[0], "snapshot": snapshot})
+
     def retry_alignment(self, project: str, expected_revision: int, audio_sha: str,
                         transcript_sha: str, key: str) -> dict:
         with self.store._transaction() as db:
