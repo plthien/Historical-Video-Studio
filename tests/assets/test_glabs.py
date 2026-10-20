@@ -58,11 +58,17 @@ def test_generate_poll_result_restart_no_duplicate_submission(tmp_path):
     assert service.process_one(job["job_id"])["state"]=="RUNNING"
     active=service.queue.get(job["job_id"])
     assert active["provider_task_id"]=="a1b2c3d4"
+    with store._connection() as db:
+        assert db.execute("SELECT provider_status FROM glabs_task_observations WHERE job_id=?",
+                          (job["job_id"],)).fetchone()[0]=="running"
     recover_interrupted(service.queue)
     resumed=GTaskService(ProjectStore(store.database,store.artifacts.root),
                          JobQueue(store),service.provider)
     result=resumed.process_one(job["job_id"])
     assert result["state"]=="SUCCEEDED" and store.get_artifact(result["output_sha256"])==PNG
+    with store._connection() as db:
+        assert db.execute("SELECT provider_status FROM glabs_task_observations WHERE job_id=?",
+                          (job["job_id"],)).fetchone()[0]=="completed"
     assert len([x for x in calls if x[1]=="/api/image/generate"])==1
     with store._connection() as db:
         row=db.execute("SELECT metadata_json,user_approved FROM asset_candidates WHERE project_id=?",
@@ -94,6 +100,9 @@ def test_generate_model_rules_http_errors_and_stop_scope(tmp_path):
         expected_revision=1,idempotency_key="glabs-stop-fixture-01",controlled_offline=True)
     assert service.process_one(job["job_id"])["state"]=="RUNNING"
     assert service.cancel(pid,job["job_id"])["state"]=="CANCELLED"
+    with store._connection() as db:
+        assert db.execute("SELECT last_error_code FROM glabs_task_observations WHERE job_id=?",
+                          (job["job_id"],)).fetchone()[0]=="STOPPED_BY_CLIENT"
     assert "/api/stop/abcddcba" in calls and "/api/stop" not in calls
     with pytest.raises(ContractViolation,match="GLABS_TASK_NOT_FOUND"):
         service.cancel("proj_other",job["job_id"])
@@ -107,3 +116,19 @@ def test_generate_model_rules_http_errors_and_stop_scope(tmp_path):
               api_key="offline-secret").poll("abcddcba")
     with pytest.raises(ContractViolation,match="GLABS_TASK_ID_INVALID"):
         service.provider.stop("../../stop")
+
+
+def test_poll_error_499_marks_cancelled_and_never_creates_original(tmp_path):
+    def handler(req):
+        if req.url.path=="/api/image/generate":
+            return httpx.Response(202,json={"task_id":"deadcafe","status":"pending"})
+        return httpx.Response(200,json={"task_id":"deadcafe","status":"failed","error_code":499,
+                                         "error":"Stopped by client"})
+    store,service,project,requirement=setup(tmp_path,handler)
+    job=service.enqueue(project,requirement,"nano_banana_2_lite","Historical scene",
+        expected_revision=1,idempotency_key="glabs-cancelled-499",controlled_offline=True)
+    result=service.process_one(job["job_id"])
+    assert result["state"]=="CANCELLED" and result["provider_task_id"]=="deadcafe"
+    with store._connection() as db:
+        assert db.execute("SELECT COUNT(*) FROM asset_candidates WHERE project_id=?",
+                          (project,)).fetchone()[0]==0
