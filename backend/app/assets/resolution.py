@@ -214,6 +214,8 @@ class AssetResolution:
             # Bind to the exact StoryPackage, not an implicit approval by absence.
             manifest={"assets":[],"story_sha256":__import__("hashlib").sha256(row[0]).hexdigest()}
             return _digest(manifest),_digest({"empty_asset_review":manifest["story_sha256"]})
+        if not db.execute("SELECT 1 FROM sqlite_master WHERE name='asset_approval_heads'").fetchone():
+            return None
         pinned=[]
         for r in requirements:
             rid=r["requirement_id"]
