@@ -15,17 +15,23 @@ class Europeana:
             raise ContractViolation("ARCHIVE_AUTH_REQUIRED","europeana","Configure Europeana API key locally.")
         return self.key
     def _norm(self,record,raw):
+        # Search responses may echo request URLs; a wskey must never enter
+        # persisted provenance or later operator metadata, even if echoed.
+        import json
+        sanitized=json.loads(json.dumps(raw).replace(self.key,"[REDACTED]")) if self.key else raw
         item_id=record.get("id")
         if not isinstance(item_id,str) or not item_id.startswith("/") or len(item_id)>400:
             raise ContractViolation("ARCHIVE_ITEM_INVALID","europeana","Missing dataset/record ID.")
         shown=first(record.get("edmIsShownBy"))
         if shown and not shown.startswith("https://"): shown=None
-        return candidate(self.provider,item_id,"https://www.europeana.eu/en/item"+item_id,raw,
+        normalized=candidate(self.provider,item_id,"https://www.europeana.eu/en/item"+item_id,raw,
              title=record.get("title") or record.get("dcTitle"),creator=record.get("dcCreator"),
              date=record.get("year") or record.get("dcDate"),collection=record.get("dataProvider") or record.get("provider"),
              place=record.get("country"),rights=record.get("rights") or record.get("edmRights"),
              rights_uri=first(record.get("rights") or record.get("edmRights")),
              original=shown,preview=first(record.get("edmPreview")))
+        normalized["raw_source"]=sanitized
+        return normalized
     def search(self,query,cursor=None,page_size=20):
         checked_query(query,page_size)
         start=read_cursor(self.provider,query,cursor) or 1
