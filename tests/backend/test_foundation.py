@@ -445,6 +445,8 @@ def test_gate_never_approved_revised_story_ready_after_claim_review(story, store
     from backend.app.projects.gates import GateService
     project_id = story["project"]["project_id"]
     store.create_project(project_id, "Unapproved draft")
+    gates = GateService(store)
+    assert gates.board(project_id)[0]["state"] == "DRAFT"
     store.import_story(StoryCandidate.parse(story), 0)
     updated = copy.deepcopy(story)
     updated["sections"][0]["narration"] += " Evidence checked for this revision."
@@ -455,7 +457,12 @@ def test_gate_never_approved_revised_story_ready_after_claim_review(story, store
         if claim["critical"]:
             revision = gates.review_claim(project_id, claim["claim_id"], "REVIEWED",
                                           "Researched historical lead", revision)
-    assert gates.board(project_id)[0]["state"] == "READY_FOR_REVIEW"
+    board = gates.board(project_id)[0]
+    assert board["state"] == "READY_FOR_REVIEW"
+    decision = {"decision": "APPROVED", "candidate_sha256": board["candidate_sha256"],
+                "dependency_fingerprint": board["dependency_fingerprint"], "expected_revision": revision}
+    gates.decide(project_id, "G1", decision)
+    assert gates.board(project_id)[0]["state"] == "APPROVED"
 
 
 def test_gate_review_edit_after_approval_invalidates_effective_head(story, store):
