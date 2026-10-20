@@ -78,7 +78,7 @@ export function AssetStudio({projectId,onRefresh}:{projectId:string;onRefresh:()
     if(!gate?.candidate_sha256||!gate.dependency_fingerprint)return;
     await api.decide(projectId,"G3",{decision:"APPROVED",candidate_sha256:gate.candidate_sha256,
       dependency_fingerprint:gate.dependency_fingerprint,expected_revision:revision,
-      affected_ids:requirements.map(r=>r.requirement_id),comment:"Reviewed exact source and rights evidence"},
+      affected_ids:requirements.map(r=>r.requirement_id),comment:requirements.length?"Reviewed exact source and rights evidence":"Explicit operator confirmation: StoryPackage requires no historical assets"},
       crypto.randomUUID());
   }
   return <div className="asset-studio">
@@ -94,7 +94,7 @@ export function AssetStudio({projectId,onRefresh}:{projectId:string;onRefresh:()
       }}>
         {requirements.map(r=><option value={r.requirement_id} key={r.requirement_id}>{r.requirement_id} · {r.status} ({r.candidate_count})</option>)}
       </select>
-      {!current?<p>Import a StoryPackage containing asset requirements first.</p>:<>
+      {!current?<p>No asset requirements in this StoryPackage. Review the empty list and explicitly approve G3 below; nothing is auto-approved.</p>:<>
       <p>Resolution: <strong>{current.resolution_mode}</strong> · {current.status}</p>
       <label htmlFor="resolution-reason">Explicit missing-source reason</label>
       <textarea id="resolution-reason" value={reason} onChange={e=>setReason(e.target.value)}/>
@@ -134,7 +134,18 @@ export function AssetStudio({projectId,onRefresh}:{projectId:string;onRefresh:()
       {candidates.length===0?<p>No candidates yet.</p>:candidates.map(c=><article className="claim" key={c.candidate_id}>
         <strong>{c.title||c.candidate_id}</strong> · {c.provider} {c.asset_class||""}
         <p>Original SHA: {c.original_sha256||"NOT DOWNLOADED"} · Rights: {c.rights_status||"UNKNOWN"} · {c.current_source?"Current":"STALE"} {c.approved?"· G3 reviewed":""}</p>
-        {!c.original_sha256&&c.provider!=="glabs_webhook"&&c.provider!=="manual_upload"&&
+        {c.source_page_url&&<p><a href={c.source_page_url} target="_blank" rel="noreferrer">Source metadata</a> (not original bytes)</p>}
+        {c.original_sha256&&c.current_source&&
+          <figure><img className="asset-original-preview"
+            src={assetApi.previewUrl(projectId,selected,c.candidate_id)}
+            alt={"Verified original candidate "+c.candidate_id}/>
+          <figcaption>Stored original preview · exact SHA {c.original_sha256} · {c.mime_type||"image"}</figcaption></figure>}
+        {c.provider==="europeana"&&!c.hydrated&&c.current_source&&
+          <button disabled={!!pending} onClick={()=>void action("Hydrate Europeana record",
+            ()=>assetApi.hydrate(projectId,revision,selected,c.candidate_id))}>
+            Hydrate Europeana record
+          </button>}
+        {!c.original_sha256&&c.provider!=="glabs_webhook"&&c.provider!=="manual_upload"&&(c.provider!=="europeana"||c.hydrated)&&
           <button disabled={!!pending||!c.current_source} onClick={()=>void action("Download original",()=>assetApi.original(projectId,revision,selected,c.candidate_id))}>Verify original bytes</button>}
         <label><input type="checkbox" disabled={!c.original_sha256||!c.current_source||!!pending} checked={!!checks[c.candidate_id]}
           onChange={e=>setChecks(old=>({...old,[c.candidate_id]:e.target.checked}))}/> Select for independent rights review</label>
@@ -154,6 +165,7 @@ export function AssetStudio({projectId,onRefresh}:{projectId:string;onRefresh:()
     <div className="panel">
       <h4>G3 gate — {gate?.state||"DRAFT"}</h4>
       <p>{gate?.blockers.join(", ")||"All required approved sources available"}</p>
+      {gate?.state==="STALE"&&<p>G3 approval is stale. Re-review and reapprove the exact current original(s); previous approval is never restored automatically.</p>}
       <button disabled={!!pending||gate?.state!=="READY_FOR_REVIEW"} onClick={()=>void action("Approve G3",approveGate)}>Approve complete G3 snapshot</button>
     </div>
     <ProviderSettings/>
