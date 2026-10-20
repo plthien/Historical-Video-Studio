@@ -1,0 +1,1 @@
+"""Section-scoped voice synthesis and immutable attempt lineage (A2-01/02)."""

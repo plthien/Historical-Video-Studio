@@ -58,6 +58,18 @@ jobs:
           Verify -CommandArgs @("-m","backend.tools.smoke","--case","api-and-ui","--mode","local")
           npm --prefix frontend run typecheck
           if ($LASTEXITCODE -ne 0) { throw "A1 typed frontend check failed" }
+      - name: A2-01/02 voice boundary, SQLite and FFmpeg regression
+        shell: pwsh
+        run: |
+          $py = ".venv/Scripts/python.exe"
+          & $py -m pytest -q tests/voice/test_voice_pipeline.py -k "tts or identity or transport"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          & $py -m pytest -q tests/voice/test_voice_pipeline.py -k "attempt or correction or regenerate"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          & $py -m pytest -q tests/voice/test_voice_pipeline.py
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          & $py -m backend.tools.smoke --case section-repair --mode local
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Chromium browser E2E (real local servers)
         shell: pwsh
         run: |

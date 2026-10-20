@@ -1,0 +1,1 @@
+"""Concrete TTS transport boundaries; no runtime language model involved."""

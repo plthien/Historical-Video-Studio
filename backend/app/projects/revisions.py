@@ -18,10 +18,18 @@ _DOWNSTREAM = {
 def mark_stale(db, project_id: str, change_kind: str) -> tuple[str, ...]:
     gates = _DOWNSTREAM[change_kind]
     for gate in gates:
-        if gate == "G1" and not db.execute(
-                "SELECT 1 FROM gate_heads WHERE project_id=? AND gate_id='G1'",
-                (project_id,)).fetchone():
-            continue  # never-approved G1 draft does not own a stale authorization
+        has_approval = db.execute(
+            "SELECT 1 FROM gate_heads WHERE project_id=? AND gate_id=?",
+            (project_id, gate)).fetchone()
+        if not has_approval:
+            # Invalidate any unapproved draft pointer, not an approval that never existed.
+            # Candidate media/history bytes remain immutable; a future owner must publish
+            # fresh dependency evidence before its first approval.
+            db.execute("DELETE FROM gate_candidates WHERE project_id=? AND gate_id=?",
+                       (project_id, gate))
+            db.execute("DELETE FROM gate_staleness WHERE project_id=? AND gate_id=?",
+                       (project_id, gate))
+            continue
         db.execute("INSERT INTO gate_staleness VALUES(?,?,?) "
                    "ON CONFLICT(project_id,gate_id) DO UPDATE SET cause=excluded.cause",
                    (project_id, gate, change_kind))

@@ -19,6 +19,8 @@ from backend.app.contracts import ContractViolation
 from backend.app.jobs import JobQueue, recover_interrupted
 from backend.app.projects.gates import GateService
 from backend.app.projects.storage import ProjectStore
+from backend.app.voice.attempts import VoiceService
+from backend.app.api.voice import mount as mount_voice
 
 
 class ProjectInput(BaseModel):
@@ -52,6 +54,7 @@ def create_app(database: str | Path | None = None, media_root: str | Path | None
     store = ProjectStore(db_file, media)
     gates = GateService(store)
     queue = JobQueue(store)
+    voice_service = VoiceService(store, gates, queue)
     with store._connection() as db:
         db.executescript("""
             CREATE TABLE IF NOT EXISTS api_requests (
@@ -73,14 +76,17 @@ def create_app(database: str | Path | None = None, media_root: str | Path | None
                        allow_credentials=False, allow_methods=["GET", "POST"],
                        allow_headers=["Content-Type", "Idempotency-Key"])
     app.state.store, app.state.gates, app.state.queue = store, gates, queue
+    app.state.voice = voice_service
 
     @app.exception_handler(ContractViolation)
     async def violation(_request: Request, exc: ContractViolation):
         if "CONFLICT" in exc.code or exc.code in ("GATE_ILLEGAL_TRANSITION", "JOB_RETRY_FORBIDDEN", "IDEMPOTENCY_IN_PROGRESS"):
             status = 409
-        elif exc.code in ("STORY_NOT_FOUND", "CANDIDATE_NOT_READY", "WORD_MAP_STALE"):
+        elif exc.code in ("STORY_NOT_FOUND", "CANDIDATE_NOT_READY", "WORD_MAP_STALE",
+                               "G1_APPROVAL_REQUIRED", "VOICE_STORY_STALE", "VOICE_SOURCE_STALE"):
             status = 424
-        elif exc.code in ("PROJECT_NOT_FOUND", "JOB_NOT_FOUND", "CLAIM_NOT_FOUND"):
+        elif exc.code in ("PROJECT_NOT_FOUND", "JOB_NOT_FOUND", "CLAIM_NOT_FOUND",
+                               "VOICE_SECTION_NOT_FOUND", "VOICE_ATTEMPT_NOT_FOUND"):
             status = 404
         else:
             status = 422
@@ -195,6 +201,8 @@ def create_app(database: str | Path | None = None, media_root: str | Path | None
         job = queue.get(job_id)
         return idempotent(job["project_id"], f"cancel:{job_id}", idempotency_key, {"job_id": job_id},
                           lambda: queue.cancel(job_id))
+
+    mount_voice(app, voice_service, idempotent)
 
     @app.api_route("/api/v1/{remaining:path}", methods=["GET", "POST", "PUT", "PATCH", "DELETE"])
     def unavailable(remaining: str):
