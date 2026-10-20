@@ -105,7 +105,7 @@ jobs:
           try {
             npx playwright install chromium
             if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-            npm run test:e2e -- --grep "project-shell|voice-workflow"
+            npm run test:e2e -- --grep "project-shell|voice-workflow|asset-review"
             if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           }
           finally { Pop-Location }
