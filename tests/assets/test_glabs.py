@@ -257,3 +257,42 @@ def test_poll_error_classifies_terminal_quota_vs_transient_http(tmp_path, http_f
         with pytest.raises(ContractViolation, match="JOB_RETRY_FORBIDDEN"):
             svc.queue.retry(job["job_id"])
     assert submits == ["/api/image/generate"]
+
+
+def test_managed_authorization_revoked_before_publication(tmp_path):
+    """A3-04 paid boundary: a durable explicit choice is required and rechecked."""
+    from backend.app.assets.resolution import AssetResolution
+    calls=[]
+    def handler(req):
+        calls.append(req.url.path)
+        if req.url.path=="/api/image/generate":
+            return httpx.Response(202,json={"task_id":"abcd9999","status":"pending"})
+        if req.url.path=="/api/status/abcd9999":
+            return httpx.Response(200,json={"task_id":"abcd9999","status":"running"
+                if calls.count("/api/status/abcd9999")==1 else "completed"})
+        if req.url.path=="/api/result/abcd9999":
+            return httpx.Response(200,json={"task_id":"abcd9999","status":"completed",
+                "results":["http://127.0.0.1:8765/api/files/final.png"]})
+        if req.url.path=="/api/files/final.png":
+            return httpx.Response(200,content=PNG)
+        return httpx.Response(404)
+    store,service,pid,rid=setup(tmp_path,handler)
+    service.provider.offline_fixture=False
+    resolver=AssetResolution(store)
+    with pytest.raises(ContractViolation,match="GLABS_FALLBACK_AUTH_REQUIRED"):
+        service.enqueue(pid,rid,"nano_banana_2","Historical illustration",expected_revision=1,
+                        idempotency_key="managed-not-authorized-01")
+    revision=resolver.choose(pid,rid,"MANAGED_FALLBACK","Operator authorizes billable candidate",1)["project_revision"]
+    job=service.enqueue(pid,rid,"nano_banana_2","Historical illustration",expected_revision=revision,
+                        idempotency_key="managed-authorized-001")
+    assert service.process_one(job["job_id"])["state"]=="RUNNING"
+    assert calls.count("/api/image/generate")==1
+    revision=resolver.choose(pid,rid,"MANUAL_UPLOAD","Revoked managed choice",revision)["project_revision"]
+    recover_interrupted(service.queue)
+    result=service.process_one(job["job_id"])
+    assert result["state"]=="FAILED_TERMINAL"
+    assert result["error_code"]=="GLABS_FALLBACK_AUTH_REQUIRED"
+    assert result["provider_task_id"]=="abcd9999"
+    assert calls.count("/api/image/generate")==1
+    with store._connection() as db:
+        assert db.execute("SELECT COUNT(*) FROM asset_candidates").fetchone()[0]==0
