@@ -99,7 +99,9 @@ def test_generate_model_rules_http_errors_and_stop_scope(tmp_path):
     job=service.enqueue(pid,req,"nano_banana_2","Ancient village",
         expected_revision=1,idempotency_key="glabs-stop-fixture-01",controlled_offline=True)
     assert service.process_one(job["job_id"])["state"]=="RUNNING"
+    active_token=service.queue.get(job["job_id"])["lease_token"]
     assert service.cancel(pid,job["job_id"])["state"]=="CANCELLED"
+    assert service.poll(job["job_id"],active_token)["state"]=="CANCELLED"
     with store._connection() as db:
         assert db.execute("SELECT last_error_code FROM glabs_task_observations WHERE job_id=?",
                           (job["job_id"],)).fetchone()[0]=="STOPPED_BY_CLIENT"
