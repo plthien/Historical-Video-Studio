@@ -47,13 +47,22 @@ class GTaskService:
         if source["project_revision"]!=expected_revision:
             raise ContractViolation("REVISION_CONFLICT",project,
                                     "Reload the project before queueing source-bound generation.")
-        # No A3-04 fallback authorization ledger exists yet. Never bill by default.
-        if not controlled_offline:
-            raise ContractViolation("GLABS_FALLBACK_AUTH_REQUIRED",requirement,
-                                    "A3-04 operator managed-fallback authorization is not implemented.")
-        if not getattr(self.provider,"offline_fixture",False):
-            raise ContractViolation("GLABS_FALLBACK_AUTH_REQUIRED",requirement,
-                                    "Controlled tests require an explicit offline provider boundary.")
+        if controlled_offline:
+            if not getattr(self.provider,"offline_fixture",False):
+                raise ContractViolation("GLABS_FALLBACK_AUTH_REQUIRED",requirement,
+                                        "Controlled tests require an explicit offline provider boundary.")
+            authorization="CONTROLLED_OFFLINE_FIXTURE"
+        else:
+            if getattr(self.provider,"offline_fixture",False):
+                raise ContractViolation("GLABS_FALLBACK_AUTH_REQUIRED",requirement,
+                                        "Mock providers cannot impersonate managed authorization.")
+            from backend.app.assets.resolution import AssetResolution
+            with self.store._connection() as db:
+                choice=AssetResolution._choice(db,project,requirement,source["requirement_sha256"])
+            if not choice or choice["mode"]!="MANAGED_FALLBACK" or not choice["operator_authorized"]:
+                raise ContractViolation("GLABS_FALLBACK_AUTH_REQUIRED",requirement,
+                                        "Operator must explicitly select managed fallback.")
+            authorization="MANAGED_FALLBACK_AUTHORIZED"
         body=validate_request(prompt,model,ratio,refs or [],upscale,mode,keep)
         payload={"project_id":project,"requirement_id":requirement,
                  "story_sha256":source["story_sha256"],
@@ -61,7 +70,7 @@ class GTaskService:
                  "requirement_sha256":source["requirement_sha256"],
                  "request":body,
                  "request_sha256":sha256(json.dumps(body,sort_keys=True).encode()).hexdigest(),
-                 "authorization":"CONTROLLED_OFFLINE_FIXTURE"}
+                 "authorization":authorization}
         return self.queue.submit(project,"glabs_image",idempotency_key,payload,expected_revision)
     def process_one(self,job_id=None):
         job=self.queue.claim("glabs_image",job_id=job_id)
@@ -71,8 +80,14 @@ class GTaskService:
                 raise ContractViolation("GLABS_UNCERTAIN_SUBMISSION",job["job_id"],
                                         "Do not resubmit an uncertain paid generation.")
             data=json.loads(job["payload_json"])
-            if data.get("authorization")!="CONTROLLED_OFFLINE_FIXTURE" or not getattr(self.provider,"offline_fixture",False):
-                raise ContractViolation("GLABS_FALLBACK_AUTH_REQUIRED",job["job_id"],"A3-04 authorization required.")
+            if data.get("authorization")=="CONTROLLED_OFFLINE_FIXTURE":
+                if not getattr(self.provider,"offline_fixture",False):
+                    raise ContractViolation("GLABS_FALLBACK_AUTH_REQUIRED",job["job_id"],"Offline task requires mock provider.")
+            elif data.get("authorization")=="MANAGED_FALLBACK_AUTHORIZED":
+                if getattr(self.provider,"offline_fixture",False):
+                    raise ContractViolation("GLABS_FALLBACK_AUTH_REQUIRED",job["job_id"],"Cannot bill mock fallback.")
+            else:
+                raise ContractViolation("GLABS_FALLBACK_AUTH_REQUIRED",job["job_id"],"Explicit authorization missing.")
             if not job["provider_task_id"]:
                 # This check is immediately before a potentially billable network request.
                 with self.store._connection() as db:
@@ -81,6 +96,11 @@ class GTaskService:
                         raise ContractViolation("JOB_CANCEL_PENDING",job["job_id"],
                                                 "Cancelled before provider submission.")
                     self._current_source(db,owned,data)
+                    if data["authorization"]=="MANAGED_FALLBACK_AUTHORIZED":
+                        from backend.app.assets.resolution import AssetResolution
+                        choice=AssetResolution._choice(db,owned["project_id"],data["requirement_id"],data["requirement_sha256"])
+                        if not choice or choice["mode"]!="MANAGED_FALLBACK" or not choice["operator_authorized"]:
+                            raise ContractViolation("GLABS_FALLBACK_AUTH_REQUIRED",job["job_id"],"Fallback authorization changed.")
                 tid=self.provider.submit(data["request"])
                 self.queue.attach_provider_task(job["job_id"],job["lease_token"],tid)
                 job=self.queue.get(job["job_id"])
@@ -119,6 +139,11 @@ class GTaskService:
                 if owned["cancel_requested"]:
                     raise ContractViolation("JOB_CANCEL_PENDING",job_id,"Cancellation pending; no publish.")
                 self._current_source(db,owned,payload)
+                if payload["authorization"]=="MANAGED_FALLBACK_AUTHORIZED":
+                    from backend.app.assets.resolution import AssetResolution
+                    choice=AssetResolution._choice(db,owned["project_id"],payload["requirement_id"],payload["requirement_sha256"])
+                    if not choice or choice["mode"]!="MANAGED_FALLBACK" or not choice["operator_authorized"]:
+                        raise ContractViolation("GLABS_FALLBACK_AUTH_REQUIRED",job_id,"Authorization revoked before publication.")
                 for digest,info in digests:
                     metadata=dict(provider="glabs_webhook",item_id=job["provider_task_id"],
                         title="AI generated illustration candidate",asset_class="AI_ILLUSTRATION",
