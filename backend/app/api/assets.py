@@ -119,7 +119,13 @@ def mount(app, store, gates, queue, idempotent):
         with store._connection() as db:
             row=db.execute("SELECT api_key,base_url FROM local_provider_settings WHERE provider=?",
                            (name,)).fetchone()
-        return row if row else (None,None)
+        if row:
+            return row  # An explicitly cleared key must not silently fall back to env.
+        if name=="glabs_webhook":
+            return (os.getenv("HVS_GLABS_API_KEY"),os.getenv("HVS_GLABS_BASE_URL"))
+        if name=="europeana":
+            return (os.getenv("HVS_EUROPEANA_API_KEY"),None)
+        return (None,None)
 
     def cancel_glabs(project_id,job_id):
         secret,base=stored_provider_key("glabs_webhook")
