@@ -210,7 +210,7 @@ def create_app(database: str | Path | None = None, media_root: str | Path | None
     def job_cancel(job_id: str, idempotency_key: str = Header(alias="Idempotency-Key")):
         job = queue.get(job_id)
         return idempotent(job["project_id"], f"cancel:{job_id}", idempotency_key, {"job_id": job_id},
-                          lambda: queue.cancel(job_id))
+                          lambda: app.state.cancel_glabs(job["project_id"],job_id) if job["kind"]=="glabs_image" else queue.cancel(job_id))
 
     mount_voice(app, voice_service, idempotent, final_voice)
     mount_assets(app, store, gates, queue, idempotent)
