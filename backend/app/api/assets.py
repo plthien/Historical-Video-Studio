@@ -233,7 +233,8 @@ def mount(app, store, gates, queue, idempotent):
                                             "Select an unhydrated Europeana search candidate.")
                 item_id=chosen.get("item_id")
             api_key,_=stored_provider_key("europeana")
-            return assets.hydrate(project_id,requirement_id,Europeana(key=api_key),item_id)
+            return assets.hydrate(project_id,requirement_id,Europeana(key=api_key),item_id,
+                                  candidate_id=body.candidate_id,frozen_source=source)
         return idempotent(project_id,"asset-hydrate:"+requirement_id,key,body.model_dump(),action)
 
     @app.get("/api/v1/projects/{project_id}/assets/{requirement_id}/candidates/{candidate_id}/original-preview")
