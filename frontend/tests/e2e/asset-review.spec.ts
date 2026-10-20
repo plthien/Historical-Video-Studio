@@ -35,7 +35,7 @@ test("asset-review: operator choice persists and never auto-approves G3",async({
   await expect(page.getByRole("button",{name:"Approve complete G3 snapshot"})).toBeDisabled();
 
   // F03: the UI must display the backend-verified original, not a search thumbnail.
-  const png=Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAusB9S5wN3sAAAAASUVORK5CYII=","base64");
+  const png=Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAADElEQVR4nGMwSpkGAAH4AS3k7SvZAAAAAElFTkSuQmCC","base64");
   await page.locator(".asset-studio input[type=file]").setInputFiles({
     name:"verified-original.png",mimeType:"image/png",buffer:png
   });
