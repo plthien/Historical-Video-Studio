@@ -114,7 +114,14 @@ class GLabs:
             raise ContractViolation("GLABS_STATUS_INVALID",task_id,"Task/status mismatch.")
         if result["status"]=="failed":
             code=result.get("error_code")
-            raise ContractViolation("STOPPED_BY_CLIENT" if code==499 else "GLABS_PROVIDER_FAILED",
+            # Task failures are terminal even when quota may replenish later.
+            # HTTP 429 from polling is a separate transient condition.
+            status_codes={429:"GLABS_QUOTA_EXCEEDED",499:"STOPPED_BY_CLIENT",
+                          401:"GLABS_AUTH_REQUIRED",403:"GLABS_PLAN_REQUIRED",
+                          400:"GLABS_INPUT_INVALID",500:"GLABS_SERVER_ERROR"}
+            try: code=int(code)
+            except (ValueError,TypeError): code=None
+            raise ContractViolation(status_codes.get(code,"GLABS_PROVIDER_FAILED"),
                                     task_id,"Webhook task failed; inspect provider diagnostics.")
         return result
     def result(self,task_id):

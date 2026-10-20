@@ -4,7 +4,6 @@ A3-04 must supply managed-fallback authorization before live generation can be c
 Controlled offline tests can exercise the paid boundary with explicit mock authorization.
 """
 import json
-import uuid
 from hashlib import sha256
 from backend.app.contracts import ContractViolation
 from backend.app.assets.provenance import AssetCandidates
@@ -27,9 +26,27 @@ class GTaskService:
             db.execute("INSERT INTO glabs_task_observations VALUES(?,?,?) "
                        "ON CONFLICT(job_id) DO UPDATE SET provider_status=excluded.provider_status, "
                        "last_error_code=excluded.last_error_code",(job_id,status,error))
+    def _current_source(self,db,job,payload):
+        """Compare frozen StoryPackage + requirement under the caller's SQLite transaction."""
+        if job["project_id"]!=payload.get("project_id"):
+            raise ContractViolation("GLABS_SOURCE_STALE",job["job_id"],"Project identity changed.")
+        try:
+            current=self.assets._source_tx(db,job["project_id"],payload["requirement_id"])
+        except (ContractViolation,KeyError) as exc:
+            raise ContractViolation("GLABS_SOURCE_STALE",job["job_id"],
+                                    "Original source requirement no longer exists.") from exc
+        if any(current[k]!=payload.get(k) for k in
+               ("story_sha256","story_revision","requirement_sha256")):
+            raise ContractViolation("GLABS_SOURCE_STALE",job["job_id"],
+                                    "Source changed; do not publish or resubmit paid work.")
+        return current
+
     def enqueue(self,project,requirement,model,prompt,ratio="16:9",refs=None,upscale=(),
                 mode=None,keep=1,*,expected_revision,idempotency_key,controlled_offline=False):
-        self.assets._requirement(project,requirement)
+        source=self.assets._requirement(project,requirement)
+        if source["project_revision"]!=expected_revision:
+            raise ContractViolation("REVISION_CONFLICT",project,
+                                    "Reload the project before queueing source-bound generation.")
         # No A3-04 fallback authorization ledger exists yet. Never bill by default.
         if not controlled_offline:
             raise ContractViolation("GLABS_FALLBACK_AUTH_REQUIRED",requirement,
@@ -38,7 +55,11 @@ class GTaskService:
             raise ContractViolation("GLABS_FALLBACK_AUTH_REQUIRED",requirement,
                                     "Controlled tests require an explicit offline provider boundary.")
         body=validate_request(prompt,model,ratio,refs or [],upscale,mode,keep)
-        payload={"requirement_id":requirement,"request":body,
+        payload={"project_id":project,"requirement_id":requirement,
+                 "story_sha256":source["story_sha256"],
+                 "story_revision":source["story_revision"],
+                 "requirement_sha256":source["requirement_sha256"],
+                 "request":body,
                  "request_sha256":sha256(json.dumps(body,sort_keys=True).encode()).hexdigest(),
                  "authorization":"CONTROLLED_OFFLINE_FIXTURE"}
         return self.queue.submit(project,"glabs_image",idempotency_key,payload,expected_revision)
@@ -53,14 +74,27 @@ class GTaskService:
             if data.get("authorization")!="CONTROLLED_OFFLINE_FIXTURE" or not getattr(self.provider,"offline_fixture",False):
                 raise ContractViolation("GLABS_FALLBACK_AUTH_REQUIRED",job["job_id"],"A3-04 authorization required.")
             if not job["provider_task_id"]:
+                # This check is immediately before a potentially billable network request.
+                with self.store._connection() as db:
+                    owned=self.queue._owned(db,job["job_id"],job["lease_token"])
+                    if owned["cancel_requested"]:
+                        raise ContractViolation("JOB_CANCEL_PENDING",job["job_id"],
+                                                "Cancelled before provider submission.")
+                    self._current_source(db,owned,data)
                 tid=self.provider.submit(data["request"])
                 self.queue.attach_provider_task(job["job_id"],job["lease_token"],tid)
                 job=self.queue.get(job["job_id"])
                 self._observe(job["job_id"],"pending")
             return self.poll(job["job_id"],job["lease_token"])
         except ContractViolation as exc:
+            if exc.code=="GLABS_SOURCE_STALE":
+                self._observe(job["job_id"],"not_submitted",exc.code)
+            current=self.queue.get(job["job_id"])
+            # A rejected/uncertain first POST must never be automatically reissued.
+            retryable=(bool(current["provider_task_id"]) and
+                       exc.code in ("GLABS_RATE_LIMITED","GLABS_NETWORK_ERROR"))
             return self.queue.fail(job["job_id"],job["lease_token"],exc.code,
-                                   retryable=exc.code in ("GLABS_RATE_LIMITED",))
+                                   retryable=retryable)
         except Exception:
             return self.queue.fail(job["job_id"],job["lease_token"],"GLABS_OPERATION_UNCERTAIN",False)
     def poll(self,job_id,token):
@@ -84,9 +118,7 @@ class GTaskService:
                 owned=self.queue._owned(db,job_id,token)
                 if owned["cancel_requested"]:
                     raise ContractViolation("JOB_CANCEL_PENDING",job_id,"Cancellation pending; no publish.")
-                row=db.execute("SELECT revision FROM projects WHERE project_id=?",
-                               (job["project_id"],)).fetchone()
-                self.assets._requirement(job["project_id"],payload["requirement_id"])
+                self._current_source(db,owned,payload)
                 for digest,info in digests:
                     metadata=dict(provider="glabs_webhook",item_id=job["provider_task_id"],
                         title="AI generated illustration candidate",asset_class="AI_ILLUSTRATION",
@@ -111,7 +143,17 @@ class GTaskService:
                 self.queue.cancel(job_id)
                 self._observe(job_id,"failed","STOPPED_BY_CLIENT")
                 return self.queue.acknowledge_cancel(job_id,token,provider_confirmed=True)
-            self._observe(job_id,"failed",exc.code)
+            if exc.code=="GLABS_SOURCE_STALE":
+                # Provider completed successfully; only Studio publication is stale.
+                self._observe(job_id,"completed",exc.code)
+            elif exc.code in ("GLABS_RATE_LIMITED","GLABS_NETWORK_ERROR"):
+                # A transient HTTP failure does not make the remote task terminal.
+                with self.store._connection() as db:
+                    row=db.execute("SELECT provider_status FROM glabs_task_observations "
+                                   "WHERE job_id=?",(job_id,)).fetchone()
+                self._observe(job_id,row[0] if row else "pending",exc.code)
+            else:
+                self._observe(job_id,"failed",exc.code)
             return self.queue.fail(job_id,token,exc.code,
                                    retryable=exc.code in ("GLABS_RATE_LIMITED","GLABS_NETWORK_ERROR"))
     def run_until_terminal(self,job_id,*,poll_seconds=3,max_polls=180):
