@@ -352,3 +352,98 @@ def test_provider_identity_is_pinned_before_first_paid_post(tmp_path):
     assert calls==["/api/image/generate"]  # only after original identity restored
     with store._connection() as db:
         assert db.execute("SELECT COUNT(*) FROM asset_candidates").fetchone()[0]==0
+
+
+
+@pytest.mark.parametrize("stop_response,final_state", [
+    ("stopped","CANCELLED"),("skipped","SUCCEEDED")
+])
+def test_remote_owned_queued_cancel_after_restart_obeys_stop_outcome(tmp_path,stop_response,final_state):
+    """R02/R03: recovered QUEUED+known task ID must stop, skipped is completed."""
+    calls=[]
+    def handler(req):
+        calls.append(req.url.path)
+        if req.url.path=="/api/image/generate":
+            return httpx.Response(202,json={"task_id":"aabbccdd","status":"pending"})
+        if req.url.path=="/api/status/aabbccdd":
+            return httpx.Response(200,json={"task_id":"aabbccdd",
+                "status":"running" if calls.count("/api/status/aabbccdd")==1 else "completed"})
+        if req.url.path=="/api/stop/aabbccdd":
+            return httpx.Response(200,json={"stopped":["aabbccdd"] if stop_response=="stopped" else [],
+                "skipped":["aabbccdd"] if stop_response=="skipped" else [],"count":1})
+        if req.url.path=="/api/result/aabbccdd":
+            return httpx.Response(200,json={"task_id":"aabbccdd","status":"completed",
+                "results":["http://127.0.0.1:8765/api/files/a.png"]})
+        if req.url.path=="/api/files/a.png":
+            return httpx.Response(200,content=PNG)
+        return httpx.Response(404)
+    store,service,pid,rid=setup(tmp_path,handler)
+    job=service.enqueue(pid,rid,"nano_banana_2","Ancient village",expected_revision=1,
+        idempotency_key="cancel-resume-"+stop_response,controlled_offline=True)
+    assert service.process_one(job["job_id"])["state"]=="RUNNING"
+    assert recover_interrupted(service.queue)["resume_existing_provider_task"]==1
+    before=service.queue.get(job["job_id"])
+    assert before["state"]=="QUEUED" and before["provider_task_id"]=="aabbccdd"
+    actual=service.cancel(pid,job["job_id"])
+    assert actual["state"]==final_state
+    assert calls.count("/api/stop/aabbccdd")==1
+    assert calls.count("/api/image/generate")==1
+    assert (actual["output_sha256"] is not None)==(final_state=="SUCCEEDED")
+    assert service.cancel(pid,job["job_id"])["state"]==final_state
+    assert calls.count("/api/stop/aabbccdd")==1
+
+
+def test_uncertain_stop_recoverable_then_verified_same_task(tmp_path):
+    """R04: transport failure cannot fabricate cancel or delete durable provider ID."""
+    calls=[]
+    fail_stop=[True]
+    def handler(req):
+        calls.append(req.url.path)
+        if req.url.path=="/api/image/generate":
+            return httpx.Response(202,json={"task_id":"beadface","status":"pending"})
+        if req.url.path=="/api/status/beadface":
+            return httpx.Response(200,json={"task_id":"beadface","status":"running"})
+        if req.url.path=="/api/stop/beadface":
+            if fail_stop[0]: raise httpx.ReadTimeout("uncertain stop")
+            return httpx.Response(200,json={"stopped":["beadface"],"skipped":[],"count":1})
+        return httpx.Response(404)
+    store,service,pid,rid=setup(tmp_path,handler)
+    job=service.enqueue(pid,rid,"nano_banana_2","Old town",expected_revision=1,
+        idempotency_key="uncertain-remote-stop-01",controlled_offline=True)
+    assert service.process_one(job["job_id"])["state"]=="RUNNING"
+    blocked=service.cancel(pid,job["job_id"])
+    assert blocked["state"]=="BLOCKED_REVIEW"
+    assert blocked["provider_task_id"]=="beadface"
+    assert blocked["cancel_requested"]==1
+    recovered=GTaskService(ProjectStore(store.database,store.artifacts.root),
+        JobQueue(store),service.provider)
+    assert recovered.queue.get(job["job_id"])["state"]=="BLOCKED_REVIEW"
+    fail_stop[0]=False
+    cancelled=recovered.cancel(pid,job["job_id"])
+    assert cancelled["state"]=="CANCELLED"
+    assert calls.count("/api/image/generate")==1
+    assert calls.count("/api/stop/beadface")==2
+
+
+def test_queued_unsubmitted_cancel_has_no_provider_side_effect(tmp_path):
+    calls=[]
+    def handler(req):
+        calls.append(req.url.path)
+        return httpx.Response(500)
+    store,service,pid,rid=setup(tmp_path,handler)
+    job=service.enqueue(pid,rid,"nano_banana_2","No provider yet",expected_revision=1,
+        idempotency_key="queued-not-submitted-001",controlled_offline=True)
+    assert service.cancel(pid,job["job_id"])["state"]=="CANCELLED"
+    assert calls==[]
+
+
+def test_actual_original_download_guard_blocks_europeana_third_party(tmp_path):
+    """V01: do not relax trusted host restrictions to pass thumbnail tests."""
+    from backend.app.assets.download import verify_url
+    wrong={"provider":"europeana",
+           "original_download_url":"https://images.unknown-archive.example/media/original.jpg"}
+    with pytest.raises(ContractViolation,match="ORIGINAL_HOST_FORBIDDEN"):
+        verify_url(wrong)
+    with pytest.raises(ContractViolation,match="ORIGINAL_NOT_VERIFIED"):
+        verify_url({"provider":"europeana",
+                    "original_download_url":"https://www.europeana.eu/thumb/preview.jpg"})
