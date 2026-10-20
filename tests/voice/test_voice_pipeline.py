@@ -627,7 +627,12 @@ def test_gate_2_reapproval_after_restore_same_wav_keeps_distinct_alignment_linea
         voice.enqueue(project, "sec_001", "kokoro_local", "am_adam", 1.0,
                       "new B voice", store.revision(project), "reapproval-voice-change-b")
         assert voice.process_one(lambda *_: wav_fixture(2))["state"] == "SUCCEEDED"
-    assert gates.board(project)[1]["state"] == "STALE"
+    # The old approval must not authorize B; a fresh B candidate may already
+    # be READY_FOR_REVIEW rather than displaying a stale historical candidate.
+    assert gates.board(project)[1]["state"] in ("STALE", "READY_FOR_REVIEW")
+    from backend.app.voice.workflow import word_map_source_current
+    with store._connection() as db:
+        assert word_map_source_current(db, project) is False
     b = voice.list_attempts(project, "sec_001")["selected_attempt_id"]
     voice.restore(project, "sec_001", first["attempt_id"], first["audio_sha256"],
                   store.revision(project), "restore original A")
