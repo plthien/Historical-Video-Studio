@@ -27,7 +27,10 @@ class Wikimedia:
         params=dict(action="query",generator="search",gsrsearch=query,gsrnamespace=6,
                     gsrlimit=page_size,prop="imageinfo",iiprop="url|size|mime|extmetadata|timestamp",
                     iiurlwidth=320,format="json",formatversion=2)
-        if c: params.update(c)
+        if c:
+            if (not isinstance(c,dict) or set(c)-{"continue","gsroffset"}):
+                raise ContractViolation("ARCHIVE_CURSOR_INVALID","commons","Invalid continuation keys.")
+            params.update(c)
         raw=self.http.json(URL,params)
         pages=raw.get("query",{}).get("pages",[])
         if not isinstance(pages,list): raise ContractViolation("ARCHIVE_JSON_INVALID","commons","Invalid search pages.")

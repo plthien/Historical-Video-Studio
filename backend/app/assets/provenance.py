@@ -35,7 +35,8 @@ class AssetCandidates:
             raise ContractViolation("ASSET_ORIGIN_INVALID","candidate","Unknown source provenance.")
         candidate={**candidate,"review_status":"CANDIDATE","user_approved":False}
         body=json.dumps(candidate,sort_keys=True,separators=(",",":"),ensure_ascii=False)
-        digest=sha256(body.encode()).hexdigest()
+        identity={k:v for k,v in candidate.items() if k!="retrieved_at"}
+        digest=sha256(json.dumps(identity,sort_keys=True,separators=(",",":"),ensure_ascii=False).encode()).hexdigest()
         row=db.execute("SELECT candidate_id FROM asset_candidates WHERE project_id=? AND "
                        "requirement_id=? AND origin=? AND metadata_sha256=? AND "
                        "IFNULL(original_sha256,'')=IFNULL(?,'')",

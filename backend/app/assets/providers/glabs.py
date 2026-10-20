@@ -3,6 +3,7 @@ import base64
 import hashlib
 import json
 import os
+import re
 from urllib.parse import urlparse
 import httpx
 from backend.app.contracts import ContractViolation
@@ -92,10 +93,12 @@ class GLabs:
     def submit(self,body):
         status,info=self._request("POST","/api/image/generate",body=body)
         tid=info.get("task_id")
-        if status!=202 or info.get("status")!="pending" or not isinstance(tid,str) or len(tid)<8:
+        if status!=202 or info.get("status")!="pending" or not isinstance(tid,str) or not re.fullmatch(r"[a-fA-F0-9]{8}",tid):
             raise ContractViolation("GLABS_202_INVALID","webhook","Expected pending task and durable task_id.")
         return tid
     def poll(self,task_id):
+        if not re.fullmatch(r"[a-fA-F0-9]{8}",task_id):
+            raise ContractViolation("GLABS_TASK_ID_INVALID","task","Invalid task identifier.")
         _,result=self._request("GET","/api/status/"+task_id)
         if result.get("task_id")!=task_id or result.get("status") not in STATUS:
             raise ContractViolation("GLABS_STATUS_INVALID",task_id,"Task/status mismatch.")
@@ -105,6 +108,8 @@ class GLabs:
                                     task_id,"Webhook task failed; inspect provider diagnostics.")
         return result
     def result(self,task_id):
+        if not re.fullmatch(r"[a-fA-F0-9]{8}",task_id):
+            raise ContractViolation("GLABS_TASK_ID_INVALID","task","Invalid task identifier.")
         _,info=self._request("GET","/api/result/"+task_id)
         urls=info.get("results")
         if info.get("task_id")!=task_id or info.get("status")!="completed" or not isinstance(urls,list) or not urls:
@@ -121,6 +126,8 @@ class GLabs:
             files.append((binary,metadata))
         return files
     def stop(self,task_id):
+        if not re.fullmatch(r"[a-fA-F0-9]{8}",task_id):
+            raise ContractViolation("GLABS_TASK_ID_INVALID","task","Invalid task identifier.")
         _,info=self._request("POST","/api/stop/"+task_id,body={})
         if task_id not in info.get("stopped",[]) and task_id not in info.get("skipped",[]):
             raise ContractViolation("GLABS_STOP_UNCONFIRMED",task_id,"No task-specific stop evidence.")

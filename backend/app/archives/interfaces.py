@@ -37,7 +37,8 @@ def candidate(provider, item_id, source_url, raw, *, title=None, creator=None, d
                 creation_date=plain(date), collection=plain(collection), place=plain(place),
                 rights_statement=plain(rights), rights_uri=rights_uri,
                 original_download_url=original, thumbnail_url=preview,
-                raw_response_sha256=digest(raw), retrieved_at=datetime.now(timezone.utc).isoformat(),
+                raw_response_sha256=digest(raw), raw_source=raw,
+                retrieved_at=datetime.now(timezone.utc).isoformat(),
                 rights_status="REVIEW_REQUIRED" if rights else "UNKNOWN",
                 historical_exactness="UNREVIEWED", review_status="CANDIDATE",
                 user_approved=False, asset_class=None, depicted_event_date=None, period=None)
