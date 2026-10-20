@@ -78,8 +78,11 @@ class AssetResolution:
                 source = self.assets._source_tx(db, project, rid)
                 choice = self._choice(db, project, rid, source["requirement_sha256"])
                 head = self._head(db, project, rid, source["requirement_sha256"])
-                count = db.execute("SELECT COUNT(*) FROM asset_candidates WHERE project_id=? "
-                                   "AND requirement_id=?",(project,rid)).fetchone()[0]
+                versions = db.execute("SELECT metadata_json FROM asset_candidates WHERE project_id=? "
+                                      "AND requirement_id=?",(project,rid)).fetchall()
+                count = sum(1 for (raw,) in versions if
+                            (meta:=json.loads(raw)).get("source_story_sha256")==source["story_sha256"]
+                            and meta.get("source_requirement_sha256")==source["requirement_sha256"])
                 status = ("APPROVED" if head else "MANAGED_FALLBACK_AUTHORIZED"
                           if choice and choice["mode"]=="MANAGED_FALLBACK" else "MANUAL_SELECTED"
                           if choice else "CANDIDATES_READY" if count else "ARCHIVE_ASSET_UNRESOLVED")
