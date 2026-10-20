@@ -234,12 +234,15 @@ class GateService:
                 blockers.append("CANDIDATE_DEPENDENCY_CHANGED")
                 return "BLOCKED", candidate, blockers, last
             return "DRAFT", None, blockers, last
-        if not head and candidate and gate in ("G2", "G4", "G5") and (
+        if not head and candidate and gate in ("G2", "G3", "G4", "G5") and (
                 self._status(db, project_id, "G1")[0] != "APPROVED"):
             blockers.append("G1_APPROVAL_REQUIRED")
             return "BLOCKED", candidate, blockers, last
 
         if gate == "G4" and (candidate or head):
+            if self._status(db,project_id,"G3")[0]!="APPROVED":
+                blockers.append("G3_APPROVAL_REQUIRED")
+                return ("STALE" if head else "BLOCKED"),candidate,blockers,last
             from backend.app.voice.workflow import word_map_ready
             if not word_map_ready(db, project_id):
                 blockers.append("WORD_MAP_MISSING_OR_STALE")
