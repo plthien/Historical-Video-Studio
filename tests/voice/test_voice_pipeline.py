@@ -417,3 +417,349 @@ def test_previously_approved_head_only_is_genuinely_stale(ctx):
     queue_one(ctx, key="voice-second-approved-head-0002")
     assert voice.process_one(lambda req, ident: audio_fixture(2))["state"] == "SUCCEEDED"
     assert gates.board(project)[1]["state"] == "STALE"  # never silently clear a real stale head
+
+
+def test_gate_2_final_wav_assemble_alignment_and_cold_reopen(tmp_path):
+    """A2-03/04: selected 2 sections -> G2 intent -> actual sample offsets -> provider word map."""
+    from backend.tools.voice_final_smoke import setup,approval,mock_alignment
+    from backend.app.voice.correction import inspect_wav
+    from backend.app.voice.workflow import FinalVoiceWorkflow
+    store,gates,voice,workflow,project,story=setup(tmp_path)
+    first=voice.list_attempts(project,"sec_001")["attempts"][0]
+    original=store.get_artifact(first["audio_sha256"])
+    gate=gates.board(project)[1]
+    assert gate["state"]=="READY_FOR_REVIEW"
+    decision=approval(store,gates,project)
+    assert decision["state"]=="APPROVED"
+    with pytest.raises(ContractViolation,match="GATE_ILLEGAL_TRANSITION|APPROVAL_REVISION_CONFLICT"):
+        gates.decide(project,"G2",{"decision":"APPROVED",
+            "candidate_sha256":gate["candidate_sha256"],
+            "dependency_fingerprint":gate["dependency_fingerprint"],
+            "expected_revision":store.revision(project)})
+    assert workflow.status(project)["final_audio"] is None
+    assert workflow.status(project)["g4_ready_dependency"] is False
+    completed=workflow.process_one()
+    assert completed["state"]=="SUCCEEDED"
+    current=workflow.status(project)
+    final=current["final_audio"]
+    offsets=final["section_offsets"]
+    assert len(offsets)==2 and offsets[0]["start_sample"]==0
+    assert offsets[0]["end_sample"]==offsets[1]["start_sample"]
+    assert offsets[-1]["end_sample"]==final["duration_samples"]
+    assert inspect_wav(store.get_artifact(final["audio_sha256"]))["sample_count"]==final["duration_samples"]
+    assert store.get_artifact(first["audio_sha256"])==original
+    assert current["g4_ready_dependency"] is False
+    # An owner draft alone cannot make G4 eligible before verified alignment.
+    draft=store.put_artifact(b"unapproved G4 candidate bytes","voice_candidate")
+    gates.publish_candidate(project,"G4",draft,"b"*64,store.revision(project))
+    assert gates.board(project)[3]["state"]=="BLOCKED"
+    assert "WORD_MAP_MISSING_OR_STALE" in gates.board(project)[3]["blockers"]
+    failed=workflow.process_one(lambda *_:{"words":[]})
+    assert failed["state"]=="FAILED_TERMINAL" and failed["error_code"]=="ALIGNMENT_TRANSCRIPT_MISMATCH"
+    assert workflow.status(project)["word_map"] is None
+    with pytest.raises(ContractViolation,match="ALIGNMENT_RETRY_FORBIDDEN"):
+        # Cannot queue duplicate alignment while an existing retry is already queued.
+        workflow.retry_alignment(project,store.revision(project),final["audio_sha256"],
+                                 final["transcript_sha256"],"new-retry-duplicate-000")
+        workflow.retry_alignment(project,store.revision(project),final["audio_sha256"],
+                                 final["transcript_sha256"],"another-retry-duplicate")
+    done=workflow.process_one(lambda audio,text:mock_alignment(final,text))
+    assert done["state"]=="SUCCEEDED",done
+    stable=workflow.status(project)
+    assert stable["g4_ready_dependency"]
+    assert gates.board(project)[3]["state"]=="READY_FOR_REVIEW"
+    words=stable["word_map"]["words"]
+    assert len(words)==len("\n".join(s["narration"] for s in story["sections"]).split())
+    assert all(words[i]["end_sample"]<=words[i+1]["start_sample"] for i in range(len(words)-1))
+    reopened=FinalVoiceWorkflow(ProjectStore(store.database,store.artifacts.root),
+                                GateService(store),JobQueue(store))
+    assert reopened.status(project)["word_map"]==stable["word_map"]
+    queue_one_ctx=(store,gates,voice,project,story)
+    from unittest.mock import patch
+    with patch.object(attempts,"_provider_identity",return_value={"model_id":"fixture_only"}):
+        voice.enqueue(project,"sec_001","kokoro_local","am_adam",1.0,
+                      "new selection",store.revision(project),"new-voice-after-g2")
+        assert voice.process_one(lambda *_:audio_fixture(2))["state"]=="SUCCEEDED"
+    assert gates.board(project)[1]["state"] in ("STALE","READY_FOR_REVIEW")
+    with store._connection() as db:
+        assert db.execute("SELECT cause FROM gate_staleness WHERE project_id=? AND gate_id='G2'",
+                          (project,)).fetchone()[0]=="voice_audio"
+    assert workflow.status(project)["g4_ready_dependency"] is False
+    assert store.get_artifact(final["audio_sha256"])  # historical bytes still immutable
+
+
+def test_gate_2_missing_selection_and_corrupt_wav_block_before_approval(tmp_path):
+    """A2-03: no authorization/job or partial output on incomplete/corrupt selection."""
+    from backend.tools.voice_final_smoke import setup
+    store,gates,voice,workflow,project,_=setup(tmp_path)
+    selected=voice.list_attempts(project,"sec_002")["selected_attempt_id"]
+    with store._transaction() as db:
+        db.execute("DELETE FROM voice_selected WHERE project_id=? AND section_id=?",(project,"sec_002"))
+    assert gates.board(project)[1]["state"]=="DRAFT"
+    with pytest.raises(ContractViolation,match="GATE_ILLEGAL_TRANSITION"):
+        gates.decide(project,"G2",{"decision":"APPROVED","candidate_sha256":"0"*64,
+          "dependency_fingerprint":"0"*64,"expected_revision":store.revision(project)})
+    with store._transaction() as db:
+        db.execute("INSERT INTO voice_selected VALUES(?,?,?)",(project,"sec_002",selected))
+    a=voice.list_attempts(project,"sec_001")["attempts"][0]
+    store.artifacts.path(a["audio_sha256"]).write_bytes(b"corrupted")
+    board=gates.board(project)[1]
+    with pytest.raises(ContractViolation,match="ARTIFACT_CORRUPT|VOICE_AUDIO_INVALID"):
+        gates.decide(project,"G2",{"decision":"APPROVED",
+           "candidate_sha256":board["candidate_sha256"],"dependency_fingerprint":board["dependency_fingerprint"],
+           "expected_revision":store.revision(project)})
+    assert workflow.status(project)["final_audio"] is None
+    with store._connection() as db:
+        assert db.execute("SELECT COUNT(*) FROM gate_events WHERE gate_id='G2'").fetchone()[0]==0
+        assert db.execute("SELECT COUNT(*) FROM jobs WHERE kind='final_assembly'").fetchone()[0]==0
+
+
+def test_alignment_word_map_rejects_malformed_overlap_and_wrong_section(tmp_path):
+    from backend.tools.voice_final_smoke import setup,approval,mock_alignment
+    from backend.app.voice.word_map import word_map
+    from backend.app.voice.alignment import align_audio
+    import httpx
+    store,gates,voice,workflow,project,story=setup(tmp_path)
+    approval(store,gates,project);workflow.process_one()
+    final=workflow.status(project)["final_audio"]
+    transcript="\n".join(s["narration"] for s in story["sections"])
+    answer=mock_alignment(final,transcript)
+    broken=copy.deepcopy(answer);broken["words"][0]["end"]=broken["words"][1]["end"]+1
+    with pytest.raises(ContractViolation,match="ALIGNMENT_TIME_INVALID"):
+        word_map(project,final,transcript,broken,story["sections"])
+    broken=copy.deepcopy(answer);broken["words"][0]["text"]="unrelated"
+    with pytest.raises(ContractViolation,match="ALIGNMENT_TRANSCRIPT_MISMATCH"):
+        word_map(project,final,transcript,broken,story["sections"])
+    broken=copy.deepcopy(answer);broken["words"][0]["start"]=-1.0
+    with pytest.raises(ContractViolation,match="ALIGNMENT_TIME_INVALID"):
+        word_map(project,final,transcript,broken,story["sections"])
+    from backend.app.voice import alignment
+    from unittest.mock import patch
+    with patch.dict("os.environ",{"HVS_ELEVENLABS_API_KEY":"offline-test-token"}):
+        with patch.object(alignment.httpx,"post",return_value=httpx.Response(
+                401,request=httpx.Request("POST","https://api.elevenlabs.io/v1/forced-alignment"))):
+            with pytest.raises(ContractViolation,match="PROVIDER_AUTH_FAILED"):
+                align_audio(store.get_artifact(final["audio_sha256"]),transcript)
+    with patch.dict("os.environ",{"HVS_ELEVENLABS_API_KEY":""}):
+        with pytest.raises(ContractViolation,match="PROVIDER_CREDENTIALS_MISSING"):
+            align_audio(store.get_artifact(final["audio_sha256"]),transcript)
+
+
+def test_alignment_api_status_and_media_bytes_on_real_store(tmp_path):
+    from backend.tools.voice_final_smoke import setup,approval
+    from fastapi.testclient import TestClient
+    from backend.app.api.server import create_app
+    store,gates,voice,workflow,project,story=setup(tmp_path)
+    approved=approval(store,gates,project)
+    with TestClient(create_app(store.database,store.artifacts.root)) as client:
+        base="/api/v1/projects/"+project+"/voice"
+        assert client.get(base+"/alignment").json()["final_audio"] is None
+        assert workflow.process_one()["state"]=="SUCCEEDED"
+        metadata=client.get(base+"/alignment").json()
+        final=metadata["final_audio"]
+        assert metadata["g4_ready_dependency"] is False
+        # S11: identical WAV with another transcript must never inherit a prior word map.
+        with store._transaction() as db:
+            db.execute("INSERT INTO word_maps VALUES(?,?,?,?,?,?,?)",
+                       (approved["approval_id"],project,final["audio_sha256"],"0"*64,"1"*64,"{}",
+                        "wrong-transcript-mock-job"))
+        incompatible=client.get(base+"/alignment")
+        assert incompatible.status_code==200
+        assert incompatible.json()["word_map"] is None
+        assert incompatible.json()["g4_ready_dependency"] is False
+        # These are two *independent* malformed-fixture scenarios for the same
+        # approval. Only one immutable map lineage per approval may exist.
+        with store._transaction() as db:
+            db.execute("DELETE FROM word_maps WHERE approval_id=?", (approved["approval_id"],))
+        # A schema-valid map inserted without a successfully owned alignment job is
+        # not provider evidence and must not unlock the G4 dependency.
+        from backend.tools.voice_final_smoke import mock_alignment
+        from backend.app.voice.word_map import word_map
+        from backend.app.voice.assemble import canonical,sha
+        transcript="\n".join(s["narration"] for s in story["sections"])
+        forged=word_map(project,final,transcript,mock_alignment(final,transcript),story["sections"])
+        doc=canonical(forged)
+        digest=store.put_artifact(doc,"word_map")
+        with store._transaction() as db:
+            db.execute("INSERT INTO word_maps VALUES(?,?,?,?,?,?,?)",
+                       (approved["approval_id"],project,final["audio_sha256"],final["transcript_sha256"],
+                        digest,doc.decode("utf-8"),"no_successful_provider_job"))
+        assert client.get(base+"/alignment").json()["g4_ready_dependency"] is False
+        assert client.get(base+"/alignment").json()["word_map"] is None
+        assert client.get(base+"/audio/"+final["audio_sha256"]).content==store.get_artifact(final["audio_sha256"])
+        assert client.get("/api/v1/projects/proj_foreign/voice/audio/"+final["audio_sha256"]).status_code==404
+        assert client.get(base+"/audio/"+"0"*64).status_code==404
+        assert client.post(base+"/alignment/retry",json={
+            "expected_revision":store.revision(project),"audio_sha256":final["audio_sha256"],
+            "transcript_sha256":final["transcript_sha256"]},headers={
+            "Idempotency-Key":"should-not-retry-active"}).status_code in (409,422)
+
+
+def test_gate_2_technical_assembly_retry_preserves_original_approval(tmp_path):
+    """A2-03 failure/recovery: blocked/failed jobs can be retried without another G2 approval."""
+    from backend.tools.voice_final_smoke import setup,approval
+    store,gates,voice,workflow,project,story=setup(tmp_path)
+    accepted=approval(store,gates,project)
+    leased=workflow.queue.claim("final_assembly")
+    assert leased and leased["job_id"]==accepted["job_id"]
+    workflow.queue.fail(leased["job_id"],leased["lease_token"],"FINAL_AUDIO_ASSEMBLY_FAILED",False)
+    revision=store.revision(project)
+    retry=workflow.retry_assembly(project,revision,"manual-technical-retry-001")
+    assert retry != accepted["job_id"] and store.revision(project)==revision
+    assert workflow.process_one()["state"]=="SUCCEEDED"
+    assert workflow.status(project)["final_audio"]
+    with store._connection() as db:
+        assert db.execute("SELECT COUNT(*) FROM gate_events WHERE project_id=? AND gate_id='G2'",
+                          (project,)).fetchone()[0]==1
+    with pytest.raises(ContractViolation,match="FINAL_AUDIO_RETRY_FORBIDDEN"):
+        workflow.retry_assembly(project,store.revision(project),"invalid-second-technical-retry")
+
+
+def test_gate_2_reapproval_after_restore_same_wav_keeps_distinct_alignment_lineage(tmp_path):
+    """R01/C02-C06: A→B→A is a new review, never automatic old approval."""
+    from unittest.mock import patch
+    from backend.tools.voice_final_smoke import setup, approval, mock_alignment, wav_fixture
+    from backend.app.voice.workflow import FinalVoiceWorkflow
+    store, gates, voice, workflow, project, story = setup(tmp_path)
+    first = voice.list_attempts(project, "sec_001")["attempts"][0]
+    old_candidate = gates.board(project)[1]
+    initial = approval(store, gates, project)
+    assert workflow.process_one()["state"] == "SUCCEEDED"
+    frozen = workflow.status(project)["final_audio"]
+    assert workflow.process_one(lambda wav, txt: mock_alignment(frozen, txt))["state"] == "SUCCEEDED"
+    first_map = workflow.status(project)["word_map"]
+    with patch.object(attempts, "_provider_identity", return_value={"model_id": "fixture_only"}):
+        voice.enqueue(project, "sec_001", "kokoro_local", "am_adam", 1.0,
+                      "new B voice", store.revision(project), "reapproval-voice-change-b")
+        assert voice.process_one(lambda *_: wav_fixture(2))["state"] == "SUCCEEDED"
+    # The old approval must not authorize B; a fresh B candidate may already
+    # be READY_FOR_REVIEW rather than displaying a stale historical candidate.
+    assert gates.board(project)[1]["state"] in ("STALE", "READY_FOR_REVIEW")
+    from backend.app.voice.workflow import word_map_source_current
+    with store._connection() as db:
+        assert word_map_source_current(db, project) is False
+    b = voice.list_attempts(project, "sec_001")["selected_attempt_id"]
+    voice.restore(project, "sec_001", first["attempt_id"], first["audio_sha256"],
+                  store.revision(project), "restore original A")
+    state = gates.board(project)[1]
+    assert state["state"] == "READY_FOR_REVIEW"
+    current_id = state["candidate_sha256"]
+    assert voice.list_attempts(project, "sec_001")["selected_attempt_id"] != b
+    with pytest.raises(ContractViolation, match="APPROVAL_REVISION_CONFLICT"):
+        gates.decide(project, "G2", {"decision": "APPROVED",
+            "candidate_sha256": old_candidate["candidate_sha256"],
+            "dependency_fingerprint": old_candidate["dependency_fingerprint"],
+            "expected_revision": store.revision(project)})
+    renewed = approval(store, gates, project)
+    assert renewed["approval_id"] != initial["approval_id"]
+    assert workflow.process_one()["state"] == "SUCCEEDED"
+    second = workflow.status(project)["final_audio"]
+    assert second["audio_sha256"] == frozen["audio_sha256"]
+    assert second["transcript_sha256"] == frozen["transcript_sha256"]
+    assert workflow.status(project)["g4_ready_dependency"] is False
+    assert workflow.process_one(lambda wav, txt: mock_alignment(second, txt))["state"] == "SUCCEEDED"
+    assert workflow.status(project)["g4_ready_dependency"]
+    with store._connection() as db:
+        assert db.execute("SELECT COUNT(*) FROM gate_events WHERE project_id=? AND gate_id='G2'", (project,)).fetchone()[0] == 2
+        assert db.execute("SELECT COUNT(*) FROM final_audio WHERE project_id=?", (project,)).fetchone()[0] == 2
+    assert first_map == workflow.status(project)["word_map"]
+    assert current_id != "0"*64
+
+
+@pytest.mark.parametrize("first,second", [
+    ("First word.\n\nAgain word, word.", "Later again."),
+    ("First word.\r\nAgain word, word.", "Later\r\nagain."),
+    ("First\n\nword.", "Word,\nagain.\nFinal word.")
+])
+def test_alignment_multiline_uses_frozen_section_manifest(tmp_path, first, second):
+    """R02/C08-C13: embedded CRLF and blank lines never become artificial section boundaries."""
+    from backend.tools.voice_final_smoke import setup, approval
+    from backend.app.voice.word_map import word_map
+    from backend.app.voice.assemble import transcript_for
+    from backend.app.voice.assemble import sha
+    import copy
+    store, gates, voice, workflow, project, story = setup(tmp_path, (first, second))
+    final_audio = {"audio_sha256": "a"*64, "transcript_sha256": sha((first+"\n"+second).encode()),
+                   "sample_rate": 24000, "duration_samples": 144000,
+                   "section_offsets": [
+                      {"section_id":"sec_001","start_sample":0,"end_sample":60000},
+                      {"section_id":"sec_002","start_sample":60000,"end_sample":144000}]}
+    sections=[{"section_id":"sec_001","narration":first},
+              {"section_id":"sec_002","narration":second}]
+    transcript=transcript_for(sections)
+    provider_words=[]
+    for s,off in zip(sections,final_audio["section_offsets"]):
+        words=s["narration"].split()
+        width=off["end_sample"]-off["start_sample"]
+        for i,w in enumerate(words):
+            a=off["start_sample"]+round(width*(i+.05)/len(words))
+            b=off["start_sample"]+round(width*(i+.75)/len(words))
+            provider_words.append({"text":w,"start":a/24000,"end":b/24000,"loss":0.1})
+    mapped=word_map(project,final_audio,transcript,{"words":provider_words},sections)
+    # Same texts through approved G2 assembly and a provider-shaped response:
+    # real WAV sample offsets and frozen section texts must survive SQLite reopen.
+    from backend.tools.voice_final_smoke import approval
+    approval(store,gates,project)
+    assert workflow.process_one()["state"]=="SUCCEEDED"
+    actual=workflow.status(project)["final_audio"]
+    assert actual["duration_samples"]==144000
+    assert actual["transcript_sha256"]==final_audio["transcript_sha256"]
+    assert actual["section_offsets"]==final_audio["section_offsets"]
+    assert workflow.process_one(lambda wav,txt:{"words":provider_words})["state"]=="SUCCEEDED"
+    actual_map=word_map(project,actual,transcript,{"words":provider_words},sections)
+    assert workflow.status(project)["word_map"]==actual_map
+    reopened=__import__("backend.app.voice.workflow",fromlist=["FinalVoiceWorkflow"]).FinalVoiceWorkflow(
+        ProjectStore(store.database,store.artifacts.root),GateService(store),JobQueue(store))
+    assert reopened.status(project)["word_map"]==actual_map
+    assert len(mapped["words"])==len(first.split())+len(second.split())
+    assert [x["section_id"] for x in mapped["words"]] == (
+        ["sec_001"]*len(first.split())+["sec_002"]*len(second.split()))
+    bad=copy.deepcopy(provider_words)
+    bad[0]["text"]="wrong"
+    with pytest.raises(ContractViolation, match="ALIGNMENT_TRANSCRIPT_MISMATCH"):
+        word_map(project,final_audio,transcript,{"words":bad},sections)
+    bad=copy.deepcopy(provider_words)
+    bad[len(first.split())-1]["end"]=60001/24000
+    with pytest.raises(ContractViolation, match="ALIGNMENT_SECTION_MISMATCH|ALIGNMENT_TIME_INVALID"):
+        word_map(project,final_audio,transcript,{"words":bad},sections)
+
+
+def test_exact_job_background_chain_skips_other_queued_assemblies(tmp_path):
+    """R03/C14-C16: two real project G2 approvals, exact independent job lineage."""
+    from unittest.mock import patch
+    from backend.tools.voice_final_smoke import setup, approval, mock_alignment, wav_fixture
+    from backend.app.projects.models import StoryCandidate
+    store,gates,voice,workflow,project,story=setup(tmp_path)
+    other="proj_queued_other"
+    other_story=copy.deepcopy(story)
+    other_story["project"]["project_id"]=other
+    store.create_project(other,"Earlier approved independent voice project")
+    store.import_story(StoryCandidate.parse(other_story),0)
+    g1=gates.board(other)[0]
+    gates.decide(other,"G1",{"decision":"APPROVED",
+        "candidate_sha256":g1["candidate_sha256"],
+        "dependency_fingerprint":g1["dependency_fingerprint"],
+        "expected_revision":store.revision(other)})
+    with patch.object(attempts,"_provider_identity",return_value={"model_id":"fixture_only"}):
+        for section,duration in zip(other_story["sections"],(2.5,3.5)):
+            voice.enqueue(other,section["section_id"],"kokoro_local","am_adam",1.0,
+                          "synthetic other project",store.revision(other),
+                          "other-project-"+section["section_id"]+"-tts")
+            assert voice.process_one(lambda req,ident,seconds=duration:wav_fixture(seconds))["state"]=="SUCCEEDED"
+    other_decision=approval(store,gates,other)
+    decision=approval(store,gates,project)
+    workflow.process_pending(decision["job_id"],
+        provider=lambda wav,transcript:mock_alignment(workflow.status(project)["final_audio"],transcript))
+    assert workflow.status(project)["g4_ready_dependency"] is True
+    assert workflow.queue.get(other_decision["job_id"])["state"]=="QUEUED"
+    assert workflow.queue.get(decision["job_id"])["state"]=="SUCCEEDED"
+    assert workflow.status(other)["final_audio"] is None
+    workflow.process_pending(other_decision["job_id"],
+        provider=lambda wav,transcript:mock_alignment(workflow.status(other)["final_audio"],transcript))
+    assert workflow.status(other)["g4_ready_dependency"] is True
+    with store._connection() as db:
+        assert db.execute("SELECT COUNT(*) FROM jobs WHERE kind='final_alignment'").fetchone()[0]==2
+        assert db.execute("SELECT COUNT(*) FROM gate_events WHERE gate_id='G2'").fetchone()[0]==2
+    workflow.process_pending(decision["job_id"],provider=lambda *_:pytest.fail("duplicate provider call"))
+    with store._connection() as db:
+        assert db.execute("SELECT COUNT(*) FROM jobs WHERE kind='final_alignment'").fetchone()[0]==2

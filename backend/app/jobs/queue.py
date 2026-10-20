@@ -79,11 +79,12 @@ class JobQueue:
                        (job_id, project_id, kind, idempotency_key, digest, body))
             return self._row(db, job_id)
 
-    def claim(self, kind: str | None = None) -> dict | None:
+    def claim(self, kind: str | None = None, *, job_id: str | None = None) -> dict | None:
         with self.store._transaction() as db:
             row = db.execute(
                 "SELECT job_id FROM jobs WHERE state='QUEUED' AND cancel_requested=0 "
-                "AND (? IS NULL OR kind=?) ORDER BY rowid LIMIT 1", (kind, kind)
+                "AND (? IS NULL OR kind=?) AND (? IS NULL OR job_id=?) ORDER BY rowid LIMIT 1",
+                (kind, kind, job_id, job_id)
             ).fetchone()
             if row is None:
                 return None

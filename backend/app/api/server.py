@@ -8,7 +8,7 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 from uuid import uuid4
 
-from fastapi import FastAPI, Header, Request
+from fastapi import FastAPI, Header, Request, BackgroundTasks
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, ConfigDict, Field
@@ -20,6 +20,7 @@ from backend.app.jobs import JobQueue, recover_interrupted
 from backend.app.projects.gates import GateService
 from backend.app.projects.storage import ProjectStore
 from backend.app.voice.attempts import VoiceService
+from backend.app.voice.workflow import FinalVoiceWorkflow
 from backend.app.api.voice import mount as mount_voice
 
 
@@ -55,6 +56,7 @@ def create_app(database: str | Path | None = None, media_root: str | Path | None
     gates = GateService(store)
     queue = JobQueue(store)
     voice_service = VoiceService(store, gates, queue)
+    final_voice = FinalVoiceWorkflow(store, gates, queue)
     with store._connection() as db:
         db.executescript("""
             CREATE TABLE IF NOT EXISTS api_requests (
@@ -77,13 +79,15 @@ def create_app(database: str | Path | None = None, media_root: str | Path | None
                        allow_headers=["Content-Type", "Idempotency-Key"])
     app.state.store, app.state.gates, app.state.queue = store, gates, queue
     app.state.voice = voice_service
+    app.state.final_voice = final_voice
 
     @app.exception_handler(ContractViolation)
     async def violation(_request: Request, exc: ContractViolation):
         if "CONFLICT" in exc.code or exc.code in ("GATE_ILLEGAL_TRANSITION", "JOB_RETRY_FORBIDDEN", "IDEMPOTENCY_IN_PROGRESS"):
             status = 409
         elif exc.code in ("STORY_NOT_FOUND", "CANDIDATE_NOT_READY", "WORD_MAP_STALE",
-                               "G1_APPROVAL_REQUIRED", "VOICE_STORY_STALE", "VOICE_SOURCE_STALE"):
+                               "G1_APPROVAL_REQUIRED", "VOICE_STORY_STALE", "VOICE_SOURCE_STALE",
+                                "FINAL_AUDIO_SOURCE_STALE", "FINAL_AUDIO_SELECTION_INCOMPLETE"):
             status = 424
         elif exc.code in ("PROJECT_NOT_FOUND", "JOB_NOT_FOUND", "CLAIM_NOT_FOUND",
                                "VOICE_SECTION_NOT_FOUND", "VOICE_ATTEMPT_NOT_FOUND"):
@@ -182,10 +186,15 @@ def create_app(database: str | Path | None = None, media_root: str | Path | None
 
     @app.post("/api/v1/projects/{project_id}/gates/{gate_id}/decision")
     def gate_decision(project_id: str, gate_id: str, body: GateDecision,
+                      background: BackgroundTasks,
                       idempotency_key: str = Header(alias="Idempotency-Key")):
         data = body.model_dump()
-        return idempotent(project_id, f"gate:{gate_id}", idempotency_key, data,
-                          lambda: gates.decide(project_id, gate_id, data))
+        result = idempotent(project_id, f"gate:{gate_id}", idempotency_key, data,
+                            lambda: gates.decide(project_id, gate_id, data))
+        if gate_id == "G2" and result.get("job_id"):
+            # Durable job commit precedes scheduling; recovery owns interrupted jobs.
+            background.add_task(final_voice.process_pending, result["job_id"])
+        return result
 
     @app.get("/api/v1/projects/{project_id}/jobs")
     def project_jobs(project_id: str):
@@ -202,7 +211,7 @@ def create_app(database: str | Path | None = None, media_root: str | Path | None
         return idempotent(job["project_id"], f"cancel:{job_id}", idempotency_key, {"job_id": job_id},
                           lambda: queue.cancel(job_id))
 
-    mount_voice(app, voice_service, idempotent)
+    mount_voice(app, voice_service, idempotent, final_voice)
 
     @app.api_route("/api/v1/{remaining:path}", methods=["GET", "POST", "PUT", "PATCH", "DELETE"])
     def unavailable(remaining: str):

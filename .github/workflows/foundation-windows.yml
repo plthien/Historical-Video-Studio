@@ -70,6 +70,19 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           & $py -m backend.tools.smoke --case section-repair --mode local
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: A2-03/04/05 final voice owner checks
+        shell: pwsh
+        run: |
+          $py = ".venv/Scripts/python.exe"
+          function Run-Owner([string[]]$argsList) {
+            & $py @argsList
+            if ($LASTEXITCODE -ne 0) { throw "A2 owner failed: $($argsList -join ' ')" }
+          }
+          Run-Owner @("-m","pytest","-q","tests/voice/test_voice_pipeline.py","-k","assemble or sample or final_wav or gate_2")
+          Run-Owner @("-m","backend.tools.smoke","--case","final-wav","--mode","local")
+          Run-Owner @("-m","pytest","-q","tests/voice/test_voice_pipeline.py","-k","alignment or word_map or stale")
+          Run-Owner @("-m","backend.tools.smoke","--case","voice-ui","--mode","local")
+          Run-Owner @("-m","pytest","-q","tests/voice/test_voice_pipeline.py")
       - name: Chromium browser E2E (real local servers)
         shell: pwsh
         run: |
@@ -77,7 +90,7 @@ jobs:
           try {
             npx playwright install chromium
             if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-            npm run test:e2e -- --grep "project-shell"
+            npm run test:e2e -- --grep "project-shell|voice-workflow"
             if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           }
           finally { Pop-Location }

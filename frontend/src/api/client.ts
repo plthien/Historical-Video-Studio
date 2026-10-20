@@ -37,7 +37,7 @@ export class ApiError extends Error {
   }
 }
 const origin = "http://127.0.0.1:8000/api/v1";
-async function request<T>(path: string, method = "GET", payload?: unknown, idempotencyKey?: string): Promise<T> {
+export async function request<T>(path: string, method = "GET", payload?: unknown, idempotencyKey?: string): Promise<T> {
   const response = await fetch(origin + path, {
     method, headers: {
       ...(payload === undefined ? {} : {"Content-Type": "application/json"}),
@@ -73,7 +73,7 @@ export const api = {
       "POST", {status, evidence_note, source_url, expected_revision}, key);
   },
   decide(id: string, gate: GateId, decision: GateDecision, key: string) {
-    return request<{approval_id: string; project_revision: number; state: string}>(
+    return request<{approval_id: string; project_revision: number; state: string; job_id?: string}>(
       `/projects/${safe(id)}/gates/${gate}/decision`, "POST", decision, key);
   }
 };

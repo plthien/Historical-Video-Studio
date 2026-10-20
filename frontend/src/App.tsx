@@ -1,6 +1,7 @@
 import {useCallback, useState} from "react";
 import {api, ApiError, type Gate, type GateDecision, type GateId, type JobInfo, type ProjectInfo, type StoryPayload, type StoryView} from "./api/client";
 import {workspaces} from "./routes/workspaces";
+import {VoiceStudio} from "./workspaces/Voice/VoiceStudio";
 
 type Notice = {kind: "success" | "error"; message: string};
 const idKey = () => crypto.randomUUID();
@@ -117,7 +118,7 @@ export function App() {
   return <div className="shell">
     <aside className="sidebar">
       <h1>Historical Video Studio</h1>
-      <p className="sub">Windows Local · A1 Foundation</p>
+      <p className="sub">Windows Local · A2 Voice</p>
       <nav aria-label="Workspaces">{workspaces.map(w =>
         <button key={w.id} type="button" aria-current={workspace === w.id ? "page" : undefined}
           className={workspace === w.id ? "nav-active" : ""} onClick={() => {setWorkspace(w.id); setNotice(null);}}>
@@ -138,7 +139,8 @@ export function App() {
         {!active.enabled ? <div className="unavailable" role="note">
           <strong>Not available in A1</strong>
           <p>This workspace requires the {active.owner} owner implementation. No provider, approved media, alignment, render, or export result is simulated.</p>
-        </div> : workspace === "project" ?
+        </div> : workspace === "voice" && project ?
+          <VoiceStudio project={project} story={storyView} onRefresh={() => refresh(project.project_id)}/> : workspace === "project" ?
           <div className="stack">
             <label htmlFor="new-title">Project title</label>
             <input id="new-title" value={title} onChange={e => setTitle(e.target.value)} disabled={!!pending}/>

@@ -183,6 +183,11 @@ class GateService:
     def _candidate(self, db, project_id, gate):
         if gate == "G1":
             return _g1_identity(db, project_id)[:2]
+        if gate == "G2":
+            from backend.app.voice.assemble import selection_identity
+            current = selection_identity(db, project_id)
+            if current:
+                return current
         return db.execute("SELECT candidate_sha256,dependency_fingerprint FROM gate_candidates "
                           "WHERE project_id=? AND gate_id=?", (project_id, gate)).fetchone()
 
@@ -229,6 +234,11 @@ class GateService:
             blockers.append("G1_APPROVAL_REQUIRED")
             return "BLOCKED", candidate, blockers, last
 
+        if gate == "G4" and (candidate or head):
+            from backend.app.voice.workflow import word_map_ready
+            if not word_map_ready(db, project_id):
+                blockers.append("WORD_MAP_MISSING_OR_STALE")
+                return ("STALE" if head else "BLOCKED"), candidate, blockers, last
         # Current G1 authorization, never just a historical gate_heads row, is
         # required before any dependent gate becomes effectively approved.
         if gate in ("G4", "G5") and head and self._status(db, project_id, "G1")[0] != "APPROVED":
@@ -292,8 +302,16 @@ class GateService:
             if gate != "G1":
                 # A2/A3/B1–B3 must supply real pipeline evidence before approval.
                 # No generic artifact, schema-valid fixture, or invented table can authorize them.
-                if payload["decision"] == "APPROVED":
+                if payload["decision"] == "APPROVED" and gate != "G2":
                     _fail("GATE_ILLEGAL_TRANSITION", gate, "Owner pipeline approval evidence is not implemented.", gate)
+                if gate == "G2" and payload["decision"] == "APPROVED":
+                    from backend.app.voice.assemble import selection_snapshot, canonical, sha, assemble_frozen
+                    snapshot = selection_snapshot(db, project_id)
+                    if not snapshot or sha(canonical(snapshot)) != candidate[0]:
+                        _fail("GATE_ILLEGAL_TRANSITION", gate,
+                              "A G2 owner candidate must bind selected current audio in every section.", gate)
+                    # Validate real audio samples before creating immutable approval intent.
+                    assemble_frozen(self.store, project_id, snapshot)
                 if self._status(db, project_id, "G1")[0] != "APPROVED":
                     _fail("GATE_ILLEGAL_TRANSITION", gate, "Approve the CURRENT G1 review dependencies first.", gate)
             record = {
@@ -320,6 +338,11 @@ class GateService:
                            "dependency_fingerprint=excluded.dependency_fingerprint,approval_id=excluded.approval_id",
                            (project_id, gate, candidate[0], candidate[1], record["approval_id"]))
                 db.execute("DELETE FROM gate_staleness WHERE project_id=? AND gate_id=?", (project_id, gate))
+            job_id = None
+            if gate == "G2" and record["decision"] == "APPROVED":
+                from backend.app.voice.workflow import enqueue_assembly_tx
+                job_id = enqueue_assembly_tx(db, project_id, record["approval_id"])
             db.execute("UPDATE projects SET revision=? WHERE project_id=?", (revision + 1, project_id))
             return {"approval_id": record["approval_id"], "gate_id": gate,
-                    "state": record["decision"], "project_revision": revision + 1}
+                    "state": record["decision"], "project_revision": revision + 1,
+                    **({"job_id": job_id} if job_id else {})}
