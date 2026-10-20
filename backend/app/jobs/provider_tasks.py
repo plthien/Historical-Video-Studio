@@ -144,10 +144,19 @@ class GTaskService:
             return self.queue.fail(job["job_id"],job["lease_token"],exc.code,
                                    retryable=retryable)
         except Exception:
+            latest=self.queue.get(job["job_id"])
+            if latest["state"] in ("BLOCKED_REVIEW","CANCELLED","SUCCEEDED","FAILED_TERMINAL"):
+                return latest
             return self.queue.fail(job["job_id"],job["lease_token"],"GLABS_OPERATION_UNCERTAIN",False)
     def poll(self,job_id,token):
-        with self.store._connection() as db:
-            job=self.queue._owned(db,job_id,token)
+        try:
+            with self.store._connection() as db:
+                job=self.queue._owned(db,job_id,token)
+        except ContractViolation as exc:
+            if exc.code=="JOB_LEASE_CONFLICT":
+                # Cancel/another worker already decided the durable state.
+                return self.queue.get(job_id)
+            raise
         if job["kind"]!="glabs_image" or not job["provider_task_id"]:
             raise ContractViolation("GLABS_TASK_ID_MISSING",job_id,"No submitted provider task.")
         if job["cancel_requested"]:
