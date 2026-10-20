@@ -18,3 +18,10 @@ label{font-size:13px;font-weight:600}.buttonrow{display:flex;gap:9px;flex-wrap:w
 .unavailable{padding:25px;background:#f0f2f6;border:1px dashed #9aaabd;border-radius:8px}
 li{margin:12px 0;overflow-wrap:anywhere}li button{margin-left:12px}
 @media(max-width:950px){.shell{display:block}.sidebar{width:auto}.sidebar nav{display:grid;grid-template-columns:repeat(2,1fr)}.gateboard{grid-template-columns:repeat(2,minmax(0,1fr))}main{padding:15px}}
+
+.voice-studio audio{display:block;width:min(100%,520px);margin:10px 0}
+.voice-fields{display:flex;flex-wrap:wrap;gap:10px;align-items:end;margin:15px 0}
+.voice-fields label{display:grid;gap:5px;min-width:155px;flex:1}
+.voice-fields input,.voice-fields select{padding:9px;border:1px solid #a9b8ca;border-radius:6px;width:100%}
+.voice-attempt{padding:10px;border-top:1px solid #dce2e8}
+.voice-studio details{width:100%}

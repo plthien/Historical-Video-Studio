@@ -58,8 +58,8 @@ test("project-shell: six destinations, real import and G1 human review", async (
 
   await expect(page.getByRole("navigation").getByRole("button", {name: /Voice Studio/})).toBeVisible();
   await page.getByRole("navigation").getByRole("button", {name: /Voice Studio/}).click();
-  await expect(page.getByText("Not available in A1")).toBeVisible();
-  await page.screenshot({path: testInfo.outputPath("future-workspace-disabled.png")});
+  await expect(page.getByRole("article", {name:"Voice section sec_001"})).toBeVisible();
+  await page.screenshot({path: testInfo.outputPath("voice-workspace-enabled.png")});
 });
 
 test("project-shell: malformed JSON and stale revision are visible", async ({page,request}) => {
