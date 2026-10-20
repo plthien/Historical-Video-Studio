@@ -210,7 +210,10 @@ class AssetResolution:
             return None
         requirements=json.loads(row[0])["asset_requirements"]
         if not requirements:
-            return None
+            # Valid empty requirements still require an explicit human G3 decision.
+            # Bind to the exact StoryPackage, not an implicit approval by absence.
+            manifest={"assets":[],"story_sha256":__import__("hashlib").sha256(row[0]).hexdigest()}
+            return _digest(manifest),_digest({"empty_asset_review":manifest["story_sha256"]})
         pinned=[]
         for r in requirements:
             rid=r["requirement_id"]
@@ -222,8 +225,13 @@ class AssetResolution:
             store.get_artifact(head["original_sha256"])
             pinned.append({"requirement_id":rid,"requirement_sha256":current["requirement_sha256"],
                            "candidate_sha256":head["approved_candidate_sha256"],
-                           "original_sha256":head["original_sha256"]})
+                           "original_sha256":head["original_sha256"],
+                           "review_approval_id":head["approval_record_id"]})
         manifest={"assets":sorted(pinned,key=lambda x:x["requirement_id"])}
-        fingerprint=_digest({"requirement_lineage": [(x["requirement_id"],x["requirement_sha256"])
-                                                    for x in manifest["assets"]]})
+        # A new human review event is a new G3 candidate even when the exact
+        # original image and review text match an earlier approved version.
+        # This makes STALE -> new review -> READY_FOR_REVIEW possible without
+        # silently resurrecting a historical G3 approval (A -> B -> A).
+        fingerprint=_digest({"review_lineage": [(x["requirement_id"],x["requirement_sha256"],
+                                                x["review_approval_id"]) for x in manifest["assets"]]})
         return _digest(manifest),fingerprint
