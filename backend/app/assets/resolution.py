@@ -199,7 +199,8 @@ class AssetResolution:
             db.execute("UPDATE projects SET revision=? WHERE project_id=?",(revision+1,project))
             return {"project_revision": revision+1, "approved":created}
 
-    def gate_candidate(self, db, project):
+    @staticmethod
+    def gate_candidate(db, project, store):
         row=db.execute("SELECT story_json FROM story_candidates WHERE project_id=? ORDER BY revision DESC LIMIT 1",
                        (project,)).fetchone()
         if not row:
@@ -210,12 +211,12 @@ class AssetResolution:
         pinned=[]
         for r in requirements:
             rid=r["requirement_id"]
-            current=self.assets._source_tx(db,project,rid)
-            head=self._head(db,project,rid,current["requirement_sha256"])
+            current=AssetCandidates._source_tx(db,project,rid)
+            head=AssetResolution._head(db,project,rid,current["requirement_sha256"])
             if not head:
                 return None
             # A replaced/corrupt immutable original cannot be approved as render input.
-            self.store.get_artifact(head["original_sha256"])
+            store.get_artifact(head["original_sha256"])
             pinned.append({"requirement_id":rid,"requirement_sha256":current["requirement_sha256"],
                            "candidate_sha256":head["approved_candidate_sha256"],
                            "original_sha256":head["original_sha256"]})
