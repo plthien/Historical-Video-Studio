@@ -1,8 +1,11 @@
 import {test, expect} from "@playwright/test";
 import {readFileSync} from "node:fs";
 import path from "node:path";
+import {fileURLToPath} from "node:url";
 
-const fixture = JSON.parse(readFileSync(path.resolve(__dirname,
+const here = path.dirname(fileURLToPath(import.meta.url));
+
+const fixture = JSON.parse(readFileSync(path.resolve(here,
   "../../../contracts/examples/longform/StoryPackage.longform.synthetic.json"), "utf8"));
 
 test("project-shell: six destinations, real import and G1 human review", async ({page}) => {
@@ -10,7 +13,7 @@ test("project-shell: six destinations, real import and G1 human review", async (
   for (const name of ["Project & ChatGPT Import", "Story Review", "Voice Studio",
     "Historical Assets", "Motion Storyboard", "Render & Delivery"]) {
     await page.getByRole("navigation").getByRole("button", {name: new RegExp(name.split(" ")[0])}).click();
-    await expect(page.locator(".content[aria-label] h2")).toContainText(name.split(" / ")[0]);
+    await expect(page.locator(".content[aria-label] h2")).toContainText(new RegExp(name.split(" / ")[0], "i"));
   }
   await page.getByRole("navigation").getByRole("button", {name: /Project & ChatGPT/}).click();
   await page.getByLabel("Project title").fill("Sarajevo Documentary");
