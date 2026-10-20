@@ -9,6 +9,7 @@ export interface Requirement {
 export interface AssetCandidate {
   candidate_id:string; provider:string; title:string; original_sha256:string|null;
   rights_status:string; rights_statement?:string; asset_class?:string;
+  hydrated?:boolean; item_id?:string; mime_type?:string; source_page_url?:string;
   current_source:boolean; approved:boolean; user_approved:boolean;
 }
 export interface AssetReview {
@@ -24,6 +25,11 @@ export const assetApi={
   search:(id:string,revision:number,rid:string,provider:string,query:string,cursor:string|null)=>
     request<{candidate_ids:string[];next_cursor:string|null}>("/projects/"+p(id)+"/assets/search","POST",
       {expected_revision:revision,requirement_id:rid,provider,query,cursor},crypto.randomUUID()),
+  hydrate:(id:string,revision:number,rid:string,candidate_id:string)=>
+    request<AssetCandidate>("/projects/"+p(id)+"/assets/"+p(rid)+"/hydrate","POST",
+      {expected_revision:revision,candidate_id},crypto.randomUUID()),
+  previewUrl:(id:string,rid:string,candidate_id:string)=>
+    "http://127.0.0.1:8000/api/v1/projects/"+p(id)+"/assets/"+p(rid)+"/candidates/"+p(candidate_id)+"/original-preview",
   original:(id:string,revision:number,rid:string,candidate_id:string)=>
     request<AssetCandidate>("/projects/"+p(id)+"/assets/original","POST",
       {expected_revision:revision,requirement_id:rid,candidate_id},crypto.randomUUID()),
