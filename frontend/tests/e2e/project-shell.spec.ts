@@ -8,7 +8,7 @@ const here = path.dirname(fileURLToPath(import.meta.url));
 const fixture = JSON.parse(readFileSync(path.resolve(here,
   "../../../contracts/examples/longform/StoryPackage.longform.synthetic.json"), "utf8"));
 
-test("project-shell: six destinations, real import and G1 human review", async ({page}) => {
+test("project-shell: six destinations, real import and G1 human review", async ({page}, testInfo) => {
   await page.goto("/");
   for (const name of ["Project & ChatGPT Import", "Story Review", "Voice Studio",
     "Historical Assets", "Motion Storyboard", "Render & Delivery"]) {
@@ -38,9 +38,11 @@ test("project-shell: six destinations, real import and G1 human review", async (
   await page.getByRole("button", {name: "Open existing project"}).click();
   await expect(page.getByText("Revision:")).toBeVisible();
   await expect(page.locator(".gateboard")).toContainText("APPROVED");
+  await page.screenshot({path: testInfo.outputPath("g1-approved.png")});
   await expect(page.getByRole("navigation").getByRole("button", {name: /Voice Studio/})).toBeVisible();
   await page.getByRole("navigation").getByRole("button", {name: /Voice Studio/}).click();
   await expect(page.getByText("Not available in A1")).toBeVisible();
+  await page.screenshot({path: testInfo.outputPath("future-workspace-disabled.png")});
 });
 
 test("project-shell: malformed JSON and stale revision are visible", async ({page,request}) => {
