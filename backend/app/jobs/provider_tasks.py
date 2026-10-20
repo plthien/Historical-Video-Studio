@@ -134,8 +134,9 @@ class GTaskService:
                 self._observe(job["job_id"],"not_submitted",exc.code)
             current=self.queue.get(job["job_id"])
             # A rejected/uncertain first POST must never be automatically reissued.
-            retryable=(bool(current["provider_task_id"]) and
-                       exc.code in ("GLABS_RATE_LIMITED","GLABS_NETWORK_ERROR"))
+            retryable=(exc.code=="GLABS_PROVIDER_IDENTITY_STALE" or
+                       (bool(current["provider_task_id"]) and
+                        exc.code in ("GLABS_RATE_LIMITED","GLABS_NETWORK_ERROR")))
             return self.queue.fail(job["job_id"],job["lease_token"],exc.code,
                                    retryable=retryable)
         except Exception:
@@ -204,7 +205,8 @@ class GTaskService:
             else:
                 self._observe(job_id,"failed",exc.code)
             return self.queue.fail(job_id,token,exc.code,
-                                   retryable=exc.code in ("GLABS_RATE_LIMITED","GLABS_NETWORK_ERROR"))
+                                   retryable=exc.code in ("GLABS_RATE_LIMITED","GLABS_NETWORK_ERROR",
+                                                          "GLABS_PROVIDER_IDENTITY_STALE"))
     def run_until_terminal(self,job_id,*,poll_seconds=3,max_polls=180):
         """Bounded 3–5 second provider polling; resume persisted task, never resubmit."""
         import time
