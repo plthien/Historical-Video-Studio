@@ -16,8 +16,8 @@ EXAMPLE = ROOT / "contracts/examples/longform/StoryPackage.longform.synthetic.js
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--case", choices=["story-import", "reopen-project", "gate-transitions", "restart-running-job", "api-and-ui"], required=False)
-    parser.add_argument("--mode", choices=["local"], default="local")
+    parser.add_argument("--case", choices=["story-import", "reopen-project", "gate-transitions", "restart-running-job", "api-and-ui", "section-repair", "tts-kokoro", "tts-elevenlabs"], required=False)
+    parser.add_argument("--mode", choices=["local", "live"], default="local")
     parser.add_argument("--inspect", nargs=3, metavar=("DATABASE", "MEDIA_ROOT", "PROJECT_ID"))
     args = parser.parse_args()
     if args.inspect:
@@ -28,6 +28,12 @@ def main() -> None:
         return
     if not args.case:
         parser.error("--case required")
+    if args.case in ("section-repair", "tts-kokoro", "tts-elevenlabs"):
+        from backend.tools.voice_smoke import run
+        run(args.case, args.mode)
+        return
+    if args.mode != "local":
+        parser.error("A1 smoke cases only support local mode")
     data = EXAMPLE.read_bytes()
     with TemporaryDirectory() as dirname:
         root = Path(dirname)
