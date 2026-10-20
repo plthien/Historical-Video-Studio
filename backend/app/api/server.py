@@ -76,7 +76,7 @@ def create_app(database: str | Path | None = None, media_root: str | Path | None
 
     app = FastAPI(title="Historical Video Studio Local API", version="1.0.0", lifespan=lifespan)
     app.add_middleware(CORSMiddleware, allow_origins=["http://127.0.0.1:5173", "http://localhost:5173"],
-                       allow_credentials=False, allow_methods=["GET", "POST"],
+                       allow_credentials=False, allow_methods=["GET", "POST", "PUT"],
                        allow_headers=["Content-Type", "Idempotency-Key"])
     app.state.store, app.state.gates, app.state.queue = store, gates, queue
     app.state.voice = voice_service
