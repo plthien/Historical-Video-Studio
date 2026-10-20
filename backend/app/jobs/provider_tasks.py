@@ -56,6 +56,10 @@ class GTaskService:
             if getattr(self.provider,"offline_fixture",False):
                 raise ContractViolation("GLABS_FALLBACK_AUTH_REQUIRED",requirement,
                                         "Mock providers cannot impersonate managed authorization.")
+            from backend.app.projects.gates import GateService
+            if GateService(self.store).board(project)[0]["state"]!="APPROVED":
+                raise ContractViolation("G1_APPROVAL_REQUIRED",requirement,
+                                        "Approve current G1 critical evidence before any paid provider call.")
             from backend.app.assets.resolution import AssetResolution
             with self.store._connection() as db:
                 choice=AssetResolution._choice(db,project,requirement,source["requirement_sha256"])
