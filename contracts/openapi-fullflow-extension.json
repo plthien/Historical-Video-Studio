@@ -613,6 +613,135 @@
         }
       }
     },
+    "/projects/{project_id}/assets/{requirement_id}/hydrate": {
+      "post": {
+        "operationId": "hydrate_europeana_asset_candidate",
+        "tags": [
+          "assets"
+        ],
+        "summary": "Hydrate the exact current Europeana search candidate before original download",
+        "parameters": [
+          {
+            "name": "project_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "requirement_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 12
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "expected_revision",
+                  "candidate_id"
+                ],
+                "properties": {
+                  "expected_revision": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "candidate_id": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "New hydrated candidate; never auto-approved"
+          },
+          "409": {
+            "description": "Revision or idempotency conflict"
+          },
+          "422": {
+            "description": "Wrong requirement, stale source or invalid candidate"
+          },
+          "424": {
+            "description": "Missing current StoryPackage or original evidence"
+          }
+        }
+      }
+    },
+    "/projects/{project_id}/assets/{requirement_id}/candidates/{candidate_id}/original-preview": {
+      "get": {
+        "operationId": "get_verified_asset_original_preview",
+        "tags": [
+          "assets"
+        ],
+        "summary": "Serve only source-current, SHA-verified image original bytes for human evidence review",
+        "parameters": [
+          {
+            "name": "project_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "requirement_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "candidate_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Verified original image bytes",
+            "content": {
+              "image/png": {},
+              "image/jpeg": {},
+              "image/webp": {}
+            }
+          },
+          "409": {
+            "description": "Revision or idempotency conflict"
+          },
+          "422": {
+            "description": "Wrong requirement, stale source or invalid candidate"
+          },
+          "424": {
+            "description": "Missing current StoryPackage or original evidence"
+          }
+        }
+      }
+    },
     "/projects/{project_id}/assets/search": {
       "post": {
         "operationId": "post__projects_project_id_assets_search",
