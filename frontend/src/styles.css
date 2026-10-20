@@ -1,0 +1,20 @@
+:root{font-family:Inter,"Segoe UI",Arial,sans-serif;color:#1e2533;background:#f5f6f8;font-synthesis:none}
+*{box-sizing:border-box}button,input,textarea{font:inherit}button{cursor:pointer;border:1px solid #8a9cb8;background:#fff;border-radius:7px;padding:10px 13px;color:#1a3760}
+button:disabled{opacity:.52;cursor:not-allowed}button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid #3977c4;outline-offset:2px}
+.shell{display:flex;min-height:100vh}.sidebar{width:280px;background:#1b273a;color:white;padding:22px;flex-shrink:0}
+.sidebar h1{font-size:21px}.sub{color:#bbcadc;font-size:13px}.sidebar nav{display:flex;flex-direction:column;gap:6px;margin-top:25px}
+.sidebar nav button{text-align:left;background:transparent;border:none;color:white;padding:12px;display:grid;gap:6px}
+.sidebar nav button small{color:#abc0d8}.sidebar nav .nav-active{background:#324a68}
+main{flex:1;min-width:0;padding:24px;max-width:1250px}.topline{display:flex;justify-content:space-between;align-items:center;gap:16px;border-bottom:1px solid #cad3de}
+.topline p{font-size:13px;color:#526478}.gateboard{display:grid;grid-template-columns:repeat(5,minmax(110px,1fr));gap:10px;margin:20px 0}
+.gate,.content,.panel{border:1px solid #d3dbe5;border-radius:10px;background:#fff;padding:16px}.gate{display:grid;gap:7px}
+.gate span{font-size:13px}.gate small{font-size:11px;color:#66758a;overflow-wrap:anywhere}
+.content{margin-top:18px}.content h2{margin-top:0;font-size:19px}.panel{margin-top:16px;background:#fafbfc}.stack{display:flex;flex-direction:column;align-items:flex-start;gap:10px}
+.stack>input,.stack>textarea,.panel input,.panel textarea{max-width:100%;width:100%;padding:9px;border:1px solid #a9b8ca;border-radius:6px}
+label{font-size:13px;font-weight:600}.buttonrow{display:flex;gap:9px;flex-wrap:wrap;margin-top:12px}
+.claim{border-top:1px solid #dce2e8;padding:17px 0}.claim>p{white-space:pre-wrap}
+.claim small{display:block;margin:6px 0 14px;color:#526478}.claim label{display:block;margin:10px 0 5px}
+.notice{border-radius:8px;padding:12px 16px;white-space:pre-wrap}.notice.error{background:#fff3f1;color:#8d2e24}.notice.success{background:#eaf7ef;color:#175935}
+.unavailable{padding:25px;background:#f0f2f6;border:1px dashed #9aaabd;border-radius:8px}
+li{margin:12px 0;overflow-wrap:anywhere}li button{margin-left:12px}
+@media(max-width:950px){.shell{display:block}.sidebar{width:auto}.sidebar nav{display:grid;grid-template-columns:repeat(2,1fr)}.gateboard{grid-template-columns:repeat(2,minmax(0,1fr))}main{padding:15px}}

@@ -10,9 +10,22 @@
   "packageManager": "npm@10.9.2",
   "scripts": {
     "verify:toolchain": "node -e \"if(process.versions.node.split('.')[0]!=='22') process.exit(2)\"",
-    "typecheck": "tsc --project tsconfig.json --noEmit"
+    "typecheck": "tsc --project tsconfig.json --noEmit",
+    "dev": "vite --host 127.0.0.1",
+    "build": "tsc --noEmit && vite build",
+    "test:e2e": "playwright test"
+  },
+  "dependencies": {
+    "react": "19.2.0",
+    "react-dom": "19.2.0"
   },
   "devDependencies": {
-    "typescript": "5.9.3"
+    "@playwright/test": "1.56.0",
+    "@types/node": "22.18.10",
+    "@types/react": "19.2.2",
+    "@types/react-dom": "19.2.2",
+    "@vitejs/plugin-react": "5.0.4",
+    "typescript": "5.9.3",
+    "vite": "7.1.9"
   }
 }

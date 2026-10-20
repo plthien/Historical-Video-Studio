@@ -6,7 +6,22 @@
     "target": "ES2022",
     "module": "ESNext",
     "moduleResolution": "Bundler",
-    "types": []
+    "types": [
+      "vite/client",
+      "node"
+    ],
+    "jsx": "react-jsx",
+    "lib": [
+      "ES2022",
+      "DOM",
+      "DOM.Iterable"
+    ],
+    "allowSyntheticDefaultImports": true
   },
-  "include": ["src/api/generated/contracts.ts", "src/api/generated/contracts.typecheck.ts"]
+  "include": [
+    "src",
+    "vite.config.ts",
+    "playwright.config.ts",
+    "tests/e2e"
+  ]
 }

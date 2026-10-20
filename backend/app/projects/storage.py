@@ -70,6 +70,8 @@ class ProjectStore:
         return row[0]
 
     def import_story(self, candidate: StoryCandidate, expected_revision: int) -> int:
+        from backend.app.projects.gates import GateService
+        GateService(self)  # ensure the gate ledger exists before same-transaction invalidation
         with self._transaction() as db:
             row = db.execute("SELECT revision FROM projects WHERE project_id=?",
                              (candidate.project_id,)).fetchone()
@@ -83,7 +85,24 @@ class ProjectStore:
             if checked.sha256 != candidate.sha256 or checked.project_id != candidate.project_id:
                 raise ContractViolation("STORY_SHA_MISMATCH", candidate.project_id,
                                         "Re-validate the story candidate against original content.")
+            previous = db.execute("SELECT sha256,story_json FROM story_candidates WHERE project_id=? "
+                                  "ORDER BY revision DESC LIMIT 1", (candidate.project_id,)).fetchone()
+            if previous and previous[0] == candidate.sha256:
+                return row[0]  # same canonical content: keep approval and current revision
             new_revision = row[0] + 1
+            if previous:
+                # New source truth invalidates dependent snapshots in this SAME transaction.
+                # Relevance-specific G3 invalidation remains owned by its asset binding logic.
+                from backend.app.projects.revisions import mark_stale
+                mark_stale(db, candidate.project_id, "story_text")
+                old_story, new_story = json.loads(previous[1]), checked.data()
+                # Only asset-relevant edits stale G3. Preserve independent approved source bytes.
+                def relevance(story):
+                    return (story["asset_requirements"],
+                            [(s["section_id"], s["asset_requirement_refs"]) for s in story["sections"]],
+                            [(s["setup_id"], s["requirement_refs"]) for s in story["visual_setups"]])
+                if relevance(old_story) != relevance(new_story):
+                    mark_stale(db, candidate.project_id, "story_assets")
             db.execute("INSERT INTO story_candidates (project_id, revision, sha256, story_json)"
                        " VALUES (?, ?, ?, ?)",
                        (candidate.project_id, new_revision, candidate.sha256, candidate.canonical_bytes))
@@ -95,8 +114,8 @@ class ProjectStore:
         with self._connection() as db:
             if revision is None:
                 row = db.execute("SELECT s.sha256, s.story_json FROM story_candidates s "
-                                 "JOIN projects p ON p.project_id=s.project_id AND p.revision=s.revision "
-                                 "WHERE s.project_id=?", (project_id,)).fetchone()
+                                 "JOIN projects p ON p.project_id=s.project_id AND s.revision<=p.revision "
+                                 "WHERE s.project_id=? ORDER BY s.revision DESC LIMIT 1", (project_id,)).fetchone()
             else:
                 row = db.execute("SELECT sha256, story_json FROM story_candidates WHERE project_id=? AND revision=?",
                                  (project_id, revision)).fetchone()
