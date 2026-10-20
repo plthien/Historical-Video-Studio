@@ -64,7 +64,7 @@ def test_generate_poll_result_restart_no_duplicate_submission(tmp_path):
     recover_interrupted(service.queue)
     resumed=GTaskService(ProjectStore(store.database,store.artifacts.root),
                          JobQueue(store),service.provider)
-    result=resumed.process_one(job["job_id"])
+    result=resumed.run_until_terminal(job["job_id"],poll_seconds=0,max_polls=2)
     assert result["state"]=="SUCCEEDED" and store.get_artifact(result["output_sha256"])==PNG
     with store._connection() as db:
         assert db.execute("SELECT provider_status FROM glabs_task_observations WHERE job_id=?",
