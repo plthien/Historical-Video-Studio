@@ -204,15 +204,17 @@ class AssetResolution:
 
     @staticmethod
     def gate_candidate(db, project, store):
-        row=db.execute("SELECT story_json FROM story_candidates WHERE project_id=? ORDER BY revision DESC LIMIT 1",
+        row=db.execute("SELECT sha256,story_json FROM story_candidates WHERE project_id=? ORDER BY revision DESC LIMIT 1",
                        (project,)).fetchone()
         if not row:
             return None
-        requirements=json.loads(row[0])["asset_requirements"]
+        if hashlib.sha256(row[1]).hexdigest()!=row[0]:
+            raise ContractViolation("STORY_SHA_MISMATCH",project,"Immutable StoryPackage bytes changed.")
+        requirements=json.loads(row[1])["asset_requirements"]
         if not requirements:
-            # Valid empty requirements still require an explicit human G3 decision.
-            # Bind to the exact StoryPackage, not an implicit approval by absence.
-            manifest={"assets":[],"story_sha256":__import__("hashlib").sha256(row[0]).hexdigest()}
+            # Valid empty requirements still require explicit G3 operator approval.
+            # Bind to the already-verified immutable StoryPackage SHA.
+            manifest={"assets":[],"story_sha256":row[0]}
             return _digest(manifest),_digest({"empty_asset_review":manifest["story_sha256"]})
         if not db.execute("SELECT 1 FROM sqlite_master WHERE name='asset_approval_heads'").fetchone():
             return None
