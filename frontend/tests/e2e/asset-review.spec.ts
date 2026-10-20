@@ -33,6 +33,20 @@ test("asset-review: operator choice persists and never auto-approves G3",async({
   await page.getByRole("navigation").getByRole("button",{name:/Historical Assets/}).click();
   await expect(page.getByText("Resolution:")).toContainText("MANUAL_UPLOAD");
   await expect(page.getByRole("button",{name:"Approve complete G3 snapshot"})).toBeDisabled();
+
+  // F03: the UI must display the backend-verified original, not a search thumbnail.
+  const png=Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAusB9S5wN3sAAAAASUVORK5CYII=","base64");
+  await page.locator(".asset-studio input[type=file]").setInputFiles({
+    name:"verified-original.png",mimeType:"image/png",buffer:png
+  });
+  await page.locator(".asset-studio input[placeholder='Title']").fill("Original media fixture");
+  await page.locator(".asset-studio textarea[placeholder='Origin and historical context']").fill("Synthetic context");
+  await page.locator(".asset-studio textarea[placeholder='Rights evidence']").fill("Test fixture only");
+  await page.getByRole("button",{name:"Upload original candidate"}).click();
+  await expect(page.locator(".asset-studio").getByRole("status")).toContainText("Manual upload completed");
+  await expect(page.locator(".asset-original-preview")).toBeVisible();
+  await expect(page.locator(".asset-original-preview")).toHaveJSProperty("naturalWidth",1);
+  await expect(page.getByRole("button",{name:"Approve complete G3 snapshot"})).toBeDisabled();
 });
 
 
