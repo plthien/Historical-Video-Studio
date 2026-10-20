@@ -83,6 +83,19 @@ jobs:
           Run-Owner @("-m","pytest","-q","tests/voice/test_voice_pipeline.py","-k","alignment or word_map or stale")
           Run-Owner @("-m","backend.tools.smoke","--case","voice-ui","--mode","local")
           Run-Owner @("-m","pytest","-q","tests/voice/test_voice_pipeline.py")
+      - name: A3-01/02/03 archive original and G-Labs provider regression
+        shell: pwsh
+        run: |
+          $py = ".venv/Scripts/python.exe"
+          function Check([string[]]$arguments) {
+            & $py @arguments
+            if ($LASTEXITCODE -ne 0) { throw "A3 owner command failed: $($arguments -join ' ')" }
+          }
+          Check @("-m","pytest","-q","tests/assets/test_sources.py","-k","search or paging or hydrate")
+          Check @("-m","pytest","-q","tests/assets/test_sources.py","-k","rights or download or provenance")
+          Check @("-m","pytest","-q","tests/assets/test_glabs.py","-k","generate or poll or stop or error")
+          Check @("-m","pytest","-q","tests/assets/test_sources.py","tests/assets/test_glabs.py")
+          Check @("-m","pytest","-q","tests/backend/test_foundation.py","tests/voice/test_voice_pipeline.py")
       - name: Chromium browser E2E (real local servers)
         shell: pwsh
         run: |
