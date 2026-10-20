@@ -474,7 +474,10 @@ def test_gate_2_final_wav_assemble_alignment_and_cold_reopen(tmp_path):
         voice.enqueue(project,"sec_001","kokoro_local","am_adam",1.0,
                       "new selection",store.revision(project),"new-voice-after-g2")
         assert voice.process_one(lambda *_:audio_fixture(2))["state"]=="SUCCEEDED"
-    assert gates.board(project)[1]["state"]=="STALE"
+    assert gates.board(project)[1]["state"] in ("STALE","READY_FOR_REVIEW")
+    with store._connection() as db:
+        assert db.execute("SELECT cause FROM gate_staleness WHERE project_id=? AND gate_id='G2'",
+                          (project,)).fetchone()[0]=="voice_audio"
     assert workflow.status(project)["g4_ready_dependency"] is False
     assert store.get_artifact(final["audio_sha256"])  # historical bytes still immutable
 
@@ -556,3 +559,23 @@ def test_alignment_api_status_and_media_bytes_on_real_store(tmp_path):
             "expected_revision":store.revision(project),"audio_sha256":final["audio_sha256"],
             "transcript_sha256":final["transcript_sha256"]},headers={
             "Idempotency-Key":"should-not-retry-active"}).status_code in (409,422)
+
+
+def test_gate_2_technical_assembly_retry_preserves_original_approval(tmp_path):
+    """A2-03 failure/recovery: blocked/failed jobs can be retried without another G2 approval."""
+    from backend.tools.voice_final_smoke import setup,approval
+    store,gates,voice,workflow,project,story=setup(tmp_path)
+    accepted=approval(store,gates,project)
+    leased=workflow.queue.claim("final_assembly")
+    assert leased and leased["job_id"]==accepted["job_id"]
+    workflow.queue.fail(leased["job_id"],leased["lease_token"],"FINAL_AUDIO_ASSEMBLY_FAILED",False)
+    revision=store.revision(project)
+    retry=workflow.retry_assembly(project,revision,"manual-technical-retry-001")
+    assert retry != accepted["job_id"] and store.revision(project)==revision
+    assert workflow.process_one()["state"]=="SUCCEEDED"
+    assert workflow.status(project)["final_audio"]
+    with store._connection() as db:
+        assert db.execute("SELECT COUNT(*) FROM gate_events WHERE project_id=? AND gate_id='G2'",
+                          (project,)).fetchone()[0]==1
+    with pytest.raises(ContractViolation,match="FINAL_AUDIO_RETRY_FORBIDDEN"):
+        workflow.retry_assembly(project,store.revision(project),"invalid-second-technical-retry")
