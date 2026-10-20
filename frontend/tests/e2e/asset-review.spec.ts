@@ -46,6 +46,25 @@ test("asset-review: operator choice persists and never auto-approves G3",async({
   await expect(page.locator(".asset-studio").getByRole("status")).toContainText("Manual upload completed");
   await expect(page.locator(".asset-original-preview")).toBeVisible();
   await expect(page.locator(".asset-original-preview")).toHaveJSProperty("naturalWidth",1);
+  await expect(page.locator(".asset-studio")).toContainText("Synthetic context");
+  await expect(page.locator(".asset-studio")).toContainText("Test fixture only");
+  const requirementSelect=page.getByLabel("Asset requirement");
+  const original=await requirementSelect.inputValue();
+  const options=await requirementSelect.locator("option").evaluateAll(nodes=>
+    nodes.map(n=>(n as HTMLOptionElement).value));
+  expect(options.length).toBeGreaterThan(1);
+  await page.locator(".asset-studio input[type=checkbox]").first().check();
+  await page.getByText("Rights/license evidence (required)").locator("..").locator("textarea").first().fill("Reviewed rights");
+  await page.getByText("Period, geography, exactness evidence (required)").locator("..").locator("textarea").first().fill("Reviewed period");
+  await page.getByRole("button",{name:"Stage selected for batch"}).click();
+  await expect(page.locator(".asset-studio")).toContainText("1 staged;");
+  await requirementSelect.selectOption(options.find(value=>value!==original)!);
+  await expect(page.locator(".asset-studio")).not.toContainText("1 staged;");
+  await page.route("**/original-preview**",route=>route.abort("failed"));
+  await requirementSelect.selectOption(original);
+  await expect(page.getByRole("alert")).toContainText("Original image could not be loaded");
+  await expect(page.getByRole("button",{name:"Retry original preview"})).toBeVisible();
+  await expect(page.getByRole("button",{name:"Stage selected for batch"})).toBeDisabled();
   await expect(page.getByRole("button",{name:"Approve complete G3 snapshot"})).toBeDisabled();
 });
 
