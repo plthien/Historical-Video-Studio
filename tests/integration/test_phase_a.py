@@ -324,3 +324,63 @@ def test_phase_a_europeana_record_hydrate_original_preview_and_stale(tmp_path,mo
         changed["sections"][0]["narration"]+=" Updated context."
         store.import_story(StoryCandidate.parse(changed),store.revision(pid))
         assert http.get(url).status_code==422
+
+
+
+def test_provider_settings_secret_preservation_explicit_clear_and_idempotency(tmp_path):
+    """R06/R07: blank password is not a destructive overwrite; journal never stores plaintext."""
+    db=tmp_path/"settings.sqlite"
+    with TestClient(create_app(db,tmp_path/"media")) as http:
+        url="/api/v1/providers/settings"
+        key=lambda name:{"Idempotency-Key":name}
+        first={"provider":"glabs_webhook","api_key":"local-secret-example",
+               "base_url":"http://127.0.0.1:8765","clear_key":False}
+        response=http.put(url,headers=key("secret-first-001"),json=first)
+        assert response.status_code==200,response.text
+        assert response.json()["configured"]
+        change={"provider":"glabs_webhook","api_key":None,
+                "base_url":"http://127.0.0.1:8770","clear_key":False}
+        assert http.put(url,headers=key("base-only-edit-001"),json=change).status_code==200
+        with ProjectStore(db,tmp_path/"media")._connection() as conn:
+            secret,base=conn.execute("SELECT api_key,base_url FROM local_provider_settings "
+                                     "WHERE provider='glabs_webhook'").fetchone()
+            assert secret=="local-secret-example" and base=="http://127.0.0.1:8770"
+            journal=str(conn.execute("SELECT payload_sha256,result_json FROM api_requests").fetchall())
+            assert "local-secret-example" not in journal
+        assert http.put(url,headers=key("base-only-edit-001"),json=change).status_code==200
+        conflict=http.put(url,headers=key("base-only-edit-001"),json={**change,"base_url":"http://127.0.0.1:8771"})
+        assert conflict.status_code==409,conflict.text
+        erased=http.put(url,headers=key("clear-secret-001"),json={
+            "provider":"glabs_webhook","api_key":None,"base_url":"http://127.0.0.1:8770","clear_key":True})
+        assert erased.status_code==200 and not erased.json()["configured"]
+        assert all("local-secret-example" not in str(res.json()) for res in (response,erased))
+
+
+def test_hydration_rejects_story_change_during_exact_candidate_provider_call(tmp_path):
+    """R08: no old Europeana record can be attached to a new StoryPackage after network."""
+    from backend.app.assets.provenance import AssetCandidates
+    store=ProjectStore(tmp_path/"db.sqlite",tmp_path/"media")
+    story=json.loads((Path(__file__).resolve().parents[2]/
+        "contracts/examples/longform/StoryPackage.longform.synthetic.json").read_text())
+    pid=story["project"]["project_id"]
+    rid=story["asset_requirements"][0]["requirement_id"]
+    store.create_project(pid,"Hydrate race")
+    store.import_story(StoryCandidate.parse(story),0)
+    assets=AssetCandidates(store)
+    with store._transaction() as db:
+        candidate_id=assets._save(db,pid,rid,{"provider":"europeana",
+            "item_id":"/record/123","hydrated":False,"title":"Original archive record"})
+    source=assets._requirement(pid,rid)
+    class RaceAdapter:
+        provider="europeana"
+        def hydrate(self,item_id):
+            changed=json.loads(json.dumps(story))
+            changed["sections"][0]["narration"]+=" Revised source text."
+            store.import_story(StoryCandidate.parse(changed),store.revision(pid))
+            return {"provider":"europeana","item_id":item_id,"hydrated":True,
+                    "title":"Record after wrong revision"}
+    with pytest.raises(ContractViolation,match="ASSET_SOURCE_STALE"):
+        assets.hydrate(pid,rid,RaceAdapter(),"/record/123",
+            candidate_id=candidate_id,frozen_source=source)
+    with store._connection() as db:
+        assert db.execute("SELECT COUNT(*) FROM asset_candidates WHERE project_id=?",(pid,)).fetchone()[0]==1
