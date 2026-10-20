@@ -240,13 +240,13 @@ class GateService:
             return "BLOCKED", candidate, blockers, last
 
         if gate == "G4" and (candidate or head):
-            if self._status(db,project_id,"G3")[0]!="APPROVED":
-                blockers.append("G3_APPROVAL_REQUIRED")
-                return ("STALE" if head else "BLOCKED"),candidate,blockers,last
             from backend.app.voice.workflow import word_map_ready
             if not word_map_ready(db, project_id):
                 blockers.append("WORD_MAP_MISSING_OR_STALE")
                 return ("STALE" if head else "BLOCKED"), candidate, blockers, last
+            if self._status(db,project_id,"G3")[0]!="APPROVED":
+                blockers.append("G3_APPROVAL_REQUIRED")
+                return ("STALE" if head else "BLOCKED"),candidate,blockers,last
         # Current G1 authorization, never just a historical gate_heads row, is
         # required before any dependent gate becomes effectively approved.
         if gate in ("G4", "G5") and head and self._status(db, project_id, "G1")[0] != "APPROVED":
