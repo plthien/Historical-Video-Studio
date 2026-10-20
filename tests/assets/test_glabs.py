@@ -447,3 +447,98 @@ def test_actual_original_download_guard_blocks_europeana_third_party(tmp_path):
     with pytest.raises(ContractViolation,match="ORIGINAL_NOT_VERIFIED"):
         verify_url({"provider":"europeana",
                     "original_download_url":"https://www.europeana.eu/thumb/preview.jpg"})
+
+
+
+def test_stop_skipped_failed_quota_never_becomes_cancelled(tmp_path):
+    """R03: skipped is already terminal; provider failed quota remains FAILED_TERMINAL."""
+    calls=[]
+    def handler(req):
+        calls.append(req.url.path)
+        if req.url.path=="/api/image/generate":
+            return httpx.Response(202,json={"task_id":"deadbeef","status":"pending"})
+        if req.url.path=="/api/status/deadbeef":
+            if calls.count("/api/status/deadbeef")==1:
+                return httpx.Response(200,json={"task_id":"deadbeef","status":"running"})
+            return httpx.Response(200,json={"task_id":"deadbeef","status":"failed","error_code":429})
+        if req.url.path=="/api/stop/deadbeef":
+            return httpx.Response(200,json={"stopped":[],"skipped":["deadbeef"],"count":0})
+        return httpx.Response(404)
+    store,service,pid,rid=setup(tmp_path,handler)
+    job=service.enqueue(pid,rid,"nano_banana_2","Period village",expected_revision=1,
+        idempotency_key="skipped-quota-outcome-01",controlled_offline=True)
+    assert service.process_one(job["job_id"])["state"]=="RUNNING"
+    result=service.cancel(pid,job["job_id"])
+    assert result["state"]=="FAILED_TERMINAL" and result["error_code"]=="GLABS_QUOTA_EXCEEDED"
+    assert result["state"]!="CANCELLED"
+    assert calls.count("/api/image/generate")==1
+
+
+def test_project_scoped_retry_endpoint_rejects_foreign_and_nonretryable(tmp_path):
+    """R05: no cross-project job transition or retry of a still queued job."""
+    from backend.app.api.server import create_app
+    from fastapi.testclient import TestClient
+    store,service,pid,rid=setup(tmp_path,lambda req:httpx.Response(500))
+    job=service.enqueue(pid,rid,"nano_banana_2","Original job",expected_revision=1,
+        idempotency_key="retry-scope-case-01",controlled_offline=True)
+    with TestClient(create_app(store.database,store.artifacts.root)) as http:
+        foreign=http.post("/api/v1/projects/proj_foreign/jobs/"+job["job_id"]+"/retry",
+            headers={"Idempotency-Key":"foreign-job-retry-001"})
+        assert foreign.status_code in (404,409,422),foreign.text
+        forbidden=http.post("/api/v1/projects/"+pid+"/jobs/"+job["job_id"]+"/retry",
+            headers={"Idempotency-Key":"queued-job-retry-001"})
+        assert forbidden.status_code==409,forbidden.text
+        assert service.queue.get(job["job_id"])["state"]=="QUEUED"
+
+
+def test_known_remote_provider_rotation_restores_id_without_duplicate_post(tmp_path):
+    """R05: a retryable known task resumes after restoring exact endpoint/key."""
+    from backend.app.assets.resolution import AssetResolution
+    from backend.app.projects.gates import GateService
+    calls=[]
+    def handler(req):
+        calls.append(req.url.path)
+        if req.url.path=="/api/image/generate":
+            return httpx.Response(202,json={"task_id":"cafe1234","status":"pending"})
+        if req.url.path=="/api/status/cafe1234":
+            return httpx.Response(200,json={"task_id":"cafe1234",
+                "status":"running" if calls.count("/api/status/cafe1234")==1 else "completed"})
+        if req.url.path=="/api/result/cafe1234":
+            return httpx.Response(200,json={"task_id":"cafe1234","status":"completed",
+                "results":["http://127.0.0.1:8765/api/files/verified.png"]})
+        if req.url.path=="/api/files/verified.png":
+            return httpx.Response(200,content=PNG)
+        return httpx.Response(404)
+    store,service,pid,rid=setup(tmp_path,handler)
+    service.provider.offline_fixture=False
+    gates=GateService(store)
+    for claim in store.get_story(pid).data()["claims"]:
+        if claim["critical"]:
+            gates.review_claim(pid,claim["claim_id"],"REVIEWED",
+                "Controlled evidence only",store.revision(pid),
+                source_url="https://example.org/reviewed")
+    g1=gates.board(pid)[0]
+    gates.decide(pid,"G1",{"decision":"APPROVED",
+        "candidate_sha256":g1["candidate_sha256"],
+        "dependency_fingerprint":g1["dependency_fingerprint"],
+        "expected_revision":store.revision(pid)})
+    AssetResolution(store).choose(pid,rid,"MANAGED_FALLBACK","Operator controls paid boundary",
+                                  store.revision(pid))
+    job=service.enqueue(pid,rid,"nano_banana_2","Village illustration",
+                        expected_revision=store.revision(pid),
+                        idempotency_key="rotation-known-task-001")
+    assert service.process_one(job["job_id"])["state"]=="RUNNING"
+    running=service.queue.get(job["job_id"])
+    assert running["provider_task_id"]=="cafe1234"
+    service.provider.key="rotated-key"
+    failed=service.poll(job["job_id"],running["lease_token"])
+    assert failed["state"]=="FAILED_RETRYABLE"
+    with pytest.raises(ContractViolation,match="GLABS_PROVIDER_IDENTITY_STALE"):
+        service.retry(pid,job["job_id"])
+    service.provider.key="offline-secret"
+    assert service.retry(pid,job["job_id"])["resume_only"]==1
+    done=service.process_one(job["job_id"])
+    assert done["state"]=="SUCCEEDED"
+    assert done["provider_task_id"]=="cafe1234"
+    assert calls.count("/api/image/generate")==1
+    assert store.get_artifact(done["output_sha256"])==PNG
