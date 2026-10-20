@@ -36,8 +36,11 @@ jobs:
       - name: Temporary generate frontend lock for dependency capture
         shell: pwsh
         run: |
-          npm install --package-lock-only --prefix frontend --ignore-scripts --no-audit --no-fund
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          Push-Location frontend
+          try {
+            npm install --package-lock-only --ignore-scripts --no-audit --no-fund
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          } finally { Pop-Location }
           Write-Host "__FRONTEND_LOCK_START__"
           Get-Content frontend/package-lock.json -Raw
           Write-Host "__FRONTEND_LOCK_END__"
