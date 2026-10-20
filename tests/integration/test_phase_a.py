@@ -8,6 +8,14 @@ from backend.app.projects.models import StoryCandidate
 from backend.app.projects.gates import GateService
 from backend.app.assets.resolution import AssetResolution
 
+def _png_fixture():
+    import struct,zlib
+    def chunk(name,body):
+        return struct.pack(">I",len(body))+name+body+struct.pack(">I",zlib.crc32(name+body))
+    return (b"\\x89PNG\\r\\n\\x1a\\n"+
+        chunk(b"IHDR",struct.pack(">IIBBBBB",1,1,8,2,0,0,0))+
+        chunk(b"IDAT",zlib.compress(bytes([0,1,10,30])))+chunk(b"IEND",b""))
+
 def test_phase_a_local_g3_never_auto_approves_and_survives_reopen(tmp_path):
     db=tmp_path/"phase_a.sqlite";media=tmp_path/"media"
     store=ProjectStore(db,media)
@@ -104,7 +112,7 @@ def test_phase_a_complete_g3_requires_g1_and_all_exact_sources(tmp_path):
 def test_phase_a_g3_stale_requires_new_review_even_for_same_original(tmp_path):
     """F01: an A→B→A selection never silently revives historical G3."""
     from backend.app.assets.provenance import AssetCandidates
-    from backend.tools.asset_smoke import PNG
+
     story=json.loads((Path(__file__).resolve().parents[2]/
         "contracts/examples/longform/StoryPackage.longform.synthetic.json").read_text())
     rid=story["asset_requirements"][0]["requirement_id"]
@@ -124,7 +132,7 @@ def test_phase_a_g3_stale_requires_new_review_even_for_same_original(tmp_path):
         "dependency_fingerprint":g1["dependency_fingerprint"],"expected_revision":store.revision(pid)})
     resolver=AssetResolution(store)
     resolver.choose(pid,rid,"MANUAL_UPLOAD","Licensed original",store.revision(pid))
-    candidate=AssetCandidates(store).manual(pid,rid,PNG,"Reviewed image","Checked date","Licensed")
+    candidate=AssetCandidates(store).manual(pid,rid,_png_fixture(),"Reviewed image","Checked date","Licensed")
     review={"requirement_id":rid,"candidate_id":candidate["candidate_id"],
             "original_sha256":candidate["original_sha256"],"rights_status":"ELIGIBLE",
             "rights_evidence_note":"Fixture license review","historical_context_note":"Fixture period check"}
@@ -148,7 +156,7 @@ def test_phase_a_g3_stale_requires_new_review_even_for_same_original(tmp_path):
     with store._connection() as db:
         assert db.execute("SELECT COUNT(*) FROM gate_events WHERE gate_id='G3'").fetchone()[0]==2
         assert db.execute("SELECT COUNT(*) FROM asset_approval_events").fetchone()[0]==2
-    assert store.get_artifact(candidate["original_sha256"])==PNG
+    assert store.get_artifact(candidate["original_sha256"])==_png_fixture()
 
 
 def test_phase_a_empty_asset_requirements_explicit_g3_and_restart(tmp_path):
@@ -188,7 +196,7 @@ def test_phase_a_real_g1_g2_g3_reopen_independence(tmp_path):
     from backend.app.voice.workflow import FinalVoiceWorkflow
     from backend.app.jobs.queue import JobQueue
     from backend.app.assets.provenance import AssetCandidates
-    from backend.tools.asset_smoke import PNG
+
     store,gates,voice,workflow,pid,story=setup(tmp_path)
     approved_g2=approval(store,gates,pid)
     assert approved_g2["state"]=="APPROVED"
@@ -202,7 +210,7 @@ def test_phase_a_real_g1_g2_g3_reopen_independence(tmp_path):
     for requirement in story["asset_requirements"]:
         rid=requirement["requirement_id"]
         resolver.choose(pid,rid,"MANUAL_UPLOAD","Reviewed owned source",store.revision(pid))
-        asset=media.manual(pid,rid,PNG,"Local original","Period checked","Operator license review")
+        asset=media.manual(pid,rid,_png_fixture(),"Local original","Period checked","Operator license review")
         reviews.append({"requirement_id":rid,"candidate_id":asset["candidate_id"],
           "original_sha256":asset["original_sha256"],"rights_status":"ELIGIBLE",
           "rights_evidence_note":"Controlled fixture license","historical_context_note":"Controlled period"})
