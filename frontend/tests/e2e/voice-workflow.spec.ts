@@ -29,7 +29,7 @@ test("voice-workflow: two selected sections, one G2 approval and truthful alignm
     await box.getByLabel("Speed "+section).fill("1.0");
     await box.getByRole("button",{name:"Regenerate"}).click();
     await expect(box.getByText(/Selected am_adam/)).toBeVisible({timeout:45000});
-    await expect(box.locator("audio")).toHaveCount(1);
+    await expect(box.locator("audio:visible")).toHaveCount(1);
   }
   await expect(page.getByRole("button",{name:"Approve G2"})).toBeEnabled({timeout:30000});
   await page.getByRole("button",{name:"Approve G2"}).click();
