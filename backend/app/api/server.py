@@ -22,6 +22,7 @@ from backend.app.projects.storage import ProjectStore
 from backend.app.voice.attempts import VoiceService
 from backend.app.voice.workflow import FinalVoiceWorkflow
 from backend.app.api.voice import mount as mount_voice
+from backend.app.api.assets import mount as mount_assets
 
 
 class ProjectInput(BaseModel):
@@ -212,6 +213,7 @@ def create_app(database: str | Path | None = None, media_root: str | Path | None
                           lambda: queue.cancel(job_id))
 
     mount_voice(app, voice_service, idempotent, final_voice)
+    mount_assets(app, store, gates, queue, idempotent)
 
     @app.api_route("/api/v1/{remaining:path}", methods=["GET", "POST", "PUT", "PATCH", "DELETE"])
     def unavailable(remaining: str):
