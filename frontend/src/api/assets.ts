@@ -10,6 +10,8 @@ export interface AssetCandidate {
   candidate_id:string; provider:string; title:string; original_sha256:string|null;
   rights_status:string; rights_statement?:string; asset_class?:string;
   hydrated?:boolean; item_id?:string; mime_type?:string; source_page_url?:string;
+  creator?:string|null;creation_date?:string|null;place?:string|null;
+  rights_uri?:string|null;historical_exactness?:string|null;historical_context_note?:string|null;
   current_source:boolean; approved:boolean; user_approved:boolean;
 }
 export interface AssetReview {
