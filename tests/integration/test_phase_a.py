@@ -146,6 +146,15 @@ def test_phase_a_g3_stale_requires_new_review_even_for_same_original(tmp_path):
         "dependency_fingerprint":g3["dependency_fingerprint"],"expected_revision":store.revision(pid)})
     old=gates.board(pid)[2]
     assert old["state"]=="APPROVED"
+    revision=store.revision(pid)
+    with store._connection() as db:
+        approval_count=db.execute("SELECT COUNT(*) FROM asset_approval_events").fetchone()[0]
+    repeated=resolver.approve_batch(pid,[review],revision)
+    assert repeated["project_revision"]==revision
+    assert repeated["approved"][0]["approval_record_id"]==resolver.requirements(pid)["requirements"][0]["approval_record_id"]
+    assert gates.board(pid)[2]["state"]=="APPROVED"
+    with store._connection() as db:
+        assert db.execute("SELECT COUNT(*) FROM asset_approval_events").fetchone()[0]==approval_count
     resolver.choose(pid,rid,"MANAGED_FALLBACK","Changed selection",store.revision(pid))
     resolver.choose(pid,rid,"MANUAL_UPLOAD","Licensed original",store.revision(pid))
     assert gates.board(pid)[2]["state"]!="APPROVED"
