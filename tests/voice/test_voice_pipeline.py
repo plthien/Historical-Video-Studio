@@ -371,6 +371,16 @@ def test_history_read_independent_of_g1_and_story_sha(ctx):
     changed_narration["sections"][0]["narration"] += " A new voice source now exists."
     store.import_story(StoryCandidate.parse(changed_narration), store.revision(project))
     assert voice.list_attempts(project, "sec_001")["attempts"][0]["compatible_source"] is False
+    without_section = copy.deepcopy(changed_narration)
+    without_section["sections"] = [s for s in without_section["sections"] if s["section_id"] != "sec_001"]
+    without_section["visual_setups"] = [
+        setup for setup in without_section["visual_setups"] if "sec_001" not in setup["section_refs"]]
+    store.import_story(StoryCandidate.parse(without_section), store.revision(project))
+    history_without_section = voice.list_attempts(project, "sec_001")
+    assert len(history_without_section["attempts"]) == 1
+    assert history_without_section["attempts"][0]["compatible_source"] is False
+    with pytest.raises(ContractViolation, match="VOICE_SECTION_NOT_FOUND"):
+        voice.list_attempts(project, "sec_nonexistent")
 
 
 def test_previously_approved_head_only_is_genuinely_stale(ctx):
