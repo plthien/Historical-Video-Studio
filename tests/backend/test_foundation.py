@@ -435,3 +435,42 @@ def test_story_asset_relevance_selectively_stales_g3(story, store):
     assert states["G1"] == "STALE"
     with sqlite3.connect(store.database) as db:
         assert db.execute("SELECT COUNT(*) FROM story_candidates").fetchone()[0] == 3
+
+
+def test_gate_never_approved_revised_story_ready_after_claim_review(story, store):
+    """A1-04 P1-01: a revised unapproved draft must never be trapped STALE."""
+    from backend.app.projects.gates import GateService
+    project_id = story["project"]["project_id"]
+    store.create_project(project_id, "Unapproved draft")
+    store.import_story(StoryCandidate.parse(story), 0)
+    updated = copy.deepcopy(story)
+    updated["sections"][0]["narration"] += " Evidence checked for this revision."
+    revision = store.import_story(StoryCandidate.parse(updated), 1)
+    gates = GateService(store)
+    assert gates.board(project_id)[0]["state"] == "BLOCKED"
+    for claim in updated["claims"]:
+        if claim["critical"]:
+            revision = gates.review_claim(project_id, claim["claim_id"], "REVIEWED",
+                                          "Researched historical lead", revision)
+    assert gates.board(project_id)[0]["state"] == "READY_FOR_REVIEW"
+
+
+def test_gate_review_edit_after_approval_invalidates_effective_head(story, store):
+    """A1-04 P1-02: persisted evidence modification must deactivate prior approval."""
+    from backend.app.projects.gates import GateService
+    project_id = story["project"]["project_id"]
+    store.create_project(project_id, "Evidence provenance")
+    store.import_story(StoryCandidate.parse(story), 0)
+    gates = GateService(store)
+    revision = 1
+    for claim in story["claims"]:
+        if claim["critical"]:
+            revision = gates.review_claim(project_id, claim["claim_id"], "REVIEWED",
+                                          "First human review", revision)
+    candidate = gates.board(project_id)[0]
+    gates.decide(project_id, "G1", {"decision": "APPROVED", "candidate_sha256": candidate["candidate_sha256"],
+       "dependency_fingerprint": candidate["dependency_fingerprint"], "expected_revision": revision})
+    assert gates.board(project_id)[0]["state"] == "APPROVED"
+    critical_id = next(c["claim_id"] for c in story["claims"] if c["critical"])
+    gates.review_claim(project_id, critical_id, "REVIEWED", "Corrected evidence note", store.revision(project_id))
+    assert gates.board(project_id)[0]["state"] != "APPROVED"
