@@ -2,6 +2,7 @@ import {test,expect} from "@playwright/test";
 import {readFileSync} from "node:fs";
 import path from "node:path";
 import {fileURLToPath} from "node:url";
+import {execFileSync} from "node:child_process";
 const here=path.dirname(fileURLToPath(import.meta.url));
 const fixture=JSON.parse(readFileSync(path.resolve(here,
   "../../../contracts/examples/longform/StoryPackage.longform.synthetic.json"),"utf8"));
@@ -343,4 +344,89 @@ test("asset-review V4: revision conflict never commits partial batch or retries 
   await expect(page.locator(".asset-studio .notice.success")).toContainText("Approved 2 requirement(s)");
   expect(batchReqs).toHaveLength(2);
   expect((await assetState(page,P.id)).requirements.filter(r=>r.approval_record_id!==null)).toHaveLength(2);
+});
+
+
+// C02-F: test-owned SQLite fixture. This does NOT impersonate a successful
+// provider request: owner mock-HTTP tests separately establish pre-submit proof.
+function jobSql(action:"seed"|"read",projectId:string,state:string,errorCode:string,jobId="") {
+  const root=path.resolve(here,"../../..");
+  const python=path.join(root,".venv","Scripts","python.exe"); // Windows-only repo test contract.
+  const script=[
+    "import json,sys,uuid",
+    "from pathlib import Path",
+    "from backend.app.projects.storage import ProjectStore",
+    "from backend.app.jobs.queue import JobQueue",
+    "db=Path('frontend/.e2e-data/state.sqlite')",
+    "store=ProjectStore(db,Path('frontend/.e2e-data/media'))",
+    "q=JobQueue(store)",
+    "if sys.argv[1]=='seed':",
+    "    job=q.submit(sys.argv[2],'glabs_image','v4fixture-'+uuid.uuid4().hex,{},store.revision(sys.argv[2]))",
+    "    with store._transaction() as con:",
+    "        con.execute('UPDATE jobs SET state=?,error_code=? WHERE job_id=?',(sys.argv[3],sys.argv[4],job['job_id']))",
+    "    print(json.dumps(q.get(job['job_id'])))",
+    "else:",
+    "    print(json.dumps(q.get(sys.argv[5])))"
+  ].join("\n");
+  const output=execFileSync(python,["-c",script,action,projectId,state,errorCode,jobId],{
+    cwd:root,encoding:"utf8"
+  });
+  return JSON.parse(output.trim()) as {job_id:string;project_id:string;state:string;
+    provider_task_id:string|null;cancel_requested:number;error_code:string|null};
+}
+
+test("asset-review V4: jobs UI reflects persisted safe cancel versus uncertain review",async({page})=>{
+  await page.goto("/");
+  await page.getByLabel("Project title").fill("V4 safe cancel UI");
+  await page.getByRole("button",{name:"Create project"}).click();
+  await expect(page.getByRole("status")).toContainText("Project creation completed");
+  const id=(await page.locator(".topline strong").innerText()).trim();
+  const safe=jobSql("seed",id,"FAILED_RETRYABLE","GLABS_PROVIDER_IDENTITY_STALE");
+  const unknown=jobSql("seed",id,"BLOCKED_REVIEW","GLABS_UNCERTAIN_SUBMISSION");
+  expect(safe.provider_task_id).toBeNull();
+  expect(unknown.provider_task_id).toBeNull();
+  const resultSafe=await page.request.get(baseApi+"/projects/"+id+"/jobs");
+  expect(resultSafe.status()).toBe(200);
+  expect((await resultSafe.json()).map((x:{job_id:string})=>x.job_id))
+    .toEqual(expect.arrayContaining([safe.job_id,unknown.job_id]));
+  await page.getByRole("button",{name:"Refresh jobs"}).click();
+  const jobList=page.locator("section.content").filter({hasText:"Project jobs"});
+  const safeRow=jobList.locator("li").filter({hasText:safe.job_id});
+  const unknownRow=jobList.locator("li").filter({hasText:unknown.job_id});
+  await expect(safeRow).toContainText("FAILED_RETRYABLE");
+  await expect(unknownRow).toContainText("BLOCKED_REVIEW");
+  await safeRow.getByRole("button",{name:"Request cancellation"}).click();
+  await expect(safeRow).toContainText("CANCELLED");
+  await expect(safeRow.getByRole("button",{name:/Retry/})).toHaveCount(0);
+  const cancelled=jobSql("read",id,"","",safe.job_id);
+  expect(cancelled).toMatchObject({state:"CANCELLED",provider_task_id:null,
+    cancel_requested:1,error_code:"GLABS_PROVIDER_IDENTITY_STALE"});
+  const firstCancel=await page.request.post(
+    baseApi+"/projects/"+id+"/jobs/"+safe.job_id+"/cancel",
+    {headers:{"Idempotency-Key":crypto.randomUUID()}});
+  expect(firstCancel.status()).toBe(200);
+  expect((await firstCancel.json()).state).toBe("CANCELLED");
+  const forbidden=await page.request.post(baseApi+"/projects/"+id+"/jobs/"+safe.job_id+"/retry",{
+    headers:{"Idempotency-Key":crypto.randomUUID()}});
+  expect(forbidden.ok()).toBe(false);
+  expect((await forbidden.json()).code).toBe("JOB_RETRY_FORBIDDEN");
+  await unknownRow.getByRole("button",{name:"Request cancellation"}).click();
+  await expect(unknownRow).toContainText("BLOCKED_REVIEW");
+  await expect(unknownRow).toContainText("GLABS_UNCERTAIN_SUBMISSION");
+  await expect(unknownRow).toContainText("Restore original webhook credentials");
+  const uncertain=jobSql("read",id,"","",unknown.job_id);
+  expect(uncertain).toMatchObject({state:"BLOCKED_REVIEW",provider_task_id:null,
+    cancel_requested:1,error_code:"GLABS_UNCERTAIN_SUBMISSION"});
+  await expect(jobList).not.toContainText("remote stop succeeded");
+  await page.reload();
+  await page.getByLabel("Project ID").fill(id);
+  await page.getByRole("button",{name:"Open existing project"}).click();
+  await expect(page.locator("section.content").filter({hasText:"Project jobs"}))
+    .toContainText(safe.job_id+" — glabs_image: CANCELLED");
+  await expect(page.locator("section.content").filter({hasText:"Project jobs"}))
+    .toContainText(unknown.job_id+" — glabs_image: BLOCKED_REVIEW");
+  const fresh=await page.request.get(baseApi+"/projects/"+id+"/jobs");
+  const jobs=await fresh.json() as {job_id:string;state:string;cancel_requested:number;provider_task_id:string|null}[];
+  expect(jobs.find(j=>j.job_id===safe.job_id)).toMatchObject({state:"CANCELLED",cancel_requested:1,provider_task_id:null});
+  expect(jobs.find(j=>j.job_id===unknown.job_id)).toMatchObject({state:"BLOCKED_REVIEW",cancel_requested:1,provider_task_id:null});
 });
