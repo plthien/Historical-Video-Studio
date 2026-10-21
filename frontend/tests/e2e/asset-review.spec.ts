@@ -59,9 +59,42 @@ test("asset-review: operator choice persists and never auto-approves G3",async({
   await article.locator("textarea").nth(1).fill("Reviewed period");
   await page.getByRole("button",{name:"Stage selected for batch"}).click();
   await expect(page.locator(".asset-studio")).toContainText("1 staged;");
-  await requirementSelect.selectOption(options.find(value=>value!==original)!);
-  // C01-A: merely navigating to B must retain review draft A, not approve it.
+  const second=options.find(value=>value!==original)!;
+  await requirementSelect.selectOption(second);
+  // C01-A/B: navigation never discards A's exact review draft.
   await expect(page.locator(".asset-studio")).toContainText("1 staged;");
+  await page.getByLabel("Explicit missing-source reason").fill("Second source requires an owned image");
+  await page.getByRole("button",{name:"Save explicit choice"}).click();
+  await expect(page.locator(".asset-studio").getByRole("status")).toContainText("Save resolution completed");
+  await expect(page.locator(".asset-studio")).toContainText("1 staged;");
+  await page.locator(".asset-studio input[type=file]").setInputFiles({
+    name:"second-original.png",mimeType:"image/png",buffer:png
+  });
+  await page.locator(".asset-studio input[placeholder='Title']").fill("Second original");
+  await page.locator(".asset-studio textarea[placeholder='Origin and historical context']").fill("Second period");
+  await page.locator(".asset-studio textarea[placeholder='Rights evidence']").fill("Separate license");
+  await page.getByRole("button",{name:"Upload original candidate"}).click();
+  await expect(page.locator(".asset-studio").getByRole("status")).toContainText("Manual upload completed");
+  const secondArticle=page.locator(".asset-studio article.claim").filter({hasText:"Second original"});
+  await expect(secondArticle.locator(".asset-original-preview")).toHaveJSProperty("naturalWidth",1);
+  await secondArticle.locator("input[type=checkbox]").check();
+  await secondArticle.locator("textarea").nth(0).fill("Second reviewed rights");
+  await secondArticle.locator("textarea").nth(1).fill("Second reviewed period");
+  await page.getByRole("button",{name:"Stage selected for batch"}).click();
+  await expect(page.locator(".asset-studio")).toContainText("2 staged;");
+  const payloads:unknown[]=[];
+  page.on("request",req=>{
+    if(req.url().includes("/assets/batch-approve") && req.method()==="POST")
+      payloads.push(req.postDataJSON());
+  });
+  await page.getByRole("button",{name:/Approve 2 selected\/staged source/}).click();
+  await expect(page.locator(".asset-studio").getByRole("status")).toContainText("Approved 2 requirement(s)");
+  expect(payloads).toHaveLength(1);
+  const batch=payloads[0] as {reviews:{requirement_id:string}[]};
+  expect(new Set(batch.reviews.map(r=>r.requirement_id))).toEqual(new Set([original,second]));
+  await expect(page.locator(".asset-studio")).not.toContainText("2 staged;");
+  await expect(page.getByRole("button",{name:"Approve complete G3 snapshot"})).toBeDisabled();
+  // No preview may be treated as visually reviewed if its bytes fail to load.
   await page.route("**/original-preview**",route=>route.abort("failed"));
   await requirementSelect.selectOption(original);
   await expect(page.getByRole("alert")).toContainText("Original image could not be loaded");
