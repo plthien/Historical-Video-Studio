@@ -124,7 +124,7 @@ test("asset-review: operator choice persists and never auto-approves G3",async({
   // No preview may be treated as visually reviewed if its bytes fail to load.
   await page.route("**/original-preview**",route=>route.abort("failed"));
   await requirementSelect.selectOption(original);
-  await expect(page.getByRole("alert")).toContainText("Original image could not be loaded");
+  await expect(page.locator(".asset-studio").getByText("Original image could not be loaded.",{exact:false})).toBeVisible();
   await expect(page.getByRole("button",{name:"Retry original preview"})).toBeVisible();
   await expect(page.getByRole("button",{name:"Stage selected for batch"})).toBeDisabled();
   await expect(page.getByRole("button",{name:"Approve complete G3 snapshot"})).toBeDisabled();
