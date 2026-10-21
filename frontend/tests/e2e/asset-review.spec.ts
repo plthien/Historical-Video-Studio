@@ -199,6 +199,7 @@ async function createAssetProject(page: import("@playwright/test").Page,title:st
   await expect(page.getByRole("status")).toContainText("Story import completed");
   await page.getByRole("navigation").getByRole("button",{name:/Historical Assets/}).click();
   await expect(page.getByLabel("Asset requirement")).toBeVisible();
+  await expect.poll(()=>page.getByLabel("Asset requirement").locator("option").count()).toBeGreaterThan(1);
   const options=await page.getByLabel("Asset requirement").locator("option")
     .evaluateAll(nodes=>nodes.map(node=>(node as HTMLOptionElement).value));
   return {id,story,requirements:options};
@@ -441,6 +442,8 @@ test("asset-review V4: jobs UI reflects persisted safe cancel versus uncertain r
   expect(forbidden.ok()).toBe(false);
   expect((await forbidden.json()).code).toBe("JOB_RETRY_FORBIDDEN");
   await unknownRow.getByRole("button",{name:"Request cancellation"}).click();
+  await expect(unknownRow.getByRole("button",{name:"Reconcile cancellation with provider"})).toBeVisible();
+  await expect(page.getByRole("status").first()).toContainText("Cancel request");
   await expect(unknownRow).toContainText("BLOCKED_REVIEW");
   await expect(unknownRow).toContainText("GLABS_UNCERTAIN_SUBMISSION");
   await expect(unknownRow).toContainText("Restore original webhook credentials");
