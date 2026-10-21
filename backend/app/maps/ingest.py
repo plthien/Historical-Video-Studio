@@ -38,7 +38,8 @@ def _geometry(g,crs,fid):
     return {"type":kind,"coordinates":paths[0] if kind=="LineString" else paths}
 
 def ingest(map_record:dict,original_bytes:bytes, *,year:int,feature_ids:list[str],
-           approval:dict, route_feature_id:str|None=None) -> dict:
+           approval:dict, route_feature_id:str|None=None,
+           reviewed_tie_points:list[dict]|None=None) -> dict:
     """Approval must be the current G3 approval-head snapshot (AssetResolution._head).
 
     The caller retrieves this head from the existing ProjectStore; an arbitrary
@@ -67,9 +68,41 @@ def ingest(map_record:dict,original_bytes:bytes, *,year:int,feature_ids:list[str
             raise ContractViolation("MAP_GEOMETRY_INVALID",mid,"Raster source and immutable SHA must agree.")
         if feature_ids or route_feature_id:
             raise ContractViolation("MAP_GEOREFERENCE_REQUIRED",mid,
-                                    "Raster coordinates remain image UV-only until G3-reviewed tie points are supplied.")
+                                    "Raster cannot expose GeoJSON features or route without a separate reviewed vector source.")
+        if not reviewed_tie_points:
+            return {"historical_map":map_record,"source_original_sha256":digest,
+                    "coordinate_space":"UV_ONLY","features":[],"projected":[],"geometry_sha256":None}
+        if len(reviewed_tie_points)<3:
+            raise ContractViolation("MAP_GEOREFERENCE_REQUIRED",mid,"At least 3 reviewed noncollinear UV/lonlat tie points required.")
+        if any(p.get("rights_review_record_id")!=map_record["rights_review_record_id"] or
+               p.get("source_original_sha256")!=digest or not p.get("user_approved") or
+               any(type(p.get(k)) not in (int,float) for k in ("u","v","lon","lat")) or
+               not (0<=p["u"]<=1 and 0<=p["v"]<=1)
+               for p in reviewed_tie_points):
+            raise ContractViolation("MAP_GEOREFERENCE_REQUIRED",mid,"Bind reviewed tie points to exact original SHA and G3 rights evidence.")
+        p0,p1,p2=reviewed_tie_points[:3]
+        d=(p1["u"]-p0["u"])*(p2["v"]-p0["v"])-(p2["u"]-p0["u"])*(p1["v"]-p0["v"])
+        if abs(d)<1e-9:
+            raise ContractViolation("MAP_GEOREFERENCE_REQUIRED",mid,"Reviewed tie points cannot be collinear.")
+        def affine(attr):
+            dx=p1[attr]-p0[attr];dy=p2[attr]-p0[attr]
+            a=(dx*(p2["v"]-p0["v"])-dy*(p1["v"]-p0["v"]))/d
+            b=(dy*(p1["u"]-p0["u"])-dx*(p2["u"]-p0["u"]))/d
+            return (a,b,p0[attr]-a*p0["u"]-b*p0["v"])
+        lon=affine("lon");lat=affine("lat")
+        def uv(u,v):return (lon[0]*u+lon[1]*v+lon[2],lat[0]*u+lat[1]*v+lat[2])
+        bbox=map_record["geography_bbox"]
+        corners=[uv(u,v) for u,v in ((0,0),(1,0),(0,1),(1,1))]
+        if any(not (bbox["min_lon"]<=a<=bbox["max_lon"] and bbox["min_lat"]<=b<=bbox["max_lat"])
+               for a,b in corners):
+            raise ContractViolation("MAP_GEOREFERENCE_REQUIRED",mid,"Georeference corners exceed reviewed historical bbox.")
+        geo={"uv_lon_coefficients":lon,"uv_lat_coefficients":lat,
+             "source_original_sha256":digest,
+             "rights_review_record_id":map_record["rights_review_record_id"]}
         return {"historical_map":map_record,"source_original_sha256":digest,
-                "coordinate_space":"UV_ONLY","features":[],"projected":[],"geometry_sha256":None}
+                "coordinate_space":"REVIEWED_RASTER_UV_TO_GEO","features":[],
+                "projected":[list(project(a,b,map_record["map_projection"])) for a,b in corners],
+                "georeference":geo,"geometry_sha256":hashlib.sha256(_canonical(geo)).hexdigest()}
     if map_record["geometry_format"] not in ("GeoJSON","GPKG_DERIVED_GEOJSON"):
         raise ContractViolation("MAP_GEOMETRY_INVALID",mid,"Vector map requires reviewable GeoJSON source.")
     try:
