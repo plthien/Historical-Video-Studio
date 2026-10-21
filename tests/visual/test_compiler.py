@@ -130,6 +130,7 @@ def test_map_projection_period_sha_and_feature_lineage():
     ("sha","MAP_RIGHTS_UNREVIEWED"),
     ("topology","MAP_GEOMETRY_INVALID"),
     ("antimeridian","MAP_GEOMETRY_INVALID"),
+    ("selfcross","MAP_GEOMETRY_INVALID"),
 ])
 def test_map_invalid_source_never_geographic_fallback(mode,expected):
     source=vector_sample();m,approval=example_map(source)
@@ -139,11 +140,16 @@ def test_map_invalid_source_never_geographic_fallback(mode,expected):
     elif mode=="feature":features=["missing_feature"]
     elif mode=="rights":approval["approval_record_id"]="not_reviewed"
     elif mode=="sha":source+=b" "
-    elif mode in ("topology","antimeridian"):
+    elif mode in ("topology","antimeridian","selfcross"):
         raw=json.loads(source)
         raw["crs"]="EPSG:4326";m["source_crs"]="EPSG:4326"
-        pts=([[10,50],[10,50],[10,50],[10,50]] if mode=="topology"
-             else [[179,50],[-179,50],[-179,51],[179,50]])
+        if mode=="topology":
+            pts=[[10,50],[10,50],[10,50],[10,50]]
+        elif mode=="selfcross":
+            vertex=[(11+math.cos(2*math.pi*i/5),51+math.sin(2*math.pi*i/5)) for i in range(5)]
+            pts=[list(vertex[i]) for i in (0,2,4,1,3,0)]
+        else:
+            pts=[[179,50],[-179,50],[-179,51],[179,50]]
         raw["features"][0]["geometry"]["coordinates"]=[pts]
         source=json.dumps(raw).encode()
         m["source_original_sha256"]=hashlib.sha256(source).hexdigest()
