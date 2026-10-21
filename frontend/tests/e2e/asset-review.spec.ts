@@ -60,7 +60,8 @@ test("asset-review: operator choice persists and never auto-approves G3",async({
   await page.getByRole("button",{name:"Stage selected for batch"}).click();
   await expect(page.locator(".asset-studio")).toContainText("1 staged;");
   await requirementSelect.selectOption(options.find(value=>value!==original)!);
-  await expect(page.locator(".asset-studio")).not.toContainText("1 staged;");
+  // C01-A: merely navigating to B must retain review draft A, not approve it.
+  await expect(page.locator(".asset-studio")).toContainText("1 staged;");
   await page.route("**/original-preview**",route=>route.abort("failed"));
   await requirementSelect.selectOption(original);
   await expect(page.getByRole("alert")).toContainText("Original image could not be loaded");
