@@ -47,6 +47,7 @@ def test_blueprint_ten_templates_immutable_refs_and_30_layouts():
     ("collage_order","COLLAGE_ORDER_INVALID"),
     ("collage_hero","COLLAGE_HERO_INVALID"),
     ("quote_verbatim","QUOTE_SOURCE_NOT_VERIFIED"),
+    ("quote_t09","QUOTE_SOURCE_NOT_VERIFIED"),
     ("map_pair","MAP_PAIR_NOT_DISTINCT"),
     ("unknown_claim","TEMPLATE_CLAIM_MISSING"),
     ("geo_editorial","EDITORIAL_ROUTE_INVALID"),
@@ -63,6 +64,8 @@ def test_payload_role_negative_fail_closed(change,code):
         payloads["setup_03"]["cards"][0]["card_role"]="supporting"
     elif change=="quote_verbatim":
         payloads["setup_06"]["excerpt_kind"]="verbatim_verified"
+    elif change=="quote_t09":
+        payloads["setup_09"]["quote_kind"]="verbatim_verified"
     elif change=="map_pair":
         payloads["setup_07"]["after_map"]=copy.deepcopy(payloads["setup_07"]["before_map"])
     elif change=="unknown_claim":payloads["setup_01"]["map"]["label_source_claim_refs"]=["ghost_claim"]
