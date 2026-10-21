@@ -1,7 +1,14 @@
-import {useCallback,useEffect,useState} from "react";
+import {useCallback,useEffect,useRef,useState} from "react";
 import {assetApi,type Requirement,type AssetCandidate,type AssetReview} from "../../api/assets";
 import {api,type Gate} from "../../api/client";
 import {ProviderSettings} from "../Settings/ProviderSettings";
+type StagedReview = AssetReview & {project_id:string;source_story_sha256:string;source_requirement_sha256:string};
+function draftMatches(d:StagedReview,c:AssetCandidate|undefined) {
+  return Boolean(c && c.current_source && c.candidate_id===d.candidate_id &&
+    c.original_sha256===d.original_sha256 &&
+    c.source_story_sha256===d.source_story_sha256 &&
+    c.source_requirement_sha256===d.source_requirement_sha256);
+}
 export function AssetStudio({projectId,onRefresh}:{projectId:string;onRefresh:()=>Promise<void>}) {
   const [requirements,setRequirements]=useState<Requirement[]>([]);
   const [revision,setRevision]=useState(0);
@@ -21,29 +28,86 @@ export function AssetStudio({projectId,onRefresh}:{projectId:string;onRefresh:()
   const [file,setFile]=useState<File|null>(null);
   const [reviewNotes,setReviewNotes]=useState<Record<string,{rights:string;history:string}>>({});
   const [checks,setChecks]=useState<Record<string,boolean>>({});
-  const [staged,setStaged]=useState<AssetReview[]>([]);
+  const [staged,setStaged]=useState<StagedReview[]>([]);
+  const stagedRef=useRef<StagedReview[]>([]);
+  const selectedRef=useRef("");
+  const projectRef=useRef(projectId);
+  projectRef.current=projectId;
+  const requestSeq=useRef(0);
+  const reloadSeq=useRef(0);
+  function saveStaged(next:StagedReview[]){
+    stagedRef.current=next;setStaged(next);
+  }
+  const loadCandidates=useCallback(async(pid:string,rid:string)=>{
+    const seq=++requestSeq.current;
+    if(!rid){setCandidates([]);return;}
+    const response=await assetApi.candidates(pid,rid);
+    if(projectRef.current===pid && selectedRef.current===rid && requestSeq.current===seq)
+      setCandidates(response.candidates);
+  },[]);
+  async function validated(drafts:StagedReview[],allowed:Requirement[]) {
+    const eligible=new Set(allowed.map(r=>r.requirement_id));
+    const rows=await Promise.all(drafts.map(async d=>{
+      if(d.project_id!==projectId || !eligible.has(d.requirement_id))return null;
+      const response=await assetApi.candidates(projectId,d.requirement_id);
+      return response.candidates.find(c=>draftMatches(d,c))?d:null;
+    }));
+    return rows.filter((item):item is StagedReview=>item!==null);
+  }
   const [preview,setPreview]=useState<Record<string,"loading"|"ok"|"error">>({});
   const [previewAttempt,setPreviewAttempt]=useState<Record<string,number>>({});
   const [prompt,setPrompt]=useState("");
   const [gate,setGate]=useState<Gate|null>(null);
   const reload=useCallback(async(rid?:string)=>{
-    const res=await assetApi.requirements(projectId);setRequirements(res.requirements);setRevision(res.project_revision);
-    setStaged([]);setChecks({});setReviewNotes({});setPreview({});
-    const preferred=rid||selected;
+    const pid=projectId,seq=++reloadSeq.current;
+    const res=await assetApi.requirements(pid);
+    if(projectRef.current!==pid || seq!==reloadSeq.current)return;
+    setRequirements(res.requirements);setRevision(res.project_revision);
+    const preferred=rid||selectedRef.current;
     const active=res.requirements.some(r=>r.requirement_id===preferred)
       ? preferred : (res.requirements[0]?.requirement_id||"");
-    setSelected(active);
-    if(active)setCandidates((await assetApi.candidates(projectId,active)).candidates);
-    else setCandidates([]);
-    setGate((await api.gates(projectId)).find(x=>x.gate_id==="G3")||null);
+    selectedRef.current=active;setSelected(active);
+    await loadCandidates(pid,active);
+    const snapshot=stagedRef.current;
+    if(snapshot.length){
+      try{
+        const stillValid=await validated(snapshot,res.requirements);
+        if(projectRef.current!==pid||seq!==reloadSeq.current)return;
+        if(stagedRef.current===snapshot&&stillValid.length!==snapshot.length){
+          saveStaged(stillValid);
+          setProblem("Outdated staged review(s) removed after source verification. Check current originals before approval.");
+        }
+      }catch(e){
+        if(projectRef.current===pid)setProblem("Could not verify staged sources: "+String(e));
+      }
+    }
+    const board=await api.gates(pid);
+    if(projectRef.current!==pid||seq!==reloadSeq.current)return;
+    setGate(board.find(x=>x.gate_id==="G3")||null);
     await onRefresh();
-  },[projectId,selected,onRefresh]);
-  useEffect(()=>{setStaged([]);setChecks({});setReviewNotes({});setPreview({});
-    setSelected("");setCandidates([]);void reload().catch(e=>setProblem(String(e)));},[projectId]);
+  },[projectId,loadCandidates,onRefresh]);
+  useEffect(()=>{
+    ++reloadSeq.current;++requestSeq.current;
+    saveStaged([]);selectedRef.current="";setSelected("");setCandidates([]);
+    setChecks({});setReviewNotes({});setPreview({});setProblem("");setNotice("");
+    void reload().catch(e=>{if(projectRef.current===projectId)setProblem(String(e));});
+  },[projectId,reload]);
   async function action(label:string,call:()=>Promise<unknown>){
     if(pending)return;setPending(label);setProblem("");setNotice("");
-    try{await call();await reload();setNotice(label+" completed. Updated backend state loaded.");}
-    catch(e){setProblem(e instanceof Error?e.message:String(e));}
+    try{
+      const result=await call();
+      await reload();
+      if(label==="Approve exact asset sources"){
+        const rows=(result as {approved?:{requirement_id:string;approval_record_id:string}[]})?.approved||[];
+        setNotice("Approved "+rows.length+" requirement(s): "+rows.map(r=>r.requirement_id+" / "+r.approval_record_id).join(", ")+
+                  ". G3 still requires an independent operator decision.");
+      }else setNotice(label+" completed. Updated backend state loaded.");
+    }
+    catch(e){
+      setProblem(e instanceof Error?e.message:String(e));
+      // Fetch changed revisions and prune stale drafts, without silently retrying the mutation.
+      try{await reload();}catch{ /* Preserve the original actionable error. */ }
+    }
     finally{setPending("");}
   }
   const current=requirements.find(r=>r.requirement_id===selected);
@@ -70,7 +134,13 @@ export function AssetStudio({projectId,onRefresh}:{projectId:string;onRefresh:()
     try{
       const item=selectedReview();
       if(!item)throw new Error("Select a verified candidate first.");
-      setStaged(old=>[...old.filter(x=>x.requirement_id!==item.requirement_id),item]);
+      const candidate=candidates.find(c=>c.candidate_id===item.candidate_id);
+      if(!candidate?.source_story_sha256||!candidate.source_requirement_sha256)
+        throw new Error("Source identity unavailable. Refresh candidates before staging.");
+      const draft:StagedReview={...item,project_id:projectId,
+        source_story_sha256:candidate.source_story_sha256,
+        source_requirement_sha256:candidate.source_requirement_sha256};
+      saveStaged([...stagedRef.current.filter(x=>x.requirement_id!==item.requirement_id),draft]);
       setChecks({});
       setNotice("Review staged; not approved until batch commit.");
       setProblem("");
@@ -78,9 +148,25 @@ export function AssetStudio({projectId,onRefresh}:{projectId:string;onRefresh:()
   }
   async function batch(){
     const current=selectedReview();
-    const reviews=current?[...staged.filter(x=>x.requirement_id!==current.requirement_id),current]:staged;
-    if(!reviews.length)throw new Error("Select or stage at least one candidate.");
-    await assetApi.batch(projectId,revision,reviews);setStaged([]);setChecks({});
+    const draft=current?candidates.find(c=>c.candidate_id===current.candidate_id):null;
+    if(current&&(!draft?.source_story_sha256||!draft.source_requirement_sha256))
+      throw new Error("Refresh current candidate source before approval.");
+    const included=current?[...stagedRef.current.filter(x=>x.requirement_id!==current.requirement_id),
+      {...current,project_id:projectId,source_story_sha256:draft!.source_story_sha256!,
+        source_requirement_sha256:draft!.source_requirement_sha256!}]:stagedRef.current;
+    if(!included.length)throw new Error("Select or stage at least one candidate.");
+    const latest=await assetApi.requirements(projectId);
+    if(latest.project_revision!==revision)
+      throw new Error("REVISION_CONFLICT: Project changed. Reviews will be revalidated; inspect and retry explicitly.");
+    const valid=await validated(included,latest.requirements);
+    if(valid.length!==included.length){
+      // Prune only invalid entries; never approve an unexpectedly reduced batch.
+      saveStaged(valid);setChecks({});
+      throw new Error("ASSET_SOURCE_STALE: One or more originals changed. Valid drafts remain staged; review before retry.");
+    }
+    const result=await assetApi.batch(projectId,revision,valid.map(({project_id,source_story_sha256,source_requirement_sha256,...review})=>review));
+    saveStaged([]);setChecks({});
+    return result;
   }
   async function approveGate(){
     if(!gate?.candidate_sha256||!gate.dependency_fingerprint)return;
@@ -97,8 +183,9 @@ export function AssetStudio({projectId,onRefresh}:{projectId:string;onRefresh:()
     <div className="panel">
       <label htmlFor="asset-requirement">Asset requirement</label>
       <select id="asset-requirement" value={selected} disabled={!!pending} onChange={e=>{
-        const rid=e.target.value;setSelected(rid);setStaged([]);setChecks({});setReviewNotes({});setPreview({});setCursor(null);
-        void assetApi.candidates(projectId,rid).then(r=>setCandidates(r.candidates)).catch(e=>setProblem(String(e)));
+        const rid=e.target.value;selectedRef.current=rid;setSelected(rid);
+        setChecks({});setReviewNotes({});setPreview({});setCursor(null);setCandidates([]);
+        void loadCandidates(projectId,rid).catch(e=>{if(selectedRef.current===rid)setProblem(String(e));});
       }}>
         {requirements.map(r=><option value={r.requirement_id} key={r.requirement_id}>{r.requirement_id} · {r.status} ({r.candidate_count})</option>)}
       </select>
@@ -175,7 +262,14 @@ export function AssetStudio({projectId,onRefresh}:{projectId:string;onRefresh:()
           Approve {staged.length+(approved?1:0)} selected/staged source(s)
         </button>
       </div>
-      {staged.length>0&&<p role="status">{staged.length} staged; no approval recorded yet. Commit as one atomic batch.</p>}
+      {staged.length>0&&<div>
+        <p role="status">{staged.length} staged; no approval recorded yet. Commit as one atomic batch.</p>
+        <ul>{staged.map(d=><li key={d.requirement_id}>
+          {d.requirement_id} · {d.candidate_id} · {d.original_sha256.slice(0,12)} · {d.rights_evidence_note}
+          <button type="button" disabled={!!pending} aria-label={"Remove staged "+d.requirement_id}
+            onClick={()=>saveStaged(stagedRef.current.filter(x=>x.requirement_id!==d.requirement_id))}>Remove</button>
+        </li>)}</ul>
+      </div>}
     </div>
     <div className="panel">
       <h4>G3 gate — {gate?.state||"DRAFT"}</h4>
