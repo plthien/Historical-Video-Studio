@@ -76,20 +76,27 @@ def bind_beats(blueprint:dict,word_map:dict, *,
             item.update({"setup_id":plan["setup_id"],"focus_ref":b["focus_ref"],
                          "staging":b["staging"],"continuity":b["continuity"]})
             resolved.append(item)
-        for i,item in enumerate(resolved):
-            if i and item["start_sample"]<resolved[i-1]["end_sample"]:
-                raise ContractViolation("CUE_OVERLAP",item["beat_id"],"Authored cues cannot reverse or overlap.")
-            next_start=resolved[i+1]["start_sample"] if i+1<len(resolved) else audio_total_samples
-            if next_start<=item["start_sample"] or next_start>audio_total_samples:
-                raise ContractViolation("CUE_RANGE_INVALID",item["beat_id"],
-                                        "Next beat must follow the cue within approved audio bounds.")
-            # Store exact cue frames and staging window separately; no accumulated durations.
-            cue_a,cue_b=sample_to_frames(item["start_sample"],item["end_sample"],sr)
-            win_a=item["start_sample"]*30//sr
-            win_b=(next_start*30+sr-1)//sr
-            if win_b<=win_a:win_b=win_a+1
-            output.append({**item,"cue_start_frame":cue_a,"cue_end_frame":cue_b,
-                           "start_frame":win_a,"end_frame":win_b,
-                           "duration_frames":win_b-win_a,"fps":30,
-                           "audio_sha256":audio_sha256,"transcript_sha256":transcript_sha256})
-    return output
+        output.extend(resolved)
+    # Compute cuts across ALL ordered setups, not independently per setup:
+    # a later scene's start is the previous scene's exclusive end.
+    windows=[]
+    for i,item in enumerate(output):
+        if i and item["start_sample"]<output[i-1]["end_sample"]:
+            raise ContractViolation("CUE_OVERLAP",item["beat_id"],
+                                    "Authored cues across all setups cannot overlap or reverse.")
+        next_start=output[i+1]["start_sample"] if i+1<len(output) else audio_total_samples
+        if next_start<=item["start_sample"] or next_start>audio_total_samples:
+            raise ContractViolation("CUE_RANGE_INVALID",item["beat_id"],
+                                    "Next beat must follow this cue within final approved audio.")
+        cue_a,cue_b=sample_to_frames(item["start_sample"],item["end_sample"],sr)
+        win_a=item["start_sample"]*30//sr
+        win_b=(next_start*30//sr if i+1<len(output)
+               else (audio_total_samples*30+sr-1)//sr)
+        if win_b<=win_a:
+            raise ContractViolation("FRAME_INTERVAL_INVALID",item["beat_id"],
+                                    "Two authored cuts fall inside one frame; retime at a word boundary.")
+        windows.append({**item,"cue_start_frame":cue_a,"cue_end_frame":cue_b,
+                        "start_frame":win_a,"end_frame":win_b,
+                        "duration_frames":win_b-win_a,"fps":30,
+                        "audio_sha256":audio_sha256,"transcript_sha256":transcript_sha256})
+    return windows
