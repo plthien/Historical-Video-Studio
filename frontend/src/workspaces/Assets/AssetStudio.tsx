@@ -2,7 +2,7 @@ import {useCallback,useEffect,useRef,useState} from "react";
 import {assetApi,type Requirement,type AssetCandidate,type AssetReview} from "../../api/assets";
 import {api,type Gate} from "../../api/client";
 import {ProviderSettings} from "../Settings/ProviderSettings";
-type StagedReview = AssetReview & {project_id:string;source_story_sha256:string;source_requirement_sha256:string};
+type StagedReview = AssetReview & {project_id:string;source_story_sha256:string;source_requirement_sha256:string;resolution_mode:string};
 function draftMatches(d:StagedReview,c:AssetCandidate|undefined) {
   return Boolean(c && c.current_source && c.candidate_id===d.candidate_id &&
     c.original_sha256===d.original_sha256 &&
@@ -48,7 +48,8 @@ export function AssetStudio({projectId,onRefresh}:{projectId:string;onRefresh:()
   async function validated(drafts:StagedReview[],allowed:Requirement[]) {
     const eligible=new Set(allowed.map(r=>r.requirement_id));
     const rows=await Promise.all(drafts.map(async d=>{
-      if(d.project_id!==projectId || !eligible.has(d.requirement_id))return null;
+      if(d.project_id!==projectId || !eligible.has(d.requirement_id) ||
+          allowed.find(r=>r.requirement_id===d.requirement_id)?.resolution_mode!==d.resolution_mode)return null;
       const response=await assetApi.candidates(projectId,d.requirement_id);
       return response.candidates.find(c=>draftMatches(d,c))?d:null;
     }));
@@ -97,6 +98,7 @@ export function AssetStudio({projectId,onRefresh}:{projectId:string;onRefresh:()
     try{
       const result=await call();
       await reload();
+      if(projectRef.current!==projectId)return;
       if(label==="Approve exact asset sources"){
         const rows=(result as {approved?:{requirement_id:string;approval_record_id:string}[]})?.approved||[];
         setNotice("Approved "+rows.length+" requirement(s): "+rows.map(r=>r.requirement_id+" / "+r.approval_record_id).join(", ")+
@@ -139,7 +141,8 @@ export function AssetStudio({projectId,onRefresh}:{projectId:string;onRefresh:()
         throw new Error("Source identity unavailable. Refresh candidates before staging.");
       const draft:StagedReview={...item,project_id:projectId,
         source_story_sha256:candidate.source_story_sha256,
-        source_requirement_sha256:candidate.source_requirement_sha256};
+        source_requirement_sha256:candidate.source_requirement_sha256,
+        resolution_mode:current?.resolution_mode||"NONE"};
       saveStaged([...stagedRef.current.filter(x=>x.requirement_id!==item.requirement_id),draft]);
       setChecks({});
       setNotice("Review staged; not approved until batch commit.");
@@ -153,7 +156,8 @@ export function AssetStudio({projectId,onRefresh}:{projectId:string;onRefresh:()
       throw new Error("Refresh current candidate source before approval.");
     const included=current?[...stagedRef.current.filter(x=>x.requirement_id!==current.requirement_id),
       {...current,project_id:projectId,source_story_sha256:draft!.source_story_sha256!,
-        source_requirement_sha256:draft!.source_requirement_sha256!}]:stagedRef.current;
+        source_requirement_sha256:draft!.source_requirement_sha256!,
+        resolution_mode:current?.resolution_mode||"NONE"}]:stagedRef.current;
     if(!included.length)throw new Error("Select or stage at least one candidate.");
     const latest=await assetApi.requirements(projectId);
     if(latest.project_revision!==revision)
@@ -164,7 +168,7 @@ export function AssetStudio({projectId,onRefresh}:{projectId:string;onRefresh:()
       saveStaged(valid);setChecks({});
       throw new Error("ASSET_SOURCE_STALE: One or more originals changed. Valid drafts remain staged; review before retry.");
     }
-    const result=await assetApi.batch(projectId,revision,valid.map(({project_id,source_story_sha256,source_requirement_sha256,...review})=>review));
+    const result=await assetApi.batch(projectId,revision,valid.map(({project_id,source_story_sha256,source_requirement_sha256,resolution_mode,...review})=>review));
     saveStaged([]);setChecks({});
     return result;
   }
