@@ -150,7 +150,7 @@ export function App() {
           <strong>Not available in A1</strong>
           <p>This workspace requires the {active.owner} owner implementation. No provider, approved media, alignment, render, or export result is simulated.</p>
         </div> : workspace === "assets" && project ?
-          <AssetStudio projectId={project.project_id} onRefresh={() => refresh(project.project_id)}/> : workspace === "voice" && project ?
+          <AssetStudio projectId={project.project_id} projectRevision={project.project_revision} onRefresh={() => refresh(project.project_id)}/> : workspace === "voice" && project ?
           <VoiceStudio project={project} story={storyView} onRefresh={() => refresh(project.project_id)}/> : workspace === "project" ?
           <div className="stack">
             <label htmlFor="new-title">Project title</label>
