@@ -295,6 +295,9 @@ def test_map_real_local_g3_original_and_approval_lineage(tmp_path):
         geometry_format="RASTER",geography_mode="raster_georeferenced",
         geometry_object_sha256=None,approved_feature_ids=[],labels=[],
         user_approved=True,rights_review_record_id=reviewed["approved"][0]["approval_record_id"])
+    with pytest.raises(ContractViolation,match="MAP_PERIOD_MISMATCH"):
+        ingest_current_approved(store,pid,rid,{**map_record,"valid_year_from":1914,
+            "valid_year_to":1914},year=1914,feature_ids=[])
     result=ingest_current_approved(store,pid,rid,map_record,year=1871,feature_ids=[])
     assert result["coordinate_space"]=="UV_ONLY"
     assert store.get_artifact(result["source_original_sha256"])==original
