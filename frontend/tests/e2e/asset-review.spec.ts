@@ -239,6 +239,21 @@ async function incrementClaimRevision(page:import("@playwright/test").Page,id:st
   expect(response.status(),await response.text()).toBe(200);
 }
 
+function approvalLedger(projectId:string) {
+  const root=path.resolve(here,"../../..");
+  const script=[
+    "import json,sqlite3,sys",
+    "con=sqlite3.connect('frontend/.e2e-data/state.sqlite')",
+    "pid=sys.argv[1]",
+    "heads=con.execute('SELECT requirement_id,approval_id FROM asset_approval_heads WHERE project_id=? ORDER BY requirement_id',(pid,)).fetchall()",
+    "events=con.execute('SELECT requirement_id,approval_id FROM asset_approval_events WHERE project_id=? ORDER BY requirement_id',(pid,)).fetchall()",
+    "print(json.dumps({'heads':heads,'events':events}))"
+  ].join("\n");
+  const result=execFileSync(path.join(root,".venv","Scripts","python.exe"),
+    ["-c",script,projectId],{cwd:root,encoding:"utf8"});
+  return JSON.parse(result.trim()) as {heads:[string,string][];events:[string,string][]};
+}
+
 // C01-B/D: normal in-place refresh and true P -> Q project isolation.
 test("asset-review V4: refresh preserves valid draft, second project cannot see it",async({page})=>{
   const P=await createAssetProject(page,"V4 project P isolated");
@@ -263,6 +278,8 @@ test("asset-review V4: refresh preserves valid draft, second project cannot see 
   expect((await qResult.json()).candidates).toHaveLength(0);
   expect((await assetState(page,P.id)).requirements.every(r=>r.approval_record_id===null)).toBe(true);
   expect((await assetState(page,Q.id)).requirements.every(r=>r.approval_record_id===null)).toBe(true);
+  expect(approvalLedger(P.id)).toEqual({heads:[],events:[]});
+  expect(approvalLedger(Q.id)).toEqual({heads:[],events:[]});
   const attempted:unknown[]=[];
   page.on("request",request=>{if(request.url().includes("/assets/batch-approve"))attempted.push(request.postDataJSON())});
   await expect(page.getByRole("button",{name:/Approve \d+ selected\/staged source/})).toBeDisabled();
@@ -317,6 +334,7 @@ test("asset-review V4: revision conflict never commits partial batch or retries 
   await expect(page.locator(".asset-studio").getByRole("alert")).toContainText("REVISION_CONFLICT");
   expect(batchReqs).toHaveLength(0);
   expect((await assetState(page,P.id)).requirements.every(r=>r.approval_record_id===null)).toBe(true);
+  expect(approvalLedger(P.id)).toEqual({heads:[],events:[]});
   await expect(page.getByRole("button",{name:"Remove staged "+A})).toBeVisible();
   await expect(page.getByRole("button",{name:"Remove staged "+B})).toBeVisible();
   expect((await assetState(page,P.id)).project_revision).toBeGreaterThan(start);
@@ -338,6 +356,7 @@ test("asset-review V4: revision conflict never commits partial batch or retries 
   await expect.poll(()=>batchStatuses[0]).toBe(409);
   const rejected=await assetState(page,P.id);
   expect(rejected.requirements.every(r=>r.approval_record_id===null)).toBe(true);
+  expect(approvalLedger(P.id)).toEqual({heads:[],events:[]});
   await expect(page.getByRole("button",{name:"Remove staged "+A})).toBeVisible();
   await expect(page.getByRole("button",{name:"Remove staged "+B})).toBeVisible();
   expect(batchReqs).toHaveLength(1); // no silent retry
@@ -346,6 +365,8 @@ test("asset-review V4: revision conflict never commits partial batch or retries 
   await expect(page.locator(".asset-studio .notice.success")).toContainText("Approved 2 requirement(s)");
   expect(batchReqs).toHaveLength(2);
   expect((await assetState(page,P.id)).requirements.filter(r=>r.approval_record_id!==null)).toHaveLength(2);
+  expect(new Set(approvalLedger(P.id).heads.map(row=>row[0]))).toEqual(new Set([A,B]));
+  expect(approvalLedger(P.id).events).toHaveLength(2);
 });
 
 
