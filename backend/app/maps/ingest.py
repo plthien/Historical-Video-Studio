@@ -141,9 +141,14 @@ def ingest(map_record:dict,original_bytes:bytes, *,year:int,feature_ids:list[str
     projected=[{"id":f["id"],"points":[list(project(*pt,map_record["map_projection"])) for pt in
         ([pt for ring in f["geometry"]["coordinates"] for pt in ring] if f["geometry"]["type"]=="Polygon"
          else f["geometry"]["coordinates"])]} for f in normalized]
-    return {"historical_map":map_record,"source_original_sha256":digest,
+    normalized_sha=hashlib.sha256(_canonical(derived)).hexdigest()
+    if map_record["geometry_object_sha256"] not in (None,normalized_sha):
+        raise ContractViolation("MAP_GEOMETRY_SHA_MISMATCH",mid,
+                                "Derived WGS84 geometry differs from the reviewed, pinned map geometry fingerprint.")
+    frozen_record={**map_record,"geometry_object_sha256":normalized_sha}
+    return {"historical_map":frozen_record,"source_original_sha256":digest,
             "coordinate_space":"EPSG:4326","features":normalized,"projected":projected,
-            "geometry_sha256":hashlib.sha256(_canonical(derived)).hexdigest(),
+            "geometry_sha256":normalized_sha,
             "event_year":year, "route_feature_id":route_feature_id,
             "disclosure_required":mode=="schematic_approved"}
 
