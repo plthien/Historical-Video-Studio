@@ -80,6 +80,7 @@ def example_map(source, *, period=(1871,1871), projection="mercator", crs="EPSG:
     base.update(source_original_sha256=hashlib.sha256(source).hexdigest(),
                 valid_year_from=period[0],valid_year_to=period[1],
                 source_crs=crs,map_projection=projection,user_approved=True,
+                geometry_object_sha256=None,
                 rights_review_record_id="approval_fixture_map",
                 source_asset_id="candidate_fixture_map",
                 approved_feature_ids=["feature_001"],
@@ -106,7 +107,11 @@ def test_map_projection_period_sha_and_feature_lineage():
     first=result["features"][0]["geometry"]["coordinates"][0][0]
     assert first==[10.0,50.0]
     assert result["source_original_sha256"]==hashlib.sha256(source).hexdigest()
+    assert result["geometry_sha256"]==result["historical_map"]["geometry_object_sha256"]
     assert result["geometry_sha256"]==ingest(m,source,year=1871,feature_ids=["feature_001"],approval=approval)["geometry_sha256"]
+    with pytest.raises(ContractViolation,match="MAP_GEOMETRY_SHA_MISMATCH"):
+        ingest({**m,"geometry_object_sha256":"a"*64},source,year=1871,
+               feature_ids=["feature_001"],approval=approval)
     assert result["projected"][0]["points"]
     assert project(10,50,"mercator")==project(10,50,"mercator")
     newer=copy.deepcopy(m);newer["historical_map_id"]="map_1872"
