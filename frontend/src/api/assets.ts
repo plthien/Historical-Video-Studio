@@ -12,6 +12,7 @@ export interface AssetCandidate {
   hydrated?:boolean; item_id?:string; mime_type?:string; source_page_url?:string;
   creator?:string|null;creation_date?:string|null;place?:string|null;
   rights_uri?:string|null;historical_exactness?:string|null;historical_context_note?:string|null;
+  source_story_sha256?:string; source_requirement_sha256?:string; metadata_sha256?:string;
   current_source:boolean; approved:boolean; user_approved:boolean;
 }
 export interface AssetReview {
