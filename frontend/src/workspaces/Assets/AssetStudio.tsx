@@ -91,7 +91,7 @@ export function AssetStudio({projectId,onRefresh}:{projectId:string;onRefresh:()
     saveStaged([]);selectedRef.current="";setSelected("");setCandidates([]);
     setChecks({});setReviewNotes({});setPreview({});setProblem("");setNotice("");
     void reload().catch(e=>{if(projectRef.current===projectId)setProblem(String(e));});
-  },[projectId,reload]);
+  },[projectId]);
   async function action(label:string,call:()=>Promise<unknown>){
     if(pending)return;setPending(label);setProblem("");setNotice("");
     try{
