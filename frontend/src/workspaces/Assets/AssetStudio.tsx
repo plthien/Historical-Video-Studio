@@ -263,7 +263,7 @@ export function AssetStudio({projectId,onRefresh}:{projectId:string;onRefresh:()
       <div className="buttonrow">
         <button disabled={!approved||!!pending} onClick={stage}>Stage selected for batch</button>
         <button disabled={(!approved&&!staged.length)||!!pending} onClick={()=>void action("Approve exact asset sources",batch)}>
-          Approve {staged.length+(approved?1:0)} selected/staged source(s)
+          Approve {staged.length+(approved&&!staged.some(d=>d.requirement_id===selected)?1:0)} selected/staged source(s)
         </button>
       </div>
       {staged.length>0&&<div>
