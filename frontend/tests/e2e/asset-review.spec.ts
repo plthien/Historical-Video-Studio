@@ -290,7 +290,9 @@ test("asset-review V4: out-of-order A candidate response cannot overwrite select
   await aEntered;
   await select.selectOption(B);
   await expect(page.locator(".asset-studio article.claim").filter({hasText:"Async source B"})).toBeVisible();
+  const releasedA=page.waitForResponse(r=>r.url().includes("/assets/"+A+"/candidates")&&r.request().method()==="GET");
   letAProceed();
+  await releasedA; // assert AFTER the delayed response reached the browser.
   await expect(page.locator(".asset-studio article.claim").filter({hasText:"Async source A"})).toHaveCount(0);
   await expect(select).toHaveValue(B);
   await expect(page.locator(".asset-studio article.claim").filter({hasText:"Async source B"})).toBeVisible();
