@@ -34,6 +34,17 @@ def _geometry(g,crs,fid):
             # Shoelace prevents collapsed/zero-area geometry, no silent healing.
             if abs(sum(a[0]*b[1]-b[0]*a[1] for a,b in zip(pts,pts[1:])))<1e-10:
                 raise ContractViolation("MAP_GEOMETRY_INVALID",fid,"Polygon has zero area.")
+            def orient(a,b,c):
+                return (b[0]-a[0])*(c[1]-a[1])-(b[1]-a[1])*(c[0]-a[0])
+            edge_count=len(pts)-1
+            for i in range(edge_count):
+                for j in range(i+2,edge_count):
+                    if i==0 and j==edge_count-1:continue
+                    a,b=pts[i],pts[i+1]
+                    c,d=pts[j],pts[j+1]
+                    if orient(a,b,c)*orient(a,b,d)<0 and orient(c,d,a)*orient(c,d,b)<0:
+                        raise ContractViolation("MAP_GEOMETRY_INVALID",fid,
+                                                "Self-intersecting historic polygon requires reviewed topology repair.")
         paths.append(pts)
     return {"type":kind,"coordinates":paths[0] if kind=="LineString" else paths}
 
