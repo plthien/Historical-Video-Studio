@@ -146,3 +146,33 @@ def ingest(map_record:dict,original_bytes:bytes, *,year:int,feature_ids:list[str
             "geometry_sha256":hashlib.sha256(_canonical(derived)).hexdigest(),
             "event_year":year, "route_feature_id":route_feature_id,
             "disclosure_required":mode=="schematic_approved"}
+
+
+
+def ingest_current_approved(store, project_id:str, requirement_id:str, map_record:dict,
+                            *, year:int, feature_ids:list[str],
+                            route_feature_id:str|None=None,
+                            reviewed_tie_points:list[dict]|None=None) -> dict:
+    """Retrieve actual G3 approval and original from the existing local SQLite/SHA store.
+
+    Pure ingest() below is suitable for explicitly synthetic fixtures; this
+    integration entry refuses a stale/foreign/unapproved asset snapshot.
+    """
+    from backend.app.assets.resolution import AssetResolution
+    from backend.app.assets.provenance import AssetCandidates
+    from backend.app.projects.gates import GateService
+    board=GateService(store).board(project_id)
+    if board[2]["state"]!="APPROVED":
+        raise ContractViolation("G3_APPROVAL_REQUIRED",requirement_id,
+                                "Operator must approve the current G3 source snapshot before geographic use.")
+    with store._connection() as db:
+        current=AssetCandidates._source_tx(db,project_id,requirement_id)
+        head=AssetResolution._head(db,project_id,requirement_id,current["requirement_sha256"])
+    if not head or (head["candidate_id"]!=map_record["source_asset_id"] or
+                    head["original_sha256"]!=map_record["source_original_sha256"] or
+                    head["approval_record_id"]!=map_record["rights_review_record_id"]):
+        raise ContractViolation("MAP_RIGHTS_UNREVIEWED",requirement_id,
+                                "Map does not match current project/requirement G3 approval event and original SHA.")
+    original=store.get_artifact(head["original_sha256"])
+    return ingest(map_record,original,year=year,feature_ids=feature_ids,approval=head,
+                  route_feature_id=route_feature_id,reviewed_tie_points=reviewed_tie_points)
