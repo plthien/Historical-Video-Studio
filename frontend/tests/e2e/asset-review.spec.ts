@@ -184,8 +184,8 @@ test("asset-review: zero requirements still needs an explicit G3 decision",async
 // V4: small shared local-server fixture for independent scope/race/conflict evidence.
 const baseApi="http://127.0.0.1:8000/api/v1";
 const tinyPng=Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAADElEQVR4nGMwSpkGAAH4AS3k7SvZAAAAAElFTkSuQmCC","base64");
-async function createAssetProject(page: import("@playwright/test").Page,title:string){
-  await page.goto("/");
+async function createAssetProject(page: import("@playwright/test").Page,title:string,initialVisit=true){
+  if(initialVisit)await page.goto("/");
   await page.getByRole("navigation").getByRole("button",{name:/Project & ChatGPT/}).click();
   await page.getByLabel("Project title").fill(title);
   await page.getByRole("button",{name:"Create project"}).click();
@@ -254,7 +254,7 @@ test("asset-review V4: refresh preserves valid draft, second project cannot see 
   await incrementClaimRevision(page,P.id,"unrelated");
   await page.getByRole("button",{name:"Refresh project"}).click();
   await expect(page.getByRole("button",{name:"Remove staged "+A})).toBeVisible();
-  const Q=await createAssetProject(page,"V4 project Q isolated");
+  const Q=await createAssetProject(page,"V4 project Q isolated",false);
   expect(Q.id).not.toEqual(P.id);
   expect(Q.requirements).toContain(A); // Intentionally overlapping canonical requirement IDs.
   await expect(page.getByRole("button",{name:"Remove staged "+A})).toHaveCount(0);
