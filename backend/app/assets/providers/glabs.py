@@ -146,6 +146,9 @@ class GLabs:
         if not re.fullmatch(r"[a-fA-F0-9]{8}",task_id):
             raise ContractViolation("GLABS_TASK_ID_INVALID","task","Invalid task identifier.")
         _,info=self._request("POST","/api/stop/"+task_id,body={})
-        if task_id not in info.get("stopped",[]) and task_id not in info.get("skipped",[]):
-            raise ContractViolation("GLABS_STOP_UNCONFIRMED",task_id,"No task-specific stop evidence.")
-        return info
+        stopped=task_id in info.get("stopped",[])
+        skipped=task_id in info.get("skipped",[])
+        if stopped==skipped:
+            raise ContractViolation("GLABS_STOP_UNCONFIRMED",task_id,
+                                    "Require exactly one task-specific stopped/skipped outcome.")
+        return "stopped" if stopped else "skipped"

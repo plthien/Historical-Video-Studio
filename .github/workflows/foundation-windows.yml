@@ -95,6 +95,10 @@ jobs:
           Check @("-m","pytest","-q","tests/assets/test_sources.py","-k","rights or download or provenance")
           Check @("-m","pytest","-q","tests/assets/test_glabs.py","-k","generate or poll or stop or error")
           Check @("-m","pytest","-q","tests/assets/test_sources.py","tests/assets/test_glabs.py")
+          Check @("-m","pytest","-q","tests/assets/test_resolution.py","tests/integration/test_phase_a.py")
+          Check @("-m","backend.tools.smoke","--case","missing-asset-choice","--mode","local")
+          Check @("-m","backend.tools.smoke","--case","asset-ui","--mode","local")
+          Check @("-m","backend.tools.smoke","--case","phase-a","--mode","local")
           Check @("-m","pytest","-q","tests/backend/test_foundation.py","tests/voice/test_voice_pipeline.py")
       - name: Chromium browser E2E (real local servers)
         shell: pwsh
@@ -103,7 +107,7 @@ jobs:
           try {
             npx playwright install chromium
             if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-            npm run test:e2e -- --grep "project-shell|voice-workflow"
+            npm run test:e2e -- --grep "project-shell|voice-workflow|asset-review"
             if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           }
           finally { Pop-Location }

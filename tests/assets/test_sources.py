@@ -122,6 +122,13 @@ def test_search_errors_hydrate_404_and_key_redacted():
     def timeout(request): raise httpx.TimeoutException("offline simulated timeout")
     with pytest.raises(ContractViolation,match="ARCHIVE_NETWORK_ERROR"):
         LOC(transport(timeout)).search("war")
+    # R08: Record response cannot change item identity just because the
+    # client-provided path is copied into the normalized result.
+    wrong=Europeana(transport(lambda req:httpx.Response(200,json={
+        "object":{"id":"/other/999","title":["Wrong record"],"aggregations":[]}})),
+        key="fixture-secret")
+    with pytest.raises(ContractViolation,match="ARCHIVE_ITEM_MISMATCH"):
+        wrong.hydrate("/abc/123")
 
 def test_download_rights_manual_provenance_and_original_bytes(tmp_path):
     from backend.app.assets.download import inspect,download

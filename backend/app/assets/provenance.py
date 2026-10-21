@@ -135,10 +135,30 @@ class AssetCandidates:
         if not row: raise ContractViolation("ASSET_CANDIDATE_NOT_FOUND",candidate_id,"Not this project's candidate.")
         return {**json.loads(row[0]),"candidate_id":candidate_id,"original_sha256":row[1],
                 "mime_type":row[2],"byte_count":row[3],"user_approved":False}
-    def hydrate(self,project,requirement,adapter,item_id):
-        source=self._requirement(project,requirement)
+    def hydrate(self,project,requirement,adapter,item_id,*,candidate_id=None,frozen_source=None):
+        source=frozen_source or self._requirement(project,requirement)
+        if candidate_id:
+            with self.store._connection() as db:
+                selected=self._owned_tx(db,project,requirement,candidate_id)
+                self._assert_source(self._source_tx(db,project,requirement),source)
+                if selected.get("item_id")!=item_id or selected.get("provider")!=adapter.provider:
+                    raise ContractViolation("ASSET_CANDIDATE_MISMATCH",candidate_id,
+                                            "Hydrate the exact selected provider record.")
         metadata=adapter.hydrate(item_id)
+        if metadata.get("provider")!=adapter.provider or metadata.get("item_id")!=item_id or not metadata.get("hydrated"):
+            raise ContractViolation("ARCHIVE_HYDRATION_MISMATCH",item_id,
+                                    "Provider returned another record or unhydrated metadata.")
         with self.store._transaction() as db:
+            self._assert_source(self._source_tx(db,project,requirement),source)
+            if candidate_id:
+                selected=self._owned_tx(db,project,requirement,candidate_id)
+                if selected.get("item_id")!=item_id:
+                    raise ContractViolation("ASSET_CANDIDATE_MISMATCH",candidate_id,
+                                            "Selected record changed while fetching.")
+                self._assert_source(source,{"project_id":project,
+                    "story_sha256":selected.get("source_story_sha256"),
+                    "story_revision":selected.get("source_story_revision"),
+                    "requirement_sha256":selected.get("source_requirement_sha256")})
             cid=self._save(db,project,requirement,metadata,frozen_source=source)
         return self.get(project,cid)
     def original(self,project,requirement,candidate_id,client=None):

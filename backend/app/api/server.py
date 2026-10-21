@@ -22,6 +22,7 @@ from backend.app.projects.storage import ProjectStore
 from backend.app.voice.attempts import VoiceService
 from backend.app.voice.workflow import FinalVoiceWorkflow
 from backend.app.api.voice import mount as mount_voice
+from backend.app.api.assets import mount as mount_assets
 
 
 class ProjectInput(BaseModel):
@@ -70,12 +71,24 @@ def create_app(database: str | Path | None = None, media_root: str | Path | None
 
     @asynccontextmanager
     async def lifespan(application: FastAPI):
+        import asyncio
         application.state.recovery = recover_interrupted(queue)
-        yield
+        # Recover persisted A3 jobs on restart; never submit a second provider task
+        # when a durable task_id or uncertain first POST already exists.
+        with store._connection() as db:
+            queued = [row[0] for row in db.execute(
+                "SELECT job_id FROM jobs WHERE kind='glabs_image' AND state='QUEUED'")]
+        tasks = [asyncio.create_task(asyncio.to_thread(application.state.run_glabs_job,job_id))
+                 for job_id in queued if hasattr(application.state,"run_glabs_job")]
+        try:
+            yield
+        finally:
+            for task in tasks:
+                task.cancel()
 
     app = FastAPI(title="Historical Video Studio Local API", version="1.0.0", lifespan=lifespan)
     app.add_middleware(CORSMiddleware, allow_origins=["http://127.0.0.1:5173", "http://localhost:5173"],
-                       allow_credentials=False, allow_methods=["GET", "POST"],
+                       allow_credentials=False, allow_methods=["GET", "POST", "PUT"],
                        allow_headers=["Content-Type", "Idempotency-Key"])
     app.state.store, app.state.gates, app.state.queue = store, gates, queue
     app.state.voice = voice_service
@@ -209,9 +222,10 @@ def create_app(database: str | Path | None = None, media_root: str | Path | None
     def job_cancel(job_id: str, idempotency_key: str = Header(alias="Idempotency-Key")):
         job = queue.get(job_id)
         return idempotent(job["project_id"], f"cancel:{job_id}", idempotency_key, {"job_id": job_id},
-                          lambda: queue.cancel(job_id))
+                          lambda: app.state.cancel_glabs(job["project_id"],job_id) if job["kind"]=="glabs_image" else queue.cancel(job_id))
 
     mount_voice(app, voice_service, idempotent, final_voice)
+    mount_assets(app, store, gates, queue, idempotent)
 
     @app.api_route("/api/v1/{remaining:path}", methods=["GET", "POST", "PUT", "PATCH", "DELETE"])
     def unavailable(remaining: str):
