@@ -94,6 +94,33 @@ test("asset-review: operator choice persists and never auto-approves G3",async({
   expect(new Set(batch.reviews.map(r=>r.requirement_id))).toEqual(new Set([original,second]));
   await expect(page.locator(".asset-studio")).not.toContainText("2 staged;");
   await expect(page.getByRole("button",{name:"Approve complete G3 snapshot"})).toBeDisabled();
+  // C01-C/G: repeated staging has one slot per requirement, manual removal works,
+  // and changing only A's resolution prunes A while keeping still-valid B.
+  await secondArticle.locator("input[type=checkbox]").check();
+  await secondArticle.locator("textarea").nth(0).fill("Second reviewed rights");
+  await secondArticle.locator("textarea").nth(1).fill("Second reviewed period");
+  await page.getByRole("button",{name:"Stage selected for batch"}).click();
+  await requirementSelect.selectOption(original);
+  const firstArticle=page.locator(".asset-studio article.claim").filter({hasText:"Original media fixture"});
+  await expect(firstArticle.locator(".asset-original-preview")).toHaveJSProperty("naturalWidth",1);
+  await firstArticle.locator("input[type=checkbox]").check();
+  await firstArticle.locator("textarea").nth(0).fill("Reviewed rights again");
+  await firstArticle.locator("textarea").nth(1).fill("Reviewed period again");
+  await page.getByRole("button",{name:"Stage selected for batch"}).click();
+  await expect(page.locator(".asset-studio")).toContainText("2 staged;");
+  await page.getByRole("button",{name:"Remove staged "+original}).click();
+  await expect(page.locator(".asset-studio")).toContainText("1 staged;");
+  await firstArticle.locator("input[type=checkbox]").check();
+  await firstArticle.locator("textarea").nth(0).fill("Reviewed rights again");
+  await firstArticle.locator("textarea").nth(1).fill("Reviewed period again");
+  await page.getByRole("button",{name:"Stage selected for batch"}).click();
+  await expect(page.locator(".asset-studio")).toContainText("2 staged;");
+  await page.getByLabel("Operator choice").selectOption("MANAGED_FALLBACK");
+  await page.getByRole("button",{name:"Save explicit choice"}).click();
+  await expect(page.locator(".asset-studio").getByRole("alert")).toContainText("Outdated staged review");
+  await expect(page.locator(".asset-studio")).toContainText("1 staged;");
+  await expect(page.getByRole("button",{name:"Remove staged "+original})).toHaveCount(0);
+  await expect(page.getByRole("button",{name:"Remove staged "+second})).toBeVisible();
   // No preview may be treated as visually reviewed if its bytes fail to load.
   await page.route("**/original-preview**",route=>route.abort("failed"));
   await requirementSelect.selectOption(original);
