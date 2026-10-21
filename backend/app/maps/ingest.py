@@ -177,6 +177,17 @@ def ingest_current_approved(store, project_id:str, requirement_id:str, map_recor
     from backend.app.assets.resolution import AssetResolution
     from backend.app.assets.provenance import AssetCandidates
     from backend.app.projects.gates import GateService
+    story=store.get_story(project_id).data()
+    requirement=next((x for x in story["asset_requirements"]
+                      if x["requirement_id"]==requirement_id),None)
+    if not requirement or requirement["asset_class"]!="HISTORICAL_MAP" or not (
+            requirement["start_year"]<=year<=requirement["end_year"]):
+        raise ContractViolation("MAP_PERIOD_MISMATCH",requirement_id,
+                                "Requested year and map type must fit the current G1 authored map requirement.")
+    if (requirement["map_reconstruction_policy"]=="exact_period_map"
+            and map_record["geography_mode"]=="schematic_approved"):
+        raise ContractViolation("MAP_POLICY_MISMATCH",requirement_id,
+                                "An exact period-map request cannot silently use schematic reconstruction.")
     board=GateService(store).board(project_id)
     if board[2]["state"]!="APPROVED":
         raise ContractViolation("G3_APPROVAL_REQUIRED",requirement_id,
