@@ -48,6 +48,7 @@ def run(case, mode):
         m=fixture("contracts/examples/HistoricalMap.v1.valid.json")
         digest=hashlib.sha256(binary).hexdigest()
         m.update(source_original_sha256=digest,source_crs="EPSG:3857",user_approved=True,
+                 geometry_object_sha256=None,
                  source_asset_id="candidate_fixture",rights_review_record_id="approval_fixture",
                  approved_feature_ids=["feature_001"],
                  geography_bbox={"min_lon":9,"min_lat":49,"max_lon":13,"max_lat":53})
