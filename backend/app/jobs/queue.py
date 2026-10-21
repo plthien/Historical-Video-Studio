@@ -123,6 +123,27 @@ class JobQueue:
                     db.execute("UPDATE jobs SET cancel_requested=1 WHERE job_id=?", (job_id,))
             return self._row(db, job_id)
 
+    def cancel_verified_presubmit(self, job_id: str) -> dict | None:
+        """Local stop is valid only for an exact G-Labs identity preflight failure.
+
+        This error originates before provider.submit(). A missing task id alone
+        is never proof of no remote billing; unknown POST is excluded by the
+        error, resume_only, lease and state guards in the same SQLite CAS.
+        """
+        with self.store._transaction() as db:
+            job=self._row(db,job_id)
+            if not (job["kind"]=="glabs_image" and job["state"]=="FAILED_RETRYABLE"
+                    and job["error_code"]=="GLABS_PROVIDER_IDENTITY_STALE"
+                    and job["provider_task_id"] is None and not job["resume_only"]
+                    and job["lease_token"] is None):
+                return None
+            db.execute("UPDATE jobs SET state='CANCELLED',cancel_requested=1 "
+                       "WHERE job_id=? AND state='FAILED_RETRYABLE' AND provider_task_id IS NULL "
+                       "AND lease_token IS NULL AND resume_only=0 "
+                       "AND error_code='GLABS_PROVIDER_IDENTITY_STALE' AND kind='glabs_image'",
+                       (job_id,))
+            return self._row(db,job_id)
+
     def confirm_remote_stop(self, job_id: str, task_id: str) -> dict:
         """Stop receipt is task-specific. Never overwrite a worker's terminal result."""
         with self.store._transaction() as db:
