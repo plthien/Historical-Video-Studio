@@ -23,7 +23,7 @@ test("asset-review: operator choice persists and never auto-approves G3",async({
   await expect(page.locator(".asset-studio")).toContainText("ARCHIVE_ASSET_UNRESOLVED");
   await page.getByLabel("Explicit missing-source reason").fill("Need an owned image");
   await page.getByRole("button",{name:"Save explicit choice"}).click();
-  await expect(page.locator(".asset-studio").getByRole("status")).toContainText("Save resolution completed");
+  await expect(page.locator(".asset-studio .notice.success")).toContainText("Save resolution completed");
   await expect(page.locator(".asset-studio")).toContainText("MANUAL_UPLOAD");
   await expect(page.getByRole("button",{name:"Approve complete G3 snapshot"})).toBeDisabled();
   await page.screenshot({path:testInfo.outputPath("g3-manual-choice.png")});
@@ -43,7 +43,7 @@ test("asset-review: operator choice persists and never auto-approves G3",async({
   await page.locator(".asset-studio textarea[placeholder='Origin and historical context']").fill("Synthetic context");
   await page.locator(".asset-studio textarea[placeholder='Rights evidence']").fill("Test fixture only");
   await page.getByRole("button",{name:"Upload original candidate"}).click();
-  await expect(page.locator(".asset-studio").getByRole("status")).toContainText("Manual upload completed");
+  await expect(page.locator(".asset-studio .notice.success")).toContainText("Manual upload completed");
   await expect(page.locator(".asset-original-preview")).toBeVisible();
   await expect(page.locator(".asset-original-preview")).toHaveJSProperty("naturalWidth",1);
   await expect(page.locator(".asset-studio")).toContainText("Synthetic context");
@@ -65,7 +65,7 @@ test("asset-review: operator choice persists and never auto-approves G3",async({
   await expect(page.locator(".asset-studio")).toContainText("1 staged;");
   await page.getByLabel("Explicit missing-source reason").fill("Second source requires an owned image");
   await page.getByRole("button",{name:"Save explicit choice"}).click();
-  await expect(page.locator(".asset-studio").getByRole("status")).toContainText("Save resolution completed");
+  await expect(page.locator(".asset-studio .notice.success")).toContainText("Save resolution completed");
   await expect(page.locator(".asset-studio")).toContainText("1 staged;");
   await page.locator(".asset-studio input[type=file]").setInputFiles({
     name:"second-original.png",mimeType:"image/png",buffer:png
@@ -74,7 +74,7 @@ test("asset-review: operator choice persists and never auto-approves G3",async({
   await page.locator(".asset-studio textarea[placeholder='Origin and historical context']").fill("Second period");
   await page.locator(".asset-studio textarea[placeholder='Rights evidence']").fill("Separate license");
   await page.getByRole("button",{name:"Upload original candidate"}).click();
-  await expect(page.locator(".asset-studio").getByRole("status")).toContainText("Manual upload completed");
+  await expect(page.locator(".asset-studio .notice.success")).toContainText("Manual upload completed");
   const secondArticle=page.locator(".asset-studio article.claim").filter({hasText:"Second original"});
   await expect(secondArticle.locator(".asset-original-preview")).toHaveJSProperty("naturalWidth",1);
   await secondArticle.locator("input[type=checkbox]").check();
@@ -88,7 +88,7 @@ test("asset-review: operator choice persists and never auto-approves G3",async({
       payloads.push(req.postDataJSON());
   });
   await page.getByRole("button",{name:/Approve 2 selected\/staged source/}).click();
-  await expect(page.locator(".asset-studio").getByRole("status")).toContainText("Approved 2 requirement(s)");
+  await expect(page.locator(".asset-studio .notice.success")).toContainText("Approved 2 requirement(s)");
   expect(payloads).toHaveLength(1);
   const batch=payloads[0] as {reviews:{requirement_id:string}[]};
   expect(new Set(batch.reviews.map(r=>r.requirement_id))).toEqual(new Set([original,second]));
@@ -170,7 +170,7 @@ test("asset-review: zero requirements still needs an explicit G3 decision",async
   await expect(page.locator(".asset-studio")).toContainText("READY_FOR_REVIEW");
   await page.screenshot({path:testInfo.outputPath("zero-assets-g3-ready.png")});
   await page.getByRole("button",{name:"Approve complete G3 snapshot"}).click();
-  await expect(page.locator(".asset-studio").getByRole("status")).toContainText("Approve G3 completed");
+  await expect(page.locator(".asset-studio .notice.success")).toContainText("Approve G3 completed");
   await expect(page.locator(".asset-studio")).toContainText("G3 gate — APPROVED");
   await page.reload();
   await page.getByLabel("Project ID").fill(project);
