@@ -157,7 +157,7 @@ export function AssetStudio({projectId,onRefresh}:{projectId:string;onRefresh:()
     const included=current?[...stagedRef.current.filter(x=>x.requirement_id!==current.requirement_id),
       {...current,project_id:projectId,source_story_sha256:draft!.source_story_sha256!,
         source_requirement_sha256:draft!.source_requirement_sha256!,
-        resolution_mode:current?.resolution_mode||"NONE"}]:stagedRef.current;
+        resolution_mode:requirements.find(r=>r.requirement_id===selected)?.resolution_mode||"NONE"}]:stagedRef.current;
     if(!included.length)throw new Error("Select or stage at least one candidate.");
     const latest=await assetApi.requirements(projectId);
     if(latest.project_revision!==revision)
