@@ -253,6 +253,11 @@ class GTaskService:
         job=self._scoped(project,job_id)
         if job["state"] in ("SUCCEEDED","CANCELLED","FAILED_TERMINAL"):
             return job
+        # Only this durable pre-submit identity preflight proves that no
+        # billable request occurred. Missing provider_task_id alone is unsafe.
+        safe=self.queue.cancel_verified_presubmit(job_id)
+        if safe is not None:
+            return safe
         # QUEUED with a recovered remote ID is remote-owned, not local-only work.
         flagged=self.queue.cancel(job_id)
         if not job["provider_task_id"]:
