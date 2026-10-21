@@ -178,3 +178,169 @@ test("asset-review: zero requirements still needs an explicit G3 decision",async
   await page.getByRole("navigation").getByRole("button",{name:/Historical Assets/}).click();
   await expect(page.locator(".asset-studio")).toContainText("G3 gate — APPROVED");
 });
+
+
+// V4: small shared local-server fixture for independent scope/race/conflict evidence.
+const baseApi="http://127.0.0.1:8000/api/v1";
+const tinyPng=Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAADElEQVR4nGMwSpkGAAH4AS3k7SvZAAAAAElFTkSuQmCC","base64");
+async function createAssetProject(page: import("@playwright/test").Page,title:string){
+  await page.goto("/");
+  await page.getByRole("navigation").getByRole("button",{name:/Project & ChatGPT/}).click();
+  await page.getByLabel("Project title").fill(title);
+  await page.getByRole("button",{name:"Create project"}).click();
+  await expect(page.getByRole("status")).toContainText("Project creation completed");
+  const id=(await page.locator(".topline strong").innerText()).trim();
+  const story=structuredClone(fixture);
+  story.project.project_id=id;
+  story.claims.forEach((c:{critical:boolean})=>{c.critical=false});
+  await page.getByLabel("StoryPackage JSON").fill(JSON.stringify(story));
+  await page.getByRole("button",{name:"Import and validate story"}).click();
+  await expect(page.getByRole("status")).toContainText("Story import completed");
+  await page.getByRole("navigation").getByRole("button",{name:/Historical Assets/}).click();
+  await expect(page.getByLabel("Asset requirement")).toBeVisible();
+  const options=await page.getByLabel("Asset requirement").locator("option")
+    .evaluateAll(nodes=>nodes.map(node=>(node as HTMLOptionElement).value));
+  return {id,story,requirements:options};
+}
+async function stageVerified(page:import("@playwright/test").Page,rid:string,title:string) {
+  await page.getByLabel("Asset requirement").selectOption(rid);
+  await page.getByLabel("Explicit missing-source reason").fill("Verified rights for "+title);
+  await page.getByRole("button",{name:"Save explicit choice"}).click();
+  await expect(page.locator(".asset-studio .notice.success")).toContainText("Save resolution completed");
+  await page.locator(".asset-studio input[type=file]").setInputFiles({
+    name:title.replaceAll(" ","-")+".png",mimeType:"image/png",buffer:tinyPng
+  });
+  await page.locator(".asset-studio input[placeholder='Title']").fill(title);
+  await page.locator(".asset-studio textarea[placeholder='Origin and historical context']").fill("Synthetic historical suitability");
+  await page.locator(".asset-studio textarea[placeholder='Rights evidence']").fill("Synthetic license check");
+  await page.getByRole("button",{name:"Upload original candidate"}).click();
+  await expect(page.locator(".asset-studio .notice.success")).toContainText("Manual upload completed");
+  const article=page.locator(".asset-studio article.claim").filter({hasText:title});
+  await expect(article.locator(".asset-original-preview")).toHaveJSProperty("naturalWidth",1);
+  await article.locator("input[type=checkbox]").check();
+  await article.locator("textarea").nth(0).fill("Explicit license review for "+title);
+  await article.locator("textarea").nth(1).fill("Explicit period review for "+title);
+  await page.getByRole("button",{name:"Stage selected for batch"}).click();
+  await expect(page.getByRole("button",{name:"Remove staged "+rid})).toBeVisible();
+}
+async function assetState(page:import("@playwright/test").Page,id:string) {
+  const reply=await page.request.get(baseApi+"/projects/"+id+"/assets/requirements");
+  expect(reply.ok()).toBeTruthy();
+  return reply.json() as Promise<{project_revision:number;requirements:{
+    requirement_id:string;approved_asset_id:string|null;approval_record_id:string|null}[]}>;
+}
+async function incrementClaimRevision(page:import("@playwright/test").Page,id:string,tag:string){
+  const current=await assetState(page,id);
+  const response=await page.request.post(baseApi+"/projects/"+id+"/story/claims/claim_001/review",{
+    headers:{"Idempotency-Key":crypto.randomUUID()},
+    data:{expected_revision:current.project_revision,status:"REVIEWED",
+      evidence_note:"External concurrency "+tag,source_url:null}});
+  expect(response.status(),await response.text()).toBe(200);
+}
+
+// C01-B/D: normal in-place refresh and true P -> Q project isolation.
+test("asset-review V4: refresh preserves valid draft, second project cannot see it",async({page})=>{
+  const P=await createAssetProject(page,"V4 project P isolated");
+  const A=P.requirements[0];
+  await stageVerified(page,A,"P-only original");
+  const own=await page.request.get(baseApi+"/projects/"+P.id+"/assets/"+A+"/candidates");
+  const ownerCandidate=(await own.json()).candidates.find((c:{title:string})=>c.title==="P-only original");
+  expect(ownerCandidate.original_sha256).toBeTruthy();
+  await page.getByLabel("Asset requirement").selectOption(P.requirements[1]);
+  await page.getByLabel("Asset requirement").selectOption(A);
+  await page.getByRole("button",{name:"Refresh project"}).click();
+  await expect(page.getByRole("button",{name:"Remove staged "+A})).toBeVisible();
+  await incrementClaimRevision(page,P.id,"unrelated");
+  await page.getByRole("button",{name:"Refresh project"}).click();
+  await expect(page.getByRole("button",{name:"Remove staged "+A})).toBeVisible();
+  const Q=await createAssetProject(page,"V4 project Q isolated");
+  expect(Q.id).not.toEqual(P.id);
+  expect(Q.requirements).toContain(A); // Intentionally overlapping canonical requirement IDs.
+  await expect(page.getByRole("button",{name:"Remove staged "+A})).toHaveCount(0);
+  await expect(page.locator(".asset-studio")).not.toContainText("P-only original");
+  const qResult=await page.request.get(baseApi+"/projects/"+Q.id+"/assets/"+A+"/candidates");
+  expect((await qResult.json()).candidates).toHaveLength(0);
+  expect((await assetState(page,P.id)).requirements.every(r=>r.approval_record_id===null)).toBe(true);
+  expect((await assetState(page,Q.id)).requirements.every(r=>r.approval_record_id===null)).toBe(true);
+  const attempted:unknown[]=[];
+  page.on("request",request=>{if(request.url().includes("/assets/batch-approve"))attempted.push(request.postDataJSON())});
+  await expect(page.getByRole("button",{name:/Approve \d+ selected\/staged source/})).toBeDisabled();
+  expect(attempted).toHaveLength(0);
+});
+
+// C01-E: a late candidate response for A must not replace B's actual displayed original.
+test("asset-review V4: out-of-order A candidate response cannot overwrite selected B",async({page})=>{
+  const P=await createAssetProject(page,"V4 async candidates");
+  const [A,B]=P.requirements;
+  await stageVerified(page,A,"Async source A");
+  await stageVerified(page,B,"Async source B");
+  let letAProceed=()=>{};
+  let signalAEntered=()=>{};
+  const holdA=new Promise<void>(resolve=>{letAProceed=resolve});
+  const aEntered=new Promise<void>(resolve=>{signalAEntered=resolve});
+  await page.route("**/assets/"+A+"/candidates",async route=>{
+    signalAEntered();
+    await holdA;
+    await route.continue();
+  });
+  const select=page.getByLabel("Asset requirement");
+  // Start the delayed A request only after the route has been installed.
+  await select.selectOption(A);
+  await aEntered;
+  await select.selectOption(B);
+  await expect(page.locator(".asset-studio article.claim").filter({hasText:"Async source B"})).toBeVisible();
+  letAProceed();
+  await expect(page.locator(".asset-studio article.claim").filter({hasText:"Async source A"})).toHaveCount(0);
+  await expect(select).toHaveValue(B);
+  await expect(page.locator(".asset-studio article.claim").filter({hasText:"Async source B"})).toBeVisible();
+  await expect(page.getByRole("button",{name:"Remove staged "+A})).toBeVisible();
+  await expect(page.getByRole("button",{name:"Remove staged "+B})).toBeVisible();
+});
+
+// C01-F: both local preflight and server commit-time revisions reject atomically.
+// A request captured via Playwright route goes to the REAL backend after an independent edit.
+test("asset-review V4: revision conflict never commits partial batch or retries itself",async({page})=>{
+  const P=await createAssetProject(page,"V4 concurrent review");
+  const [A,B]=P.requirements;
+  await stageVerified(page,A,"Conflict source A");
+  await stageVerified(page,B,"Conflict source B");
+  const batchReqs:{reviews:{requirement_id:string}[]}[]=[];
+  const batchStatuses:number[]=[];
+  page.on("request",r=>{if(r.url().includes("/assets/batch-approve")&&r.method()==="POST")batchReqs.push(r.postDataJSON())});
+  page.on("response",r=>{if(r.url().includes("/assets/batch-approve"))batchStatuses.push(r.status())});
+  const start=(await assetState(page,P.id)).project_revision;
+  await incrementClaimRevision(page,P.id,"before preflight");
+  await page.getByRole("button",{name:/Approve 2 selected\/staged source/}).click();
+  await expect(page.locator(".asset-studio").getByRole("alert")).toContainText("REVISION_CONFLICT");
+  expect(batchReqs).toHaveLength(0);
+  expect((await assetState(page,P.id)).requirements.every(r=>r.approval_record_id===null)).toBe(true);
+  await expect(page.getByRole("button",{name:"Remove staged "+A})).toBeVisible();
+  await expect(page.getByRole("button",{name:"Remove staged "+B})).toBeVisible();
+  expect((await assetState(page,P.id)).project_revision).toBeGreaterThan(start);
+  let releaseCommit=()=>{}, enteredCommit=()=>{};
+  const pendingCommit=new Promise<void>(resolve=>{releaseCommit=resolve});
+  const requestReached=new Promise<void>(resolve=>{enteredCommit=resolve});
+  await page.route("**/assets/batch-approve",async route=>{
+    enteredCommit();
+    await pendingCommit;
+    await route.continue();
+  });
+  await page.getByRole("button",{name:/Approve 2 selected\/staged source/}).click();
+  await requestReached;
+  expect(batchReqs).toHaveLength(1);
+  expect(new Set(batchReqs[0].reviews.map(r=>r.requirement_id))).toEqual(new Set([A,B]));
+  await incrementClaimRevision(page,P.id,"between preflight and commit");
+  releaseCommit();
+  await expect(page.locator(".asset-studio").getByRole("alert")).toContainText("REVISION_CONFLICT");
+  await expect.poll(()=>batchStatuses[0]).toBe(409);
+  const rejected=await assetState(page,P.id);
+  expect(rejected.requirements.every(r=>r.approval_record_id===null)).toBe(true);
+  await expect(page.getByRole("button",{name:"Remove staged "+A})).toBeVisible();
+  await expect(page.getByRole("button",{name:"Remove staged "+B})).toBeVisible();
+  expect(batchReqs).toHaveLength(1); // no silent retry
+  await page.unroute("**/assets/batch-approve");
+  await page.getByRole("button",{name:/Approve 2 selected\/staged source/}).click();
+  await expect(page.locator(".asset-studio .notice.success")).toContainText("Approved 2 requirement(s)");
+  expect(batchReqs).toHaveLength(2);
+  expect((await assetState(page,P.id)).requirements.filter(r=>r.approval_record_id!==null)).toHaveLength(2);
+});
