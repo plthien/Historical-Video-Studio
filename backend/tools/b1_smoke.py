@@ -63,7 +63,7 @@ def run(case, mode):
             if exc.code!="MAP_PERIOD_MISMATCH":raise
         else:
             raise RuntimeError("Modern/wrong-era source was incorrectly accepted.")
-        print("historical-map: LOCAL_PASS SYNTHETIC EPSG:3857→4326 lonlat="+str(first)+
+        print("historical-map: LOCAL_PASS SYNTHETIC EPSG:3857->4326 lonlat="+str(first)+
               " derived_sha="+result["geometry_sha256"]+" wrong-era=BLOCKED")
         return
     if case=="align-scene-cues":
