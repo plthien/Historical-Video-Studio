@@ -304,7 +304,7 @@ def test_map_real_local_g3_original_and_approval_lineage(tmp_path):
     with pytest.raises(ContractViolation,match="MAP_RIGHTS_UNREVIEWED"):
         ingest_current_approved(store,pid,rid,{**map_record,"rights_review_record_id":"foreign_approval"},
                                 year=1871,feature_ids=[])
-    changed=copy.deepcopy(story);changed["project"]["title"]="Story changed"
+    changed=copy.deepcopy(story);changed["asset_requirements"][0]["subject"]="Updated period source evidence"
     store.import_story(StoryCandidate.parse(changed),store.revision(pid))
     with pytest.raises(ContractViolation,match="G3_APPROVAL_REQUIRED"):
         ingest_current_approved(store,pid,rid,map_record,year=1871,feature_ids=[])
