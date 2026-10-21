@@ -292,6 +292,11 @@ test("asset-review V4: out-of-order A candidate response cannot overwrite select
   const [A,B]=P.requirements;
   await stageVerified(page,A,"Async source A");
   await stageVerified(page,B,"Async source B");
+  const aJson=await (await page.request.get(baseApi+"/projects/"+P.id+"/assets/"+A+"/candidates")).json();
+  const bJson=await (await page.request.get(baseApi+"/projects/"+P.id+"/assets/"+B+"/candidates")).json();
+  const idA=aJson.candidates.find((c:{title:string})=>c.title==="Async source A").candidate_id as string;
+  const idB=bJson.candidates.find((c:{title:string})=>c.title==="Async source B").candidate_id as string;
+  expect(idA).not.toBe(idB);
   let letAProceed=()=>{};
   let signalAEntered=()=>{};
   const holdA=new Promise<void>(resolve=>{letAProceed=resolve});
@@ -310,6 +315,8 @@ test("asset-review V4: out-of-order A candidate response cannot overwrite select
   const releasedA=page.waitForResponse(r=>r.url().includes("/assets/"+A+"/candidates")&&r.request().method()==="GET");
   letAProceed();
   await releasedA; // assert AFTER the delayed response reached the browser.
+  await expect(page.getByAltText("Verified original candidate "+idA)).toHaveCount(0);
+  await expect(page.getByAltText("Verified original candidate "+idB)).toBeVisible();
   await expect(page.locator(".asset-studio article.claim").filter({hasText:"Async source A"})).toHaveCount(0);
   await expect(select).toHaveValue(B);
   await expect(page.locator(".asset-studio article.claim").filter({hasText:"Async source B"})).toBeVisible();
