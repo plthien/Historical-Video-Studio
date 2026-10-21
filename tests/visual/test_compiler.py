@@ -220,3 +220,22 @@ def test_timing_scene_cuts_follow_global_sample_boundaries_without_frame_overlap
     assert windows[0]["end_frame"]==windows[1]["start_frame"]==10
     assert windows[-1]["end_frame"]==30
     assert sum(w["duration_frames"] for w in windows)==30
+
+
+def test_map_raster_reviewed_three_point_georeference_and_wrong_rights_rejected():
+    source=b"synthetic-period-raster";m,approval=example_map(source,crs="EPSG:4326")
+    m.update(geometry_format="RASTER",geography_mode="raster_georeferenced",
+             geometry_object_sha256=None,raster_asset_sha256=hashlib.sha256(source).hexdigest())
+    ties=[{"u":u,"v":v,"lon":lon,"lat":lat,
+           "source_original_sha256":hashlib.sha256(source).hexdigest(),
+           "rights_review_record_id":"approval_fixture_map","user_approved":True}
+          for u,v,lon,lat in [(0,0,10,50),(1,0,11,50),(0,1,10,51)]]
+    result=ingest(m,source,year=1871,feature_ids=[],approval=approval,
+                  reviewed_tie_points=ties)
+    assert result["coordinate_space"]=="REVIEWED_RASTER_UV_TO_GEO"
+    assert result["georeference"]["uv_lon_coefficients"]==(1.0,0.0,10.0)
+    assert result["geometry_sha256"]
+    ties[1]["user_approved"]=False
+    with pytest.raises(ContractViolation,match="MAP_GEOREFERENCE_REQUIRED"):
+        ingest(m,source,year=1871,feature_ids=[],approval=approval,
+               reviewed_tie_points=ties)
