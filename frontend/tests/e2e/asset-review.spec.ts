@@ -412,10 +412,19 @@ test("asset-review V4: jobs UI reflects persisted safe cancel versus uncertain r
   await page.getByRole("button",{name:"Create project"}).click();
   await expect(page.getByRole("status")).toContainText("Project creation completed");
   const id=(await page.locator(".topline strong").innerText()).trim();
+  const other=await page.request.post(baseApi+"/projects",{
+    data:{title:"V4 foreign job scope",language:"en",style_id:"HistoryEditorialPaper.v1"}});
+  expect(other.status()).toBe(201);
+  const foreignId=(await other.json()).project_id as string;
+  expect(foreignId).not.toBe(id);
   const safe=jobSql("seed",id,"FAILED_RETRYABLE","GLABS_PROVIDER_IDENTITY_STALE");
   const unknown=jobSql("seed",id,"BLOCKED_REVIEW","GLABS_UNCERTAIN_SUBMISSION");
   expect(safe.provider_task_id).toBeNull();
   expect(unknown.provider_task_id).toBeNull();
+  const wrongProject=await page.request.post(baseApi+"/projects/"+foreignId+"/jobs/"+safe.job_id+"/cancel",{
+    headers:{"Idempotency-Key":crypto.randomUUID()}});
+  expect(wrongProject.ok()).toBe(false);
+  expect(jobSql("read",id,"","",safe.job_id).state).toBe("FAILED_RETRYABLE");
   const resultSafe=await page.request.get(baseApi+"/projects/"+id+"/jobs");
   expect(resultSafe.status()).toBe(200);
   expect((await resultSafe.json()).map((x:{job_id:string})=>x.job_id))
