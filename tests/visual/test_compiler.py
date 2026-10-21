@@ -157,6 +157,21 @@ def test_map_invalid_source_never_geographic_fallback(mode,expected):
     with pytest.raises(ContractViolation,match=expected):
         ingest(m,source,year=year,feature_ids=features,approval=approval)
 
+
+def test_map_polygon_nonadjacent_vertex_on_edge_red_green():
+    # B1-02: nonadjacent vertex touches the interior of the first edge.
+    # Use the full provenance-checked ingest path, never a geometry-only shortcut.
+    points=[[10,50],[12,50],[12,52],[11,50],[10,52],[10,50]]
+    raw={"type":"FeatureCollection","crs":"EPSG:4326",
+         "features":[{"id":"feature_001","type":"Feature",
+                      "geometry":{"type":"Polygon","coordinates":[points]},"properties":{}}]}
+    source=json.dumps(raw,separators=(",",":")).encode()
+    m,approval=example_map(source,crs="EPSG:4326")
+    with pytest.raises(ContractViolation) as ex:
+        ingest(m,source,year=1871,feature_ids=["feature_001"],approval=approval)
+    assert ex.value.code=="MAP_GEOMETRY_INVALID"
+    assert ex.value.path=="feature_001"
+
 def test_map_raster_without_tiepoints_stays_uv_only():
     source=b"synthetic-raster-byte-fixture";m,approval=example_map(source,crs="EPSG:4326")
     m.update(geometry_format="RASTER",geography_mode="raster_georeferenced",
@@ -189,8 +204,12 @@ def test_cue_repeated_phrase_exact_sample_frames_and_staging():
     windows=bind_beats(blueprint,wav,audio_sha256=wav["audio_sha256"],
                        transcript_sha256=wav["transcript_sha256"],audio_total_samples=48001)
     assert windows[0]["cue_start_frame"]==1 and windows[0]["cue_end_frame"]==3
-    assert windows[0]["end_frame"]==31
-    assert group_staging(windows,48001,48000)[0]["focus_sequence"][0]["word_ids"]==["word_004","word_005"]
+    assert windows[0]["start_frame"]==0 and windows[0]["end_frame"]==31
+    assert windows[0]["start_sample"]==3001 and windows[0]["end_sample"]==4101
+    assert windows[0]["word_ids"]==["word_004","word_005"]
+    scene=group_staging(windows,48001,48000)[0]
+    assert scene["start_frame"]==0 and scene["end_frame"]==31
+    assert scene["focus_sequence"][0]["word_ids"]==["word_004","word_005"]
     with pytest.raises(ContractViolation,match="CUE_OCCURRENCE_INVALID"):
         resolve_cue({**c,"occurrence":3},wav,"beat_setup_001")
     with pytest.raises(ContractViolation,match="CUE_AMBIGUOUS"):
