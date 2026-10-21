@@ -269,6 +269,11 @@ class GTaskService:
                 return self.cancel(project,job_id)
             if flagged["state"]=="QUEUED" and flagged["resume_only"]:
                 return self.queue.cancellation_uncertain(job_id,"GLABS_UNCERTAIN_SUBMISSION")
+            if flagged["state"]=="FAILED_RETRYABLE":
+                # No durable proof that this error happened before the paid POST.
+                # Preserve the original diagnostic and require operator reconciliation.
+                return self.queue.cancellation_uncertain(job_id,
+                    flagged["error_code"] or "GLABS_UNCERTAIN_SUBMISSION")
             return flagged
         try:
             self._assert_job_provider(job,json.loads(job["payload_json"]))
