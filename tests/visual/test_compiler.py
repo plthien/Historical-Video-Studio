@@ -203,3 +203,20 @@ def test_timing_missing_cue_or_wrong_section():
     with pytest.raises(ContractViolation,match="CUE_SECTION_MISMATCH"):
         bind_beats(bp,wav,audio_sha256=wav["audio_sha256"],
                    transcript_sha256=wav["transcript_sha256"],audio_total_samples=47000)
+
+
+def test_timing_scene_cuts_follow_global_sample_boundaries_without_frame_overlap():
+    story=fixture("contracts/examples/StoryPackage.v1.valid.json")
+    authored=fixture("contracts/examples/VisualBlueprint.v1.valid.json")["setup_plans"][0]["template_payload"]
+    bp=normalize_story(story,{"setup_001":authored})
+    other=copy.deepcopy(bp["setup_plans"][0]["editorial_direction"]["visual_beats"][0])
+    other["beat_id"]="beat_second"
+    other["cue"]={"section_id":"sec_001","phrase":"1871,","occurrence":0}
+    bp["setup_plans"][0]["editorial_direction"]["visual_beats"].append(other)
+    wav=fixture("contracts/examples/WordTimingMap.v1.valid.json")
+    windows=bind_beats(bp,wav,audio_sha256=wav["audio_sha256"],
+                       transcript_sha256=wav["transcript_sha256"],audio_total_samples=48000)
+    assert len(windows)==2
+    assert windows[0]["end_frame"]==windows[1]["start_frame"]==10
+    assert windows[-1]["end_frame"]==30
+    assert sum(w["duration_frames"] for w in windows)==30
