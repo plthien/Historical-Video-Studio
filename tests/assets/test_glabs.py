@@ -679,3 +679,21 @@ def test_safe_presubmit_retryable_cancel_via_scoped_api_has_zero_provider_calls(
     reopened=JobQueue(ProjectStore(store.database,store.artifacts.root)).get(job["job_id"])
     assert reopened["state"]=="CANCELLED" and reopened["cancel_requested"]==1
     assert reopened["provider_task_id"] is None and calls==[]
+
+
+def test_unproven_no_id_retryable_cancel_is_review_blocked_not_success(tmp_path):
+    """C02-C: absent ID with unknown origin is not evidence of a never-sent POST."""
+    calls=[]
+    store,service,pid,rid=setup(tmp_path,lambda req:(calls.append(req.url.path),httpx.Response(500))[1])
+    job=service.enqueue(pid,rid,"nano_banana_2","Synthetic media",expected_revision=1,
+                        idempotency_key="c02-unknown-origin-001",controlled_offline=True)
+    # Historical durable state from an uncertain first submission, not a trusted preflight error.
+    with store._transaction() as db:
+        db.execute("UPDATE jobs SET state='FAILED_RETRYABLE',error_code='GLABS_NETWORK_ERROR' "
+                   "WHERE job_id=?",(job["job_id"],))
+    current=service.cancel(pid,job["job_id"])
+    assert current["state"]=="BLOCKED_REVIEW" and current["cancel_requested"]==1
+    assert current["error_code"]=="GLABS_NETWORK_ERROR"
+    assert current["provider_task_id"] is None and calls==[]
+    assert service.cancel(pid,job["job_id"])["state"]=="BLOCKED_REVIEW"
+    assert service.queue.get(job["job_id"])["state"]=="BLOCKED_REVIEW"
