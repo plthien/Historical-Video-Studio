@@ -633,3 +633,49 @@ def test_cancel_wins_during_poll_http_error_keeps_remote_verified_cancel(tmp_pat
     assert service.poll(job["job_id"],active["lease_token"])["state"]=="CANCELLED"
     assert service.queue.get(job["job_id"])["state"]=="CANCELLED"
     assert calls.count("/api/image/generate")==1 and calls.count("/api/stop/abcdd123")==1
+
+
+def test_safe_presubmit_retryable_cancel_via_scoped_api_has_zero_provider_calls(tmp_path):
+    """C02-A RED: proven identity preflight failure can be locally cancelled, unlike unknown POST."""
+    from fastapi.testclient import TestClient
+    from backend.app.api.server import create_app
+    from backend.app.projects.gates import GateService
+    from backend.app.assets.resolution import AssetResolution
+    calls=[]
+    def handler(req):
+        calls.append((req.method,req.url.path))
+        raise AssertionError("Pre-submit identity mismatch or safe cancel must not contact provider")
+    store,service,pid,rid=setup(tmp_path,handler)
+    service.provider.offline_fixture=False
+    gates=GateService(store)
+    for claim in store.get_story(pid).data()["claims"]:
+        if claim["critical"]:
+            gates.review_claim(pid,claim["claim_id"],"REVIEWED","Offline rights fixture",
+                               store.revision(pid),source_url="https://example.org/source")
+    g1=gates.board(pid)[0]
+    gates.decide(pid,"G1",{"decision":"APPROVED","candidate_sha256":g1["candidate_sha256"],
+        "dependency_fingerprint":g1["dependency_fingerprint"],
+        "expected_revision":store.revision(pid)})
+    AssetResolution(store).choose(pid,rid,"MANAGED_FALLBACK","Controlled preflight",
+                                  store.revision(pid))
+    job=service.enqueue(pid,rid,"nano_banana_2","Historical image",
+                        expected_revision=store.revision(pid),
+                        idempotency_key="c02-preflight-cancel-001")
+    service.provider.key="different-key"
+    failed=service.process_one(job["job_id"])
+    assert failed["state"]=="FAILED_RETRYABLE"
+    assert failed["error_code"]=="GLABS_PROVIDER_IDENTITY_STALE"
+    assert failed["provider_task_id"] is None and not failed["resume_only"] and calls==[]
+    url=f"/api/v1/projects/{pid}/jobs/{job['job_id']}/cancel"
+    with TestClient(create_app(store.database,store.artifacts.root)) as api:
+        first=api.post(url,headers={"Idempotency-Key":"c02-first-cancel-001"})
+        assert first.status_code==200,first.text
+        assert first.json()["state"]=="CANCELLED"
+        assert first.json()["cancel_requested"]==1
+        assert api.post(url,headers={"Idempotency-Key":"c02-repeat-cancel-01"}).json()["state"]=="CANCELLED"
+        retry=api.post(f"/api/v1/projects/{pid}/jobs/{job['job_id']}/retry",
+                       headers={"Idempotency-Key":"c02-retry-after-cancel-01"})
+        assert retry.status_code==409 and retry.json()["code"]=="JOB_RETRY_FORBIDDEN"
+    reopened=JobQueue(ProjectStore(store.database,store.artifacts.root)).get(job["job_id"])
+    assert reopened["state"]=="CANCELLED" and reopened["cancel_requested"]==1
+    assert reopened["provider_task_id"] is None and calls==[]
