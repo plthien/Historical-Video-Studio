@@ -1,6 +1,6 @@
 import {useCallback,useEffect,useRef,useState} from "react";
 import {assetApi,type Requirement,type AssetCandidate,type AssetReview} from "../../api/assets";
-import {api,type Gate} from "../../api/client";
+import {api,ApiError,type Gate} from "../../api/client";
 import {ProviderSettings} from "../Settings/ProviderSettings";
 type StagedReview = AssetReview & {project_id:string;source_story_sha256:string;source_requirement_sha256:string;resolution_mode:string};
 function draftMatches(d:StagedReview,c:AssetCandidate|undefined) {
@@ -9,7 +9,7 @@ function draftMatches(d:StagedReview,c:AssetCandidate|undefined) {
     c.source_story_sha256===d.source_story_sha256 &&
     c.source_requirement_sha256===d.source_requirement_sha256);
 }
-export function AssetStudio({projectId,onRefresh}:{projectId:string;onRefresh:()=>Promise<void>}) {
+export function AssetStudio({projectId,projectRevision,onRefresh}:{projectId:string;projectRevision:number;onRefresh:()=>Promise<void>}) {
   const [requirements,setRequirements]=useState<Requirement[]>([]);
   const [revision,setRevision]=useState(0);
   const [selected,setSelected]=useState("");
@@ -93,6 +93,14 @@ export function AssetStudio({projectId,onRefresh}:{projectId:string;onRefresh:()
     setChecks({});setReviewNotes({});setPreview({});setProblem("");setNotice("");
     void reload().catch(e=>{if(projectRef.current===projectId)setProblem(String(e));});
   },[projectId]);
+  // An in-app Project refresh can reveal a newer StoryPackage while Assets stays
+  // mounted. Revalidate source-bound drafts without erasing unrelated valid ones.
+  const lastParentRevision=useRef(projectRevision);
+  useEffect(()=>{
+    if(lastParentRevision.current===projectRevision)return;
+    lastParentRevision.current=projectRevision;
+    void reload().catch(e=>{if(projectRef.current===projectId)setProblem(String(e));});
+  },[projectRevision,reload]);
   async function action(label:string,call:()=>Promise<unknown>){
     if(pending)return;setPending(label);setProblem("");setNotice("");
     try{
@@ -106,7 +114,8 @@ export function AssetStudio({projectId,onRefresh}:{projectId:string;onRefresh:()
       }else setNotice(label+" completed. Updated backend state loaded.");
     }
     catch(e){
-      setProblem(e instanceof Error?e.message:String(e));
+      setProblem(e instanceof ApiError?e.problem.code+": "+e.message+" — "+e.problem.remediation:
+        e instanceof Error?e.message:String(e));
       // Fetch changed revisions and prune stale drafts, without silently retrying the mutation.
       try{await reload();}catch{ /* Preserve the original actionable error. */ }
     }
