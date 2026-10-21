@@ -239,3 +239,55 @@ def test_map_raster_reviewed_three_point_georeference_and_wrong_rights_rejected(
     with pytest.raises(ContractViolation,match="MAP_GEOREFERENCE_REQUIRED"):
         ingest(m,source,year=1871,feature_ids=[],approval=approval,
                reviewed_tie_points=ties)
+
+
+def test_map_real_local_g3_original_and_approval_lineage(tmp_path):
+    """B1-02 integration: no user-approved boolean can replace a G3 SQLite head."""
+    import base64
+    from backend.app.projects.storage import ProjectStore
+    from backend.app.projects.gates import GateService
+    from backend.app.assets.provenance import AssetCandidates
+    from backend.app.assets.resolution import AssetResolution
+    from backend.app.maps.ingest import ingest_current_approved
+    original=base64.b64decode("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAADElEQVR4nGMwSpkGAAH4AS3k7SvZAAAAAElFTkSuQmCC")
+    store=ProjectStore(tmp_path/"db.sqlite",tmp_path/"media")
+    story=fixture("contracts/examples/StoryPackage.v1.valid.json")
+    pid=story["project"]["project_id"];rid="req_001"
+    store.create_project(pid,"Reviewed raster fixture")
+    store.import_story(StoryCandidate.parse(story),0)
+    gates=GateService(store)
+    g1=gates.board(pid)[0]
+    gates.decide(pid,"G1",{"decision":"APPROVED",
+        "candidate_sha256":g1["candidate_sha256"],
+        "dependency_fingerprint":g1["dependency_fingerprint"],
+        "expected_revision":store.revision(pid)})
+    resolver=AssetResolution(store)
+    resolver.choose(pid,rid,"MANUAL_UPLOAD","Operator reviewed synthetic PNG",store.revision(pid))
+    asset=AssetCandidates(store).manual(pid,rid,original,"Fixture map","Synthetic period","Synthetic source rights")
+    reviewed=resolver.approve_batch(pid,[{"requirement_id":rid,"candidate_id":asset["candidate_id"],
+        "original_sha256":asset["original_sha256"],"rights_status":"ELIGIBLE",
+        "rights_evidence_note":"SYNTHETIC review","historical_context_note":"SYNTHETIC 1871 map"}],
+        store.revision(pid))
+    assert gates.board(pid)[2]["state"]=="READY_FOR_REVIEW"
+    g3=gates.board(pid)[2]
+    gates.decide(pid,"G3",{"decision":"APPROVED",
+        "candidate_sha256":g3["candidate_sha256"],
+        "dependency_fingerprint":g3["dependency_fingerprint"],
+        "expected_revision":store.revision(pid)})
+    map_record=fixture("contracts/examples/HistoricalMap.v1.valid.json")
+    map_record.update(source_asset_id=asset["candidate_id"],
+        source_original_sha256=asset["original_sha256"],
+        raster_asset_sha256=asset["original_sha256"],
+        geometry_format="RASTER",geography_mode="raster_georeferenced",
+        geometry_object_sha256=None,approved_feature_ids=[],labels=[],
+        user_approved=True,rights_review_record_id=reviewed["approved"][0]["approval_record_id"])
+    result=ingest_current_approved(store,pid,rid,map_record,year=1871,feature_ids=[])
+    assert result["coordinate_space"]=="UV_ONLY"
+    assert store.get_artifact(result["source_original_sha256"])==original
+    with pytest.raises(ContractViolation,match="MAP_RIGHTS_UNREVIEWED"):
+        ingest_current_approved(store,pid,rid,{**map_record,"rights_review_record_id":"foreign_approval"},
+                                year=1871,feature_ids=[])
+    changed=copy.deepcopy(story);changed["project"]["title"]="Story changed"
+    store.import_story(StoryCandidate.parse(changed),store.revision(pid))
+    with pytest.raises(ContractViolation,match="G3_APPROVAL_REQUIRED"):
+        ingest_current_approved(store,pid,rid,map_record,year=1871,feature_ids=[])
