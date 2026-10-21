@@ -430,3 +430,25 @@ test("asset-review V4: jobs UI reflects persisted safe cancel versus uncertain r
   expect(jobs.find(j=>j.job_id===safe.job_id)).toMatchObject({state:"CANCELLED",cancel_requested:1,provider_task_id:null});
   expect(jobs.find(j=>j.job_id===unknown.job_id)).toMatchObject({state:"BLOCKED_REVIEW",cancel_requested:1,provider_task_id:null});
 });
+
+
+test("asset-review V4: importing changed StoryPackage globally invalidates old staged source identities",async({page})=>{
+  const P=await createAssetProject(page,"V4 immutable story change");
+  const [A,B]=P.requirements;
+  await stageVerified(page,A,"Old story A");
+  await stageVerified(page,B,"Old story B");
+  await expect(page.locator(".asset-studio")).toContainText("2 staged;");
+  const updated=structuredClone(P.story);
+  updated.project.title=updated.project.title+" revised";
+  const revision=(await assetState(page,P.id)).project_revision;
+  const changed=await page.request.post(baseApi+"/projects/"+P.id+"/story/import?expected_revision="+revision,{
+    headers:{"Idempotency-Key":crypto.randomUUID()},data:updated});
+  expect(changed.status(),await changed.text()).toBe(200);
+  await page.getByRole("button",{name:"Refresh project"}).click();
+  await expect(page.getByRole("button",{name:"Remove staged "+A})).toHaveCount(0);
+  await expect(page.getByRole("button",{name:"Remove staged "+B})).toHaveCount(0);
+  await expect(page.locator(".asset-studio")).toContainText("Outdated staged review");
+  await expect(page.getByRole("button",{name:/Approve \d+ selected\/staged source/})).toBeDisabled();
+  const state=await assetState(page,P.id);
+  expect(state.requirements.every(r=>r.approval_record_id===null)).toBe(true);
+});
