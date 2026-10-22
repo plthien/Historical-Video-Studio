@@ -1255,3 +1255,28 @@ def test_b1_g4_real_sqlite_positive_invalid_staging_selective_revision_and_stale
                   font_measure=measure,
                   crop_overrides={"setup_001":{map_layer["layer_id"]:reviewed_crop}})
     assert store.revision(pid)==current_revision
+    # Re-approval of G1 review evidence changes an approval-head identity
+    # even if StoryPackage/G2 WAV/G3 original hashes remain identical.
+    # A fresh verified compile must create the next trusted draft generation;
+    # callers cannot reset the G4 draft while approval heads are unchanged.
+    from backend.app.director.fingerprint import digest
+    with store._transaction() as db:
+        db.execute("UPDATE word_maps SET map_sha256=? WHERE project_id=?",
+                   (digest(words),pid))
+    reviewed_rev=gates.review_claim(pid,"claim_001","REVIEWED",
+        "Synthetic re-review for approval lineage identity",store.revision(pid))
+    g1_review=gates.board(pid)[0]
+    assert g1_review["state"]=="READY_FOR_REVIEW"
+    gates.decide(pid,"G1",{"decision":"APPROVED",
+        "candidate_sha256":g1_review["candidate_sha256"],
+        "dependency_fingerprint":g1_review["dependency_fingerprint"],
+        "expected_revision":store.revision(pid)})
+    assert all(x["state"]=="APPROVED" for x in gates.board(pid)[:3])
+    recompiled=compile_from_store(store,pid,bp,words,frozen,
+        map_requests=requests,font_measure=measure,font_identity=identity)
+    refreshed=draft.load(store,pid)
+    assert refreshed["generation"]==4
+    assert refreshed["manifest"]["gate_heads"]["G1"]!=new_head["manifest"]["gate_heads"]["G1"]
+    assert canonical(refreshed["timeline"])==canonical(recompiled)
+    assert store.revision(pid)==refreshed["revision"]
+    assert all(x["state"]!="APPROVED" for x in gates.board(pid)[3:])
