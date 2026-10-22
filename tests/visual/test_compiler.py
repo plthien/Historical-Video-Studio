@@ -507,8 +507,8 @@ def test_compiler_fingerprint_full_48_synthetic_deterministic_and_negative():
         pytest.skip("B1 compiler target is native Windows")
     path=Path(os.environ["WINDIR"])/"Fonts"/"arial.ttf"
     measure,font_id=windows_font_measure(str(path),hashlib.sha256(path.read_bytes()).hexdigest())
-    story,bp,words,final,approved=synthetic_longform_inputs()
-    args=dict(font_measure=measure,font_identity=font_id,
+    story,bp,words,final,approved,maps=synthetic_longform_inputs()
+    args=dict(maps=maps,font_measure=measure,font_identity=font_id,
               expected_story_sha256=bp["story_revision_sha256"])
     result=compile_timeline(story,bp,words,final,approved,**args)
     again=compile_timeline(story,bp,words,final,approved,**args)
