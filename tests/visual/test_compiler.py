@@ -568,3 +568,85 @@ def test_compiler_g4_invariant_rejects_changed_frozen_source_before_recompute():
                   {"req_001":{"original_sha256":"c"*64}},
                   expected_revision=6,operator_reason="Presentation-only adjustment")
     assert ex.value.code=="APPROVAL_REVISION_CONFLICT"
+
+
+# B1-04/B1-05 RED discriminators: call the production scene compiler, not compile_event.
+def _actual_scene_for(template_id):
+    from backend.app.director.compiler import _scene
+    story, payloads = visual()
+    plan = next(p for p in normalize_story(story, payloads)["setup_plans"]
+                if p["template_id"] == template_id)
+    requirements = {r["requirement_id"]: r for r in story["asset_requirements"]}
+    approved = {
+        rid: {"candidate_id": "candidate_" + rid, "approval_record_id": "approval_" + rid,
+              "original_sha256": hashlib.sha256(rid.encode()).hexdigest(),
+              "asset_class": req["asset_class"], "source_kind": "SYNTHETIC"}
+        for rid, req in requirements.items()}
+    frame_rows = [
+        {**{"start_frame": i*60, "end_frame": (i+1)*60,
+            "cue_start_frame": i*60, "word_ids": ["word_" + str(i+1)]},
+         "beat_id": beat["beat_id"], "focus_ref": beat["focus_ref"],
+         "staging": beat["staging"]}
+        for i, beat in enumerate(plan["editorial_direction"]["visual_beats"])]
+    maps = {plan["setup_id"]: {
+        "reviewed_period_map": True, "route_feature_id": "geometry_route_001",
+        "geometry_type": "LineString", "historical_map_id": "map_synthetic",
+        "era_year": 1914, "approved_feature_ids": ["feature_001"]}}
+    if template_id == "T07":
+        maps[plan["setup_id"]].update(shared_projection="mercator",
+                                      shared_viewport=[0,0,1,1])
+    staging = {"start_frame": 0, "end_frame": len(frame_rows)*60}
+    # No rights or font claims: synthetic helper only. Production compiler still runs.
+    return _scene(plan, staging, frame_rows, approved, requirements, maps,
+                  lambda text, size: (len(text)*size//2, size)), plan
+
+
+def test_b1_authored_t03_stagger_dispatch_actual_scene():
+    scene, plan = _actual_scene_for("T03")
+    e = scene["events"][0]
+    assert e["preset_id"] == "stagger-reveal"
+    assert e["stagger"]["order"] == [
+        next(x["layer_id"] for x in scene["layers"]
+             if x["source_asset_slot_id"] == card["asset_slot_id"])
+        for card_id in plan["template_payload"]["card_reveal_order"]
+        for card in plan["template_payload"]["cards"] if card["card_id"] == card_id]
+    assert len(e["affected_layer_ids"]) == 3
+    assert e["cue_binding"]["word_id"] == "word_1"
+
+
+def test_b1_authored_t04_route_draw_targets_route_not_focus_map():
+    scene, plan = _actual_scene_for("T04")
+    assert scene["staging"]["beat_sequence"][0]["focus_layer_id"].endswith("map_backdrop")
+    e = scene["events"][0]
+    assert e["preset_id"] == "route-line-draw"
+    assert e["layer_id"].endswith("route_overlay")
+    assert e["params"]["route_geometry_ref"] == plan["template_payload"]["route_geometry_ref"]
+    assert e["motion_space"] == "map_world"
+
+
+def test_b1_authored_t06_document_crop_is_non_destructive():
+    scene, plan = _actual_scene_for("T06")
+    document = next(x for x in scene["layers"] if x["layer_kind"] == "document")
+    assert document["crop_normalized"] == plan["template_payload"]["focus_region_uv"]
+    assert document["asset_id"] is not None
+    assert document["mask"]["kind"] == "none"
+
+
+def test_b1_unsupported_motion_hint_fails_closed():
+    from backend.app.director.compiler import _scene
+    scene, plan = _actual_scene_for("T03")
+    # Never mistake an unsupported effect for a generic photo-card fallback.
+    beat = copy.deepcopy(plan["editorial_direction"]["visual_beats"][0])
+    beat["staging"][0]["motion_hint"] = "unregistered_motion"
+    plan["editorial_direction"]["visual_beats"] = [beat]
+    requirements = {r["requirement_id"]: r for r in visual()[0]["asset_requirements"]}
+    approved = {rid: {"candidate_id": "candidate_" + rid, "approval_record_id": "approval_" + rid,
+                       "original_sha256": hashlib.sha256(rid.encode()).hexdigest(),
+                       "asset_class": req["asset_class"], "source_kind": "SYNTHETIC"}
+                for rid, req in requirements.items()}
+    row = {"beat_id": beat["beat_id"], "focus_ref": beat["focus_ref"],
+           "staging": beat["staging"], "start_frame": 0, "end_frame": 60,
+           "cue_start_frame": 0, "word_ids": ["word_1"]}
+    with pytest.raises(ContractViolation, match="MOTION_HINT_UNSUPPORTED"):
+        _scene(plan, {"start_frame": 0, "end_frame": 60}, [row], approved,
+               requirements, {}, lambda text,size: (len(text)*size//2, size))
