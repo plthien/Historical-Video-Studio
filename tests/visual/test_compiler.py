@@ -969,6 +969,12 @@ def test_b1_g4_real_sqlite_positive_invalid_staging_selective_revision_and_stale
     original=compile_from_store(store,pid,bp,words,frozen,map_requests=requests,
                                 font_measure=measure,font_identity=identity)
     assert len(original["scenes"])==2
+    # The registered current draft is stronger than any caller-supplied fingerprint.
+    from backend.app.director import draft
+    stored=draft.load(store,pid)
+    assert canonical(stored["timeline"])==canonical(original)
+    assert canonical(stored["blueprint"])==canonical(bp)
+    assert stored["generation"]==1 and stored["revision"]==store.revision(pid)
     with store._connection() as db:
         source=AssetCandidates._source_tx(db,pid,"req_001")
         head=AssetResolution._head(db,pid,"req_001",source["requirement_sha256"])
@@ -1004,7 +1010,7 @@ def test_b1_g4_real_sqlite_positive_invalid_staging_selective_revision_and_stale
         revise_g4(store,pid,original,bp,malformed,words,frozen,current,
                    expected_revision=before_revision,
                    operator_reason="Invalid staging must fail without writes",
-                   maps={"setup_001":ctx,"setup_002":ctx},font_measure=measure)
+                   maps=None,font_measure=measure)
     assert invalid.value.code=="SCHEMA_INVALID"
     assert "staging" in invalid.value.path and "operation" in invalid.value.path
     assert store.revision(pid)==before_revision
@@ -1048,7 +1054,7 @@ def test_b1_g4_real_sqlite_positive_invalid_staging_selective_revision_and_stale
         with pytest.raises(ContractViolation,match="G4_DRAFT_TAMPERED"):
             revise_g4(store,pid,forged,bp,edited,words,frozen,current,
                 expected_revision=baseline_revision,operator_reason="Reject retained-scene tamper",
-                maps={"setup_001":ctx,"setup_002":ctx},font_measure=measure)
+                maps=None,font_measure=measure)
         assert store.revision(pid)==baseline_revision
     forged_map=copy.deepcopy(ctx)
     forged_map["era_year"]=2026
@@ -1063,12 +1069,12 @@ def test_b1_g4_real_sqlite_positive_invalid_staging_selective_revision_and_stale
     with pytest.raises(ContractViolation,match="G4_BLUEPRINT_TAMPERED"):
         revise_g4(store,pid,original,forged_bp,edited,words,frozen,current,
             expected_revision=baseline_revision,operator_reason="Reject forged original source plan",
-            maps={"setup_001":ctx,"setup_002":ctx},font_measure=measure)
+            maps=None,font_measure=measure)
     assert store.revision(pid)==baseline_revision
     revision=store.revision(pid)
     changed=revise_g4(store,pid,original,bp,edited,words,frozen,current,
                expected_revision=revision,operator_reason="Variant framing change",
-               maps={"setup_001":ctx,"setup_002":ctx},font_measure=measure)
+               maps=None,font_measure=measure)
     assert changed["recomputed_setup_ids"]==["setup_001"]
     assert changed["retained_setup_ids"]==["setup_002"]
     assert canonical(changed["timeline"]["scenes"][1])==canonical(original["scenes"][1])
@@ -1081,14 +1087,14 @@ def test_b1_g4_real_sqlite_positive_invalid_staging_selective_revision_and_stale
     with pytest.raises(ContractViolation,match="APPROVAL_REVISION_CONFLICT"):
         revise_g4(store,pid,original,bp,edited,words,frozen,current,
                   expected_revision=revision,operator_reason="Stale update",
-                  maps={"setup_001":ctx,"setup_002":ctx},font_measure=measure)
+                  maps=None,font_measure=measure)
     # G4 no-op is not an authorized revision: it must not advance project CAS.
     revision_after_variant=store.revision(pid)
     with pytest.raises(ContractViolation,match="G4_EDIT_INVALID"):
         revise_g4(store,pid,changed["timeline"],edited,copy.deepcopy(edited),
                   words,frozen,current,expected_revision=revision_after_variant,
                   operator_reason="No visible scene change",
-                  maps={"setup_001":ctx,"setup_002":ctx},font_measure=measure)
+                  maps=None,font_measure=measure)
     assert store.revision(pid)==revision_after_variant
     # Positive source-preserving G4 crop; recompute only the named layer's scene.
     first_scene=changed["timeline"]["scenes"][0]
@@ -1097,7 +1103,7 @@ def test_b1_g4_real_sqlite_positive_invalid_staging_selective_revision_and_stale
     cropped=revise_g4(store,pid,changed["timeline"],edited,copy.deepcopy(edited),
               words,frozen,current,expected_revision=revision_after_variant,
               operator_reason="Improve reviewed map UV framing",
-              maps={"setup_001":ctx,"setup_002":ctx},font_measure=measure,
+              maps=None,font_measure=measure,
               crop_overrides={"setup_001":{map_layer["layer_id"]:reviewed_crop}})
     assert cropped["recomputed_setup_ids"]==["setup_001"]
     assert cropped["retained_setup_ids"]==["setup_002"]
@@ -1110,6 +1116,16 @@ def test_b1_g4_real_sqlite_positive_invalid_staging_selective_revision_and_stale
     assert cropped["timeline"]["word_map_sha256"]==original["word_map_sha256"]
     assert cropped["timeline"]["audio_sha256"]==original["audio_sha256"]
     assert store.revision(pid)==revision_after_variant+1
+    new_head=draft.load(store,pid)
+    assert new_head["generation"]==3
+    assert canonical(new_head["timeline"])==canonical(cropped["timeline"])
+    # Replay of the earlier trusted timeline must be blocked after another edit.
+    with pytest.raises(ContractViolation,match="G4_DRAFT_TAMPERED"):
+        revise_g4(store,pid,changed["timeline"],edited,copy.deepcopy(edited),
+            words,frozen,current,expected_revision=store.revision(pid),
+            operator_reason="Reject superseded approved G4 draft",maps=None,
+            font_measure=measure,
+            crop_overrides={"setup_001":{map_layer["layer_id"]:reviewed_crop}})
     # The pre-edit caller copies still match each other, but SQLite is now stale.
     # A changed persisted G2 WordMap SHA must block before another G4 commit.
     with store._transaction() as db:
@@ -1119,5 +1135,5 @@ def test_b1_g4_real_sqlite_positive_invalid_staging_selective_revision_and_stale
     with pytest.raises(ContractViolation,match="WORD_MAP_STALE"):
         revise_g4(store,pid,original,bp,edited,words,frozen,current,
                   expected_revision=current_revision,operator_reason="Recheck current G2",
-                  maps={"setup_001":ctx,"setup_002":ctx},font_measure=measure)
+                  maps=None,font_measure=measure)
     assert store.revision(pid)==current_revision
