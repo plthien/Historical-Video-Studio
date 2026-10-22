@@ -46,7 +46,7 @@ export function assertTimeline(input:unknown):asserts input is Timeline {
    if(!spec)fail('RENDER_MOTION_UNKNOWN',e.event_id,'Unregistered motion');
    if(!ids.has(e.layer_id)||e.affected_layer_ids.some(id=>!ids.has(id)))fail('RENDER_MOTION_TARGET',e.event_id,'Unresolved layer reference');
    if(e.start_frame<0||e.start_frame+e.duration_frames>s.duration_frames)fail('RENDER_MOTION_BOUNDS',e.event_id,'Event outside scene');
-   if(e.motion_space!==spec.render_recipe.transform_space)fail('RENDER_MOTION_SPACE',e.event_id,'Compiled motion-space mismatches registered preset');
+   if(e.motion_space!==spec!.render_recipe.transform_space)fail('RENDER_MOTION_SPACE',e.event_id,'Compiled motion-space mismatches registered preset');
   }
  }
  if(end!==t.total_frames)fail('RENDER_FRAME_COVERAGE',t.project_id,'Total frame ceiling does not equal scene sum');
@@ -84,5 +84,5 @@ export function activeScene(t:Timeline,globalFrame:number):{scene:Scene;localFra
  if(!Number.isInteger(globalFrame)||globalFrame<0||globalFrame>=t.total_frames)fail('RENDER_FRAME_OUTSIDE',t.project_id,'Frame not owned by timeline');
  const scene=t.scenes.find(s=>globalFrame>=s.start_frame&&globalFrame<s.start_frame+s.duration_frames);
  if(!scene)fail('RENDER_FRAME_GAP',t.project_id,'No scene owns frame');
- return {scene,localFrame:globalFrame-scene.start_frame};
+ return {scene:scene!,localFrame:globalFrame-scene!.start_frame};
 }
