@@ -789,3 +789,129 @@ print(json.dumps({"bytes_sha":hashlib.sha256(canonical(out)).hexdigest(),
     parsed=json.loads(results[0])
     assert len(parsed["scene_sha"])==10
     assert len(parsed["bytes_sha"])==64 and len(parsed["fingerprint"])==64
+
+
+
+def test_b1_g4_real_sqlite_positive_selective_revision_and_stale_sources(tmp_path):
+    """B1-06: local SQLite G1/G2/G3 approvals are controlled, never human/live."""
+    import os
+    from unittest.mock import patch
+    if os.name != "nt":
+        pytest.skip("Native GDI + FFmpeg + SQLite integration needs Windows")
+    from backend.app.projects.storage import ProjectStore
+    from backend.app.projects.gates import GateService
+    from backend.app.projects.models import StoryCandidate
+    from backend.app.assets.provenance import AssetCandidates
+    from backend.app.assets.resolution import AssetResolution
+    from backend.app.jobs.queue import JobQueue
+    from backend.app.voice.attempts import VoiceService
+    from backend.app.voice import attempts
+    from backend.app.voice.workflow import FinalVoiceWorkflow
+    from backend.tools.voice_final_smoke import wav_fixture, mock_alignment
+    from backend.app.director.compiler import compile_from_store, revise_g4
+    from backend.app.director.layout import windows_font_measure
+    from backend.app.director.fingerprint import canonical
+    from backend.app.maps.ingest import ingest_current_approved
+    import base64
+
+    story=fixture("contracts/examples/StoryPackage.v1.valid.json")
+    second=copy.deepcopy(story["visual_setups"][0])
+    second["setup_id"]="setup_002"
+    second["direction"]["visual_beats"][0]["beat_id"]="beat_setup_002"
+    second["direction"]["visual_beats"][0]["cue"]={
+        "section_id":"sec_001","phrase":"the","occurrence":0}
+    second["direction"]["visual_beats"][0]["continuity"]["group_id"]="group_setup_002"
+    second["direction"]["reveal_plan"][0]["beat_id"]="beat_sec_002"
+    second["direction"]["reveal_plan"][0]["cue"]={
+        "section_id":"sec_001","phrase":"the","occurrence":0}
+    story["visual_setups"].append(second)
+    pid=story["project"]["project_id"]
+    store=ProjectStore(tmp_path/"g4.sqlite",tmp_path/"media")
+    store.create_project(pid,"Controlled local integration")
+    store.import_story(StoryCandidate.parse(story),0)
+    gates=GateService(store)
+    g1=gates.board(pid)[0]
+    gates.decide(pid,"G1",{"decision":"APPROVED",
+        "candidate_sha256":g1["candidate_sha256"],
+        "dependency_fingerprint":g1["dependency_fingerprint"],
+        "expected_revision":store.revision(pid)})
+    voice=VoiceService(store,gates,JobQueue(store))
+    with patch.object(attempts,"_provider_identity",return_value={"model_id":"synthetic"}):
+        voice.enqueue(pid,"sec_001","kokoro_local","am_adam",1.0,
+                      "Local controlled TTS",store.revision(pid),"test_g4_voice_001")
+        assert voice.process_one(lambda *_:wav_fixture(4.0))["state"]=="SUCCEEDED"
+    g2=gates.board(pid)[1]
+    gates.decide(pid,"G2",{"decision":"APPROVED",
+        "candidate_sha256":g2["candidate_sha256"],
+        "dependency_fingerprint":g2["dependency_fingerprint"],
+        "expected_revision":store.revision(pid)})
+    workflow=FinalVoiceWorkflow(store,gates,JobQueue(store))
+    assert workflow.process_one()["state"]=="SUCCEEDED"
+    frozen=workflow.status(pid)["final_audio"]
+    assert workflow.process_one(lambda audio,text:mock_alignment(frozen,text))["state"]=="SUCCEEDED"
+    words=workflow.status(pid)["word_map"]
+    assert words
+    resolver=AssetResolution(store)
+    resolver.choose(pid,"req_001","MANUAL_UPLOAD","Synthetic source",store.revision(pid))
+    image=base64.b64decode(
+        "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAADElEQVR4nGMwSpkGAAH4AS3k7SvZAAAAAElFTkSuQmCC")
+    candidate=AssetCandidates(store).manual(
+        pid,"req_001",image,"Synthetic period map","Fixture 1871","Test-only rights")
+    review=resolver.approve_batch(pid,[{
+        "requirement_id":"req_001","candidate_id":candidate["candidate_id"],
+        "original_sha256":candidate["original_sha256"],"rights_status":"ELIGIBLE",
+        "rights_evidence_note":"Synthetic review only",
+        "historical_context_note":"Local test map"}],store.revision(pid))
+    g3=gates.board(pid)[2]
+    gates.decide(pid,"G3",{"decision":"APPROVED",
+        "candidate_sha256":g3["candidate_sha256"],
+        "dependency_fingerprint":g3["dependency_fingerprint"],
+        "expected_revision":store.revision(pid)})
+    record=fixture("contracts/examples/HistoricalMap.v1.valid.json")
+    record.update(source_asset_id=candidate["candidate_id"],
+         source_original_sha256=candidate["original_sha256"],
+         raster_asset_sha256=candidate["original_sha256"],
+         geometry_format="RASTER",geography_mode="raster_georeferenced",
+         geometry_object_sha256=None,approved_feature_ids=[],labels=[],
+         user_approved=True,rights_review_record_id=review["approved"][0]["approval_record_id"])
+    ingested=ingest_current_approved(store,pid,"req_001",record,year=1871,feature_ids=[])
+    ctx={"reviewed_period_map":True,"sources":{"req_001":ingested},
+         "historical_map_id":ingested["historical_map"]["historical_map_id"],
+         "era_year":1871,"approved_feature_ids":[]}
+    authored=fixture("contracts/examples/VisualBlueprint.v1.valid.json")["setup_plans"][0]["template_payload"]
+    bp=normalize_story(story,{"setup_001":authored,"setup_002":authored})
+    font=Path(os.environ["WINDIR"])/"Fonts"/"arial.ttf"
+    measure,identity=windows_font_measure(str(font),hashlib.sha256(font.read_bytes()).hexdigest())
+    requests={"req_001":{"year":1871,"map_record":record,"feature_ids":[]}}
+    original=compile_from_store(store,pid,bp,words,frozen,map_requests=requests,
+                                font_measure=measure,font_identity=identity)
+    assert len(original["scenes"])==2
+    with store._connection() as db:
+        source=AssetCandidates._source_tx(db,pid,"req_001")
+        head=AssetResolution._head(db,pid,"req_001",source["requirement_sha256"])
+    current={"req_001":{**head,"asset_class":"HISTORICAL_MAP",
+                        "source_kind":head.get("evidence",{}).get("source_kind","")}}
+    edited=copy.deepcopy(bp)
+    edited["setup_plans"][0]["variant_id"]="B"
+    edited["setup_plans"][0]["layout_control"]["layout_id"]="T01.B.v1.1"
+    edited["setup_plans"][0]["direction_revision"]={
+        "kind":"operator_visual_edit","source_story_revision_sha256":original["story_sha256"],
+        "edited_paths":["variant_id","layout_control.layout_id"],
+        "operator_confirmed":True,"edit_reason":"Improve map framing"}
+    revision=store.revision(pid)
+    changed=revise_g4(store,pid,original,bp,edited,words,frozen,current,
+               expected_revision=revision,operator_reason="Variant framing change",
+               maps={"setup_001":ctx,"setup_002":ctx},font_measure=measure)
+    assert changed["recomputed_setup_ids"]==["setup_001"]
+    assert changed["retained_setup_ids"]==["setup_002"]
+    assert canonical(changed["timeline"]["scenes"][1])==canonical(original["scenes"][1])
+    assert canonical(changed["timeline"]["scenes"][0])!=canonical(original["scenes"][0])
+    assert changed["timeline"]["word_map_sha256"]==original["word_map_sha256"]
+    assert changed["timeline"]["asset_snapshot_sha256"]==original["asset_snapshot_sha256"]
+    assert store.revision(pid)==revision+1
+    assert gates.board(pid)[3]["state"]!="APPROVED"
+    assert gates.board(pid)[4]["state"]!="APPROVED"
+    with pytest.raises(ContractViolation,match="APPROVAL_REVISION_CONFLICT"):
+        revise_g4(store,pid,original,bp,edited,words,frozen,current,
+                  expected_revision=revision,operator_reason="Stale update",
+                  maps={"setup_001":ctx,"setup_002":ctx},font_measure=measure)
