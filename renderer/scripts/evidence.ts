@@ -36,7 +36,7 @@ async function oneStill(timeline:Timeline,frame:number,label:string,mediaDir:str
  const comp=await selectComposition({serveUrl:bundlePath,id:'HistoricalTimelineV1',inputProps:props});
  if(comp.width!==1920||comp.height!==1080||comp.fps!==30||comp.durationInFrames!==timeline.total_frames)throw new Error('RENDER_FROZEN_FORMAT_MISMATCH');
  const path=resolve(output,label+'.png');
- await renderStill({serveUrl:bundlePath,composition:comp,inputProps:props,output:path,imageFormat:'png'});
+ await renderStill({serveUrl:bundlePath,composition:comp,inputProps:props,output:path,imageFormat:'png',frame});
  const png=PNG.sync.read(readFileSync(path));
  if(png.width!==1920||png.height!==1080)throw new Error('RENDER_DIMENSIONS_INVALID');
  const pixelHash=sha(Buffer.from(png.data));
