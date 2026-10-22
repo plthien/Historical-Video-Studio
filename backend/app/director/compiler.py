@@ -438,6 +438,7 @@ def revise_g4(store, project_id: str, previous: dict, original_blueprint: dict,
     if any(states[k] != "APPROVED" for k in ("G1", "G2", "G3")):
         _block("COMPILER_GATE_UNAPPROVED", project_id, "Current G1/G2/G3 must be approved at G4 edit.")
     story = store.get_story(project_id).data()
+    validate_document("VisualBlueprint.v1", edited_blueprint)
     validate_visual_blueprint(story, edited_blueprint)
     if StoryCandidate.parse(story).sha256 != previous["story_sha256"]:
         _block("STORY_SHA_MISMATCH", project_id, "Current G1 story changed since prior compiled timeline.")
