@@ -1,13 +1,13 @@
 import {readFileSync,realpathSync,statSync,writeFileSync,mkdirSync} from 'node:fs';
 import {resolve,relative,isAbsolute} from 'node:path';
 import {createHash} from 'node:crypto';
-import type {Timeline,ResolvedMedia,MediaItem,Geometry} from '../remotion/schema';
+import type {Timeline,ResolvedMedia,MediaItem,Geometry,ReviewedMap} from '../remotion/schema';
 import {assertTimeline,assertMedia,fail} from '../remotion/schema';
 import {PNG} from 'pngjs';
 
 const sha=(data:Buffer)=>createHash('sha256').update(data).digest('hex');
 export type MediaEntry={assetId:string;path:string;originalSha256:string;approvalRecordId:string;sourceKind:'APPROVED_LOCAL'|'SYNTHETIC';mime:MediaItem['mime']};
-export type ResolveManifest={projectId:string;g4ManifestSha256:string;mediaRoot:string;assets:MediaEntry[];geometries:Geometry[];fontFile:string;fontSha256:string;fontFamily:string;sourceKind:'APPROVED_LOCAL'|'SYNTHETIC'};
+export type ResolveManifest={projectId:string;g4ManifestSha256:string;mediaRoot:string;assets:MediaEntry[];geometries:Geometry[];maps:ReviewedMap[];fontFile:string;fontSha256:string;fontFamily:string;sourceKind:'APPROVED_LOCAL'|'SYNTHETIC'};
 export function loadApprovedMedia(t:Timeline, manifest:ResolveManifest):ResolvedMedia{
  assertTimeline(t);
  if(manifest.projectId!==t.project_id||!/^[a-f0-9]{64}$/.test(manifest.g4ManifestSha256))fail('RENDER_G4_DRAFT_MISMATCH',t.project_id,'Trusted project G4 manifest SHA required');
@@ -28,7 +28,7 @@ export function loadApprovedMedia(t:Timeline, manifest:ResolveManifest):Resolved
  const fontFile=realpathSync(resolve(manifest.fontFile));
  const fontBytes=readFileSync(fontFile);
  if(sha(fontBytes)!==manifest.fontSha256)fail('RENDER_FONT_SHA_MISMATCH',fontFile,'Measured font source changed');
- const media:ResolvedMedia={assets,geometries:Object.fromEntries(manifest.geometries.map(x=>[x.geometryRef,x])),
+ const media:ResolvedMedia={assets,geometries:Object.fromEntries(manifest.geometries.map(x=>[x.geometryRef,x])),maps:Object.fromEntries(manifest.maps.map(x=>[x.historicalMapId,x])),
    fontSha256:manifest.fontSha256,fontFamily:manifest.fontFamily,fontDataUri:'data:font/ttf;base64,'+fontBytes.toString('base64'),
    sourceKind:manifest.sourceKind,authorizingG4ManifestSha256:manifest.g4ManifestSha256};
  assertMedia(t,media);
@@ -51,6 +51,15 @@ export function makeSyntheticManifest(t:Timeline,directory:string,fontFile:strin
   const path=id+'.png';writeFileSync(resolve(directory,path),bytes);
   return {assetId:id,path,originalSha256:sha(bytes),approvalRecordId:'SYNTHETIC_TEST_ONLY_'+id,sourceKind:'SYNTHETIC' as const,mime:'image/png' as const};
  });
+ const maps=t.scenes.flatMap(scene=>scene.layers.filter(l=>l.layer_kind==='map'&&l.map_binding).map((l,i)=>{
+  const original=assets.find(x=>x.assetId===l.asset_id);
+  if(!original)fail('SYNTHETIC_MAP_MISSING',l.layer_id,'Synthetic image not generated');
+  return {historicalMapId:l.map_binding!.historical_map_id,projection:'mercator',
+    viewport:[9,49,13,53] as [number,number,number,number],
+    reviewedYear:scene.template_id==='T07'?(i===0?1871:1914):1871,
+    sourceOriginalSha256:original.originalSha256,
+    coordinateKind:l.map_binding!.coordinate_kind as ReviewedMap['coordinateKind']};
+ }));
  const geos=t.scenes.flatMap(s=>s.layers.filter(l=>l.path_geometry_ref).map(l=>{
   const isRoute=l.layer_kind==='route';
   return {geometryRef:l.path_geometry_ref!,sourceOriginalSha256:assets.find(x=>x.assetId===s.layers.find(x=>x.layer_kind==='map')?.asset_id)?.originalSha256??'f'.repeat(64),
@@ -62,6 +71,6 @@ export function makeSyntheticManifest(t:Timeline,directory:string,fontFile:strin
   };
  }));
  return {projectId:t.project_id,g4ManifestSha256:sha(Buffer.from('SYNTHETIC TEST G4 '+t.project_id)),
-  mediaRoot:directory,assets,geometries:geos,fontFile,fontSha256:sha(readFileSync(fontFile)),
+  mediaRoot:directory,assets,geometries:geos,maps,fontFile,fontSha256:sha(readFileSync(fontFile)),
   fontFamily:'Arial',sourceKind:'SYNTHETIC'};
 }
