@@ -1,0 +1,30 @@
+name: B2 Renderer Lockfile Bootstrap (temporary)
+on:
+  pull_request:
+    branches: [main]
+permissions:
+  contents: write
+jobs:
+  lock:
+    if: github.head_ref == 'feat/b2-remotion-shared-composition-templates'
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          persist-credentials: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Generate deterministic exact-version npm lockfile on feature branch only
+        shell: pwsh
+        run: |
+          npm --prefix renderer install --package-lock-only --ignore-scripts --no-audit --no-fund
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          git add renderer/package-lock.json
+          if (git diff --cached --quiet) { Write-Host "Lockfile already current"; exit 0 }
+          if ($env:GITHUB_HEAD_REF -ne "feat/b2-remotion-shared-composition-templates") { throw "Unexpected branch; cannot commit" }
+          git -c user.name="github-actions[bot]" -c user.email="41898282+github-actions[bot]@users.noreply.github.com" commit -m "build(B2): commit npm-resolved lockfile for pinned Remotion 4.0.524"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          git push origin HEAD:refs/heads/feat/b2-remotion-shared-composition-templates
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
