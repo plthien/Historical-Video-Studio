@@ -1,0 +1,66 @@
+"""B1-04: immutable registered layout geometry; no generated scene-specific JSX."""
+from __future__ import annotations
+
+import json
+from functools import lru_cache
+from pathlib import Path
+
+from backend.app.contracts import ContractViolation
+
+ROOT = Path(__file__).resolve().parents[3]
+REGISTRY = ROOT / "contracts/registries/layouts.v1.json"
+
+
+@lru_cache(maxsize=1)
+def layouts():
+    registry = json.loads(REGISTRY.read_text(encoding="utf-8"))
+    items = {(p["template_id"], p["variant_id"]): p for p in registry["layouts"]}
+    if len(items) != 30 or registry["registry_version"] != "1.1.0":
+        raise ContractViolation("REGISTRY_INCOMPLETE", "layouts",
+                                "Use the 30 canonical A/B/C layout variants v1.1.0.")
+    return items
+
+
+def selected_layout(plan: dict) -> dict:
+    key = (plan["template_id"], plan["variant_id"])
+    layout = layouts().get(key)
+    if layout is None or plan["layout_control"]["layout_id"].split(".")[:2] != list(key):
+        raise ContractViolation("LAYOUT_VARIANT_UNKNOWN", plan["setup_id"],
+                                "Select the existing layout variant for the authored template.")
+    return layout
+
+
+def slot_rect(slot: dict, layout: dict) -> dict:
+    canvas = layout["canvas"]
+    if (canvas["width"], canvas["height"], canvas["fps"]) != (1920, 1080, 30):
+        raise ContractViolation("LAYOUT_CANVAS_INVALID", layout["template_id"],
+                                "Only the pinned 1920x1080 30fps layout registry is supported.")
+    pos = slot["rect_normalized"]
+    box = {key: int(round(pos[key] * (canvas["width"] if key in ("x", "w") else canvas["height"])))
+           for key in ("x", "y", "w", "h")}
+    if (box["w"] < 1 or box["h"] < 1 or box["x"] < 0 or box["y"] < 0
+            or box["x"] + box["w"] > 1920 or box["y"] + box["h"] > 1080):
+        raise ContractViolation("LAYOUT_BOUNDS_INVALID", slot["slot_id"],
+                                "Return the authored slot to the registered video canvas.")
+    return box
+
+
+def pixel_geometry(plan: dict) -> dict:
+    layout = selected_layout(plan)
+    fields = {slot["slot_id"]: slot_rect(slot, layout) for slot in layout["slots"]}
+    if len(fields) != len(layout["slots"]):
+        raise ContractViolation("LAYOUT_SLOT_DUPLICATE", plan["setup_id"],
+                                "Registered template slots must be uniquely identified.")
+    return fields
+
+
+def role_bounds(layout: dict, layers: list[dict]) -> None:
+    counts = {}
+    for layer in layers:
+        role = layer["layer_kind"]
+        counts[role] = counts.get(role, 0) + 1
+    for rule in layout["composition_rules"]["required_role_counts"]:
+        num = counts.get(rule["role"], 0)
+        if not rule["min_count"] <= num <= rule["max_count"]:
+            raise ContractViolation("LAYOUT_ROLE_MISMATCH", layout["template_id"],
+                                    "Provide the registered number of reviewed layers for each required role.")
