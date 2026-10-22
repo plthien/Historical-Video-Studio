@@ -89,7 +89,8 @@ def bind_beats(blueprint:dict,word_map:dict, *,
             raise ContractViolation("CUE_RANGE_INVALID",item["beat_id"],
                                     "Next beat must follow this cue within final approved audio.")
         cue_a,cue_b=sample_to_frames(item["start_sample"],item["end_sample"],sr)
-        win_a=item["start_sample"]*30//sr
+        # Cue frame is the spoken word; visual ownership includes the first pre-cue hold.
+        win_a=windows[-1]["end_frame"] if windows else 0
         win_b=(next_start*30//sr if i+1<len(output)
                else (audio_total_samples*30+sr-1)//sr)
         if win_b<=win_a:
