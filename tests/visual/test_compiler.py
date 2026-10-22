@@ -983,6 +983,8 @@ def test_b1_g4_real_sqlite_positive_invalid_staging_selective_revision_and_stale
     edited=copy.deepcopy(bp)
     edited["setup_plans"][0]["variant_id"]="B"
     edited["setup_plans"][0]["layout_control"]["layout_id"]="T01.B.v1.1"
+    # Canonical VisualBlueprint signs the actual changed G1 direction field.
+    edited["setup_plans"][0]["editorial_direction"]["layout_variant_hint"]="B"
     edited["setup_plans"][0]["direction_revision"]={
         "kind":"operator_visual_edit","source_story_revision_sha256":original["story_sha256"],
         "edited_paths":["layout_variant_hint"],
