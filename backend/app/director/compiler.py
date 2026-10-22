@@ -196,8 +196,23 @@ def compile_from_store(store, project_id: str, blueprint: dict, word_map: dict,
     import hashlib
     if hashlib.sha256(wav).hexdigest() != final_audio["audio_sha256"]:
         _block("ALIGNMENT_SOURCE_STALE", project_id, "The immutable approved WAV hash does not match.")
+    from backend.app.voice.workflow import word_map_ready
     approved = {}
     with store._connection() as db:
+        if not word_map_ready(db, project_id):
+            _block("WORD_MAP_STALE", project_id, "Current successful G2 alignment job and word map are required.")
+        g2_head = db.execute("SELECT approval_id FROM gate_heads WHERE project_id=? AND gate_id='G2'",
+                             (project_id,)).fetchone()
+        row = db.execute(
+            "SELECT f.final_json,w.map_json,w.map_sha256 FROM final_audio f JOIN word_maps w "
+            "ON w.approval_id=f.approval_id AND w.project_id=f.project_id "
+            "WHERE f.project_id=? AND f.approval_id=?",
+            (project_id, g2_head[0])).fetchone()
+        from backend.app.director.fingerprint import digest
+        import json
+        if (not row or json.loads(row[0]) != final_audio or
+                json.loads(row[1]) != word_map or digest(word_map) != row[2]):
+            _block("WORD_MAP_STALE", project_id, "Caller supplied non-current or modified G2 WAV/WordTimingMap.")
         for requirement in story_obj.data()["asset_requirements"]:
             rid = requirement["requirement_id"]
             source = AssetCandidates._source_tx(db, project_id, rid)
