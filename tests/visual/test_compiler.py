@@ -747,7 +747,7 @@ def test_b1_g4_unapproved_staging_rejected_before_validation(tmp_path):
         "kind":"operator_visual_edit",
         "source_story_revision_sha256":prior["story_sha256"],
         "operator_confirmed":True,
-        "edited_paths":["editorial_direction.visual_beats.0.staging"],
+        "edited_paths":["visual_beats"],
         "edit_reason":"Verify authorization precedes schema validation"}
     plan["editorial_direction"]["visual_beats"][0]["staging"][0]["operation"] = "not_registered"
     revision = store.revision(pid)
@@ -954,7 +954,7 @@ def test_b1_g4_real_sqlite_positive_invalid_staging_selective_revision_and_stale
     malformed_plan["direction_revision"]={
         "kind":"operator_visual_edit",
         "source_story_revision_sha256":original["story_sha256"],
-        "edited_paths":["editorial_direction.visual_beats.0.staging"],
+        "edited_paths":["visual_beats"],
         "operator_confirmed":True,"edit_reason":"Authorized invalid-staging regression"}
     original_bytes=canonical(original)
     with pytest.raises(ContractViolation) as invalid:
@@ -985,7 +985,7 @@ def test_b1_g4_real_sqlite_positive_invalid_staging_selective_revision_and_stale
     edited["setup_plans"][0]["layout_control"]["layout_id"]="T01.B.v1.1"
     edited["setup_plans"][0]["direction_revision"]={
         "kind":"operator_visual_edit","source_story_revision_sha256":original["story_sha256"],
-        "edited_paths":["variant_id","layout_control.layout_id"],
+        "edited_paths":["layout_variant_hint"],
         "operator_confirmed":True,"edit_reason":"Improve map framing"}
     revision=store.revision(pid)
     changed=revise_g4(store,pid,original,bp,edited,words,frozen,current,
