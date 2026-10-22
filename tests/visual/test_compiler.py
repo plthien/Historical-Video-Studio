@@ -257,6 +257,9 @@ def test_cue_repeated_phrase_exact_sample_frames_and_staging():
     scene=group_staging(windows,48001,48000)[0]
     assert scene["start_frame"]==0 and scene["end_frame"]==31
     assert scene["focus_sequence"][0]["word_ids"]==["word_004","word_005"]
+    assert scene["focus_sequence"][0]["cue_start_frame"]==1
+    assert scene["focus_sequence"][0]["cue_end_frame"]==3
+    assert scene["focus_sequence"][0]["pre_cue_hold_frames"]==1
     with pytest.raises(ContractViolation,match="CUE_OCCURRENCE_INVALID"):
         resolve_cue({**c,"occurrence":3},wav,"beat_setup_001")
     with pytest.raises(ContractViolation,match="CUE_AMBIGUOUS"):
