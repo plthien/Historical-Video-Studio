@@ -172,6 +172,53 @@ def test_map_polygon_nonadjacent_vertex_on_edge_red_green():
     assert ex.value.code=="MAP_GEOMETRY_INVALID"
     assert ex.value.path=="feature_001"
 
+
+@pytest.mark.parametrize("rings,accepted",[
+    ([[10,50],[12,50],[12,52],[10,52],[10,50]],True),
+    ([[10,50],[12,50],[12,52],[11,50],[10,52],[10,50]],False),
+    ([[10,50],[12,50],[11,50],[12,52],[10,52],[10,50]],False),
+    ([[10,50],[12,50],[12,52],[11,50],[11.5,50],[10,52],[10,50]],False),
+    ([[10,50],[12,50],[12,52],[11,51],[11,50],[10,52],[11,51],[10,50]],False),
+    ([[10,50],[12,50],[12,50],[12,52],[10,52],[10,50]],False),
+])
+def test_map_polygon_topology_contacts_and_valid_control(rings,accepted):
+    raw={"type":"FeatureCollection","crs":"EPSG:4326",
+         "features":[{"id":"feature_001","type":"Feature",
+                      "geometry":{"type":"Polygon","coordinates":[rings]},"properties":{}}]}
+    source=json.dumps(raw,separators=(",",":")).encode()
+    m,approval=example_map(source,crs="EPSG:4326")
+    if accepted:
+        a=ingest(m,source,year=1871,feature_ids=["feature_001"],approval=approval)
+        b=ingest(m,source,year=1871,feature_ids=["feature_001"],approval=approval)
+        assert a["geometry_sha256"]==b["geometry_sha256"]
+        assert a["features"][0]["geometry"]["coordinates"]==[rings]
+    else:
+        with pytest.raises(ContractViolation) as ex:
+            ingest(m,source,year=1871,feature_ids=["feature_001"],approval=approval)
+        assert ex.value.code=="MAP_GEOMETRY_INVALID" and ex.value.path=="feature_001"
+
+
+@pytest.mark.parametrize("holes,accepted",[
+    ([[10.5,50.5],[10.5,51.5],[11.5,51.5],[11.5,50.5],[10.5,50.5]],True),
+    ([[10,50.5],[10.5,50.5],[10.5,51],[10,50.5]],False),
+    ([[12.2,50.5],[12.5,50.5],[12.5,51],[12.2,50.5]],False),
+    ([[11.8,50.5],[12.2,50.5],[11.8,51],[11.8,50.5]],False),
+])
+def test_map_polygon_interior_ring_relationships(holes,accepted):
+    outer=[[10,50],[12,50],[12,52],[10,52],[10,50]]
+    raw={"type":"FeatureCollection","crs":"EPSG:4326",
+         "features":[{"id":"feature_001","type":"Feature",
+                      "geometry":{"type":"Polygon","coordinates":[outer,holes]},"properties":{}}]}
+    source=json.dumps(raw,separators=(",",":")).encode()
+    m,approval=example_map(source,crs="EPSG:4326")
+    if accepted:
+        result=ingest(m,source,year=1871,feature_ids=["feature_001"],approval=approval)
+        assert result["features"][0]["geometry"]["coordinates"]==[outer,holes]
+    else:
+        with pytest.raises(ContractViolation) as ex:
+            ingest(m,source,year=1871,feature_ids=["feature_001"],approval=approval)
+        assert ex.value.code=="MAP_GEOMETRY_INVALID"
+
 def test_map_raster_without_tiepoints_stays_uv_only():
     source=b"synthetic-raster-byte-fixture";m,approval=example_map(source,crs="EPSG:4326")
     m.update(geometry_format="RASTER",geography_mode="raster_georeferenced",
