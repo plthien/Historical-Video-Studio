@@ -174,6 +174,20 @@ def build_layers(plan: dict, approved: dict, requirements: dict, *,
             "source_asset_slot_id": source["slot_id"] if source else None,
         }
         layers.append(layer)
+    # T06 excerpt UV is an explicit non-destructive crop on the approved original.
+    if plan["template_id"] == "T06":
+        payload = plan["template_payload"]
+        document = next((x for x in layers
+                         if x["source_asset_slot_id"] == payload["document_slot_id"]), None)
+        if document is None:
+            _blocked("DOCUMENT_CROP_INVALID", plan["setup_id"],
+                     "The authored excerpt must resolve to the approved document layer.")
+        crop = payload["focus_region_uv"]
+        if (crop["x"] < 0 or crop["y"] < 0 or crop["w"] <= 0 or crop["h"] <= 0
+                or crop["x"] + crop["w"] > 1 or crop["y"] + crop["h"] > 1):
+            _blocked("DOCUMENT_CROP_INVALID", plan["setup_id"],
+                     "Excerpt UV must remain strictly inside the original document.")
+        document["crop_normalized"] = dict(crop)
     role_bounds(layout, layers)
     if plan["template_id"] == "T03":
         cards=plan["template_payload"]["cards"]
