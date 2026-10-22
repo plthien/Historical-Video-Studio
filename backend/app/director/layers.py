@@ -188,6 +188,11 @@ def build_layers(plan: dict, approved: dict, requirements: dict, *,
             "source_asset_slot_id": source["slot_id"] if source else None,
         }
         layers.append(layer)
+    # The authored strict cutout contract cannot silently become a framed portrait.
+    # G3 currently authorizes originals, not a reviewed derivative mask identity.
+    if plan["template_id"] == "T02" and plan["template_payload"]["cutout_policy"] == "use_reviewed_mask":
+        _blocked("PORTRAIT_MASK_UNREVIEWED", plan["setup_id"],
+                 "Strict T02 cutout requires a G3-reviewed mask identity; frame the original until approved.")
     # T06 excerpt UV is an explicit non-destructive crop on the approved original.
     if plan["template_id"] == "T06":
         payload = plan["template_payload"]
