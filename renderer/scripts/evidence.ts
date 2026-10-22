@@ -92,6 +92,35 @@ const negatives=[];
 negatives.push(shouldFail('unregistered-template',()=>assertTimeline({...source,scenes:source.scenes.map((s,i)=>i===0?{...s,template_id:'T99'}:s)})));
 negatives.push(shouldFail('stale-frame',()=>activeScene(source,source.total_frames)));
 negatives.push(shouldFail('untrusted-media',()=>{let t=isolated(compiled.A.scenes[0],'A');loadApprovedMedia(t,{...makeSyntheticManifest(t,resolve(root,'.artifacts','negative'),fontFile),assets:[]});}));
+const sample=isolated(compiled.A.scenes.find(s=>s.template_id==='T04')!,'A');
+const synthetic=makeSyntheticManifest(sample,resolve(root,'.artifacts','negative-route'),fontFile);
+negatives.push(shouldFail('forged-original-sha',()=>loadApprovedMedia(sample,{...synthetic,
+ assets:synthetic.assets.map((a,i)=>i===0?{...a,originalSha256:'a'.repeat(64)}:a)})));
+negatives.push(shouldFail('remote-media-url',()=>loadApprovedMedia(sample,{...synthetic,
+ assets:synthetic.assets.map((a,i)=>i===0?{...a,path:'https://not-authorized.test/map.png'}:a)})));
+negatives.push(shouldFail('unsafe-media-path',()=>loadApprovedMedia(sample,{...synthetic,
+ assets:synthetic.assets.map((a,i)=>i===0?{...a,path:'../../outside.png'}:a)})));
+negatives.push(shouldFail('missing-review-geometry',()=>loadApprovedMedia(sample,{...synthetic,geometries:[]})));
+negatives.push(shouldFail('wrong-era-map-review',()=>loadApprovedMedia(sample,{...synthetic,
+ maps:synthetic.maps.map(m=>({...m,sourceOriginalSha256:'f'.repeat(64)}))})));
+negatives.push(shouldFail('unregistered-motion',()=>{
+ const t=structuredClone(sample);t.scenes[0].events[0].preset_id='unsupported-motion';assertTimeline(t);
+}));
+negatives.push(shouldFail('unapproved-mask',()=>{
+ const t=structuredClone(sample);t.scenes[0].layers[0].mask={kind:'image',asset_id:'some_external',feather_px:0};assertTimeline(t);
+}));
+const collage=isolated(compiled.A.scenes.find(s=>s.template_id==='T03')!,'A');
+const collageMedia=makeSyntheticManifest(collage,resolve(root,'.artifacts','negative-collage'),fontFile);
+negatives.push(shouldFail('duplicate-collage-original',()=>{
+ const t=structuredClone(collage);
+ const cards=t.scenes[0].layers.filter(l=>l.layer_kind==='archival_photo');
+ cards[1].asset_id=cards[0].asset_id;
+ loadApprovedMedia(t,collageMedia);
+}));
+const causal=isolated(compiled.A.scenes.find(s=>s.template_id==='T10')!,'A');
+const causalMedia=makeSyntheticManifest(causal,resolve(root,'.artifacts','negative-editorial'),fontFile);
+negatives.push(shouldFail('editorial-as-map-route',()=>loadApprovedMedia(causal,{...causalMedia,
+ geometries:causalMedia.geometries.map(g=>({...g,coordinateSpace:'WGS84' as const}))})));
 const evidence={command:mode,runner:{node:process.version,platform:process.platform},source:'SYNTHETIC B1 compiled fixtures, not live G1-G4 approvals',samples:metrics,negatives};
 writeFileSync(resolve(output,'b2-'+mode+'-evidence.json'),JSON.stringify(evidence,null,2));
 console.log(JSON.stringify({status:'LOCAL_PASS',mode,cases:sourceCases.length,negative:negatives.length,renderer:'Remotion Chromium',evidenceDir:output}));
