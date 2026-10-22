@@ -50,11 +50,23 @@ function motionForLayer(scene:Scene,layer:Layer,frame:number){
   if(e.layer_id!==layer.layer_id&&!e.affected_layer_ids.includes(layer.layer_id)&&!stagger)continue;
   const delay=stagger?ordered!.indexOf(layer.layer_id)*Number(e.params.gap_frames??6):0;
   const starts=e.start_frame+delay;
-  // Once an authored beat introduced a source card, later collage events
-  // cannot reset its opacity. Only its own entering event may reveal it.
-  const first=firstAppearance(scene,layer.layer_id);
-  if(e.preset_id==='stagger-reveal'&&starts>first&&frame>=first)continue;
-  if(frame<starts)continue;
+  // The repeated B1 stagger events describe sequential beats for the
+  // same source-card set. Pick the entrance nearest its FIRST activation,
+  // not a future replay (which would re-hide an already revealed card).
+  if(e.preset_id==='stagger-reveal'){
+   const first=firstAppearance(scene,layer.layer_id);
+   const all=scene.events.filter(candidate=>candidate.preset_id==='stagger-reveal'&&
+    (candidate.layer_id===layer.layer_id||candidate.affected_layer_ids.includes(layer.layer_id)||
+     (candidate.params.ordered_layer_ids as string[]|undefined)?.includes(layer.layer_id)));
+   const begin=(candidate:Motion)=>{
+    const order=candidate.params.ordered_layer_ids as string[]|undefined;
+    const index=order?.indexOf(layer.layer_id)??-1;
+    return candidate.start_frame+Math.max(0,index)*Number(candidate.params.gap_frames??6);
+   };
+   const sequence=[...all].sort((x,y)=>begin(x)-begin(y));
+   const chosen=sequence.find(candidate=>begin(candidate)>=first)??sequence[sequence.length-1];
+   if(chosen!==e)continue;
+  }
   const p=eventProgress({...e,start_frame:starts},frame);
   switch(e.preset_id){
    case 'photo-card-enter':opacity*=p;scale*=mix(.93,1,p);rotation+=mix(Number(e.params.start_rotation_deg??-2),Number(e.params.end_rotation_deg??0),p);break;
