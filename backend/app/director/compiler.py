@@ -416,6 +416,45 @@ def revise_g4(store, project_id: str, previous: dict, original_blueprint: dict,
     validate_visual_blueprint(story, edited_blueprint)
     if StoryCandidate.parse(story).sha256 != previous["story_sha256"]:
         _block("STORY_SHA_MISMATCH", project_id, "Current G1 story changed since prior compiled timeline.")
+    # Reject stale caller snapshots against the current persisted G2/G3 approval heads.
+    # Equality among caller dictionaries is not sufficient authorization.
+    from backend.app.assets.provenance import AssetCandidates
+    from backend.app.assets.resolution import AssetResolution
+    from backend.app.voice.workflow import word_map_ready
+    import hashlib
+    import json
+    with store._connection() as db:
+        if not word_map_ready(db, project_id):
+            _block("WORD_MAP_STALE", project_id, "G4 requires current persisted G2 alignment.")
+        g2_head = db.execute(
+            "SELECT approval_id FROM gate_heads WHERE project_id=? AND gate_id='G2'",
+            (project_id,)).fetchone()
+        row = db.execute(
+            "SELECT f.final_json,w.map_json,w.map_sha256 FROM final_audio f JOIN word_maps w "
+            "ON f.project_id=w.project_id AND f.approval_id=w.approval_id "
+            "WHERE f.project_id=? AND f.approval_id=?",
+            (project_id, g2_head[0] if g2_head else None)).fetchone()
+        if (not row or json.loads(row[0]) != final_audio
+                or json.loads(row[1]) != word_map or row[2] != digest(word_map)):
+            _block("WORD_MAP_STALE", project_id, "Edited blueprint must use persisted current G2 WAV and word map.")
+        if hashlib.sha256(store.get_artifact(final_audio["audio_sha256"])).hexdigest() != final_audio["audio_sha256"]:
+            _block("ALIGNMENT_SOURCE_STALE", project_id, "Approved final WAV original bytes changed.")
+        verified_assets = {}
+        for requirement in story["asset_requirements"]:
+            rid = requirement["requirement_id"]
+            source = AssetCandidates._source_tx(db, project_id, rid)
+            head = AssetResolution._head(db, project_id, rid, source["requirement_sha256"])
+            if not head:
+                if requirement["required"]:
+                    _block("G3_ASSET_UNAPPROVED", rid, "The current G3 source has no eligible approved original.")
+                continue
+            if hashlib.sha256(store.get_artifact(head["original_sha256"])).hexdigest() != head["original_sha256"]:
+                _block("G3_ASSET_UNAPPROVED", rid, "Current G3 original bytes are stale.")
+            verified_assets[rid] = {**head, "asset_class": requirement["asset_class"],
+                                    "source_kind": head.get("evidence", {}).get("source_kind", "")}
+        if verified_assets != approved_assets:
+            _block("G4_SOURCE_EDIT_FORBIDDEN", project_id,
+                   "Caller G3 snapshot differs from current SQLite rights and approved originals.")
     windows = bind_beats(edited_blueprint, word_map,
                          audio_sha256=final_audio["audio_sha256"],
                          transcript_sha256=final_audio["transcript_sha256"],
