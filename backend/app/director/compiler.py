@@ -132,11 +132,11 @@ def _scene(plan, staging, beats, assets, requirements, maps, font_measure):
         evidence = {"source_sha": next((r["original_sha256"] for r in assets.values()
                                         if r["candidate_id"] == target["asset_id"]), ""),
                     "claim_ids": plan["claim_refs"],
-                    **(maps or {}).get(sid, {})}
+                    **(maps or {}).get(sid, {}), "editorial_connector": plan["template_id"] == "T10"}
         event = compile_event(kind, target, layers,
                               event_id="event_" + beat["beat_id"],
                               start_frame=event_at, duration_frames=length,
-                              cue_word_id=beat["word_ids"][0], evidence=evidence)
+                              cue_word_id=beat["word_ids"][0], params=params, evidence=evidence)
         events.append(event)
     camera = build_camera(plan, layers, beats, refs, duration_frames=duration,
                           limits=layout["camera_limits"])
