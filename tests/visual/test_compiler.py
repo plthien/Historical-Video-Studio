@@ -1132,6 +1132,21 @@ def test_b1_g4_real_sqlite_positive_invalid_staging_selective_revision_and_stale
         with store._transaction() as db:
             db.execute("INSERT INTO g4_compiled_drafts VALUES(?,?,?,?)",head_row)
     assert draft.load(store,pid)["manifest_sha256"]==stored["manifest_sha256"]
+    # Current byte integrity is independent from intact caller SHA fields.
+    for affected_sha in (candidate["original_sha256"], frozen["audio_sha256"]):
+        media_path=store.artifacts.path(affected_sha)
+        immutable_bytes=media_path.read_bytes()
+        try:
+            media_path.write_bytes(b"NOT-THE-APPROVED-ORIGINAL")
+            with pytest.raises(ContractViolation,match="ARTIFACT_CORRUPT"):
+                revise_g4(store,pid,original,bp,edited,words,frozen,current,
+                    expected_revision=baseline_revision,
+                    operator_reason="Reject altered approved source bytes",
+                    maps=None,font_measure=measure)
+            assert store.revision(pid)==baseline_revision
+        finally:
+            media_path.write_bytes(immutable_bytes)
+    assert draft.load(store,pid)["manifest_sha256"]==stored["manifest_sha256"]
     revision=store.revision(pid)
     changed=revise_g4(store,pid,original,bp,edited,words,frozen,current,
                expected_revision=revision,operator_reason="Variant framing change",
