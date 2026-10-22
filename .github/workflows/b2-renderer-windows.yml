@@ -27,8 +27,12 @@ jobs:
       - name: Install exact Remotion lock on Windows
         shell: pwsh
         run: |
-          npm --prefix renderer ci --no-audit --no-fund
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          Push-Location renderer
+          try {
+            npm ci --no-audit --no-fund
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          }
+          finally { Pop-Location }
           npm --prefix renderer run verify:toolchain
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           npm --prefix renderer run typecheck
