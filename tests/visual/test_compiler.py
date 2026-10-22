@@ -975,6 +975,17 @@ def test_b1_g4_real_sqlite_positive_invalid_staging_selective_revision_and_stale
     assert canonical(stored["timeline"])==canonical(original)
     assert canonical(stored["blueprint"])==canonical(bp)
     assert stored["generation"]==1 and stored["revision"]==store.revision(pid)
+    # Immutable artifact corruption must be rejected before any trusted draft use.
+    manifest_path=store.artifacts.path(stored["manifest_sha256"])
+    manifest_bytes=manifest_path.read_bytes()
+    try:
+        manifest_path.write_bytes(b"CORRUPTED-G4-DRAFT")
+        with pytest.raises(ContractViolation,match="ARTIFACT_CORRUPT"):
+            draft.load(store,pid)
+        assert store.revision(pid)==stored["revision"]
+    finally:
+        manifest_path.write_bytes(manifest_bytes)
+    assert draft.load(store,pid)["manifest_sha256"]==stored["manifest_sha256"]
     with store._connection() as db:
         source=AssetCandidates._source_tx(db,pid,"req_001")
         head=AssetResolution._head(db,pid,"req_001",source["requirement_sha256"])
@@ -1138,7 +1149,9 @@ def test_b1_g4_real_sqlite_positive_invalid_staging_selective_revision_and_stale
                    ("f"*64,pid))
     current_revision=store.revision(pid)
     with pytest.raises(ContractViolation,match="WORD_MAP_STALE"):
-        revise_g4(store,pid,original,bp,edited,words,frozen,current,
-                  expected_revision=current_revision,operator_reason="Recheck current G2",
-                  maps=None,font_measure=measure)
+        revise_g4(store,pid,cropped["timeline"],edited,copy.deepcopy(edited),
+                  words,frozen,current,expected_revision=current_revision,
+                  operator_reason="Recheck current G2",maps=None,
+                  font_measure=measure,
+                  crop_overrides={"setup_001":{map_layer["layer_id"]:reviewed_crop}})
     assert store.revision(pid)==current_revision
