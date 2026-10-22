@@ -175,6 +175,34 @@ def build_layers(plan: dict, approved: dict, requirements: dict, *,
         }
         layers.append(layer)
     role_bounds(layout, layers)
+    if plan["template_id"] == "T03":
+        cards=plan["template_payload"]["cards"]
+        by_source={x["asset_slot_id"]:x for x in cards}
+        if (sum(x["card_role"]=="hero" for x in cards)!=1 or
+                len({x["asset_slot_id"] for x in cards})!=len(cards)):
+            _blocked("COLLAGE_HERO_INVALID", plan["setup_id"],
+                     "T03 must preserve one hero and separately authored card source IDs.")
+        source_layers=[x for x in layers if x["layer_kind"]=="archival_photo"]
+        if len(source_layers)!=len(cards):
+            _blocked("COLLAGE_SOURCE_MISSING", plan["setup_id"],
+                     "Do not silently omit T03 authored approved evidence cards.")
+        for layer in source_layers:
+            card=by_source.get(layer["source_asset_slot_id"])
+            if card is None:
+                _blocked("COLLAGE_SOURCE_MISSING", layer["layer_id"],
+                         "Card layout must resolve each authored G3 source slot.")
+            layer["depth_order"]=card["depth_plane"]
+    if plan["template_id"] == "T04":
+        route=next((x for x in layers if x["layer_kind"]=="route"),None)
+        backdrop=next((x for x in layers if x["layer_kind"]=="map"),None)
+        active=(maps or {}).get(plan["setup_id"],{})
+        if (route is None or backdrop is None or
+                not active.get("reviewed_period_map") or
+                route["path_geometry_ref"]!=plan["template_payload"]["route_geometry_ref"]):
+            _blocked("MAP_ROUTE_INVALID", plan["setup_id"],
+                     "T04 needs an approved period map and separately reviewed authored route geometry.")
+        if route["z_index"]<=backdrop["z_index"]:
+            _blocked("LAYOUT_ROLE_MISMATCH", plan["setup_id"], "Route must overlay the reviewed map.")
     if plan["template_id"] == "T07":
         names = [x for x in layers if x["layer_kind"] == "map"]
         if len(names) != 2 or names[0]["asset_id"] == names[1]["asset_id"]:
