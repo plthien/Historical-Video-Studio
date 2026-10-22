@@ -263,3 +263,110 @@ def synthetic_longform_inputs():
                        "historical_map_id":ingested["historical_map"]["historical_map_id"],
                        "approved_feature_ids":["feature_001"],"era_year":1914}
     return story,blueprint,word_map,final,approvals,maps
+
+
+
+def synthetic_ten_template_inputs():
+    """SYNTHETIC G1/G2/G3 boundary for production compile of all ten visual cases.
+
+    No actual TTS, original historical rights review, or operator gate approval.
+    Aligned synthetic words have distinct occurrence IDs and exact native samples.
+    """
+    from backend.app.projects.models import StoryCandidate
+    from backend.app.voice.word_map import normalized
+    import copy
+    story = fixture("contracts/examples/visual_cases/StoryPackage.visual_cases.synthetic.json")
+    reference = fixture("contracts/examples/visual_cases/VisualBlueprint.visual_cases.synthetic.json")
+    # The checked-in illustrative beats reuse the first 'the'. Each subsequent
+    # beat must resolve a different actually spoken word occurrence.
+    for setup in story["visual_setups"]:
+        beats = setup["direction"]["visual_beats"]
+        if len(beats) >= 3:
+            beats[2]["cue"]["occurrence"] = 1
+    payloads = {p["setup_id"]:p["template_payload"] for p in reference["setup_plans"]}
+    bp = normalize_story(story, payloads)
+    sample_rate = 24000
+    section_samples = 240000
+    words, offsets = [], []
+    for si, section in enumerate(story["sections"]):
+        start = si * section_samples
+        tokens = section["narration"].split()
+        offsets.append({"section_id": section["section_id"],
+                        "start_sample": start, "end_sample": start + section_samples})
+        for i, token in enumerate(tokens):
+            words.append({"word_id":f"word_{len(words)+1:05d}",
+                          "section_id":section["section_id"],"text":token,
+                          "start_sample":start + i*section_samples//len(tokens),
+                          "end_sample":start + (i+1)*section_samples//len(tokens)})
+    audio_hash = hashlib.sha256(b"SYNTHETIC ten-template audio identity").hexdigest()
+    transcript_hash = hashlib.sha256(b"SYNTHETIC ten-template transcript identity").hexdigest()
+    word_map = {"schema_version":"WordTimingMap.v1","project_id":bp["project_id"],
+                "provider_id":"elevenlabs_forced_alignment","audio_sha256":audio_hash,
+                "transcript_sha256":transcript_hash,"sample_rate":sample_rate,
+                "words":words,"anomalies":[]}
+    final = {"schema_version":"FinalAudio.v1","project_id":bp["project_id"],
+             "story_revision_sha256":bp["story_revision_sha256"],
+             "selected_attempt_ids":[f"attempt_{i+1:03d}" for i in range(len(offsets))],
+             "audio_sha256":audio_hash,"transcript_sha256":transcript_hash,
+             "sample_rate":sample_rate,"channels":1,
+             "duration_samples":section_samples*len(offsets),"section_offsets":offsets}
+    raw = json.dumps({"type":"FeatureCollection","crs":"EPSG:4326",
+        "features":[
+            {"type":"Feature","id":"feature_001",
+             "geometry":{"type":"Polygon","coordinates":[[
+                 [10,50],[12,50],[12,52],[10,52],[10,50]]]},"properties":{}},
+            {"type":"Feature","id":"geometry_route_001",
+             "geometry":{"type":"LineString","coordinates":[[10,50],[11,51],[12,52]]},
+             "properties":{}}
+        ]}, sort_keys=True, separators=(",",":")).encode()
+    approved = {}
+    for req in story["asset_requirements"]:
+        rid = req["requirement_id"]
+        approved[rid] = {"candidate_id":"candidate_"+rid,
+                         "approval_record_id":"approval_"+rid,
+                         "original_sha256":(hashlib.sha256(raw).hexdigest()
+                            if req["asset_class"]=="HISTORICAL_MAP"
+                            else hashlib.sha256(("SYNTHETIC "+rid).encode()).hexdigest()),
+                         "asset_class":req["asset_class"],"source_kind":"SYNTHETIC"}
+    maps = {}
+    for plan in bp["setup_plans"]:
+        sid = plan["setup_id"]
+        payload = plan["template_payload"]
+        map_refs = []
+        if "map" in payload:
+            map_refs.append(payload["map"])
+        for key in ("before_map","after_map"):
+            if key in payload:
+                map_refs.append(payload[key])
+        if not map_refs:
+            continue
+        ctx = {"sources":{}, "reviewed_period_map":True}
+        for item in map_refs:
+            rid, year = item["map_requirement_id"], item["year"]
+            record = fixture("contracts/examples/HistoricalMap.v1.valid.json")
+            record.update(historical_map_id="map_"+rid,
+                source_original_sha256=approved[rid]["original_sha256"],
+                source_asset_id=approved[rid]["candidate_id"],
+                rights_review_record_id=approved[rid]["approval_record_id"],
+                user_approved=True, source_crs="EPSG:4326",
+                geometry_object_sha256=None, valid_year_from=year,
+                valid_year_to=year, approved_feature_ids=["feature_001","geometry_route_001"],
+                geography_bbox={"min_lon":9,"min_lat":49,"max_lon":13,"max_lat":53})
+            original = {k:approved[rid][k] for k in
+                        ("original_sha256","candidate_id","approval_record_id")}
+            route = "geometry_route_001" if plan["template_id"]=="T04" else None
+            record["geometry_format"]="GEOJSON"
+            result = ingest(record,raw,year=year,feature_ids=["feature_001","geometry_route_001"],
+                            route_feature_id=route,approval=original)
+            ctx["sources"][rid] = result
+            ctx["historical_map_id"] = result["historical_map"]["historical_map_id"]
+            ctx["era_year"] = year
+            ctx["approved_feature_ids"] = ["feature_001","geometry_route_001"]
+            if route:
+                ctx["route_feature_id"] = route
+                ctx["geometry_type"] = "LineString"
+        if plan["template_id"]=="T07":
+            ctx["shared_projection"] = "mercator"
+            ctx["shared_viewport"] = [9,49,13,53]
+        maps[sid]=ctx
+    return story,bp,word_map,final,approved,maps
