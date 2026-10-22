@@ -790,9 +790,41 @@ def test_b1_thirty_variants_actual_compiler_geometry_on_windows():
     outputs={}
     for variant in ("A","B","C"):
         bp=copy.deepcopy(base)
+        from backend.app.director.layout import selected_layout
         for plan in bp["setup_plans"]:
             plan["variant_id"]=variant
             plan["layout_control"]["layout_id"]=f'{plan["template_id"]}.{variant}.v1.1'
+            # A/B/C are different compositions. The synthetic A-authored
+            # focus may target an optional text/map slot absent in B or C.
+            # Make an explicit, signed visual-only authoring adjustment instead
+            # of expecting the production compiler to invent a missing layer.
+            registered={slot["slot_id"] for slot in selected_layout(plan)["slots"]}
+            direction=plan["editorial_direction"]
+            available=[slot["slot_id"] for slot in direction["asset_slots"]
+                       if any(slot["slot_id"].endswith("_"+name) for name in registered)]
+            available.extend(t["text_id"] for t in direction["on_screen_text"]
+                      if any(t["text_id"].endswith("_"+name) for name in registered))
+            changed_focus=False
+            for beat in direction["visual_beats"]:
+                old=beat["focus_ref"]
+                if any(old.endswith("_"+name) for name in registered):
+                    continue
+                if not available:
+                    raise AssertionError("No authored focus survives variant "+variant)
+                fallback=available[0]
+                beat["focus_ref"]=fallback
+                for step in beat["staging"]:
+                    if step["ref"]==old:
+                        step["ref"]=fallback
+                        if plan["template_id"]=="T10":
+                            step["motion_hint"]="none"
+                changed_focus=True
+            if changed_focus:
+                plan["direction_revision"]={
+                    "kind":"operator_visual_edit",
+                    "source_story_revision_sha256":bp["story_revision_sha256"],
+                    "edited_paths":["visual_beats"], "operator_confirmed":True,
+                    "edit_reason":"SYNTHETIC controlled variant-specific visible focus"}
         out=compile_timeline(story,bp,words,final,assets,maps=maps,
               font_measure=measure,font_identity=identity,
               expected_story_sha256=bp["story_revision_sha256"])
