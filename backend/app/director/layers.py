@@ -62,6 +62,7 @@ def build_layers(plan: dict, approved: dict, requirements: dict, *,
     sources = {s["slot_id"]: s for s in authored["asset_slots"]}
     bindings = {s["slot_id"]: s for s in plan["asset_slot_bindings"]}
     texts = {t["text_id"].split("_", 2)[-1]: t for t in authored["on_screen_text"]}
+    text_by_id = {t["text_id"]:t for t in authored["on_screen_text"]}
     layers = []
     ref_map = {}
     used_photo = set()
@@ -69,7 +70,31 @@ def build_layers(plan: dict, approved: dict, requirements: dict, *,
         sid, role = slot["slot_id"], slot["role"]
         source = next((x for x in sources.values() if x["semantic_role"] == sid or
                        x["slot_id"].endswith("_" + sid)), None)
+        # Generic legacy synthetic setup slots can bind only when the single
+        # authored G1 source has a compatible unambiguous registered role.
+        if source is None and role in ASSET_CLASSES:
+            possible = [x for x in sources.values()
+                        if requirements.get(x["requirement_id"], {}).get("asset_class") in ASSET_CLASSES[role]]
+            if len(possible)==1 and len([s for s in layout["slots"]
+                   if s["role"] in ASSET_CLASSES and
+                   requirements.get(possible[0]["requirement_id"], {}).get("asset_class")
+                       in ASSET_CLASSES[s["role"]]]) == 1:
+                source = possible[0]
         txt = texts.get(sid)
+        if txt is None and role in TEXT_ROLES:
+            if plan["template_id"] == "T08" and sid == "fact_value":
+                payload = plan["template_payload"]
+                txt = {"text_id": "text_" + plan["setup_id"] + "_value",
+                       "text": payload["display_value"], "role":"date",
+                       "claim_ref": payload["fact_claim_id"], "max_lines": 1}
+            elif plan["template_id"] == "T06" and sid == "verified_excerpt":
+                txt = text_by_id.get(plan["template_payload"]["excerpt_text_id"])
+            else:
+                matches = [x for x in authored["on_screen_text"] if
+                           x["role"] == role or (role=="text" and x["role"]=="caption")]
+                if len(matches)==1 and sum(1 for slot2 in layout["slots"] if
+                         slot2["required"] and slot2["role"]==role)==1:
+                    txt = matches[0]
         is_route = role == "route"
         if role in TEXT_ROLES and txt is None and not slot["required"]:
             continue
