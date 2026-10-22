@@ -10,7 +10,7 @@ const easing=(v:number,name:string)=>{const p=clamp(v);switch(name){
  case 'ease_in_out':return p*p*(3-2*p);
  case 'ease_in':return p*p;
  case 'ease_out':return 1-(1-p)*(1-p);
- default:fail('RENDER_CAMERA_EASING',name,'Unsupported authored camera easing');
+ default:return fail('RENDER_CAMERA_EASING',name,'Unsupported authored camera easing');
 }};
 export function sampleCamera(keys:Scene['camera']['keyframes'],frame:number){
  if(!keys.length)fail('RENDER_CAMERA_KEYS','camera','A pinned camera needs at least one key');
@@ -87,9 +87,8 @@ function firstAppearance(scene:Scene,layerId:string){
  return beats.length?Math.min(...beats.map(b=>b.local_start_frame)):0;
 }
 function pathPoints(layer:Layer,media:ResolvedMedia):[number,number][]{
- if(!layer.path_geometry_ref)fail('RENDER_GEOMETRY_UNTRUSTED',layer.layer_id,'Missing frozen geometry ref');
- const g=media.geometries[layer.path_geometry_ref];
- if(!g)fail('RENDER_GEOMETRY_UNTRUSTED',layer.layer_id,'No verified geometry');
+ const ref=layer.path_geometry_ref ?? fail('RENDER_GEOMETRY_UNTRUSTED',layer.layer_id,'Missing frozen geometry ref');
+ const g=media.geometries[ref] ?? fail('RENDER_GEOMETRY_UNTRUSTED',layer.layer_id,'No verified geometry');
  const r=layer.rect_px;
  const points=g.coordinates.map(([x,y])=>{
   if(g.coordinateSpace==='ANNOTATION_CANVAS')return [x*r.w,y*r.h] as [number,number];
