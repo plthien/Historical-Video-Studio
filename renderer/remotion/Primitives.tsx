@@ -56,7 +56,13 @@ function pathD(layer:Layer,media:ResolvedMedia){
   if(g.coordinateSpace==='ANNOTATION_CANVAS')return [x*r.w,y*r.h];
   const bbox=g.bbox;if(!bbox)fail('RENDER_MAP_VIEWPORT',layer.layer_id,'Historical map bbox absent');
   const [left,bottom,right,top]=bbox;
-  return [((x-left)/(right-left))*r.w,((top-y)/(top-bottom))*r.h];
+  const projection=media.maps[g.historicalMapId!]?.projection;
+  const clampLatitude=(lat:number)=>Math.max(-85.05112878,Math.min(85.05112878,lat));
+  const merc=(lat:number)=>Math.log(Math.tan(Math.PI/4+clampLatitude(lat)*Math.PI/360));
+  if(projection!=='mercator'&&projection!=='equirectangular')fail('RENDER_PROJECTION_UNSUPPORTED',layer.layer_id,'Unsupported reviewed projection cannot be silently drawn');
+  const yNorm=projection==='mercator'?(merc(top)-merc(y))/(merc(top)-merc(bottom)):
+    (top-y)/(top-bottom);
+  return [((x-left)/(right-left))*r.w,yNorm*r.h];
  });
  return points.map(([x,y],i)=>(i?'L':'M')+x.toFixed(2)+' '+y.toFixed(2)).join(' ');
 }
