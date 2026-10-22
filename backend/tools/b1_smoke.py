@@ -355,7 +355,7 @@ def synthetic_ten_template_inputs():
             original = {k:approved[rid][k] for k in
                         ("original_sha256","candidate_id","approval_record_id")}
             route = "geometry_route_001" if plan["template_id"]=="T04" else None
-            record["geometry_format"]="GEOJSON"
+            record["geometry_format"]="GeoJSON"
             result = ingest(record,raw,year=year,feature_ids=["feature_001","geometry_route_001"],
                             route_feature_id=route,approval=original)
             ctx["sources"][rid] = result
