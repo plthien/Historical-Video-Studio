@@ -93,6 +93,8 @@ def windows_font_measure(path: str, expected_sha256: str, *, family: str = "Aria
     gdi.DeleteObject.argtypes = [ctypes.c_void_p]
     gdi.GetTextExtentPoint32W.argtypes = [ctypes.c_void_p, ctypes.c_wchar_p,
                                           ctypes.c_int, ctypes.POINTER(wintypes.SIZE)]
+    gdi.GetTextFaceW.argtypes = [ctypes.c_void_p, ctypes.c_int, ctypes.c_wchar_p]
+    gdi.GetTextFaceW.restype = ctypes.c_int
     hdc = gdi.CreateCompatibleDC(0)
     if not hdc:
         raise ContractViolation("FONT_METRICS_REQUIRED", str(path), "Cannot create Windows GDI measurement context.")
@@ -107,6 +109,17 @@ def windows_font_measure(path: str, expected_sha256: str, *, family: str = "Aria
         previous = gdi.SelectObject(hdc, handle)
         bounds = wintypes.SIZE()
         try:
+            family_length = gdi.GetTextFaceW(hdc, 0, None)
+            if family_length < 1:
+                raise ContractViolation("FONT_METRICS_REQUIRED", str(path),
+                                        "Cannot identify the actual selected GDI font family.")
+            actual_family = ctypes.create_unicode_buffer(family_length + 1)
+            if not gdi.GetTextFaceW(hdc, len(actual_family), actual_family):
+                raise ContractViolation("FONT_METRICS_REQUIRED", str(path),
+                                        "Cannot read selected GDI font family.")
+            if actual_family.value.casefold() != family.casefold():
+                raise ContractViolation("FONT_IDENTITY_STALE", str(path),
+                                        "GDI silently substituted another font face; select the pinned family.")
             if not gdi.GetTextExtentPoint32W(hdc, text, len(text), ctypes.byref(bounds)):
                 raise ContractViolation("FONT_METRICS_REQUIRED", str(path), "GDI glyph measurement failed.")
             cache[key] = (bounds.cx, bounds.cy)
