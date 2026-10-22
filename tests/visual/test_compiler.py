@@ -182,7 +182,7 @@ def test_map_raster_without_tiepoints_stays_uv_only():
     ok=ingest(m,source,year=1871,feature_ids=[],approval=approval)
     assert ok["coordinate_space"]=="UV_ONLY" and ok["features"]==[]
 
-def test_cue_repeated_phrase_exact_sample_frames_and_staging():
+def test_map_cue_repeated_phrase_exact_sample_frames_and_staging():
     story=fixture("contracts/examples/StoryPackage.v1.valid.json")
     src=fixture("contracts/examples/VisualBlueprint.v1.valid.json")
     blueprint=normalize_story(story,{"setup_001":src["setup_plans"][0]["template_payload"]})
