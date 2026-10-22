@@ -284,6 +284,7 @@ def compile_from_store(store, project_id: str, blueprint: dict, word_map: dict,
     from backend.app.assets.provenance import AssetCandidates
     from backend.app.assets.resolution import AssetResolution
     from backend.app.projects.gates import GateService
+    start_revision = store.revision(project_id)
     gate = {x["gate_id"]: x for x in GateService(store).board(project_id)}
     if any(gate[k]["state"] != "APPROVED" for k in ("G1", "G2", "G3")):
         _block("COMPILER_GATE_UNAPPROVED", project_id, "Approve current G1/G2/G3 before compiling G4.")
@@ -325,13 +326,25 @@ def compile_from_store(store, project_id: str, blueprint: dict, word_map: dict,
                 _block("G3_ASSET_UNAPPROVED", rid, "Immutable approved original bytes failed SHA validation.")
             approved[rid] = {**head, "asset_class": requirement["asset_class"],
                              "source_kind": head.get("evidence", {}).get("source_kind", "")}
-    # Caller-supplied map booleans are not G3 source truth. Re-ingest every
-    # requested geographic layer against the current project/requirement head.
-    from backend.app.maps.ingest import ingest_current_approved
-    from backend.app.maps.projection import common_viewport
+    # Caller-supplied compiled map contexts cannot authorize historic geography.
     if maps:
         _block("MAP_GEOMETRY_INVALID", project_id,
-               "Production map contexts must be derived from the current SQLite G3 approvals, not caller JSON.")
+               "Production map contexts must be re-ingested from current G3 source bytes.")
+    trusted_maps = _derive_trusted_maps(store, project_id, story_obj.data(),
+                                        blueprint, map_requests or {})
+    result = compile_timeline(story_obj.data(), blueprint, word_map, final_audio, approved,
+                              maps=trusted_maps, font_measure=font_measure,
+                              font_identity=font_identity, expected_story_sha256=story_obj.sha256)
+    from backend.app.director import draft
+    draft.publish(store, project_id, result, blueprint, trusted_maps, map_requests or {},
+                  font_identity, expected_revision=start_revision)
+    return result
+
+
+def _derive_trusted_maps(store, project_id, story: dict, blueprint: dict, map_requests: dict) -> dict:
+    """Re-ingest B1-02 geometry from immutable G3 originals, never caller maps."""
+    from backend.app.maps.ingest import ingest_current_approved
+    from backend.app.maps.projection import common_viewport
     trusted_maps = {}
     for plan in blueprint["setup_plans"]:
         map_payload = plan["template_payload"]
@@ -343,7 +356,7 @@ def compile_from_store(store, project_id: str, blueprint: dict, word_map: dict,
                 requested.append(map_payload[key])
         if plan["template_id"] == "T10" and map_payload.get("map_requirement_id"):
             rid = map_payload["map_requirement_id"]
-            requirement = next((r for r in story_obj.data()["asset_requirements"]
+            requirement = next((r for r in story["asset_requirements"]
                                 if r["requirement_id"] == rid), None)
             if (requirement is None or requirement["asset_class"] != "HISTORICAL_MAP"
                     or requirement["start_year"] != requirement["end_year"]):
@@ -377,9 +390,8 @@ def compile_from_store(store, project_id: str, blueprint: dict, word_map: dict,
             ctx["shared_projection"] = viewport["projection"]
             ctx["shared_viewport"] = viewport["bbox"]
         trusted_maps[sid] = ctx
-    return compile_timeline(story_obj.data(), blueprint, word_map, final_audio, approved,
-                            maps=trusted_maps, font_measure=font_measure, font_identity=font_identity,
-                            expected_story_sha256=story_obj.sha256)
+    return trusted_maps
+
 
 
 
@@ -458,6 +470,28 @@ def revise_g4(store, project_id: str, previous: dict, original_blueprint: dict,
     validate_visual_blueprint(story, edited_blueprint)
     if StoryCandidate.parse(story).sha256 != previous["story_sha256"]:
         _block("STORY_SHA_MISMATCH", project_id, "Current G1 story changed since prior compiled timeline.")
+    # A self-declared source hash is not authorization. The head is committed
+    # only by production compile_from_store after current G1/G2/G3 validation.
+    from backend.app.director import draft
+    trusted = draft.load(store, project_id)
+    if trusted["revision"] != expected_revision:
+        _block("G4_DRAFT_STALE", project_id, "Current SQLite revision no longer matches trusted G4 draft.")
+    if canonical(previous) != canonical(trusted["timeline"]):
+        _block("G4_DRAFT_TAMPERED", project_id,
+               "The complete previous CompiledTimeline differs from the immutable current draft.")
+    if canonical(original_blueprint) != canonical(trusted["blueprint"]):
+        _block("G4_BLUEPRINT_TAMPERED", project_id,
+               "Original visual blueprint does not match the registered draft source plan.")
+    manifest = trusted["manifest"]
+    saved_maps = manifest["maps"]
+    if maps is not None and canonical(maps) != canonical(saved_maps):
+        _block("G4_MAP_CONTEXT_INVALID", project_id,
+               "Caller map features/projection/period are not trusted G3 geography.")
+    current_maps = _derive_trusted_maps(store, project_id, story,
+                                       trusted["blueprint"], manifest["map_requests"])
+    if canonical(current_maps) != canonical(saved_maps):
+        _block("G4_MAP_SOURCE_STALE", project_id,
+               "Historical map context differs from currently reviewed G3 source geometry.")
     # Reject stale caller snapshots against the current persisted G2/G3 approval heads.
     # Equality among caller dictionaries is not sufficient authorization.
     from backend.app.assets.provenance import AssetCandidates
@@ -504,7 +538,7 @@ def revise_g4(store, project_id: str, previous: dict, original_blueprint: dict,
     staging = {x["setup_id"]: x for x in group_staging(
         windows, final_audio["duration_samples"], word_map["sample_rate"])}
     requirements = {r["requirement_id"]:r for r in story["asset_requirements"]}
-    out = copy.deepcopy(previous)
+    out = copy.deepcopy(trusted["timeline"])
     index = {s["setup_id"]: i for i,s in enumerate(out["scenes"])}
     for plan in revised:
         sid = plan["setup_id"]
@@ -512,7 +546,7 @@ def revise_g4(store, project_id: str, previous: dict, original_blueprint: dict,
             continue
         rows = [x for x in windows if x["setup_id"] == sid]
         scene = _scene(plan, staging[sid], rows, approved_assets, requirements,
-                       maps or {}, font_measure)
+                       current_maps, font_measure)
         for layer in scene["layers"]:
             crop = crop_overrides.get(sid, {}).get(layer["layer_id"])
             if crop is not None:
@@ -534,11 +568,10 @@ def revise_g4(store, project_id: str, previous: dict, original_blueprint: dict,
                                              "new_direction": edited_blueprint,
                                              "crop_overrides": crop_overrides})
     validate_document("CompiledTimeline.v1", out)
-    with store._transaction() as db:
-        gate = GateService(store)
-        revision = gate._check_revision(db, project_id, expected_revision)
-        mark_stale(db, project_id, "scene_layout" if edited_blueprint != original_blueprint else "scene_crop")
-        db.execute("UPDATE projects SET revision=? WHERE project_id=?", (revision+1,project_id))
+    draft.publish(store, project_id, out, edited_blueprint, current_maps,
+                  manifest["map_requests"], manifest["font_identity"],
+                  expected_revision=expected_revision, previous=trusted,
+                  edit_kind="scene_layout" if edited_blueprint != original_blueprint else "scene_crop")
     return {"timeline": out, "recomputed_setup_ids": sorted(changed),
             "retained_setup_ids": sorted(set(index) - changed),
             "project_revision": expected_revision+1, "stale_gates": ["G4","G5"]}
