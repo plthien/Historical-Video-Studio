@@ -45,6 +45,14 @@ for variant in ("A","B","C"):
                         staged["ref"]=preferred
                 # Only synthetic editorial layout selection, no G1 claims,
                 # media sources, narration word alignment or quotes changed.
+        if setup["preferred_template"]=="T10":
+            for beat in setup["direction"]["visual_beats"]:
+                if beat["focus_ref"].endswith("entity_a"):
+                    for staged in beat["staging"]:
+                        staged["motion_hint"]="none"
+                elif beat["focus_ref"].endswith("entity_b"):
+                    for staged in beat["staging"]:
+                        staged["motion_hint"]="line_draw"
         setup["direction"]["layout_variant_hint"]=variant
     current=normalize_story(authored,payloads)
     variant_audio=copy.deepcopy(final)
