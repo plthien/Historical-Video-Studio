@@ -85,6 +85,14 @@ def windows_font_measure(path: str, expected_sha256: str, *, family: str = "Aria
         raise ContractViolation("FONT_IDENTITY_STALE", str(path),
                                 "Expected font SHA differs from the actual font bytes.")
     gdi = ctypes.windll.gdi32
+    gdi.CreateCompatibleDC.restype = ctypes.c_void_p
+    gdi.CreateFontW.argtypes = [ctypes.c_int]*13 + [ctypes.c_wchar_p]
+    gdi.CreateFontW.restype = ctypes.c_void_p
+    gdi.SelectObject.argtypes = [ctypes.c_void_p, ctypes.c_void_p]
+    gdi.SelectObject.restype = ctypes.c_void_p
+    gdi.DeleteObject.argtypes = [ctypes.c_void_p]
+    gdi.GetTextExtentPoint32W.argtypes = [ctypes.c_void_p, ctypes.c_wchar_p,
+                                          ctypes.c_int, ctypes.POINTER(wintypes.SIZE)]
     hdc = gdi.CreateCompatibleDC(0)
     if not hdc:
         raise ContractViolation("FONT_METRICS_REQUIRED", str(path), "Cannot create Windows GDI measurement context.")
