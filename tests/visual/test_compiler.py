@@ -300,7 +300,44 @@ def test_timing_scene_cuts_follow_global_sample_boundaries_without_frame_overlap
     assert windows[0]["end_frame"]==windows[1]["start_frame"]==10
     assert windows[-1]["end_frame"]==30
     assert sum(w["duration_frames"] for w in windows)==30
+    scenes=group_staging(windows,48000,wav["sample_rate"])
+    assert scenes[0]["start_frame"]==0 and scenes[0]["end_frame"]==30
+    assert [f["beat_id"] for f in scenes[0]["focus_sequence"]]==[w["beat_id"] for w in windows]
 
+
+def test_map_timing_two_setups_contiguous_from_audio_frame_zero():
+    story=fixture("contracts/examples/StoryPackage.v1.valid.json")
+    authored=fixture("contracts/examples/VisualBlueprint.v1.valid.json")["setup_plans"][0]["template_payload"]
+    bp=normalize_story(story,{"setup_001":authored})
+    p=bp["setup_plans"][0]
+    other=copy.deepcopy(p)
+    other["setup_id"]="setup_second"
+    other["editorial_direction"]["visual_beats"][0]["beat_id"]="beat_second"
+    other["editorial_direction"]["visual_beats"][0]["cue"]={"section_id":"sec_001","phrase":"1871,","occurrence":0}
+    bp["setup_plans"].append(other)
+    wav=fixture("contracts/examples/WordTimingMap.v1.valid.json")
+    windows=bind_beats(bp,wav,audio_sha256=wav["audio_sha256"],
+                       transcript_sha256=wav["transcript_sha256"],audio_total_samples=48001)
+    scenes=group_staging(windows,48001,wav["sample_rate"])
+    assert len(windows)==len(scenes)==2
+    assert windows[0]["start_frame"]==scenes[0]["start_frame"]==0
+    assert windows[0]["end_frame"]==windows[1]["start_frame"]
+    assert scenes[0]["end_frame"]==scenes[1]["start_frame"]
+    assert windows[-1]["end_frame"]==scenes[-1]["end_frame"]==31
+
+
+def test_map_timing_staging_rejects_gap_or_leading_hole():
+    story=fixture("contracts/examples/StoryPackage.v1.valid.json")
+    authored=fixture("contracts/examples/VisualBlueprint.v1.valid.json")["setup_plans"][0]["template_payload"]
+    bp=normalize_story(story,{"setup_001":authored})
+    wav=fixture("contracts/examples/WordTimingMap.v1.valid.json")
+    windows=bind_beats(bp,wav,audio_sha256=wav["audio_sha256"],
+                       transcript_sha256=wav["transcript_sha256"],audio_total_samples=48000)
+    broken=copy.deepcopy(windows)
+    broken[0]["start_frame"]=1
+    with pytest.raises(ContractViolation) as exc:
+        group_staging(broken,48000,wav["sample_rate"])
+    assert exc.value.code=="FRAME_INTERVAL_INVALID"
 
 def test_map_raster_reviewed_three_point_georeference_and_wrong_rights_rejected():
     source=b"synthetic-period-raster";m,approval=example_map(source,crs="EPSG:4326")
