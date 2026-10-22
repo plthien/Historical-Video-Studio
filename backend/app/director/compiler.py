@@ -289,6 +289,17 @@ def compile_from_store(store, project_id: str, blueprint: dict, word_map: dict,
     if any(gate[k]["state"] != "APPROVED" for k in ("G1", "G2", "G3")):
         _block("COMPILER_GATE_UNAPPROVED", project_id, "Approve current G1/G2/G3 before compiling G4.")
     story_obj = store.get_story(project_id)
+    # A caller-supplied measurement callback is not authoritative font evidence.
+    # Reconstruct the pinned GDI face from actual Windows font file bytes.
+    from backend.app.director.layout import windows_font_measure
+    from pathlib import Path
+    import os
+    if not font_identity or font_identity.get("measurement_engine") != "win32_gdi":
+        _block("FONT_IDENTITY_STALE", project_id, "Production G4 needs a pinned native Windows GDI font.")
+    font_file = Path(os.environ["WINDIR"]) / "Fonts" / font_identity["font_file"]
+    font_measure, actual_font = windows_font_measure(str(font_file), font_identity["font_sha256"])
+    if actual_font != font_identity:
+        _block("FONT_IDENTITY_STALE", project_id, "Font face or measurement bytes differ from pinned G4 baseline.")
     if story_obj.sha256 != blueprint["story_revision_sha256"]:
         _block("STORY_SHA_MISMATCH", project_id, "Only the current approved StoryPackage may be compiled.")
     # Proof of the exact FINAL WAV artifact, not a caller-provided approved=true flag.
@@ -483,6 +494,16 @@ def revise_g4(store, project_id: str, previous: dict, original_blueprint: dict,
         _block("G4_BLUEPRINT_TAMPERED", project_id,
                "Original visual blueprint does not match the registered draft source plan.")
     manifest = trusted["manifest"]
+    from backend.app.director.layout import windows_font_measure
+    from pathlib import Path
+    import os
+    font = manifest["font_identity"]
+    if font.get("measurement_engine") != "win32_gdi":
+        _block("FONT_IDENTITY_STALE", project_id, "Stored G4 draft lacks native pinned GDI font.")
+    font_file = Path(os.environ["WINDIR"]) / "Fonts" / font["font_file"]
+    font_measure, measured_identity = windows_font_measure(str(font_file), font["font_sha256"])
+    if measured_identity != font:
+        _block("FONT_IDENTITY_STALE", project_id, "G4 font source changed since initial compiler snapshot.")
     saved_maps = manifest["maps"]
     if maps is not None and canonical(maps) != canonical(saved_maps):
         _block("G4_MAP_CONTEXT_INVALID", project_id,
