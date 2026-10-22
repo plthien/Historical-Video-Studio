@@ -66,6 +66,20 @@ def _scene(plan, staging, beats, assets, requirements, maps, font_measure):
             _block("MOTION_HINT_UNSUPPORTED", beat["beat_id"],
                    "Use one coherent authored motion for this cue.")
         hint = next(iter(hints))
+        # Staging operations are executable instructions, not metadata to drop.
+        # Unsupported animation semantics must block rather than appear as a
+        # successful but visually inert compiled event.
+        for step in stage:
+            operation = step["operation"]
+            if operation in ("exit", "reposition"):
+                _block("STAGING_OPERATION_UNSUPPORTED", beat["beat_id"],
+                       "Exit/reposition need an explicit supported transition; do not silently emit an enter event.")
+            if ((operation == "draw_path" and hint != "line_draw")
+                    or (operation == "reveal_mask" and hint != "wipe")
+                    or (operation == "hold" and hint != "none")
+                    or (operation == "focus" and hint not in ("subtle_push", "track", "zoom"))):
+                _block("STAGING_OPERATION_UNSUPPORTED", beat["beat_id"],
+                       "Authored staging operation and motion hint are incompatible.")
         target = next(x for x in layers if x["layer_id"] == focus)
         allowed = layout["allowed_presets"]
         kind = None
