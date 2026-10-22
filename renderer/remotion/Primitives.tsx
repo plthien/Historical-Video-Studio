@@ -65,7 +65,7 @@ function pathD(layer:Layer,media:ResolvedMedia){
  const points=g.coordinates.map(([x,y])=>{
   if(g.coordinateSpace==='ANNOTATION_CANVAS')return [x*r.w,y*r.h];
   const bbox=g.bbox;if(!bbox)fail('RENDER_MAP_VIEWPORT',layer.layer_id,'Historical map bbox absent');
-  const [left,bottom,right,top]=bbox;
+  const [left,bottom,right,top]=bbox!;
   const projection=media.maps[g.historicalMapId!]?.projection;
   const clampLatitude=(lat:number)=>Math.max(-85.05112878,Math.min(85.05112878,lat));
   const merc=(lat:number)=>Math.log(Math.tan(Math.PI/4+clampLatitude(lat)*Math.PI/360));
@@ -80,7 +80,7 @@ function pathProgress(scene:Scene,layer:Layer,frame:number){
  const event=scene.events.find(e=>e.layer_id===layer.layer_id&&
   (e.preset_id==='route-line-draw'||e.preset_id==='editorial-connector-draw'));
  if(!event)fail('RENDER_PATH_MOTION_MISSING',layer.layer_id,'Route/connector needs authored compiled drawing event');
- return eventProgress(event,frame);
+ return eventProgress(event!,frame);
 }
 const ink='#303b39';
 export const CompiledLayer:React.FC<{scene:Scene;layer:Layer;frame:number;media:ResolvedMedia}>=({scene,layer,frame,media})=>{
@@ -111,14 +111,15 @@ export const CompiledLayer:React.FC<{scene:Scene;layer:Layer;frame:number;media:
  if(layer.text!==null){
   const txt=effect.visibleText??layer.text;const layout=layer.text_layout;
   if(!layout)fail('RENDER_TEXT_LAYOUT',layer.layer_id,'Text needs pinned glyph layout');
+  const measured=layout!;
   const isHeading=layer.layer_kind==='headline';
-  return <div style={{...style,padding:isHeading?10:6,display:'flex',alignItems:layout.vertical_align==='center'?'center':'flex-start',
-    justifyContent:layout.horizontal_align==='center'?'center':'flex-start',background:layer.layer_kind==='date'?'#e6d6b9c9':undefined,
+  return <div style={{...style,padding:isHeading?10:6,display:'flex',alignItems:measured.vertical_align==='center'?'center':'flex-start',
+    justifyContent:measured.horizontal_align==='center'?'center':'flex-start',background:layer.layer_kind==='date'?'#e6d6b9c9':undefined,
     clipPath:effect.reveal<1?`inset(0 ${(1-effect.reveal)*100}% 0 0)`:undefined}}
     data-layer={layer.layer_id} data-claim={layer.source_claim_id??undefined}>
    <span style={{fontFamily:media.fontFamily,color:effect.highlight>0.2?'#a65d20':ink,
-     fontSize:layout.font_size_px,fontWeight:isHeading?700:500,lineHeight:layout.line_height,whiteSpace:'pre-wrap',overflow:'hidden',
-     display:'-webkit-box',WebkitBoxOrient:'vertical',WebkitLineClamp:layout.max_lines}}>{txt}</span></div>;
+     fontSize:measured.font_size_px,fontWeight:isHeading?700:500,lineHeight:measured.line_height,whiteSpace:'pre-wrap',overflow:'hidden',
+     display:'-webkit-box',WebkitBoxOrient:'vertical',WebkitLineClamp:measured.max_lines}}>{txt}</span></div>;
  }
  return null;
 };
