@@ -343,6 +343,13 @@ def synthetic_ten_template_inputs():
         for key in ("before_map","after_map"):
             if key in payload:
                 map_refs.append(payload[key])
+        if plan["template_id"]=="T10" and payload.get("map_requirement_id"):
+            req=next(x for x in story["asset_requirements"]
+                     if x["requirement_id"]==payload["map_requirement_id"])
+            if req["start_year"]!=req["end_year"]:
+                raise ContractViolation("MAP_PERIOD_MISMATCH",sid,
+                    "T10 region overview requires an exact reviewed fixture period.")
+            map_refs.append({"map_requirement_id":req["requirement_id"],"year":req["start_year"]})
         if not map_refs:
             continue
         ctx = {"sources":{}, "reviewed_period_map":True}
