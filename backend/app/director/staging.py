@@ -40,5 +40,8 @@ def group_staging(windows:list[dict],audio_total_samples:int,sample_rate:int) ->
                        "end_frame":max(r["end_frame"] for r in rows),
                        "focus_sequence":[{"beat_id":r["beat_id"],"focus_ref":r["focus_ref"],
                                           "word_ids":r["word_ids"],"start_frame":r["start_frame"],
-                                          "end_frame":r["end_frame"]} for r in rows]})
+                                          "end_frame":r["end_frame"],
+                                          "cue_start_frame":r["cue_start_frame"],
+                                          "cue_end_frame":r["cue_end_frame"],
+                                          "pre_cue_hold_frames":max(0,r["cue_start_frame"]-r["start_frame"])} for r in rows]})
     return scenes
