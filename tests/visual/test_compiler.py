@@ -494,3 +494,42 @@ def test_motion_nineteen_distinct_registered_grammars_and_blockers():
     with pytest.raises(ContractViolation,match="MOTION_TIME_INVALID"):
         compile_event("route-line-draw",target,[target],event_id="event_negative",
                       start_frame=-1,duration_frames=8,cue_word_id="word_001",evidence={})
+
+
+
+def test_compiler_fingerprint_full_48_synthetic_deterministic_and_negative():
+    """B1-06 executes new production compiler on 48 re-cued synthetic setups."""
+    from backend.tools.b1_smoke import synthetic_longform_inputs
+    from backend.app.director.compiler import compile_timeline
+    from backend.app.director.layout import windows_font_measure
+    import os
+    if os.name!="nt":
+        pytest.skip("B1 compiler target is native Windows")
+    path=Path(os.environ["WINDIR"])/"Fonts"/"arial.ttf"
+    measure,font_id=windows_font_measure(str(path),hashlib.sha256(path.read_bytes()).hexdigest())
+    story,bp,words,final,approved=synthetic_longform_inputs()
+    args=dict(font_measure=measure,font_identity=font_id,
+              expected_story_sha256=bp["story_revision_sha256"])
+    result=compile_timeline(story,bp,words,final,approved,**args)
+    again=compile_timeline(story,bp,words,final,approved,**args)
+    assert json.dumps(result,sort_keys=True)==json.dumps(again,sort_keys=True)
+    validate_document("CompiledTimeline.v1",result)
+    assert len(result["scenes"])==48
+    assert result["total_frames"]==10800
+    assert [s["start_frame"] for s in result["scenes"]]==sorted(s["start_frame"] for s in result["scenes"])
+    assert {s["template_id"] for s in result["scenes"]}=={"T01","T03","T06","T08"}
+    assert all(s["events"] and s["layers"] and s["camera"]["keyframes"] for s in result["scenes"])
+    assert result["scenes"][0]["start_frame"]==0
+    assert result["scenes"][-1]["start_frame"]+result["scenes"][-1]["duration_frames"]==10800
+    wrong_audio=copy.deepcopy(words)
+    wrong_audio["audio_sha256"]="a"*64
+    with pytest.raises(ContractViolation,match="ALIGNMENT_SOURCE_STALE"):
+        compile_timeline(story,bp,wrong_audio,final,approved,**args)
+    missing=copy.deepcopy(approved)
+    missing.pop(bp["setup_plans"][0]["requirement_refs"][0])
+    with pytest.raises(ContractViolation,match="G3_ASSET_UNAPPROVED"):
+        compile_timeline(story,bp,words,final,missing,**args)
+    wrong_registry=copy.deepcopy(bp)
+    wrong_registry["setup_plans"][0]["variant_id"]="Z"
+    with pytest.raises(ContractViolation):
+        compile_timeline(story,wrong_registry,words,final,approved,**args)
