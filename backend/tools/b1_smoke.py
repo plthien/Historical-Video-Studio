@@ -132,8 +132,8 @@ def run(case, mode):
             raise ContractViolation("FONT_METRICS_REQUIRED",case,"B1 native font smoke requires Windows.")
         font=Path(os.environ["WINDIR"])/"Fonts"/"arial.ttf"
         measure,identity=windows_font_measure(str(font),hashlib.sha256(font.read_bytes()).hexdigest())
-        story,bp,words,final,assets=synthetic_longform_inputs()
-        result=compile_timeline(story,bp,words,final,assets,
+        story,bp,words,final,assets,maps=synthetic_longform_inputs()
+        result=compile_timeline(story,bp,words,final,assets,maps=maps,
                                 font_measure=measure,font_identity=identity,
                                 expected_story_sha256=bp["story_revision_sha256"])
         if (len(result["scenes"])!=48 or result["total_frames"]!=10800 or
@@ -141,7 +141,7 @@ def run(case, mode):
                 any(a["start_frame"]+a["duration_frames"]!=b["start_frame"]
                     for a,b in zip(result["scenes"],result["scenes"][1:]))):
             raise RuntimeError("The actual 48-scene compiler produced a gap or inert scene.")
-        repeat=compile_timeline(story,bp,words,final,assets,font_measure=measure,
+        repeat=compile_timeline(story,bp,words,final,assets,maps=maps,font_measure=measure,
                                 font_identity=identity,
                                 expected_story_sha256=bp["story_revision_sha256"])
         if json.dumps(result,sort_keys=True)!=json.dumps(repeat,sort_keys=True):
@@ -228,4 +228,35 @@ def synthetic_longform_inputs():
                         "approval_record_id":"approval_"+rid,
                         "original_sha256":hashlib.sha256(("SYNTHETIC original "+rid).encode()).hexdigest(),
                         "asset_class":requirement["asset_class"],"source_kind":"SYNTHETIC"}
-    return story,blueprint,word_map,final,approvals
+    from backend.app.maps.ingest import ingest
+    maps={}
+    geom_bytes=json.dumps({
+        "type":"FeatureCollection","crs":"EPSG:4326",
+        "features":[{"type":"Feature","id":"feature_001",
+                     "geometry":{"type":"Polygon","coordinates":[[
+                         [10,50],[12,50],[12,52],[10,52],[10,50]]]},"properties":{}}]
+    },sort_keys=True,separators=(",",":")).encode()
+    for plan in blueprint["setup_plans"]:
+        sid=plan["setup_id"]
+        for rid in plan["requirement_refs"]:
+            if approvals[rid]["asset_class"]!="HISTORICAL_MAP":
+                continue
+            approvals[rid]["original_sha256"]=hashlib.sha256(geom_bytes).hexdigest()
+            rec=fixture("contracts/examples/HistoricalMap.v1.valid.json")
+            rec.update(historical_map_id="map_"+rid,
+                       source_original_sha256=approvals[rid]["original_sha256"],
+                       source_asset_id=approvals[rid]["candidate_id"],
+                       rights_review_record_id=approvals[rid]["approval_record_id"],
+                       user_approved=True,source_crs="EPSG:4326",
+                       valid_year_from=1914,valid_year_to=1914,
+                       geometry_object_sha256=None,
+                       approved_feature_ids=["feature_001"],
+                       geography_bbox={"min_lon":9,"min_lat":49,"max_lon":13,"max_lat":53})
+            head={"original_sha256":approvals[rid]["original_sha256"],
+                  "candidate_id":approvals[rid]["candidate_id"],
+                  "approval_record_id":approvals[rid]["approval_record_id"]}
+            ingested=ingest(rec,geom_bytes,year=1914,feature_ids=["feature_001"],approval=head)
+            maps[sid]={"sources":{rid:ingested},"reviewed_period_map":True,
+                       "historical_map_id":ingested["historical_map"]["historical_map_id"],
+                       "approved_feature_ids":["feature_001"],"era_year":1914}
+    return story,blueprint,word_map,final,approvals,maps
