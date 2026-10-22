@@ -90,7 +90,6 @@ def run(case, mode):
     if case=="compile-layout":
         from backend.app.director.layout import windows_font_measure, pixel_geometry
         from backend.app.director.layers import build_layers
-        from backend.app.director.blueprint import normalize_story
         import os
         if os.name!="nt":
             raise ContractViolation("FONT_METRICS_REQUIRED",case,"B1 native font smoke requires Windows.")
