@@ -7,7 +7,8 @@ export type Rect = {x:number;y:number;w:number;h:number};
 export type MediaKind = 'SYNTHETIC'|'APPROVED_LOCAL';
 export type MediaItem={assetId:string; originalSha256:string; mime:'image/png'|'image/jpeg'|'image/webp'; dataUri:string; sourceKind:MediaKind; approvalRecordId:string};
 export type Geometry = {geometryRef:string; coordinates:[number,number][]; coordinateSpace:'WGS84'|'ANNOTATION_CANVAS'; sourceOriginalSha256:string; historicalMapId:string|null; reviewedYear:number|null; bbox:[number,number,number,number]|null};
-export type ResolvedMedia={assets:Record<string,MediaItem>; geometries:Record<string,Geometry>; fontFamily:string; fontSha256:string; fontDataUri:string; sourceKind:MediaKind; authorizingG4ManifestSha256:string};
+export type ReviewedMap={historicalMapId:string;projection:string;viewport:[number,number,number,number];reviewedYear:number;sourceOriginalSha256:string;coordinateKind:'geo_wgs84'|'raster_uv'};
+export type ResolvedMedia={assets:Record<string,MediaItem>; geometries:Record<string,Geometry>; maps:Record<string,ReviewedMap>; fontFamily:string; fontSha256:string; fontDataUri:string; sourceKind:MediaKind; authorizingG4ManifestSha256:string};
 export type Layer={layer_id:string; layer_kind:string; asset_id:string|null; text:string|null; source_claim_id:string|null; z_index:number;depth_order:number;rect_px:Rect; crop_normalized:Rect;object_fit:'contain'|'cover'|'fill';mask:{kind:string;asset_id:string|null;feather_px:number};map_binding:{historical_map_id:string;feature_id:string|null;coordinate_kind:string;anchor_latlon:[number,number]|null}|null; parent_layer_id:string|null;group_id:string; text_layout:{font_size_px:number;line_height:number;max_lines:number;horizontal_align:string;vertical_align:string}|null; template_slot_id:string;source_asset_slot_id:string|null; path_geometry_ref:string|null; treatment:{kind:string;source_preserving:boolean;evidence_badge:string}};
 export type Key={frame:number;value:number;easing:string};
 export type Motion={event_id:string; layer_id:string; preset_id:string;start_frame:number; duration_frames:number;params:Record<string,unknown>;keyframes:Key[];motion_space:string;affected_layer_ids:string[];animated_property:string;stagger:{order:string[];offset_frames:number}|null};
@@ -55,13 +56,28 @@ export function assertMedia(t:Timeline,m:ResolvedMedia){
  if(!/^[a-f0-9]{64}$/.test(m.fontSha256)||!m.fontDataUri.startsWith('data:font/'))fail('RENDER_FONT_UNTRUSTED',t.project_id,'Pinned local font required');
  for(const s of t.scenes)for(const l of s.layers){
   if(l.asset_id){let a=m.assets[l.asset_id];if(!a||a.assetId!==l.asset_id||!a.originalSha256||!a.approvalRecordId||!a.dataUri.startsWith('data:image/'))fail('RENDER_MEDIA_UNTRUSTED',l.layer_id,'Asset bytes/rights need local verified resolver');}
+  if(l.map_binding){
+   const map=m.maps[l.map_binding.historical_map_id];
+   if(!map||map.historicalMapId!==l.map_binding.historical_map_id||map.coordinateKind!==l.map_binding.coordinate_kind||
+      !l.asset_id||!m.assets[l.asset_id]||map.sourceOriginalSha256!==m.assets[l.asset_id].originalSha256)
+     fail('RENDER_MAP_UNREVIEWED',l.layer_id,'B1-02 period map does not match actual immutable approved original');
+  }
   if(l.path_geometry_ref){let g=m.geometries[l.path_geometry_ref];if(!g||g.geometryRef!==l.path_geometry_ref||g.coordinates.length<2)fail('RENDER_GEOMETRY_UNTRUSTED',l.layer_id,'Reviewed path geometry missing');
-   if(l.layer_kind==='route'&&(g.coordinateSpace!=='WGS84'||!g.historicalMapId||!g.bbox||g.reviewedYear===null))fail('RENDER_ROUTE_UNREVIEWED',l.layer_id,'Historical route needs period projection, source and viewport');
+   if(l.layer_kind==='route'&&(g.coordinateSpace!=='WGS84'||!g.historicalMapId||!g.bbox||g.reviewedYear===null||
+    !s.layers.some(x=>x.layer_kind==='map'&&x.map_binding?.historical_map_id===g.historicalMapId&&
+      x.asset_id&&m.assets[x.asset_id]?.originalSha256===g.sourceOriginalSha256)))
+      fail('RENDER_ROUTE_UNREVIEWED',l.layer_id,'Historical route geometry must bind the exact reviewed period-map original');
    if(l.layer_kind==='annotation'&&g.coordinateSpace!=='ANNOTATION_CANVAS')fail('RENDER_EDITORIAL_GEOMETRY',l.layer_id,'Editorial connector cannot use geographical coordinate space');
   }
  }
  const pair=t.scenes.filter(s=>s.template_id==='T07');
- for(const s of pair){const maps=s.layers.filter(l=>l.layer_kind==='map');if(maps.length!==2||maps[0].asset_id===maps[1].asset_id||maps[0].map_binding?.historical_map_id===maps[1].map_binding?.historical_map_id)fail('RENDER_PERIOD_MAP_DUPLICATE',s.setup_id,'T07 needs distinct approved historical map sources');}
+ for(const s of pair){
+  const maps=s.layers.filter(l=>l.layer_kind==='map');
+  if(maps.length!==2||maps[0].asset_id===maps[1].asset_id||maps[0].map_binding?.historical_map_id===maps[1].map_binding?.historical_map_id)fail('RENDER_PERIOD_MAP_DUPLICATE',s.setup_id,'T07 needs distinct approved historical map sources');
+  const first=m.maps[maps[0].map_binding!.historical_map_id],second=m.maps[maps[1].map_binding!.historical_map_id];
+  if(!first||!second||first.projection!==second.projection||JSON.stringify(first.viewport)!==JSON.stringify(second.viewport)||
+     first.reviewedYear===second.reviewedYear)fail('RENDER_PERIOD_MAP_MISMATCH',s.setup_id,'T07 needs two reviewed years with identical frozen projection and viewport');
+ }
  for(const s of t.scenes.filter(s=>s.template_id==='T03'))if(new Set(s.layers.filter(l=>l.layer_kind==='archival_photo').map(l=>l.asset_id)).size<2)fail('RENDER_COLLAGE_DUPLICATE',s.setup_id,'Evidence cards must use independent originals');
 }
 export function activeScene(t:Timeline,globalFrame:number):{scene:Scene;localFrame:number}{
