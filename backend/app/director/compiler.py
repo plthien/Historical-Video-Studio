@@ -101,7 +101,7 @@ def _scene(plan, staging, beats, assets, requirements, maps, font_measure):
             elif "title-mask-reveal" in allowed:
                 kind = "title-mask-reveal"
             else:
-                kind = "freeze-hold" if "freeze-hold" in allowed else None
+                kind = None
         elif hint == "parallax":
             kind = "parallax-layers"
         elif hint == "wipe":
@@ -133,6 +133,22 @@ def _scene(plan, staging, beats, assets, requirements, maps, font_measure):
                                         if r["candidate_id"] == target["asset_id"]), ""),
                     "claim_ids": plan["claim_refs"],
                     **(maps or {}).get(sid, {}), "editorial_connector": plan["template_id"] == "T10"}
+        # Distinct T07 period maps carry independent reviewed geographic truth.
+        if target.get("map_binding") is not None:
+            selected_map_id = target["map_binding"]["historical_map_id"]
+            approved_map = next((source for source in (maps or {}).get(sid, {})
+                                 .get("sources", {}).values()
+                                 if source["historical_map"]["historical_map_id"] == selected_map_id), None)
+            if approved_map is None:
+                _block("MOTION_GEOGRAPHY_UNREVIEWED", beat["beat_id"],
+                       "The animated map layer must resolve to its exact reviewed source.")
+            evidence.update({
+                "historical_map_id": selected_map_id,
+                "era_year": approved_map.get("event_year",
+                    approved_map["historical_map"]["valid_year_from"]),
+                "approved_feature_ids": [feature["id"] for feature in approved_map["features"]],
+                "reviewed_period_map": True,
+            })
         event = compile_event(kind, target, layers,
                               event_id="event_" + beat["beat_id"],
                               start_frame=event_at, duration_frames=length,
