@@ -1047,10 +1047,13 @@ def test_b1_g4_real_sqlite_positive_invalid_staging_selective_revision_and_stale
         retained=forged["scenes"][1]["layers"]
         if change=="factual_text":
             text_layer=next(x for x in retained if x.get("text_layout"))
-            text_layer["text_layout"]["text"]="FORGED HISTORICAL STATEMENT"
+            text_layer["text"]="FORGED HISTORY"
         else:
             source_layer=next(x for x in retained if x["asset_id"])
-            source_layer["asset_id"]="candidate_forged_media"
+            asset_id=source_layer["asset_id"]
+            source_layer["asset_id"]=asset_id[:-1]+("0" if asset_id[-1]!="0" else "1")
+        # Keep each attack fully schema-valid: schema rejection is not G10 proof.
+        validate_document("CompiledTimeline.v1",forged)
         with pytest.raises(ContractViolation,match="G4_DRAFT_TAMPERED"):
             revise_g4(store,pid,forged,bp,edited,words,frozen,current,
                 expected_revision=baseline_revision,operator_reason="Reject retained-scene tamper",
