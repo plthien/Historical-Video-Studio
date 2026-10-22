@@ -47,7 +47,9 @@ for variant in ("A","B","C"):
                 # media sources, narration word alignment or quotes changed.
         setup["direction"]["layout_variant_hint"]=variant
     current=normalize_story(authored,payloads)
-    timeline=compile_timeline(authored,current,words,final,assets,maps=maps,font_measure=measure,
+    variant_audio=copy.deepcopy(final)
+    variant_audio["story_revision_sha256"]=current["story_revision_sha256"]
+    timeline=compile_timeline(authored,current,words,variant_audio,assets,maps=maps,font_measure=measure,
                                font_identity=identity,
                                expected_story_sha256=current["story_revision_sha256"])
     if len(timeline["scenes"])!=10:
