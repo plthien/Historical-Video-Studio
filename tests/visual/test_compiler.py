@@ -696,36 +696,42 @@ def test_b1_production_compiler_all_ten_templates_native_samples_and_sources():
 
 
 
-def test_b1_g4_schema_invalid_staging_never_changes_sqlite_revision(tmp_path):
-    """A correctly bound upstream identity cannot authorize a schema-invalid G4 edit."""
+def test_b1_g4_unapproved_staging_rejected_before_validation(tmp_path):
+    """Unauthorized G4 must fail closed before considering a malformed staging edit."""
     from backend.app.projects.storage import ProjectStore
     from backend.app.director.compiler import revise_g4
     from backend.app.director.fingerprint import digest
     story, payloads = visual()
     original = normalize_story(story, payloads)
     pid = original["project_id"]
-    store = ProjectStore(tmp_path/"state.sqlite", tmp_path/"originals")
-    store.create_project(pid, "SYNTHETIC G4 schema gate")
+    store = ProjectStore(tmp_path / "state.sqlite", tmp_path / "originals")
+    store.create_project(pid, "SYNTHETIC unapproved G4 negative")
     store.import_story(StoryCandidate.parse(story), 0)
     prior = {"story_sha256":original["story_revision_sha256"],
              "audio_sha256":"b"*64, "word_map_sha256":digest({"words":[]}),
              "asset_snapshot_sha256":digest({})}
     edited = copy.deepcopy(original)
-    changed = edited["setup_plans"][0]
-    changed["direction_revision"] = {
+    plan = edited["setup_plans"][0]
+    plan["direction_revision"] = {
         "kind":"operator_visual_edit",
         "source_story_revision_sha256":prior["story_sha256"],
-        "operator_confirmed":True, "edited_paths":["editorial_direction.visual_beats.0.staging"],
-        "edit_reason":"Regression verification"}
-    changed["editorial_direction"]["visual_beats"][0]["staging"][0]["operation"] = "not_registered"
-    current_revision = store.revision(pid)
-    with pytest.raises(ContractViolation) as err:
+        "operator_confirmed":True,
+        "edited_paths":["editorial_direction.visual_beats.0.staging"],
+        "edit_reason":"Verify authorization precedes schema validation"}
+    plan["editorial_direction"]["visual_beats"][0]["staging"][0]["operation"] = "not_registered"
+    revision = store.revision(pid)
+    with store._connection() as db:
+        heads = db.execute("SELECT gate_id,candidate_sha256,approval_id FROM gate_heads "
+                           "WHERE project_id=? ORDER BY gate_id", (pid,)).fetchall()
+    with pytest.raises(ContractViolation) as exc:
         revise_g4(store,pid,prior,original,edited,{"words":[]},
-                  {"audio_sha256":"b"*64}, {},expected_revision=current_revision,
-                  operator_reason="Validation regression")
-    assert err.value.code != "COMPILER_GATE_UNAPPROVED"
-    assert store.revision(pid) == current_revision
-
+                  {"audio_sha256":"b"*64},{},expected_revision=revision,
+                  operator_reason="Unapproved negative")
+    assert exc.value.code == "COMPILER_GATE_UNAPPROVED"
+    assert store.revision(pid) == revision
+    with store._connection() as db:
+        assert db.execute("SELECT gate_id,candidate_sha256,approval_id FROM gate_heads "
+                          "WHERE project_id=? ORDER BY gate_id", (pid,)).fetchall() == heads
 
 
 def test_b1_thirty_variants_actual_compiler_geometry_on_windows():
@@ -795,7 +801,7 @@ print(json.dumps({"bytes_sha":hashlib.sha256(canonical(out)).hexdigest(),
 
 
 
-def test_b1_g4_real_sqlite_positive_selective_revision_and_stale_sources(tmp_path):
+def test_b1_g4_real_sqlite_positive_invalid_staging_selective_revision_and_stale_sources(tmp_path):
     """B1-06: local SQLite G1/G2/G3 approvals are controlled, never human/live."""
     import os
     from unittest.mock import patch
@@ -894,6 +900,55 @@ def test_b1_g4_real_sqlite_positive_selective_revision_and_stale_sources(tmp_pat
         head=AssetResolution._head(db,pid,"req_001",source["requirement_sha256"])
     current={"req_001":{**head,"asset_class":"HISTORICAL_MAP",
                         "source_kind":head.get("evidence",{}).get("source_kind","")}}
+    # Authorized negative: check canonical staging schema with REAL approved
+    # G1/G2/G3, persisted WAV/WordMap and G3 original; no security mocking.
+    before_revision=store.revision(pid)
+    before_board=[(x["gate_id"],x["state"],x["candidate_sha256"],
+                   x["dependency_fingerprint"]) for x in gates.board(pid)]
+    before_audio=store.get_artifact(frozen["audio_sha256"])
+    before_original=store.get_artifact(candidate["original_sha256"])
+    with store._connection() as db:
+        before_heads=db.execute(
+            "SELECT gate_id,candidate_sha256,dependency_fingerprint,approval_id "
+            "FROM gate_heads WHERE project_id=? ORDER BY gate_id",(pid,)).fetchall()
+        before_voice=db.execute(
+            "SELECT final_json FROM final_audio WHERE project_id=? ORDER BY approval_id",
+            (pid,)).fetchall()
+        before_words=db.execute(
+            "SELECT map_json,map_sha256 FROM word_maps WHERE project_id=? ORDER BY approval_id",
+            (pid,)).fetchall()
+    malformed=copy.deepcopy(bp)
+    malformed_plan=malformed["setup_plans"][0]
+    malformed_plan["editorial_direction"]["visual_beats"][0]["staging"][0]["operation"]="not_registered"
+    malformed_plan["direction_revision"]={
+        "kind":"operator_visual_edit",
+        "source_story_revision_sha256":original["story_sha256"],
+        "edited_paths":["editorial_direction.visual_beats.0.staging"],
+        "operator_confirmed":True,"edit_reason":"Authorized invalid-staging regression"}
+    original_bytes=canonical(original)
+    with pytest.raises(ContractViolation) as invalid:
+        revise_g4(store,pid,original,bp,malformed,words,frozen,current,
+                   expected_revision=before_revision,
+                   operator_reason="Invalid staging must fail without writes",
+                   maps={"setup_001":ctx,"setup_002":ctx},font_measure=measure)
+    assert invalid.value.code=="SCHEMA_INVALID"
+    assert "staging" in invalid.value.path and "operation" in invalid.value.path
+    assert store.revision(pid)==before_revision
+    assert canonical(original)==original_bytes
+    assert store.get_artifact(frozen["audio_sha256"])==before_audio
+    assert store.get_artifact(candidate["original_sha256"])==before_original
+    assert [(x["gate_id"],x["state"],x["candidate_sha256"],
+             x["dependency_fingerprint"]) for x in gates.board(pid)]==before_board
+    with store._connection() as db:
+        assert db.execute(
+            "SELECT gate_id,candidate_sha256,dependency_fingerprint,approval_id "
+            "FROM gate_heads WHERE project_id=? ORDER BY gate_id",(pid,)).fetchall()==before_heads
+        assert db.execute(
+            "SELECT final_json FROM final_audio WHERE project_id=? ORDER BY approval_id",
+            (pid,)).fetchall()==before_voice
+        assert db.execute(
+            "SELECT map_json,map_sha256 FROM word_maps WHERE project_id=? ORDER BY approval_id",
+            (pid,)).fetchall()==before_words
     edited=copy.deepcopy(bp)
     edited["setup_plans"][0]["variant_id"]="B"
     edited["setup_plans"][0]["layout_control"]["layout_id"]="T01.B.v1.1"
