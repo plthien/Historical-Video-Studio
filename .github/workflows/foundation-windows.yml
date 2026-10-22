@@ -46,7 +46,7 @@ jobs:
         shell: pwsh
         run: |
           $py = ".venv/Scripts/python.exe"
-          & $py -m pytest -q tests/visual/test_compiler.py -k "g4"
+          & $py -m pytest -q tests/visual/test_compiler.py -k "g4 or invariant or stale or fingerprint"
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           & $py -m pytest -q tests/visual/test_compiler.py -k "cue or timing or staging"
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
