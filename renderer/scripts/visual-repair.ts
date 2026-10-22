@@ -73,6 +73,7 @@ for(const total of [3,6]){
   rect_px:{x:100+i*(1700/total),y:365,w:140,h:150},source_claim_id:base.source_claim_id}));
  s.layers=[...rest,...newDates];
  s.staging.beat_sequence=newDates.map((date,i)=>({
+  beat_id:'beat_synthetic_'+total+'_'+i,
   local_start_frame:i*25,local_end_frame:i===total-1?s.duration_frames:(i+1)*25,
   focus_layer_id:date.layer_id,activated_layer_ids:newDates.slice(0,i+1).map(x=>x.layer_id),hidden_layer_ids:[]}));
  // Original frozen motion references removed original date layers: synthetic multi-event
