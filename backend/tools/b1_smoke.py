@@ -188,6 +188,10 @@ def synthetic_longform_inputs():
                 setup["direction"]["visual_beats"][0]["staging"][0]["ref"]=payload["fact_text_id"]
         else:
             second_by_section[section]=setup["setup_id"]
+            narration=next(s["narration"] for s in story["sections"] if s["section_id"]==section)
+            first_word=narration.split()[0]
+            setup["direction"]["visual_beats"][0]["cue"]={
+                "section_id":section,"phrase":first_word,"occurrence":0}
             if setup["preferred_template"]=="T08":
                 payload=params[setup["setup_id"]]
                 setup["direction"]["visual_beats"][0]["focus_ref"]=payload["fact_text_id"]
