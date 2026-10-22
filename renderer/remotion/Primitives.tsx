@@ -5,6 +5,29 @@ import {fail} from './schema';
 
 const clamp=(v:number)=>Math.min(1,Math.max(0,v));
 const mix=(a:number,b:number,t:number)=>a+(b-a)*t;
+const easing=(v:number,name:string)=>{const p=clamp(v);switch(name){
+ case 'linear':return p;
+ case 'ease_in_out':return p*p*(3-2*p);
+ case 'ease_in':return p*p;
+ case 'ease_out':return 1-(1-p)*(1-p);
+ default:fail('RENDER_CAMERA_EASING',name,'Unsupported authored camera easing');
+}};
+export function sampleCamera(keys:Scene['camera']['keyframes'],frame:number){
+ if(!keys.length)fail('RENDER_CAMERA_KEYS','camera','A pinned camera needs at least one key');
+ if(keys.some((k,i)=>i>0&&k.at_frame<=keys[i-1].at_frame))fail('RENDER_CAMERA_ORDER','camera','Camera keys must be strictly increasing');
+ const fields=['x_px','y_px','scale','rotation_deg','opacity'] as const;
+ if(keys.some(k=>fields.some(field=>!Number.isFinite(k[field]))||k.scale<=0||k.opacity<0||k.opacity>1))
+  fail('RENDER_CAMERA_INVALID','camera','Invalid authored transform');
+ if(frame<=keys[0].at_frame)return keys[0];
+ for(let i=1;i<keys.length;i++){
+  const b=keys[i],a=keys[i-1];
+  if(frame<=b.at_frame){
+   const t=easing((frame-a.at_frame)/(b.at_frame-a.at_frame),b.easing);
+   return {...b,at_frame:frame,...Object.fromEntries(fields.map(k=>[k,mix(a[k],b[k],t)]))};
+  }
+ }
+ return keys[keys.length-1];
+}
 export function interpolateKeys(keys:{frame:number;value:number}[],frame:number){
  if(!keys.length)return 1;
  if(frame<=keys[0].frame)return keys[0].value;
@@ -26,7 +49,13 @@ function motionForLayer(scene:Scene,layer:Layer,frame:number){
   const stagger=e.preset_id==='stagger-reveal'&&ordered?.includes(layer.layer_id);
   if(e.layer_id!==layer.layer_id&&!e.affected_layer_ids.includes(layer.layer_id)&&!stagger)continue;
   const delay=stagger?ordered!.indexOf(layer.layer_id)*Number(e.params.gap_frames??6):0;
-  const p=eventProgress({...e,start_frame:e.start_frame+delay},frame);
+  const starts=e.start_frame+delay;
+  // Once an authored beat introduced a source card, later collage events
+  // cannot reset its opacity. Only its own entering event may reveal it.
+  const first=firstAppearance(scene,layer.layer_id);
+  if(e.preset_id==='stagger-reveal'&&starts>first&&frame>=first)continue;
+  if(frame<starts)continue;
+  const p=eventProgress({...e,start_frame:starts},frame);
   switch(e.preset_id){
    case 'photo-card-enter':opacity*=p;scale*=mix(.93,1,p);rotation+=mix(Number(e.params.start_rotation_deg??-2),Number(e.params.end_rotation_deg??0),p);break;
    case 'pop-in':opacity*=p;scale*=mix(Number(e.params.from_scale??.95),Number(e.params.to_scale??1),p);break;
@@ -57,13 +86,13 @@ function firstAppearance(scene:Scene,layerId:string){
  const beats=scene.staging.beat_sequence.filter(b=>b.activated_layer_ids.includes(layerId));
  return beats.length?Math.min(...beats.map(b=>b.local_start_frame)):0;
 }
-function pathD(layer:Layer,media:ResolvedMedia){
+function pathPoints(layer:Layer,media:ResolvedMedia):[number,number][]{
  if(!layer.path_geometry_ref)return '';
  const g=media.geometries[layer.path_geometry_ref];
  if(!g)fail('RENDER_GEOMETRY_UNTRUSTED',layer.layer_id,'No verified geometry');
  const r=layer.rect_px;
  const points=g.coordinates.map(([x,y])=>{
-  if(g.coordinateSpace==='ANNOTATION_CANVAS')return [x*r.w,y*r.h];
+  if(g.coordinateSpace==='ANNOTATION_CANVAS')return [x*r.w,y*r.h] as [number,number];
   const bbox=g.bbox;if(!bbox)fail('RENDER_MAP_VIEWPORT',layer.layer_id,'Historical map bbox absent');
   const [left,bottom,right,top]=bbox!;
   const projection=media.maps[g.historicalMapId!]?.projection;
@@ -72,9 +101,33 @@ function pathD(layer:Layer,media:ResolvedMedia){
   if(projection!=='mercator'&&projection!=='equirectangular')fail('RENDER_PROJECTION_UNSUPPORTED',layer.layer_id,'Unsupported reviewed projection cannot be silently drawn');
   const yNorm=projection==='mercator'?(merc(top)-merc(y))/(merc(top)-merc(bottom)):
     (top-y)/(top-bottom);
-  return [((x-left)/(right-left))*r.w,yNorm*r.h];
+  return [((x-left)/(right-left))*r.w,yNorm*r.h] as [number,number];
  });
+ return points;
+}
+function pathD(points:[number,number][]):string{
  return points.map(([x,y],i)=>(i?'L':'M')+x.toFixed(2)+' '+y.toFixed(2)).join(' ');
+}
+/** The arrow moves with the drawn path's actual tip, not a fabricated line endpoint. */
+export function arrowPolygon(points:[number,number][],progress:number):string|null{
+ if(progress<=0.01)return null;
+ let total=0;const lengths:number[]=[];
+ for(let i=1;i<points.length;i++){const d=Math.hypot(points[i][0]-points[i-1][0],points[i][1]-points[i-1][1]);lengths.push(d);total+=d;}
+ if(total<1)fail('RENDER_ARROW_GEOMETRY','annotation','Arrow requires non-degenerate authored geometry');
+ let remaining=total*clamp(progress);
+ for(let i=1;i<points.length;i++){
+  const d=lengths[i-1];
+  if(remaining<=d||i===points.length-1){
+   if(d===0){remaining-=d;continue;}
+   const ux=(points[i][0]-points[i-1][0])/d,uy=(points[i][1]-points[i-1][1])/d;
+   const tip=[points[i-1][0]+ux*Math.min(d,remaining),points[i-1][1]+uy*Math.min(d,remaining)];
+   const base=[tip[0]-ux*19,tip[1]-uy*19],perp=[-uy*8,ux*8];
+   return [tip,[base[0]+perp[0],base[1]+perp[1]],[base[0]-perp[0],base[1]-perp[1]]]
+    .map(p=>p.map(x=>x.toFixed(2)).join(',')).join(' ');
+  }
+  remaining-=d;
+ }
+ return null;
 }
 function pathProgress(scene:Scene,layer:Layer,frame:number){
  const event=scene.events.find(e=>e.layer_id===layer.layer_id&&
@@ -93,9 +146,19 @@ export const CompiledLayer:React.FC<{scene:Scene;layer:Layer;frame:number;media:
    transformOrigin:'center',borderRadius:layer.layer_kind==='archival_photo'?4:0, boxSizing:'border-box'};
  if(layer.layer_kind==='route'||layer.layer_kind==='annotation'){
   const progress=pathProgress(scene,layer,frame);
-  const d=pathD(layer,media);
+  const points=pathPoints(layer,media),d=pathD(points);
+  const event=scene.events.find(e=>e.layer_id===layer.layer_id&&
+    (e.preset_id==='editorial-connector-draw'||e.preset_id==='route-line-draw'));
+  const arrow=event?.params.arrowhead;
+  if(arrow!==undefined&&typeof arrow!=='boolean')fail('RENDER_ARROW_FLAG',layer.layer_id,'Authored arrowhead must be boolean');
+  if(arrow&& (layer.layer_kind!=='annotation'||event?.motion_space!=='group_local'||
+      event.params.connector_geometry_ref!==layer.path_geometry_ref||
+      event.params.source_claim_id!==layer.source_claim_id))
+   fail('RENDER_ARROW_UNTRUSTED',layer.layer_id,'Directional arrow requires matching editorial geometry, claim and group-local motion');
+  const polygon=arrow?arrowPolygon(points,progress):null;
   return <div style={style} data-layer={layer.layer_id} data-claim={layer.source_claim_id??undefined}><svg width="100%" height="100%" viewBox={`0 0 ${r.w} ${r.h}`} style={{overflow:'visible'}}>
    <path d={d} fill="none" stroke={layer.layer_kind==='route'?'#a73c27':'#5d6770'} strokeWidth={layer.layer_kind==='route'?7:5} strokeLinecap="round" strokeDasharray="1" pathLength={1} strokeDashoffset={1-progress}/>
+   {polygon&&<polygon data-arrowhead={layer.layer_id} points={polygon} fill="#5d6770"/>}
   </svg></div>;
  }
  if(layer.asset_id){
@@ -123,23 +186,22 @@ export const CompiledLayer:React.FC<{scene:Scene;layer:Layer;frame:number;media:
  }
  return null;
 };
-export const BaseTemplate:React.FC<{scene:Scene;frame:number;media:ResolvedMedia;decor?:'map'|'portrait'|'collage'|'timeline'|'paper'|'split'|'fact'|'quote'|'causal'}>=({scene,frame,media,decor})=>{
+export const BaseTemplate:React.FC<{scene:Scene;frame:number;media:ResolvedMedia;decor?:'map'|'portrait'|'collage'|'timeline'|'paper'|'split'|'fact'|'quote'|'causal'; underlay?:React.ReactNode}>=({scene,frame,media,decor,underlay})=>{
  const cards=scene.layers.filter(l=>l.layer_kind==='archival_photo');
  if(decor==='collage'&&new Set(cards.map(l=>l.asset_id)).size!==cards.length)fail('RENDER_COLLAGE_DUPLICATE',scene.setup_id,'Duplicate evidence cards');
  if(decor==='split'){
   const pair=scene.layers.filter(l=>l.layer_kind==='map');
   if(pair.length!==2||pair[0].asset_id===pair[1].asset_id||pair[0].map_binding?.historical_map_id===pair[1].map_binding?.historical_map_id)fail('RENDER_PERIOD_MAP_DUPLICATE',scene.setup_id,'Independent period maps required');
  }
- const cam=scene.camera.keyframes;
  const local=frame;
- const k=cam.length===1?0:clamp((local-cam[0].at_frame)/(cam[cam.length-1].at_frame-cam[0].at_frame||1));
- const a=cam[0],b=cam[cam.length-1];
+ const camera=sampleCamera(scene.camera.keyframes,frame);
  const cameraStyle:React.CSSProperties={position:'absolute',inset:0,
-   transform:`translate(${mix(a.x_px,b.x_px,k)}px,${mix(a.y_px,b.y_px,k)}px) scale(${mix(a.scale,b.scale,k)})`,
+   opacity:camera.opacity,
+   transform:`translate(${camera.x_px}px,${camera.y_px}px) rotate(${camera.rotation_deg}deg) scale(${camera.scale})`,
    transformOrigin:'960px 540px'};
  const back:Record<string,string>={map:'#dfddcf',portrait:'#ded8c9',collage:'#cbc3b2',timeline:'#f0e7d4',paper:'#e6ddcb',split:'#d8d5c7',fact:'#f3ebde',quote:'#e8dfd1',causal:'#d9d4c4'};
  return <div style={{width:1920,height:1080,position:'relative',overflow:'hidden',background:back[decor??'paper']}}>
-  <div style={cameraStyle}>{[...scene.layers].sort((x,y)=>x.depth_order-y.depth_order).map(layer=>
+  <div style={cameraStyle}>{underlay}{[...scene.layers].sort((x,y)=>x.depth_order-y.depth_order).map(layer=>
     <CompiledLayer key={layer.layer_id} scene={scene} frame={local} layer={layer} media={media}/>)}</div>
  </div>;
 };
