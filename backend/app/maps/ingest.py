@@ -9,6 +9,65 @@ from backend.app.maps.projection import to_wgs84,project
 def _canonical(v):
     return json.dumps(v,sort_keys=True,separators=(",",":"),ensure_ascii=False,allow_nan=False).encode()
 
+
+def _valid_polygon_rings(paths, fid):
+    """Exact topology checks on the existing 10-decimal WGS84 coordinate grid."""
+    scale = 10**10
+    rings = [[(round(x*scale), round(y*scale)) for x,y in path] for path in paths]
+    def invalid(reason):
+        raise ContractViolation("MAP_GEOMETRY_INVALID", fid,
+                                reason + " Supply independently reviewed valid polygon rings.")
+    def cross(a,b,c):
+        return (b[0]-a[0])*(c[1]-a[1])-(b[1]-a[1])*(c[0]-a[0])
+    def on(a,b,p):
+        return cross(a,b,p)==0 and (min(a[0],b[0])<=p[0]<=max(a[0],b[0])
+                                    and min(a[1],b[1])<=p[1]<=max(a[1],b[1]))
+    def intersect(a,b,c,d):
+        q=[cross(a,b,c),cross(a,b,d),cross(c,d,a),cross(c,d,b)]
+        return ((q[0]*q[1]<0 and q[2]*q[3]<0)
+                or any((q[0]==0 and on(a,b,c),q[1]==0 and on(a,b,d),
+                        q[2]==0 and on(c,d,a),q[3]==0 and on(c,d,b))))
+    def inside(p,ring):
+        if any(on(a,b,p) for a,b in zip(ring,ring[1:])):
+            return False
+        state=False
+        for a,b in zip(ring,ring[1:]):
+            if (a[1]>p[1])!=(b[1]>p[1]) and (cross(a,b,p)>0)==(b[1]>a[1]):
+                state=not state
+        return state
+
+    for r in rings:
+        n=len(r)-1
+        if r[0]!=r[-1] or len(set(r[:-1]))!=n:
+            invalid("Polygon rings must close without repeated nonconsecutive vertices.")
+        if any(a==b for a,b in zip(r,r[1:])):
+            invalid("Polygon has zero-length edges.")
+        area2=sum(a[0]*b[1]-b[0]*a[1] for a,b in zip(r,r[1:]))
+        if abs(area2)<10**10:
+            invalid("Polygon has zero or negligible area.")
+        for i in range(n):
+            a,b,c=r[i],r[(i+1)%n],r[(i+2)%n]
+            if cross(a,b,c)==0 and ((a[0]-b[0])*(c[0]-b[0])
+                                      +(a[1]-b[1])*(c[1]-b[1]))>0:
+                invalid("Adjacent polygon edges cannot backtrack or overlap.")
+            for j in range(i+2,n):
+                if i==0 and j==n-1:
+                    continue  # One shared ring endpoint is valid.
+                if intersect(a,b,r[j],r[j+1]):
+                    invalid("Polygon has nonadjacent crossing, contact, or overlap.")
+    # Every hole must be strictly inside the exterior and holes must be disjoint.
+    for i in range(1,len(rings)):
+        if not inside(rings[i][0],rings[0]):
+            invalid("Polygon interior ring is not strictly within the exterior.")
+        for j in range(i):
+            if j>0 and (inside(rings[i][0],rings[j]) or inside(rings[j][0],rings[i])):
+                invalid("Polygon interior rings cannot contain one another.")
+            if any(intersect(a,b,c,d)
+                   for a,b in zip(rings[i],rings[i][1:])
+                   for c,d in zip(rings[j],rings[j][1:])):
+                invalid("Polygon rings cannot touch or intersect.")
+
+
 def _geometry(g,crs,fid):
     if not isinstance(g,dict) or g.get("type") not in ("LineString","Polygon"):
         raise ContractViolation("MAP_GEOMETRY_INVALID",fid,"Supply reviewed LineString or Polygon GeoJSON.")
@@ -30,22 +89,9 @@ def _geometry(g,crs,fid):
             raise ContractViolation("MAP_GEOMETRY_INVALID",fid,"Close polygon rings explicitly.")
         if any(abs(a[0]-b[0])>180 for a,b in zip(pts,pts[1:])):
             raise ContractViolation("MAP_GEOMETRY_INVALID",fid,"Antimeridian crossing needs reviewed split geometry.")
-        if kind=="Polygon":
-            # Shoelace prevents collapsed/zero-area geometry, no silent healing.
-            if abs(sum(a[0]*b[1]-b[0]*a[1] for a,b in zip(pts,pts[1:])))<1e-10:
-                raise ContractViolation("MAP_GEOMETRY_INVALID",fid,"Polygon has zero area.")
-            def orient(a,b,c):
-                return (b[0]-a[0])*(c[1]-a[1])-(b[1]-a[1])*(c[0]-a[0])
-            edge_count=len(pts)-1
-            for i in range(edge_count):
-                for j in range(i+2,edge_count):
-                    if i==0 and j==edge_count-1:continue
-                    a,b=pts[i],pts[i+1]
-                    c,d=pts[j],pts[j+1]
-                    if orient(a,b,c)*orient(a,b,d)<0 and orient(c,d,a)*orient(c,d,b)<0:
-                        raise ContractViolation("MAP_GEOMETRY_INVALID",fid,
-                                                "Self-intersecting historic polygon requires reviewed topology repair.")
         paths.append(pts)
+    if kind=="Polygon":
+        _valid_polygon_rings(paths,fid)
     return {"type":kind,"coordinates":paths[0] if kind=="LineString" else paths}
 
 def ingest(map_record:dict,original_bytes:bytes, *,year:int,feature_ids:list[str],
