@@ -45,6 +45,18 @@ for variant in ("A","B","C"):
                         staged["ref"]=preferred
                 # Only synthetic editorial layout selection, no G1 claims,
                 # media sources, narration word alignment or quotes changed.
+        # Variant-safe authored dependency ordering: a remapped focus must
+        # not depend on itself or reference a slot absent in selected layout.
+        # Remap synthetic staging refs only; never rewrite approved G1 data.
+        previous_ref=None
+        for beat in setup["direction"]["visual_beats"]:
+            for staged in beat["staging"]:
+                if staged["ref"] not in available:
+                    staged["ref"]=beat["focus_ref"]
+                dep=staged.get("after_ref")
+                if dep not in available or dep==staged["ref"]:
+                    staged["after_ref"]=previous_ref if previous_ref!=staged["ref"] else None
+                previous_ref=staged["ref"]
         if setup["preferred_template"]=="T10":
             for beat in setup["direction"]["visual_beats"]:
                 if beat["focus_ref"].endswith("entity_a"):
