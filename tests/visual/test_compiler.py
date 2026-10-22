@@ -690,3 +690,35 @@ def test_b1_production_compiler_all_ten_templates_native_samples_and_sources():
     t10 = next(s for s in scenes if s["template_id"] == "T10")
     assert any(x["layer_kind"] == "annotation" and x["path_geometry_ref"].startswith("connector_")
                for x in t10["layers"])
+
+
+
+def test_b1_g4_schema_invalid_staging_never_changes_sqlite_revision(tmp_path):
+    """A correctly bound upstream identity cannot authorize a schema-invalid G4 edit."""
+    from backend.app.projects.storage import ProjectStore
+    from backend.app.director.compiler import revise_g4
+    from backend.app.director.fingerprint import digest
+    story, payloads = visual()
+    original = normalize_story(story, payloads)
+    pid = original["project_id"]
+    store = ProjectStore(tmp_path/"state.sqlite", tmp_path/"originals")
+    store.create_project(pid, "SYNTHETIC G4 schema gate")
+    store.import_story(StoryCandidate.parse(story), 0)
+    prior = {"story_sha256":original["story_revision_sha256"],
+             "audio_sha256":"b"*64, "word_map_sha256":digest({"words":[]}),
+             "asset_snapshot_sha256":digest({})}
+    edited = copy.deepcopy(original)
+    changed = edited["setup_plans"][0]
+    changed["direction_revision"] = {
+        "kind":"operator_visual_edit",
+        "source_story_revision_sha256":prior["story_sha256"],
+        "operator_confirmed":True, "edited_paths":["editorial_direction.visual_beats.0.staging"],
+        "edit_reason":"Regression verification"}
+    changed["editorial_direction"]["visual_beats"][0]["staging"][0]["operation"] = "not_registered"
+    current_revision = store.revision(pid)
+    with pytest.raises(ContractViolation) as err:
+        revise_g4(store,pid,prior,original,edited,{"words":[]},
+                  {"audio_sha256":"b"*64}, {},expected_revision=current_revision,
+                  operator_reason="Validation regression")
+    assert err.value.code != "COMPILER_GATE_UNAPPROVED"
+    assert store.revision(pid) == current_revision
