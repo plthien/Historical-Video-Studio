@@ -754,3 +754,38 @@ def test_b1_thirty_variants_actual_compiler_geometry_on_windows():
     assert len(outputs)==30
     for tid in (f"T{i:02d}" for i in range(1,11)):
         assert len({json.dumps(outputs[(tid,v)],sort_keys=True) for v in ("A","B","C")})==3
+
+
+
+def test_b1_cold_process_compiler_bytes_and_sha_identity():
+    """B1-06: deterministic identity across two native, fresh Python processes."""
+    import os
+    import subprocess
+    import sys
+    if os.name!="nt":
+        pytest.skip("Cold Windows GDI process fingerprint comparison requires Windows")
+    script = """
+import hashlib, json, os
+from pathlib import Path
+from backend.tools.b1_smoke import synthetic_ten_template_inputs
+from backend.app.director.compiler import compile_timeline
+from backend.app.director.layout import windows_font_measure
+from backend.app.director.fingerprint import canonical
+font=Path(os.environ["WINDIR"])/"Fonts"/"arial.ttf"
+measure,identity=windows_font_measure(str(font),hashlib.sha256(font.read_bytes()).hexdigest())
+story,bp,words,final,assets,maps=synthetic_ten_template_inputs()
+out=compile_timeline(story,bp,words,final,assets,maps=maps,
+    font_measure=measure,font_identity=identity,
+    expected_story_sha256=bp["story_revision_sha256"])
+print(json.dumps({"bytes_sha":hashlib.sha256(canonical(out)).hexdigest(),
+                  "fingerprint":out["dependency_fingerprint"],
+                  "scene_sha":[hashlib.sha256(canonical(x)).hexdigest() for x in out["scenes"]]}))
+"""
+    results = [
+        subprocess.run([sys.executable,"-c",script],cwd=ROOT,
+                       check=True,capture_output=True,text=True).stdout.strip()
+        for _ in range(2)]
+    assert results[0] == results[1]
+    parsed=json.loads(results[0])
+    assert len(parsed["scene_sha"])==10
+    assert len(parsed["bytes_sha"])==64 and len(parsed["fingerprint"])==64
