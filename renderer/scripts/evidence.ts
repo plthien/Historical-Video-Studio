@@ -68,7 +68,7 @@ for(const {variant,scene} of sourceCases){
 for(const template of templateList){
  const samples=metrics.filter((x:any)=>x.template===template) as any[];
  if(samples.length!==3)throw Error('RENDER_30_VARIANTS_INCOMPLETE: '+template);
- const distinct=new Set(samples.map(x=>x.shots.find((y:any)=>y.frame===Math.floor(compiled[x.variant].scenes.find((z:any)=>z.template_id===template).duration_frames/2)).pixelSha256));
+ const distinct=new Set(samples.map(x=>x.shots.find((y:any)=>y.frame===Math.floor(compiled[x.variant].scenes.find((z:any)=>z.template_id===template)!.duration_frames/2))!.pixelSha256));
  if(distinct.size!==3)throw Error('RENDER_VARIANT_GEOMETRY_INERT: '+template);
 }
 if(mode==='render'){
