@@ -100,6 +100,21 @@ jobs:
           Check @("-m","backend.tools.smoke","--case","asset-ui","--mode","local")
           Check @("-m","backend.tools.smoke","--case","phase-a","--mode","local")
           Check @("-m","pytest","-q","tests/backend/test_foundation.py","tests/voice/test_voice_pipeline.py")
+      - name: B1-01/02/03 normalizer, map and alignment Windows owner checks
+        shell: pwsh
+        run: |
+          $py = ".venv/Scripts/python.exe"
+          function Check-B1([string[]]$argsList) {
+            & $py @argsList
+            if ($LASTEXITCODE -ne 0) { throw "B1 owner failed: $($argsList -join ' ')" }
+          }
+          Check-B1 @("-m","pytest","-q","tests/visual/test_compiler.py","-k","blueprint or payload or role")
+          Check-B1 @("-m","pytest","-q","tests/visual/test_compiler.py","-k","map or projection or period")
+          Check-B1 @("-m","pytest","-q","tests/visual/test_compiler.py","-k","cue or timing or staging")
+          Check-B1 @("-m","backend.tools.smoke","--case","normalize-visual","--mode","local")
+          Check-B1 @("-m","backend.tools.smoke","--case","historical-map","--mode","local")
+          Check-B1 @("-m","backend.tools.smoke","--case","align-scene-cues","--mode","local")
+          Check-B1 @("-m","pytest","-q","tests/visual/test_compiler.py")
       - name: Chromium browser E2E (real local servers)
         shell: pwsh
         run: |
