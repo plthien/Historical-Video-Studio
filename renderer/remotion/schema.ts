@@ -78,7 +78,12 @@ export function assertMedia(t:Timeline,m:ResolvedMedia){
   if(!first||!second||first.projection!==second.projection||JSON.stringify(first.viewport)!==JSON.stringify(second.viewport)||
      first.reviewedYear===second.reviewedYear)fail('RENDER_PERIOD_MAP_MISMATCH',s.setup_id,'T07 needs two reviewed years with identical frozen projection and viewport');
  }
- for(const s of t.scenes.filter(s=>s.template_id==='T03'))if(new Set(s.layers.filter(l=>l.layer_kind==='archival_photo').map(l=>l.asset_id)).size<2)fail('RENDER_COLLAGE_DUPLICATE',s.setup_id,'Evidence cards must use independent originals');
+ for(const s of t.scenes.filter(s=>s.template_id==='T03')){
+  const cards=s.layers.filter(l=>l.layer_kind==='archival_photo');
+  const originals=cards.map(l=>l.asset_id&&m.assets[l.asset_id]?.originalSha256);
+  if(cards.length<2||originals.some(x=>!x)||new Set(originals).size!==cards.length)
+   fail('RENDER_COLLAGE_DUPLICATE',s.setup_id,'Every evidence card must use a distinct approved original');
+ }
 }
 export function activeScene(t:Timeline,globalFrame:number):{scene:Scene;localFrame:number}{
  if(!Number.isInteger(globalFrame)||globalFrame<0||globalFrame>=t.total_frames)fail('RENDER_FRAME_OUTSIDE',t.project_id,'Frame not owned by timeline');
