@@ -61,7 +61,7 @@ export function makeSyntheticManifest(t:Timeline,directory:string,fontFile:strin
   return {historicalMapId:l.map_binding!.historical_map_id,projection:'mercator',
     viewport:[9,49,13,53] as [number,number,number,number],
     reviewedYear:scene.template_id==='T07'?(i===0?1871:1914):1871,
-    sourceOriginalSha256:original.originalSha256,
+    sourceOriginalSha256:original!.originalSha256,
     coordinateKind:l.map_binding!.coordinate_kind as ReviewedMap['coordinateKind']};
  }));
  const geos=t.scenes.flatMap(s=>s.layers.filter(l=>l.path_geometry_ref).map(l=>{
