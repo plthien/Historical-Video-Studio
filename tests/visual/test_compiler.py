@@ -915,3 +915,14 @@ def test_b1_g4_real_sqlite_positive_selective_revision_and_stale_sources(tmp_pat
         revise_g4(store,pid,original,bp,edited,words,frozen,current,
                   expected_revision=revision,operator_reason="Stale update",
                   maps={"setup_001":ctx,"setup_002":ctx},font_measure=measure)
+    # The pre-edit caller copies still match each other, but SQLite is now stale.
+    # A changed persisted G2 WordMap SHA must block before another G4 commit.
+    with store._transaction() as db:
+        db.execute("UPDATE word_maps SET map_sha256=? WHERE project_id=?",
+                   ("f"*64,pid))
+    current_revision=store.revision(pid)
+    with pytest.raises(ContractViolation,match="WORD_MAP_STALE"):
+        revise_g4(store,pid,original,bp,edited,words,frozen,current,
+                  expected_revision=current_revision,operator_reason="Recheck current G2",
+                  maps={"setup_001":ctx,"setup_002":ctx},font_measure=measure)
+    assert store.revision(pid)==current_revision
