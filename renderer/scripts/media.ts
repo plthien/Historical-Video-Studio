@@ -19,7 +19,7 @@ export function loadApprovedMedia(t:Timeline, manifest:ResolveManifest):Resolved
   const requested=resolve(root,entry.path);
   const candidate=relative(root,requested);
   if(candidate.startsWith('..')||isAbsolute(candidate))fail('RENDER_MEDIA_PATH_UNSAFE',entry.assetId,'Reject absolute escape or parent traversal');
-  let p:string;
+  let p=requested;
   try{p=realpathSync(requested);}catch{fail('RENDER_MEDIA_MISSING',entry.assetId,'Approved original missing from local immutable store');}
   const rel=relative(root,p);
   if(rel.startsWith('..')||isAbsolute(rel)||!statSync(p).isFile())fail('RENDER_MEDIA_PATH_UNSAFE',entry.assetId,'Media must live under immutable media root');
