@@ -295,6 +295,8 @@ def synthetic_ten_template_inputs():
                 hint = "wipe" if "map_" in ref else "none"
             elif tid == "T09" and "source_page" in ref:
                 hint = "none"
+            elif tid == "T10" and "entity_b" in ref:
+                hint = "line_draw"
             elif tid == "T10" and "entity_" in ref:
                 hint = "none"
             else:
