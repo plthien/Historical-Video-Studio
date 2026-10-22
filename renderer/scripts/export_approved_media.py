@@ -67,6 +67,36 @@ for aid in sorted(referenced):
                     "originalSha256":source["original_sha256"],"approvalRecordId":source["approval_record_id"],
                     "sourceKind":"APPROVED_LOCAL","mime":mime})
 geometries=[]
+reviewed_maps={}
+for scene in timeline["scenes"]:
+    ctx=head["manifest"]["maps"].get(scene["setup_id"],{})
+    for layer in scene["layers"]:
+        binding=layer.get("map_binding")
+        if not binding:
+            continue
+        matching=[entry for entry in ctx.get("sources",{}).values()
+                  if entry["historical_map"]["historical_map_id"]==binding["historical_map_id"]]
+        if len(matching)!=1:
+            raise RuntimeError("RENDER_PERIOD_MAP_UNREVIEWED "+scene["setup_id"])
+        reviewed=matching[0]
+        if reviewed["source_original_sha256"]!=assets[layer["asset_id"]]["original_sha256"]:
+            raise RuntimeError("RENDER_MAP_SHA_STALE "+scene["setup_id"])
+        record=reviewed["historical_map"]
+        bbox=record["geography_bbox"]
+        if scene["template_id"]=="T07":
+            viewport=ctx.get("shared_viewport")
+            projection=ctx.get("shared_projection")
+            if not viewport or not projection:
+                raise RuntimeError("RENDER_PERIOD_VIEWPORT_UNREVIEWED")
+        else:
+            projection=record["map_projection"]
+            viewport=[bbox["min_lon"],bbox["min_lat"],bbox["max_lon"],bbox["max_lat"]]
+        reviewed_maps[binding["historical_map_id"]]={
+            "historicalMapId":binding["historical_map_id"],"projection":projection,
+            "viewport":viewport,"reviewedYear":ctx["era_year"],
+            "sourceOriginalSha256":reviewed["source_original_sha256"],
+            "coordinateKind":binding["coordinate_kind"]
+        }
 for scene in timeline["scenes"]:
     ctx=head["manifest"]["maps"].get(scene["setup_id"],{})
     for layer in scene["layers"]:
@@ -111,7 +141,7 @@ if hashlib.sha256(font_path.read_bytes()).hexdigest()!=font["font_sha256"]:
 manifest={
  "projectId":args.project,"g4ManifestSha256":head["manifest_sha256"],
  "mediaRoot":str(store.artifacts.root.resolve()),
- "assets":records,"geometries":geometries,
+ "assets":records,"geometries":geometries,"maps":list(reviewed_maps.values()),
  "fontFile":str(font_path),"fontSha256":font["font_sha256"],
  "fontFamily":font["font_family"],"sourceKind":"APPROVED_LOCAL"
 }
