@@ -1087,6 +1087,27 @@ def test_b1_g4_real_sqlite_positive_invalid_staging_selective_revision_and_stale
             expected_revision=baseline_revision,operator_reason="Reject forged original source plan",
             maps=None,font_measure=measure)
     assert store.revision(pid)==baseline_revision
+    # A forged self-declared fingerprint never authenticates a draft.
+    forged_sha=copy.deepcopy(original)
+    forged_sha["dependency_fingerprint"]="f"*64
+    with pytest.raises(ContractViolation,match="G4_DRAFT_TAMPERED"):
+        revise_g4(store,pid,forged_sha,bp,edited,words,frozen,current,
+            expected_revision=baseline_revision,operator_reason="Reject forged compiler digest",
+            maps=None,font_measure=measure)
+    # Missing current head is a hard blocker even with valid G1/G2/G3.
+    with store._transaction() as db:
+        head_row=db.execute("SELECT * FROM g4_compiled_drafts WHERE project_id=?",(pid,)).fetchone()
+        db.execute("DELETE FROM g4_compiled_drafts WHERE project_id=?",(pid,))
+    try:
+        with pytest.raises(ContractViolation,match="G4_DRAFT_UNREGISTERED"):
+            revise_g4(store,pid,original,bp,edited,words,frozen,current,
+                expected_revision=baseline_revision,operator_reason="Reject unregistered draft",
+                maps=None,font_measure=measure)
+        assert store.revision(pid)==baseline_revision
+    finally:
+        with store._transaction() as db:
+            db.execute("INSERT INTO g4_compiled_drafts VALUES(?,?,?,?)",head_row)
+    assert draft.load(store,pid)["manifest_sha256"]==stored["manifest_sha256"]
     revision=store.revision(pid)
     changed=revise_g4(store,pid,original,bp,edited,words,frozen,current,
                expected_revision=revision,operator_reason="Variant framing change",
@@ -1112,6 +1133,7 @@ def test_b1_g4_real_sqlite_positive_invalid_staging_selective_revision_and_stale
                   operator_reason="No visible scene change",
                   maps=None,font_measure=measure)
     assert store.revision(pid)==revision_after_variant
+    assert draft.load(store,pid)["generation"]==2
     # Positive source-preserving G4 crop; recompute only the named layer's scene.
     first_scene=changed["timeline"]["scenes"][0]
     map_layer=next(x for x in first_scene["layers"] if x["layer_kind"]=="map")
@@ -1135,6 +1157,17 @@ def test_b1_g4_real_sqlite_positive_invalid_staging_selective_revision_and_stale
     new_head=draft.load(store,pid)
     assert new_head["generation"]==3
     assert canonical(new_head["timeline"])==canonical(cropped["timeline"])
+    # Invalid crop must roll back without touching the draft head, project, gates or media.
+    before_invalid=store.revision(pid)
+    with pytest.raises(ContractViolation,match="G4_CROP_INVALID"):
+        revise_g4(store,pid,cropped["timeline"],edited,copy.deepcopy(edited),
+            words,frozen,current,expected_revision=before_invalid,
+            operator_reason="Reject invalid original crop",maps=None,
+            font_measure=measure,
+            crop_overrides={"setup_001":{map_layer["layer_id"]:
+                {"x":0.7,"y":0.6,"w":0.8,"h":0.8}}})
+    assert store.revision(pid)==before_invalid
+    assert draft.load(store,pid)["manifest_sha256"]==new_head["manifest_sha256"]
     # Replay of the earlier trusted timeline must be blocked after another edit.
     with pytest.raises(ContractViolation,match="G4_DRAFT_TAMPERED"):
         revise_g4(store,pid,changed["timeline"],edited,copy.deepcopy(edited),
