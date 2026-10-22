@@ -533,3 +533,38 @@ def test_compiler_fingerprint_full_48_synthetic_deterministic_and_negative():
     wrong_registry["setup_plans"][0]["variant_id"]="Z"
     with pytest.raises(ContractViolation):
         compile_timeline(story,wrong_registry,words,final,approved,**args)
+
+
+def test_compiler_g4_invariant_rejects_changed_frozen_source_before_recompute():
+    """B1-06: G4 may only reuse prior approved WAV/word-map/G3 snapshot."""
+    from backend.app.director.compiler import revise_g4
+    from backend.app.director.fingerprint import digest
+    class RevisionOnlyStore:
+        def revision(self, project_id):
+            return 7
+    store=RevisionOnlyStore()
+    original={"project_id":"project_test",
+              "story_revision_sha256":"a"*64,"setup_plans":[]}
+    prior={"story_sha256":"a"*64,"audio_sha256":"b"*64,
+           "word_map_sha256":digest({"words":[]}),
+           "asset_snapshot_sha256":digest({"req_001":{"original_sha256":"c"*64}})}
+    rows=[
+        ({"words":[{"word_id":"modified"}]},{"audio_sha256":"b"*64},
+         {"req_001":{"original_sha256":"c"*64}}),
+        ({"words":[]},{"audio_sha256":"e"*64},
+         {"req_001":{"original_sha256":"c"*64}}),
+        ({"words":[]},{"audio_sha256":"b"*64},
+         {"req_001":{"original_sha256":"f"*64}}),
+    ]
+    for words,audio,assets in rows:
+        with pytest.raises(ContractViolation) as ex:
+            revise_g4(store,"project_test",prior,original,copy.deepcopy(original),
+                      words,audio,assets,expected_revision=7,
+                      operator_reason="Presentation-only adjustment")
+        assert ex.value.code=="G4_SOURCE_EDIT_FORBIDDEN"
+    with pytest.raises(ContractViolation) as ex:
+        revise_g4(store,"project_test",prior,original,copy.deepcopy(original),
+                  {"words":[]},{"audio_sha256":"b"*64},
+                  {"req_001":{"original_sha256":"c"*64}},
+                  expected_revision=6,operator_reason="Presentation-only adjustment")
+    assert ex.value.code=="APPROVAL_REVISION_CONFLICT"
