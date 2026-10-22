@@ -12,6 +12,7 @@
     "verify:toolchain": "node -e \"if(process.versions.node.split('.')[0]!=='22') process.exit(2)\"",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "test:frames": "tsx scripts/evidence.ts frames",
+    "test:repair": "tsx scripts/visual-repair.ts",
     "render:smoke": "tsx scripts/evidence.ts render"
   },
   "dependencies": {
