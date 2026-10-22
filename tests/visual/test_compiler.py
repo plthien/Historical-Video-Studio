@@ -1032,6 +1032,39 @@ def test_b1_g4_real_sqlite_positive_invalid_staging_selective_revision_and_stale
         "kind":"operator_visual_edit","source_story_revision_sha256":original["story_sha256"],
         "edited_paths":["layout_variant_hint"],
         "operator_confirmed":True,"edit_reason":"Improve map framing"}
+    # G10-V3 RED-A/B/C: these caller inputs must never establish authority.
+    # The two-scene baseline above is compiled from real approved local SQLite.
+    # No hash field is recomputed when tampering with a retained scene.
+    baseline_revision=store.revision(pid)
+    for change in ("factual_text", "g3_source"):
+        forged=copy.deepcopy(original)
+        retained=forged["scenes"][1]["layers"]
+        if change=="factual_text":
+            text_layer=next(x for x in retained if x.get("text_layout"))
+            text_layer["text_layout"]["text"]="FORGED HISTORICAL STATEMENT"
+        else:
+            source_layer=next(x for x in retained if x["asset_id"])
+            source_layer["asset_id"]="candidate_forged_media"
+        with pytest.raises(ContractViolation,match="G4_DRAFT_TAMPERED"):
+            revise_g4(store,pid,forged,bp,edited,words,frozen,current,
+                expected_revision=baseline_revision,operator_reason="Reject retained-scene tamper",
+                maps={"setup_001":ctx,"setup_002":ctx},font_measure=measure)
+        assert store.revision(pid)==baseline_revision
+    forged_map=copy.deepcopy(ctx)
+    forged_map["era_year"]=2026
+    forged_map["reviewed_period_map"]=False
+    with pytest.raises(ContractViolation,match="G4_MAP_CONTEXT_INVALID"):
+        revise_g4(store,pid,original,bp,edited,words,frozen,current,
+            expected_revision=baseline_revision,operator_reason="Reject forged map context",
+            maps={"setup_001":forged_map,"setup_002":ctx},font_measure=measure)
+    assert store.revision(pid)==baseline_revision
+    forged_bp=copy.deepcopy(bp)
+    forged_bp["setup_plans"][1]["layout_control"]["safe_area_pct"]["left"]=0.12
+    with pytest.raises(ContractViolation,match="G4_BLUEPRINT_TAMPERED"):
+        revise_g4(store,pid,original,forged_bp,edited,words,frozen,current,
+            expected_revision=baseline_revision,operator_reason="Reject forged original source plan",
+            maps={"setup_001":ctx,"setup_002":ctx},font_measure=measure)
+    assert store.revision(pid)==baseline_revision
     revision=store.revision(pid)
     changed=revise_g4(store,pid,original,bp,edited,words,frozen,current,
                expected_revision=revision,operator_reason="Variant framing change",
