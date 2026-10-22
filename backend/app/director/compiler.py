@@ -311,6 +311,15 @@ def compile_from_store(store, project_id: str, blueprint: dict, word_map: dict,
         for key in ("before_map","after_map"):
             if key in map_payload:
                 requested.append(map_payload[key])
+        if plan["template_id"] == "T10" and map_payload.get("map_requirement_id"):
+            rid = map_payload["map_requirement_id"]
+            requirement = next((r for r in story_obj.data()["asset_requirements"]
+                                if r["requirement_id"] == rid), None)
+            if (requirement is None or requirement["asset_class"] != "HISTORICAL_MAP"
+                    or requirement["start_year"] != requirement["end_year"]):
+                _block("MAP_PERIOD_MISMATCH", rid,
+                       "T10 region backdrop needs one exact G1 year and current G3 source.")
+            requested.append({"map_requirement_id": rid, "year": requirement["start_year"]})
         if not requested:
             continue
         sid = plan["setup_id"]
