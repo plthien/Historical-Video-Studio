@@ -151,7 +151,10 @@ def compile_timeline(story: dict, blueprint: dict, word_map: dict, final_audio: 
                 continue
             source = current.get("sources", {}).get(rid)
             head = approved_assets.get(rid)
-            if (not source or not head or
+            if head is None:
+                _block("G3_ASSET_UNAPPROVED", rid,
+                       "Required historical map has no current approved G3 original.")
+            if (not source or
                     source["source_original_sha256"] != head["original_sha256"]
                     or source["historical_map"]["source_asset_id"] != head["candidate_id"]
                     or source["historical_map"]["rights_review_record_id"] != head["approval_record_id"]):
