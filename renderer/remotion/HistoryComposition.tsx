@@ -13,7 +13,9 @@ export const HistoryComposition:React.FC<HistoryProps>=({timeline,media})=>{
  const {scene,localFrame}=activeScene(timeline,frame);
  const Template=Templates[scene.template_id];
  if(!Template)fail('RENDER_TEMPLATE_UNKNOWN',scene.setup_id,'No registered historical scene implementation');
+ if(!/^[A-Za-z0-9 _-]{1,64}$/.test(media.fontFamily))fail('RENDER_FONT_FAMILY_INVALID',scene.setup_id,'Unsafe font face');
  return <AbsoluteFill style={{backgroundColor:'#e6decf',overflow:'hidden'}} data-global-frame={frame} data-scene-id={scene.scene_id}>
+  <style>{`@font-face{font-family:"${media.fontFamily}";src:url("${media.fontDataUri}") format("truetype");font-weight:400 900;}`}</style>
   <Template scene={scene} frame={localFrame} media={media}/>
  </AbsoluteFill>;
 };
