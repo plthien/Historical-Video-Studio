@@ -1078,6 +1078,30 @@ def test_b1_g4_real_sqlite_positive_invalid_staging_selective_revision_and_stale
             expected_revision=baseline_revision,operator_reason="Reject forged map context",
             maps={"setup_001":forged_map,"setup_002":ctx},font_measure=measure)
     assert store.revision(pid)==baseline_revision
+    trusted_ctx=copy.deepcopy(draft.load(store,pid)["manifest"]["maps"])
+    for mutation in ("geometry", "projection", "period"):
+        altered=copy.deepcopy(trusted_ctx)
+        map_entry=altered["setup_001"]["sources"]["req_001"]
+        if mutation=="geometry":
+            map_entry["coordinate_space"]="EPSG:4326"
+            map_entry["features"]=[{"id":"unreviewed_feature","geometry":{
+                "type":"Polygon","coordinates":[[[10,50],[11,50],[11,51],[10,50]]]}}]
+        elif mutation=="projection":
+            map_entry["historical_map"]["map_projection"]="albers"
+        else:
+            map_entry["historical_map"]["valid_year_from"]=1914
+        with pytest.raises(ContractViolation,match="G4_MAP_CONTEXT_INVALID"):
+            revise_g4(store,pid,original,bp,edited,words,frozen,current,
+                expected_revision=baseline_revision,
+                operator_reason="Reject forged geographic "+mutation,
+                maps=altered,font_measure=measure)
+        assert store.revision(pid)==baseline_revision
+    foreign=copy.deepcopy(original)
+    foreign["project_id"]="proj_foreign"
+    with pytest.raises(ContractViolation,match="G4_DRAFT_TAMPERED"):
+        revise_g4(store,pid,foreign,bp,edited,words,frozen,current,
+            expected_revision=baseline_revision,operator_reason="Reject cross-project timeline",
+            maps=None,font_measure=measure)
     forged_bp=copy.deepcopy(bp)
     forged_bp["setup_plans"][1]["layout_control"]["safe_area_pct"]["left"]=0.12
     forged_edited=copy.deepcopy(edited)
