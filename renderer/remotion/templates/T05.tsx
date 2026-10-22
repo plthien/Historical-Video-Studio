@@ -8,14 +8,18 @@ export function timelineRail(scene:Scene){
  const dates=scene.layers.filter(l=>l.layer_kind==='date');
  if(dates.length<2||dates.length>6||dates.some(l=>!l.text||!l.source_claim_id))
   fail('T05_CHRONOLOGY_INVALID',scene.setup_id,'Requires 2-6 claim-backed authored dates');
- const rail=scene.layers.find(l=>l.layer_kind==='annotation') ?? fail('RENDER_TIMELINE_COLLISION',scene.setup_id,'Compiled non-text rail slot missing');
- const r=rail.rect_px,horizontal=r.w>=r.h;
- const axis=horizontal?r.y+r.h/2:r.x+r.w/2;
  const rects=dates.map(d=>d.rect_px);
- // All labels must be on one side of the approved, designated rail.
- const before=rects.every(d=>horizontal?d.y+d.h+6<=axis:d.x+d.w+6<=axis);
- const after=rects.every(d=>horizontal?d.y-6>=axis:d.x-6>=axis);
- if(!before&&!after)fail('RENDER_TIMELINE_COLLISION',scene.setup_id,'Rail crosses measured date/text content');
+ // Some B1 T05 layouts have no explicit rail layer. Its non-factual
+ // connector can be routed solely from the edges of frozen date rectangles.
+ const cx=rects.map(r=>r.x+r.w/2),cy=rects.map(r=>r.y+r.h/2);
+ const horizontal=Math.max(...cx)-Math.min(...cx)>=Math.max(...cy)-Math.min(...cy);
+ const start=Math.min(...rects.map(r=>horizontal?r.y:r.x));
+ const end=Math.max(...rects.map(r=>horizontal?r.y+r.h:r.x+r.w));
+ const ceiling=horizontal?1080:1920;
+ const before=end+42<=ceiling-20;
+ const after=!before&&start-42>=20;
+ if(!before&&!after)fail('RENDER_TIMELINE_COLLISION',scene.setup_id,'No safe non-text rail outside authored dates');
+ const axis=before?end+42:start-42;
  const ordered=[...dates].sort((a,b)=>(horizontal?a.rect_px.x-b.rect_px.x:a.rect_px.y-b.rect_px.y));
  const years=ordered.map(l=>l.text!.match(/\b\d{3,4}\b/)?.[0]).map(x=>x?Number(x):null);
  if(years.every(x=>x!==null)&&years.some((y,i)=>i>0&&y!>years[i-1]!))
@@ -37,7 +41,7 @@ export function timelineRail(scene:Scene){
   return {from:previous.layer_id,to:next.layer_id,start:authorized.local_start_frame,end:authorized.local_end_frame,
     d:`M ${xy(a)} L ${xy(aa)} L ${xy(bb)} L ${xy(b)}`,port:bb};
  });
- return {edges,rail:rail.layer_id};
+ return {edges,rail:'derived_from_frozen_date_rects'};
 }
 export const T05:React.FC<{scene:Scene;frame:number;media:ResolvedMedia}>=({scene,frame,media})=>{
  const {edges}=timelineRail(scene);
