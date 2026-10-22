@@ -973,6 +973,34 @@ def test_b1_g4_real_sqlite_positive_invalid_staging_selective_revision_and_stale
         revise_g4(store,pid,original,bp,edited,words,frozen,current,
                   expected_revision=revision,operator_reason="Stale update",
                   maps={"setup_001":ctx,"setup_002":ctx},font_measure=measure)
+    # G4 no-op is not an authorized revision: it must not advance project CAS.
+    revision_after_variant=store.revision(pid)
+    with pytest.raises(ContractViolation,match="G4_EDIT_INVALID"):
+        revise_g4(store,pid,changed["timeline"],edited,copy.deepcopy(edited),
+                  words,frozen,current,expected_revision=revision_after_variant,
+                  operator_reason="No visible scene change",
+                  maps={"setup_001":ctx,"setup_002":ctx},font_measure=measure)
+    assert store.revision(pid)==revision_after_variant
+    # Positive source-preserving G4 crop; recompute only the named layer's scene.
+    first_scene=changed["timeline"]["scenes"][0]
+    map_layer=next(x for x in first_scene["layers"] if x["layer_kind"]=="map")
+    reviewed_crop={"x":0.08,"y":0.12,"w":0.79,"h":0.70}
+    cropped=revise_g4(store,pid,changed["timeline"],edited,copy.deepcopy(edited),
+              words,frozen,current,expected_revision=revision_after_variant,
+              operator_reason="Improve reviewed map UV framing",
+              maps={"setup_001":ctx,"setup_002":ctx},font_measure=measure,
+              crop_overrides={"setup_001":{map_layer["layer_id"]:reviewed_crop}})
+    assert cropped["recomputed_setup_ids"]==["setup_001"]
+    assert cropped["retained_setup_ids"]==["setup_002"]
+    assert canonical(cropped["timeline"]["scenes"][1])==canonical(original["scenes"][1])
+    rendered_layer=next(x for x in cropped["timeline"]["scenes"][0]["layers"]
+                        if x["layer_id"]==map_layer["layer_id"])
+    assert rendered_layer["crop_normalized"]==reviewed_crop
+    assert rendered_layer["asset_id"]==map_layer["asset_id"]
+    assert cropped["timeline"]["asset_snapshot_sha256"]==original["asset_snapshot_sha256"]
+    assert cropped["timeline"]["word_map_sha256"]==original["word_map_sha256"]
+    assert cropped["timeline"]["audio_sha256"]==original["audio_sha256"]
+    assert store.revision(pid)==revision_after_variant+1
     # The pre-edit caller copies still match each other, but SQLite is now stale.
     # A changed persisted G2 WordMap SHA must block before another G4 commit.
     with store._transaction() as db:
