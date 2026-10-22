@@ -650,3 +650,39 @@ def test_b1_unsupported_motion_hint_fails_closed():
     with pytest.raises(ContractViolation, match="MOTION_HINT_UNSUPPORTED"):
         _scene(plan, {"start_frame": 0, "end_frame": 60}, [row], approved,
                requirements, {}, lambda text,size: (len(text)*size//2, size))
+
+
+
+def test_b1_production_compiler_all_ten_templates_native_samples_and_sources():
+    """Execute actual compile_timeline for T01..T10, not schema-only contract fixtures."""
+    from backend.tools.b1_smoke import synthetic_ten_template_inputs
+    from backend.app.director.compiler import compile_timeline
+    story, bp, words, final, assets, maps = synthetic_ten_template_inputs()
+    kwargs = {"maps":maps, "font_measure":lambda text, size: (len(text)*size//2,size),
+              "font_identity":{"font_sha256":"a"*64,"font_family":"SYNTHETIC_METRICS",
+                               "measurement_engine":"synthetic_fixture"},
+              "expected_story_sha256":bp["story_revision_sha256"]}
+    result = compile_timeline(story,bp,words,final,assets,**kwargs)
+    validate_document("CompiledTimeline.v1",result)
+    scenes = result["scenes"]
+    assert len(scenes) == 10
+    assert {s["template_id"] for s in scenes} == {f"T{i:02d}" for i in range(1,11)}
+    assert result["total_frames"] == 3000
+    assert all(s["layers"] and s["events"] and s["staging"]["beat_sequence"]
+               and s["camera"]["focus_path"] for s in scenes)
+    assert all(a["start_frame"] + a["duration_frames"] == b["start_frame"]
+               for a,b in zip(scenes, scenes[1:]))
+    t03 = next(s for s in scenes if s["template_id"] == "T03")
+    assert t03["events"][0]["preset_id"] == "stagger-reveal"
+    assert len(t03["events"][0]["affected_layer_ids"]) == 3
+    t04 = next(s for s in scenes if s["template_id"] == "T04")
+    assert t04["events"][0]["preset_id"] == "route-line-draw"
+    assert t04["events"][0]["layer_id"].endswith("route_overlay")
+    t06 = next(s for s in scenes if s["template_id"] == "T06")
+    assert any(x["layer_kind"] == "document" and x["crop_normalized"]["w"] < 1
+               for x in t06["layers"])
+    t07 = next(s for s in scenes if s["template_id"] == "T07")
+    assert len({x["asset_id"] for x in t07["layers"] if x["layer_kind"] == "map"}) == 2
+    t10 = next(s for s in scenes if s["template_id"] == "T10")
+    assert any(x["layer_kind"] == "annotation" and x["path_geometry_ref"].startswith("connector_")
+               for x in t10["layers"])
