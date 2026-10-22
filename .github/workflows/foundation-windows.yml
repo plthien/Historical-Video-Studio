@@ -115,6 +115,21 @@ jobs:
           Check-B1 @("-m","backend.tools.smoke","--case","historical-map","--mode","local")
           Check-B1 @("-m","backend.tools.smoke","--case","align-scene-cues","--mode","local")
           Check-B1 @("-m","pytest","-q","tests/visual/test_compiler.py")
+      - name: B1-04/05/06 layout motion frozen compiler Windows checks
+        shell: pwsh
+        run: |
+          $py = ".venv/Scripts/python.exe"
+          function Check-B1II([string[]]$argsList) {
+            & $py @argsList
+            if ($LASTEXITCODE -ne 0) { throw "B1 compiler failed: $($argsList -join ' ')" }
+          }
+          Check-B1II @("-m","pytest","-q","tests/visual/test_compiler.py","-k","layers or typography or slots")
+          Check-B1II @("-m","pytest","-q","tests/visual/test_compiler.py","-k","motion or camera or connector")
+          Check-B1II @("-m","pytest","-q","tests/visual/test_compiler.py","-k","fingerprint or invariant or deterministic")
+          Check-B1II @("-m","backend.tools.smoke","--case","compile-layout","--mode","local")
+          Check-B1II @("-m","backend.tools.smoke","--case","compile-motion","--mode","local")
+          Check-B1II @("-m","backend.tools.smoke","--case","compile-longform","--mode","local")
+          Check-B1II @("-m","pytest","-q","tests/visual/test_compiler.py")
       - name: Chromium browser E2E (real local servers)
         shell: pwsh
         run: |
