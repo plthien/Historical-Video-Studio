@@ -571,11 +571,13 @@ def test_compiler_g4_invariant_rejects_changed_frozen_source_before_recompute():
 
 
 # B1-04/B1-05 RED discriminators: call the production scene compiler, not compile_event.
-def _actual_scene_for(template_id):
+def _actual_scene_for(template_id, *, edit_plan=None):
     from backend.app.director.compiler import _scene
     story, payloads = visual()
     plan = next(p for p in normalize_story(story, payloads)["setup_plans"]
                 if p["template_id"] == template_id)
+    if edit_plan is not None:
+        edit_plan(plan)
     requirements = {r["requirement_id"]: r for r in story["asset_requirements"]}
     approved = {
         rid: {"candidate_id": "candidate_" + rid, "approval_record_id": "approval_" + rid,
@@ -630,6 +632,35 @@ def test_b1_authored_t06_document_crop_is_non_destructive():
     assert document["crop_normalized"] == plan["template_payload"]["focus_region_uv"]
     assert document["asset_id"] is not None
     assert document["mask"]["kind"] == "none"
+
+
+def test_b1_t02_mask_policy_and_neutral_source_hierarchy():
+    scene, plan = _actual_scene_for("T02")
+    source = next(x for x in scene["layers"] if x["layer_kind"] == "portrait")
+    assert plan["template_payload"]["cutout_policy"] == "frame_original_if_mask_bad"
+    assert source["mask"] == {"kind":"none","asset_id":None,"feather_px":0}
+    assert source["parent_layer_id"] is None
+    assert source["crop_normalized"] == {"x":0.0,"y":0.0,"w":1.0,"h":1.0}
+    assert source["treatment"]["source_preserving"] is True
+    assert source["asset_id"] is not None
+    with pytest.raises(ContractViolation) as exc:
+        _actual_scene_for("T02", edit_plan=lambda p: p["template_payload"].update(
+            cutout_policy="use_reviewed_mask"))
+    assert exc.value.code == "PORTRAIT_MASK_UNREVIEWED"
+
+
+@pytest.mark.parametrize("operation,hint", [
+    ("exit","none"), ("reposition","subtle_push"),
+    ("draw_path","subtle_push"), ("reveal_mask","none"),
+    ("focus","none"), ("hold","subtle_push"),
+])
+def test_b1_authored_staging_operation_cannot_silently_disappear(operation, hint):
+    def edit(plan):
+        plan["editorial_direction"]["visual_beats"][0]["staging"][0].update(
+            operation=operation,motion_hint=hint)
+    with pytest.raises(ContractViolation) as error:
+        _actual_scene_for("T02", edit_plan=edit)
+    assert error.value.code == "STAGING_OPERATION_UNSUPPORTED"
 
 
 def test_b1_unsupported_motion_hint_fails_closed():
