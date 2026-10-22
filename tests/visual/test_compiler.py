@@ -722,3 +722,35 @@ def test_b1_g4_schema_invalid_staging_never_changes_sqlite_revision(tmp_path):
                   operator_reason="Validation regression")
     assert err.value.code != "COMPILER_GATE_UNAPPROVED"
     assert store.revision(pid) == current_revision
+
+
+
+def test_b1_thirty_variants_actual_compiler_geometry_on_windows():
+    """B1-04: A/B/C geometry must execute through the compiler for every template."""
+    from backend.tools.b1_smoke import synthetic_ten_template_inputs
+    from backend.app.director.compiler import compile_timeline
+    from backend.app.director.layout import windows_font_measure
+    import os
+    if os.name != "nt":
+        pytest.skip("Real measured font and 30 variants require native Windows")
+    font=Path(os.environ["WINDIR"])/"Fonts"/"arial.ttf"
+    measure,identity=windows_font_measure(str(font),hashlib.sha256(font.read_bytes()).hexdigest())
+    story,base,words,final,assets,maps=synthetic_ten_template_inputs()
+    outputs={}
+    for variant in ("A","B","C"):
+        bp=copy.deepcopy(base)
+        for plan in bp["setup_plans"]:
+            plan["variant_id"]=variant
+            plan["layout_control"]["layout_id"]=f'{plan["template_id"]}.{variant}.v1.1'
+        out=compile_timeline(story,bp,words,final,assets,maps=maps,
+              font_measure=measure,font_identity=identity,
+              expected_story_sha256=bp["story_revision_sha256"])
+        assert len(out["scenes"])==10 and out["total_frames"]==3000
+        for scene in out["scenes"]:
+            assert scene["variant_id"]==variant
+            assert all(x["rect_px"]["w"]>0 and x["rect_px"]["h"]>0 for x in scene["layers"])
+            outputs[(scene["template_id"],variant)] = [
+                (x["template_slot_id"],x["rect_px"]) for x in scene["layers"]]
+    assert len(outputs)==30
+    for tid in (f"T{i:02d}" for i in range(1,11)):
+        assert len({json.dumps(outputs[(tid,v)],sort_keys=True) for v in ("A","B","C")})==3
