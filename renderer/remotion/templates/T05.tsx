@@ -8,8 +8,7 @@ export function timelineRail(scene:Scene){
  const dates=scene.layers.filter(l=>l.layer_kind==='date');
  if(dates.length<2||dates.length>6||dates.some(l=>!l.text||!l.source_claim_id))
   fail('T05_CHRONOLOGY_INVALID',scene.setup_id,'Requires 2-6 claim-backed authored dates');
- const rail=scene.layers.find(l=>l.layer_kind==='annotation');
- if(!rail)fail('RENDER_TIMELINE_COLLISION',scene.setup_id,'Compiled non-text rail slot missing');
+ const rail=scene.layers.find(l=>l.layer_kind==='annotation') ?? fail('RENDER_TIMELINE_COLLISION',scene.setup_id,'Compiled non-text rail slot missing');
  const r=rail.rect_px,horizontal=r.w>=r.h;
  const axis=horizontal?r.y+r.h/2:r.x+r.w/2;
  const rects=dates.map(d=>d.rect_px);
@@ -33,9 +32,9 @@ export function timelineRail(scene:Scene){
   const beat=scene.staging.beat_sequence.find(row=>row.focus_layer_id===next.layer_id) ??
     scene.staging.beat_sequence.find(row=>row.activated_layer_ids.includes(next.layer_id)&&
       row.local_start_frame>0);
-  if(!beat)fail('T05_STAGING_MISSING',next.layer_id,'Date lacks a frozen authored reveal beat');
+  const authorized=beat ?? fail('T05_STAGING_MISSING',next.layer_id,'Date lacks a frozen authored reveal beat');
   const xy=([x,y]:[number,number])=>x.toFixed(2)+' '+y.toFixed(2);
-  return {from:previous.layer_id,to:next.layer_id,start:beat.local_start_frame,end:beat.local_end_frame,
+  return {from:previous.layer_id,to:next.layer_id,start:authorized.local_start_frame,end:authorized.local_end_frame,
     d:`M ${xy(a)} L ${xy(aa)} L ${xy(bb)} L ${xy(b)}`,port:bb};
  });
  return {edges,rail:rail.layer_id};
