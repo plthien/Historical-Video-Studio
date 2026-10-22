@@ -16,7 +16,11 @@ export function loadApprovedMedia(t:Timeline, manifest:ResolveManifest):Resolved
  for(const entry of manifest.assets){
   if(!entry.approvalRecordId||entry.sourceKind!==manifest.sourceKind||!entry.assetId)fail('RENDER_MEDIA_UNAPPROVED',entry.assetId,'Review evidence/asset identity missing');
   if(entry.path.startsWith('http:')||entry.path.startsWith('https:')||entry.path.startsWith('data:'))fail('RENDER_REMOTE_MEDIA_BLOCKED',entry.assetId,'Never fetch remote media');
-  const p=realpathSync(resolve(root,entry.path));
+  const requested=resolve(root,entry.path);
+  const candidate=relative(root,requested);
+  if(candidate.startsWith('..')||isAbsolute(candidate))fail('RENDER_MEDIA_PATH_UNSAFE',entry.assetId,'Reject absolute escape or parent traversal');
+  let p:string;
+  try{p=realpathSync(requested);}catch{fail('RENDER_MEDIA_MISSING',entry.assetId,'Approved original missing from local immutable store');}
   const rel=relative(root,p);
   if(rel.startsWith('..')||isAbsolute(rel)||!statSync(p).isFile())fail('RENDER_MEDIA_PATH_UNSAFE',entry.assetId,'Media must live under immutable media root');
   const bytes=readFileSync(p);
