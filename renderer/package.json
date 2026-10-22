@@ -1,6 +1,6 @@
 {
   "name": "historical-video-studio-renderer",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "type": "module",
   "engines": {
@@ -9,6 +9,27 @@
   },
   "packageManager": "npm@10.9.2",
   "scripts": {
-    "verify:toolchain": "node -e \"if(process.versions.node.split('.')[0]!=='22') process.exit(2)\""
+    "verify:toolchain": "node -e \"if(process.versions.node.split('.')[0]!=='22') process.exit(2)\"",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test:frames": "tsx scripts/evidence.ts frames",
+    "render:smoke": "tsx scripts/evidence.ts render"
+  },
+  "dependencies": {
+    "@remotion/cli": "4.0.524",
+    "@remotion/player": "4.0.524",
+    "@remotion/renderer": "4.0.524",
+    "remotion": "4.0.524",
+    "react": "19.2.0",
+    "react-dom": "19.2.0",
+    "ajv": "8.17.1",
+    "pngjs": "7.0.0"
+  },
+  "devDependencies": {
+    "typescript": "5.9.3",
+    "tsx": "4.20.6",
+    "@types/node": "22.18.10",
+    "@types/react": "19.2.2",
+    "@types/react-dom": "19.2.2",
+    "@types/pngjs": "6.0.5"
   }
 }
