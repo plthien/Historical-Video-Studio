@@ -229,3 +229,113 @@ def compile_from_store(store, project_id: str, blueprint: dict, word_map: dict,
     return compile_timeline(story_obj.data(), blueprint, word_map, final_audio, approved,
                             maps=maps, font_measure=font_measure, font_identity=font_identity,
                             expected_story_sha256=story_obj.sha256)
+
+
+
+def revise_g4(store, project_id: str, previous: dict, original_blueprint: dict,
+              edited_blueprint: dict, word_map: dict, final_audio: dict,
+              approved_assets: dict, *, expected_revision: int, operator_reason: str,
+              maps: dict | None = None, font_measure=None, crop_overrides: dict | None = None) -> dict:
+    """CAS-guarded presentation-only local edit; never auto-approve G4/G5.
+
+    Only changed scenes are compiled anew. The unchanged scene dictionaries
+    are retained byte-for-byte from the previous immutable timeline.
+    """
+    from backend.app.projects.gates import GateService
+    from backend.app.projects.revisions import mark_stale
+    if not isinstance(operator_reason, str) or not operator_reason.strip():
+        _block("G4_EDIT_INTENT_MISSING", project_id, "Operator must record a meaningful presentation edit reason.")
+    if store.revision(project_id) != expected_revision:
+        _block("APPROVAL_REVISION_CONFLICT", project_id, "Reload project revision before revising G4.")
+    if previous["story_sha256"] != original_blueprint["story_revision_sha256"]:
+        _block("STORY_SHA_MISMATCH", project_id, "Prior timeline does not match frozen G1 story.")
+    old = original_blueprint["setup_plans"]
+    revised = edited_blueprint["setup_plans"]
+    if (edited_blueprint["project_id"] != original_blueprint["project_id"] or
+            edited_blueprint["story_revision_sha256"] != original_blueprint["story_revision_sha256"] or
+            len(old) != len(revised)):
+        _block("G4_SOURCE_EDIT_FORBIDDEN", project_id, "G4 edits cannot change project or frozen G1 setup identity.")
+    allowed_plan = {"variant_id", "layout_control", "direction_revision", "editorial_direction"}
+    changed = set()
+    for a, b in zip(old, revised):
+        if {k:v for k,v in a.items() if k not in allowed_plan} != {
+                k:v for k,v in b.items() if k not in allowed_plan}:
+            _block("G4_SOURCE_EDIT_FORBIDDEN", a["setup_id"],
+                   "Cannot edit G1 claim, source requirement, template or G3 slot binding at G4.")
+        da, db = a["editorial_direction"], b["editorial_direction"]
+        for key in da:
+            if key == "camera_intent":
+                continue
+            if key == "visual_beats":
+                aa, bb = da[key], db[key]
+                if len(aa) != len(bb):
+                    _block("G4_SOURCE_EDIT_FORBIDDEN", a["setup_id"],
+                           "Cannot add or delete authored cue beats at G4.")
+                for source_beat, edited_beat in zip(aa, bb):
+                    if ({k:v for k,v in source_beat.items() if k != "staging"} !=
+                            {k:v for k,v in edited_beat.items() if k != "staging"}):
+                        _block("G4_SOURCE_EDIT_FORBIDDEN", a["setup_id"],
+                               "G1 narration cues, word identity and claim connections remain immutable.")
+            elif da[key] != db.get(key):
+                _block("G4_SOURCE_EDIT_FORBIDDEN", a["setup_id"],
+                       "G4 cannot change authored on-screen factual text, source or voice timing.")
+        if a != b:
+            revision = b["direction_revision"]
+            if (revision["kind"] != "operator_visual_edit" or not revision["operator_confirmed"]
+                    or revision["source_story_revision_sha256"] != previous["story_sha256"]
+                    or not revision["edit_reason"]):
+                _block("G4_EDIT_INTENT_MISSING", a["setup_id"],
+                       "Record an authorized operator direction_revision and source SHA.")
+            changed.add(a["setup_id"])
+    crop_overrides = crop_overrides or {}
+    changed.update(crop_overrides.keys())
+    if not changed or not changed <= {p["setup_id"] for p in old}:
+        _block("G4_EDIT_INVALID", project_id, "Select at least one existing scene to revise.")
+    # Reject presentation-only input when current upstream approvals have changed.
+    states = {x["gate_id"]: x["state"] for x in GateService(store).board(project_id)}
+    if any(states[k] != "APPROVED" for k in ("G1", "G2", "G3")):
+        _block("COMPILER_GATE_UNAPPROVED", project_id, "Current G1/G2/G3 must be approved at G4 edit.")
+    story = store.get_story(project_id).data()
+    if StoryCandidate.parse(story).sha256 != previous["story_sha256"]:
+        _block("STORY_SHA_MISMATCH", project_id, "Current G1 story changed since prior compiled timeline.")
+    windows = bind_beats(edited_blueprint, word_map,
+                         audio_sha256=final_audio["audio_sha256"],
+                         transcript_sha256=final_audio["transcript_sha256"],
+                         audio_total_samples=final_audio["duration_samples"])
+    staging = {x["setup_id"]: x for x in group_staging(
+        windows, final_audio["duration_samples"], word_map["sample_rate"])}
+    requirements = {r["requirement_id"]:r for r in story["asset_requirements"]}
+    out = copy.deepcopy(previous)
+    index = {s["setup_id"]: i for i,s in enumerate(out["scenes"])}
+    for plan in revised:
+        sid = plan["setup_id"]
+        if sid not in changed:
+            continue
+        rows = [x for x in windows if x["setup_id"] == sid]
+        scene = _scene(plan, staging[sid], rows, approved_assets, requirements,
+                       maps or {}, font_measure)
+        for layer in scene["layers"]:
+            crop = crop_overrides.get(sid, {}).get(layer["layer_id"])
+            if crop is not None:
+                if (set(crop) != {"x","y","w","h"} or
+                    any(type(x) not in (int,float) for x in crop.values()) or
+                    not (0 <= crop["x"] < 1 and 0 <= crop["y"] < 1 and 0 < crop["w"] <= 1-crop["x"]
+                         and 0 < crop["h"] <= 1-crop["y"])):
+                    _block("G4_CROP_INVALID", layer["layer_id"], "Keep reviewed original and valid normalized crop.")
+                layer["crop_normalized"] = dict(crop)
+        unknown = set(crop_overrides.get(sid, {})) - {x["layer_id"] for x in scene["layers"]}
+        if unknown:
+            _block("G4_CROP_INVALID", sid, "Crop only layers that exist in the selected setup.")
+        out["scenes"][index[sid]] = scene
+    out["dependency_fingerprint"] = digest({"prior_identity": previous["dependency_fingerprint"],
+                                             "new_direction": edited_blueprint,
+                                             "crop_overrides": crop_overrides})
+    validate_document("CompiledTimeline.v1", out)
+    with store._transaction() as db:
+        gate = GateService(store)
+        revision = gate._check_revision(db, project_id, expected_revision)
+        mark_stale(db, project_id, "scene_layout" if edited_blueprint != original_blueprint else "scene_crop")
+        db.execute("UPDATE projects SET revision=? WHERE project_id=?", (revision+1,project_id))
+    return {"timeline": out, "recomputed_setup_ids": sorted(changed),
+            "retained_setup_ids": sorted(set(index) - changed),
+            "project_revision": expected_revision+1, "stale_gates": ["G4","G5"]}
