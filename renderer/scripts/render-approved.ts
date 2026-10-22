@@ -23,7 +23,7 @@ assertTimeline(timeline);
 if(manifest.sourceKind!=='APPROVED_LOCAL')throw Error('RENDER_SYNTHETIC_PROHIBITED: approved render entry only');
 const media=loadApprovedMedia(timeline,manifest);
 const inputProps={timeline,media};
-const serveUrl=await bundle({entryPoint:resolve(repo,'renderer','remotion','entry.tsx'),logLevel:'error'});
+const serveUrl=await bundle({entryPoint:resolve(repo,'renderer','remotion','entry.tsx')});
 const comp=await selectComposition({serveUrl,id:'HistoricalTimelineV1',inputProps});
 await renderStill({serveUrl,composition:comp,inputProps,frame:0,output:resolve(output),imageFormat:'png'});
 console.log(JSON.stringify({result:'LOCAL_APPROVED_STILL',project,frame:0,g4Head:manifest.g4ManifestSha256,path:resolve(output)}));
