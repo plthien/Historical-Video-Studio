@@ -308,6 +308,11 @@ def revise_g4(store, project_id: str, previous: dict, original_blueprint: dict,
         _block("APPROVAL_REVISION_CONFLICT", project_id, "Reload project revision before revising G4.")
     if previous["story_sha256"] != original_blueprint["story_revision_sha256"]:
         _block("STORY_SHA_MISMATCH", project_id, "Prior timeline does not match frozen G1 story.")
+    if (digest(word_map) != previous["word_map_sha256"] or
+            final_audio["audio_sha256"] != previous["audio_sha256"] or
+            digest(approved_assets) != previous["asset_snapshot_sha256"]):
+        _block("G4_SOURCE_EDIT_FORBIDDEN", project_id,
+               "G4 cannot replace the frozen approved WAV, word map or G3 asset snapshot.")
     old = original_blueprint["setup_plans"]
     revised = edited_blueprint["setup_plans"]
     if (edited_blueprint["project_id"] != original_blueprint["project_id"] or
