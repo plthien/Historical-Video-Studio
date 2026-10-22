@@ -283,6 +283,24 @@ def synthetic_ten_template_inputs():
         beats = setup["direction"]["visual_beats"]
         if len(beats) >= 3:
             beats[2]["cue"]["occurrence"] = 1
+    # This synthetic authoring harness deliberately chooses supported motion.
+    # The original illustrative T07/T09/T10 'subtle_push' hint is not
+    # universally registered for their map/text/document layers; production
+    # rejects that unsupported request rather than pretending to execute it.
+    for setup in story["visual_setups"]:
+        tid = setup["preferred_template"]
+        for beat in setup["direction"]["visual_beats"]:
+            ref = beat["focus_ref"]
+            if tid == "T07":
+                hint = "wipe" if "map_" in ref else "none"
+            elif tid == "T09" and "source_page" in ref:
+                hint = "none"
+            elif tid == "T10" and "entity_" in ref:
+                hint = "none"
+            else:
+                continue
+            for step in beat["staging"]:
+                step["motion_hint"] = hint
     payloads = {p["setup_id"]:p["template_payload"] for p in reference["setup_plans"]}
     bp = normalize_story(story, payloads)
     sample_rate = 24000
