@@ -9,7 +9,13 @@ export const T05:React.FC<{scene:Scene;frame:number;media:ResolvedMedia}>=({scen
  const [first,second]=dates;
  const x1=first.rect_px.x+first.rect_px.w/2,y1=first.rect_px.y+first.rect_px.h/2;
  const x2=second.rect_px.x+second.rect_px.w/2,y2=second.rect_px.y+second.rect_px.h/2;
- const localProgress=Math.min(1,Math.max(0,(frame-8)/45));
+ // Derive the rail reveal exclusively from frozen B1 authored beat windows.
+ const datedIds=new Set(dates.map(l=>l.layer_id));
+ const timed=scene.staging.beat_sequence.filter(b=>b.activated_layer_ids.some(id=>datedIds.has(id)));
+ if(timed.length<2)fail('T05_STAGING_MISSING',scene.setup_id,'Chronology requires dated authored beat windows');
+ const revealAt=timed[1].local_start_frame;
+ const revealEnd=timed[1].local_end_frame;
+ const localProgress=Math.min(1,Math.max(0,(frame-revealAt)/(revealEnd-revealAt||1)));
  return <div style={{width:1920,height:1080,position:'relative'}}>
    <BaseTemplate scene={scene} frame={frame} media={media} decor="timeline"/>
    <svg viewBox="0 0 1920 1080" width={1920} height={1080} style={{position:'absolute',inset:0,pointerEvents:'none'}}>
