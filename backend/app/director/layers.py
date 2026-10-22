@@ -1,0 +1,149 @@
+"""B1-04: registered source-bound layers; originals remain immutable."""
+from __future__ import annotations
+
+from backend.app.contracts import ContractViolation
+from backend.app.director.layout import pixel_geometry, role_bounds, selected_layout
+
+TEXT_ROLES = {"text", "headline", "date", "callout"}
+ASSET_CLASSES = {
+    "map": {"HISTORICAL_MAP"}, "portrait": {"ARCHIVAL_PHOTO", "HISTORICAL_ARTWORK"},
+    "archival_photo": {"ARCHIVAL_PHOTO", "HISTORICAL_ARTWORK"},
+    "document": {"HISTORICAL_DOCUMENT"}, "decorative_paper": {"HISTORICAL_DOCUMENT"},
+    "territory": {"HISTORICAL_MAP"},
+}
+
+
+def _blocked(code, path, what):
+    raise ContractViolation(code, path, what)
+
+
+def _text_layout(source, rect, font_measure):
+    """Measure actual glyphs through a supplied pinned glyph-width provider.
+
+    No character-count fitting and no quiet font replacement. B2 controls final
+    browser font parity; this gate rejects missing metrics.
+    """
+    if font_measure is None or not callable(font_measure):
+        _blocked("FONT_METRICS_REQUIRED", source["text_id"],
+                 "Supply measured pinned-font glyph bounds before compiling text.")
+    max_lines = min(source["max_lines"], 8)
+    text = source["text"]
+    options = (64, 56, 48, 40, 32, 28, 24, 20)
+    for size in options:
+        words = text.split()
+        lines = []
+        current = ""
+        for word in words:
+            proposed = (current + " " + word).strip()
+            if font_measure(proposed, size)[0] <= rect["w"]:
+                current = proposed
+            else:
+                if current:
+                    lines.append(current)
+                current = word
+        if current:
+            lines.append(current)
+        if (len(lines) <= max_lines and
+                all(font_measure(line, size)[0] <= rect["w"] for line in lines) and
+                len(lines) * font_measure("Hg", size)[1] * 1.16 <= rect["h"]):
+            return {"font_token": "headline_sans", "font_size_px": size,
+                    "line_height": 1.16, "letter_spacing_px": 0,
+                    "horizontal_align": "left", "vertical_align": "center",
+                    "max_lines": max_lines, "overflow": "block"}
+    _blocked("TYPOGRAPHY_OVERFLOW", source["text_id"],
+             "Actual measured glyph extents exceed this approved layout; revise text layout without changing G1 claims.")
+
+
+def build_layers(plan: dict, approved: dict, requirements: dict, *,
+                 maps: dict | None = None, font_measure=None) -> tuple[list[dict], dict[str,str]]:
+    layout = selected_layout(plan)
+    rects = pixel_geometry(plan)
+    authored = plan["editorial_direction"]
+    sources = {s["slot_id"]: s for s in authored["asset_slots"]}
+    bindings = {s["slot_id"]: s for s in plan["asset_slot_bindings"]}
+    texts = {t["text_id"].split("_", 2)[-1]: t for t in authored["on_screen_text"]}
+    layers = []
+    ref_map = {}
+    used_photo = set()
+    for slot in layout["slots"]:
+        sid, role = slot["slot_id"], slot["role"]
+        source = next((x for x in sources.values() if x["semantic_role"] == sid or
+                       x["slot_id"].endswith("_" + sid)), None)
+        txt = texts.get(sid)
+        is_route = role == "route"
+        if role in TEXT_ROLES and txt is None and not slot["required"]:
+            continue
+        if role in TEXT_ROLES and txt is None and slot["required"]:
+            _blocked("LAYOUT_TEXT_MISSING", sid, "Supply the approved authored on-screen text for this required slot.")
+        if not is_route and role not in TEXT_ROLES and source is None:
+            if slot["required"]:
+                _blocked("LAYOUT_SOURCE_MISSING", sid, "Bind the required template role to an authored source slot.")
+            continue
+        candidate = None
+        if source is not None:
+            bind = bindings.get(source["slot_id"])
+            if bind is None or bind["requirement_id"] != source["requirement_id"]:
+                _blocked("ASSET_SLOT_MISMATCH", sid, "Match the authored and blueprint source slot identities.")
+            candidate = approved.get(bind["requirement_id"])
+            req = requirements.get(bind["requirement_id"])
+            if (not candidate or not req or candidate.get("asset_class") != req["asset_class"]
+                    or role not in ASSET_CLASSES or req["asset_class"] not in ASSET_CLASSES[role]
+                    or not candidate.get("approval_record_id") or not candidate.get("original_sha256")
+                    or not candidate.get("candidate_id")
+                    or (bind.get("approved_asset_id") and bind["approved_asset_id"] != candidate["candidate_id"])):
+                _blocked("G3_ASSET_UNAPPROVED", sid,
+                         "Resolve an exact current G3 approval, asset class, candidate and immutable original SHA.")
+            if candidate.get("source_kind") == "AI_ILLUSTRATION" and role != "decorative_paper":
+                _blocked("ASSET_PROVENANCE_INVALID", sid, "Do not substitute an AI illustration for archival material.")
+            if role == "archival_photo":
+                if candidate["candidate_id"] in used_photo:
+                    _blocked("PHOTO_CARD_DUPLICATE", sid, "T03 cards require independent approved original sources.")
+                used_photo.add(candidate["candidate_id"])
+        if is_route and not (maps and maps.get(plan["setup_id"], {}).get("route_feature_id")):
+            _blocked("MAP_ROUTE_INVALID", sid, "Require an approved ordered period route before adding route overlay.")
+        ident = "layer_" + plan["setup_id"] + "_" + sid
+        ref_map[sid] = ident
+        if source is not None:
+            ref_map[source["slot_id"]] = ident
+        if txt is not None:
+            ref_map[txt["text_id"]] = ident
+        rect = rects[sid]
+        layer = {
+            "layer_id": ident, "layer_kind": role,
+            "asset_id": candidate["candidate_id"] if candidate else None,
+            "text": txt["text"] if txt else None,
+            "source_claim_id": txt["claim_ref"] if txt else None,
+            "z_index": slot["z_index"], "rect_px": rect,
+            "anchor": "top_left",
+            "crop_normalized": {"x": 0., "y": 0., "w": 1., "h": 1.},
+            "object_fit": slot["fit"],
+            "mask": {"kind": "none", "asset_id": None, "feather_px": 0},
+            "style": {"font_token": "headline_sans" if txt else None,
+                      "color_token": None, "stroke_token": None,
+                      "max_lines": min(slot["max_lines"], 8)},
+            "map_binding": None,
+            "parent_layer_id": None, "group_id": "group_" + plan["setup_id"],
+            "transform_origin": {"x": .5, "y": .5}, "depth_order": slot["z_index"],
+            "treatment": {"kind": ("headline_text" if txt else
+                                   "ink_map" if role == "map" else
+                                   "source_photo_card" if role in ("archival_photo", "portrait") else
+                                   "paper_document" if role == "document" else "none"),
+                          "source_preserving": True,
+                          "evidence_badge": "archival" if candidate else "none"},
+            "path_geometry_ref": (maps[plan["setup_id"]]["route_feature_id"] if is_route else None),
+            "text_layout": _text_layout(txt, rect, font_measure) if txt else None,
+            "template_slot_id": sid,
+            "source_asset_slot_id": source["slot_id"] if source else None,
+        }
+        layers.append(layer)
+    role_bounds(layout, layers)
+    if plan["template_id"] == "T07":
+        names = [x for x in layers if x["layer_kind"] == "map"]
+        if len(names) != 2 or names[0]["asset_id"] == names[1]["asset_id"]:
+            _blocked("MAP_PAIR_NOT_DISTINCT", plan["setup_id"],
+                     "T07 requires distinct reviewed before and after maps.")
+        a = (maps or {}).get(plan["setup_id"], {})
+        if not a.get("shared_viewport") or not a.get("shared_projection"):
+            _blocked("MAP_PROJECTION_MISMATCH", plan["setup_id"],
+                     "T07 period maps require a reviewed shared projection and viewport.")
+    return layers, ref_map
