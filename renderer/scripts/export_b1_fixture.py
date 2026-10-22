@@ -11,6 +11,7 @@ import os
 from pathlib import Path
 from backend.tools.b1_smoke import synthetic_ten_template_inputs
 from backend.app.director.compiler import compile_timeline
+from backend.app.director.blueprint import normalize_story
 from backend.app.director.layout import windows_font_measure
 from backend.app.director.fingerprint import canonical
 
@@ -20,13 +21,33 @@ outdir.mkdir(parents=True,exist_ok=True)
 font=Path(os.environ["WINDIR"])/"Fonts"/"arial.ttf"
 measure, identity=windows_font_measure(str(font),hashlib.sha256(font.read_bytes()).hexdigest())
 story, bp, words, final, assets, maps=synthetic_ten_template_inputs()
+registry=json.loads((ROOT/"contracts/registries/layouts.v1.json").read_text())["layouts"]
+payloads={p["setup_id"]:p["template_payload"] for p in bp["setup_plans"]}
 compiled={}
 for variant in ("A","B","C"):
-    current=copy.deepcopy(bp)
-    for p in current["setup_plans"]:
-        p["variant_id"]=variant
-        p["layout_control"]["layout_id"]=f'{p["template_id"]}.{variant}.v1.1'
-    timeline=compile_timeline(story,current,words,final,assets,maps=maps,font_measure=measure,
+    authored=copy.deepcopy(story)
+    for setup in authored["visual_setups"]:
+        layout=next(l for l in registry if l["template_id"]==setup["preferred_template"]
+                    and l["variant_id"]==variant)
+        available={x["slot_id"] for x in setup["direction"]["asset_slots"]
+                   if x["semantic_role"] in {slot["slot_id"] for slot in layout["slots"]}}
+        available.update(text["text_id"] for text in setup["direction"]["on_screen_text"]
+                   if text["text_id"].split("_",2)[-1] in {slot["slot_id"] for slot in layout["slots"]})
+        if not available:
+            raise RuntimeError(f"No frozen authored source refs for {setup['setup_id']} {variant}")
+        preferred=next((ref for ref in available if ref.endswith(("map_main","map_backdrop","map_before","portrait_main","entity_a"))),sorted(available)[0])
+        for beat in setup["direction"]["visual_beats"]:
+            if beat["focus_ref"] not in available:
+                prior=beat["focus_ref"]
+                beat["focus_ref"]=preferred
+                for staged in beat["staging"]:
+                    if staged["ref"]==prior:
+                        staged["ref"]=preferred
+                # Only synthetic editorial layout selection, no G1 claims,
+                # media sources, narration word alignment or quotes changed.
+        setup["direction"]["layout_variant_hint"]=variant
+    current=normalize_story(authored,payloads)
+    timeline=compile_timeline(authored,current,words,final,assets,maps=maps,font_measure=measure,
                                font_identity=identity,
                                expected_story_sha256=current["story_revision_sha256"])
     if len(timeline["scenes"])!=10:
