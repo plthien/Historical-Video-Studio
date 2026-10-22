@@ -420,7 +420,9 @@ def revise_g4(store, project_id: str, previous: dict, original_blueprint: dict,
                    "Cannot edit G1 claim, source requirement, template or G3 slot binding at G4.")
         da, db = a["editorial_direction"], b["editorial_direction"]
         for key in da:
-            if key == "camera_intent":
+            # Operator's authorized variant selection is a presentation-only
+            # field, never a change to G1 facts/claims/word cues or G3 sources.
+            if key in ("camera_intent", "layout_variant_hint"):
                 continue
             if key == "visual_beats":
                 aa, bb = da[key], db[key]
