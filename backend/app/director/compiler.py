@@ -58,19 +58,69 @@ def _scene(plan, staging, beats, assets, requirements, maps, font_measure):
                 rel = {"from_id": a, "to_id": b, "relation": relation["relation"]}
                 if rel not in relations:
                     relations.append(rel)
+        # Dispatch from authored stage direction. Never substitute an unrelated preset.
+        authored = plan["editorial_direction"]["visual_beats"][i]
+        stage = authored["staging"]
+        hints = {step["motion_hint"] for step in stage}
+        if len(hints) != 1:
+            _block("MOTION_HINT_UNSUPPORTED", beat["beat_id"],
+                   "Use one coherent authored motion for this cue.")
+        hint = next(iter(hints))
         target = next(x for x in layers if x["layer_id"] == focus)
         allowed = layout["allowed_presets"]
-        if target["layer_kind"] in ("headline", "text") and "title-mask-reveal" in allowed:
-            kind = "title-mask-reveal"
-        elif target["layer_kind"] in ("archival_photo", "portrait", "document") and "photo-card-enter" in allowed:
-            kind = "photo-card-enter"
-        elif target["layer_kind"] == "route" and "route-line-draw" in allowed:
-            kind = "route-line-draw"
-        else:
-            kind = "freeze-hold" if "freeze-hold" in allowed else next(
-                (preset for preset in allowed if target["layer_kind"] in presets()[preset]["compatible_layer_kinds"]), None)
-        if not kind:
-            _block("MOTION_PRESET_UNKNOWN", sid, "No compatible registered grammar for the authored focus.")
+        kind = None
+        params = {}
+        if hint == "stagger":
+            order = []
+            if plan["template_id"] == "T03":
+                cards = {c["card_id"]: c for c in plan["template_payload"]["cards"]}
+                order = [refs[cards[cid]["asset_slot_id"]]
+                         for cid in plan["template_payload"]["card_reveal_order"]]
+            else:
+                order = [refs[step["ref"]] for step in sorted(stage, key=lambda x: x["priority"])
+                         if step["ref"] in refs]
+            if len(order) < 2 or len(set(order)) != len(order):
+                _block("MOTION_STAGGER_INVALID", beat["beat_id"],
+                       "Stagger must identify at least two distinct registered layers.")
+            kind = "stagger-reveal"
+            params["ordered_layer_ids"] = order
+            target = next(x for x in layers if x["layer_id"] == order[0])
+        elif hint == "line_draw":
+            if plan["template_id"] == "T04":
+                target = next((x for x in layers if x["layer_kind"] == "route"), None)
+                kind = "route-line-draw"
+            elif plan["template_id"] == "T10":
+                target = next((x for x in layers if x["layer_kind"] == "annotation"), None)
+                kind = "editorial-connector-draw"
+            if target is None or kind is None:
+                _block("MOTION_HINT_UNSUPPORTED", beat["beat_id"],
+                       "Line drawing needs a registered geographic route or editorial connector.")
+        elif hint == "subtle_push":
+            if target["layer_kind"] in ("map", "archival_photo", "portrait", "document"):
+                kind = "camera-push" if "camera-push" in allowed else None
+            elif "title-mask-reveal" in allowed:
+                kind = "title-mask-reveal"
+            else:
+                kind = "freeze-hold" if "freeze-hold" in allowed else None
+        elif hint == "parallax":
+            kind = "parallax-layers"
+        elif hint == "wipe":
+            kind = ("map-region-wipe" if target["layer_kind"] in ("map", "territory")
+                    else "mask-transition")
+        elif hint == "cut":
+            kind = "hard-cut"
+        elif hint == "track":
+            kind = "camera-pan"
+        elif hint == "zoom":
+            kind = "camera-push"
+        elif hint == "none":
+            kind = "freeze-hold"
+        if kind not in allowed or kind not in presets() or target is None:
+            _block("MOTION_HINT_UNSUPPORTED", beat["beat_id"],
+                   "Motion hint is incompatible with this template, layer or registered grammar.")
+        if target["layer_kind"] not in presets()[kind]["compatible_layer_kinds"]:
+            _block("MOTION_KIND_INVALID", beat["beat_id"],
+                   "Authored motion cannot target this layer kind.")
         cue_start = beat["cue_start_frame"] - scene_start
         event_at = max(origin, cue_start)
         if event_at >= end:
