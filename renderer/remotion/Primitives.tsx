@@ -23,7 +23,7 @@ export function sampleCamera(keys:Scene['camera']['keyframes'],frame:number){
   const b=keys[i],a=keys[i-1];
   if(frame<=b.at_frame){
    const t=easing((frame-a.at_frame)/(b.at_frame-a.at_frame),b.easing);
-   return {...b,at_frame:frame,...Object.fromEntries(fields.map(k=>[k,mix(a[k],b[k],t)]))};
+   return {...b,at_frame:frame,x_px:mix(a.x_px,b.x_px,t),y_px:mix(a.y_px,b.y_px,t),scale:mix(a.scale,b.scale,t),rotation_deg:mix(a.rotation_deg,b.rotation_deg,t),opacity:mix(a.opacity,b.opacity,t)};
   }
  }
  return keys[keys.length-1];
@@ -87,7 +87,7 @@ function firstAppearance(scene:Scene,layerId:string){
  return beats.length?Math.min(...beats.map(b=>b.local_start_frame)):0;
 }
 function pathPoints(layer:Layer,media:ResolvedMedia):[number,number][]{
- if(!layer.path_geometry_ref)return '';
+ if(!layer.path_geometry_ref)fail('RENDER_GEOMETRY_UNTRUSTED',layer.layer_id,'Missing frozen geometry ref');
  const g=media.geometries[layer.path_geometry_ref];
  if(!g)fail('RENDER_GEOMETRY_UNTRUSTED',layer.layer_id,'No verified geometry');
  const r=layer.rect_px;
