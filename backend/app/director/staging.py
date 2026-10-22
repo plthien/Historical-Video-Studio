@@ -5,8 +5,29 @@ from backend.app.contracts import ContractViolation
 def group_staging(windows:list[dict],audio_total_samples:int,sample_rate:int) -> list[dict]:
     if sample_rate<=0 or audio_total_samples<=0:
         raise ContractViolation("ALIGNMENT_TIME_INVALID","audio","Load approved WAV samples.")
-    by_setup={}
+    total_frames=(audio_total_samples*30+sample_rate-1)//sample_rate
+    if not windows:
+        raise ContractViolation("FRAME_INTERVAL_INVALID","audio","At least one authored visual beat must cover approved audio.")
+    previous=0
     for w in windows:
+        if w["start_frame"]!=previous or w["end_frame"]<=w["start_frame"]:
+            raise ContractViolation("FRAME_INTERVAL_INVALID",w["beat_id"],
+                                    "Authored visual windows must be contiguous, positive and start at frame zero.")
+        previous=w["end_frame"]
+    if previous!=total_frames:
+        raise ContractViolation("FRAME_INTERVAL_INVALID","audio",
+                                "Final visual frame must equal ceil of approved WAV samples.")
+    by_setup={}
+    closed=set()
+    current=None
+    for w in windows:
+        if w["setup_id"]!=current:
+            if w["setup_id"] in closed:
+                raise ContractViolation("CUE_RANGE_INVALID",w["setup_id"],
+                                        "One setup must own a contiguous scene interval.")
+            if current is not None:
+                closed.add(current)
+            current=w["setup_id"]
         by_setup.setdefault(w["setup_id"],[]).append(w)
     scenes=[]
     for setup_id,rows in by_setup.items():
