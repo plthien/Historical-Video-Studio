@@ -81,6 +81,17 @@ def build_layers(plan: dict, approved: dict, requirements: dict, *,
                        in ASSET_CLASSES[s["role"]]]) == 1 and slot["required"]:
                 source = possible[0]
         txt = texts.get(sid)
+        payload = plan["template_payload"]
+        if role in TEXT_ROLES and txt is None:
+            text_ref = None
+            if plan["template_id"] == "T07":
+                text_ref = {"date_before": "date_before_text_id",
+                            "date_after": "date_after_text_id"}.get(sid)
+            elif plan["template_id"] == "T09":
+                text_ref = {"quote_text": "headline_text_id",
+                            "attribution": "attribution_text_id"}.get(sid)
+            if text_ref:
+                txt = text_by_id.get(payload[text_ref])
         if txt is None and role in TEXT_ROLES:
             if plan["template_id"] == "T08" and sid == "fact_value":
                 payload = plan["template_payload"]
@@ -96,11 +107,12 @@ def build_layers(plan: dict, approved: dict, requirements: dict, *,
                          slot2["required"] and slot2["role"]==role)==1:
                     txt = matches[0]
         is_route = role == "route"
+        is_editorial_connector = role == "annotation" and plan["template_id"] == "T10"
         if role in TEXT_ROLES and txt is None and not slot["required"]:
             continue
         if role in TEXT_ROLES and txt is None and slot["required"]:
             _blocked("LAYOUT_TEXT_MISSING", sid, "Supply the approved authored on-screen text for this required slot.")
-        if not is_route and role not in TEXT_ROLES and source is None:
+        if not is_route and not is_editorial_connector and role not in TEXT_ROLES and source is None:
             if slot["required"]:
                 _blocked("LAYOUT_SOURCE_MISSING", sid, "Bind the required template role to an authored source slot.")
             continue
@@ -150,7 +162,8 @@ def build_layers(plan: dict, approved: dict, requirements: dict, *,
             "layer_id": ident, "layer_kind": role,
             "asset_id": candidate["candidate_id"] if candidate else None,
             "text": txt["text"] if txt else None,
-            "source_claim_id": txt["claim_ref"] if txt else None,
+            "source_claim_id": (txt["claim_ref"] if txt else
+                payload["causal_links"][0]["relationship_claim_id"] if is_editorial_connector else None),
             "z_index": slot["z_index"], "rect_px": rect,
             "anchor": "top_left",
             "crop_normalized": {"x": 0., "y": 0., "w": 1., "h": 1.},
@@ -168,7 +181,8 @@ def build_layers(plan: dict, approved: dict, requirements: dict, *,
                                    "paper_document" if role == "document" else "none"),
                           "source_preserving": True,
                           "evidence_badge": "archival" if candidate else "none"},
-            "path_geometry_ref": (maps[plan["setup_id"]]["route_feature_id"] if is_route else None),
+            "path_geometry_ref": (maps[plan["setup_id"]]["route_feature_id"] if is_route else
+                                  "connector_" + plan["setup_id"] if is_editorial_connector else None),
             "text_layout": _text_layout(txt, rect, font_measure) if txt else None,
             "template_slot_id": sid,
             "source_asset_slot_id": source["slot_id"] if source else None,
