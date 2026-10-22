@@ -19,6 +19,23 @@ def _runtime_identity():
                                for key,path in SOURCES.items()}}
 
 
+def current_gate_heads(store, project):
+    from backend.app.projects.gates import GateService
+    board = {item["gate_id"]:item["state"] for item in GateService(store).board(project)}
+    if any(board.get(gate) != "APPROVED" for gate in ("G1","G2","G3")):
+        _fail("COMPILER_GATE_UNAPPROVED",project,"Current G1/G2/G3 approval heads are required.")
+    with store._connection() as db:
+        rows=db.execute(
+            "SELECT gate_id,candidate_sha256,dependency_fingerprint,approval_id "
+            "FROM gate_heads WHERE project_id=? AND gate_id IN ('G1','G2','G3') "
+            "ORDER BY gate_id",(project,)).fetchall()
+    if len(rows)!=3:
+        _fail("COMPILER_GATE_UNAPPROVED",project,"An upstream approval head is missing.")
+    return {gate:{"candidate_sha256":candidate,"dependency_fingerprint":fingerprint,
+                  "approval_id":approval}
+            for gate,candidate,fingerprint,approval in rows}
+
+
 def ensure(store):
     # This table is deliberately separate from operator gate_heads: a draft is
     # never approval evidence for G4 or G5.
@@ -58,6 +75,8 @@ def load(store, project):
     if manifest.get("runtime_identity") != _runtime_identity():
         _fail("G4_DRAFT_STALE", project,
               "Compiler or registered motion/layout definitions changed; recompile with approval.")
+    if sorted(manifest.get("gate_heads",{})) != ["G1","G2","G3"]:
+        _fail("G4_DRAFT_CORRUPT", project, "Immutable draft requires all three approval identities.")
     if (manifest.get("schema_version") != "G4CompiledDraft.v1"
             or manifest.get("project_id") != project
             or manifest.get("generation") != generation
@@ -88,7 +107,30 @@ def publish(store, project, timeline, blueprint, maps, map_requests, font_identi
     from backend.app.projects.gates import GateService
     from backend.app.projects.revisions import mark_stale
     ensure(store)
-    generation = previous["generation"] + 1 if previous else 1
+    approved_heads = current_gate_heads(store,project)
+    refresh = None
+    if previous is None:
+        with store._connection() as db:
+            prior=db.execute(
+                "SELECT generation,project_revision,manifest_sha256 "
+                "FROM g4_compiled_drafts WHERE project_id=?",(project,)).fetchone()
+        if prior:
+            previous_head=load(store,project)
+            old_heads=previous_head["manifest"]["gate_heads"]
+            if (expected_revision > previous_head["revision"]
+                    and approved_heads != old_heads):
+                # G1/G2/G3 were independently re-approved after prior draft.
+                # Fresh production compile establishes a NEW trustworthy
+                # baseline; same upstream head must never reset G4 edits.
+                refresh=previous_head
+            elif (previous_head["revision"] != expected_revision
+                    or canonical(previous_head["timeline"]) != canonical(timeline)
+                    or canonical(previous_head["blueprint"]) != canonical(blueprint)
+                    or canonical(previous_head["manifest"]["maps"]) != canonical(maps)
+                    or canonical(previous_head["manifest"]["map_requests"]) != canonical(map_requests)):
+                _fail("G4_DRAFT_EXISTS",project,
+                      "Same approved G1/G2/G3 cannot replace the current G4 draft.")
+    generation = ((refresh or previous)["generation"] + 1 if (refresh or previous) else 1)
     new_revision = expected_revision + 1 if previous else expected_revision
     timeline_sha = store.put_artifact(canonical(timeline), "g4_compiled_timeline")
     blueprint_sha = store.put_artifact(canonical(blueprint), "g4_compiled_blueprint")
@@ -99,6 +141,7 @@ def publish(store, project, timeline, blueprint, maps, map_requests, font_identi
         "map_context_sha256":digest(maps), "map_requests_sha256":digest(map_requests),
         "maps":maps, "map_requests":map_requests, "font_identity":font_identity,
         "runtime_identity":_runtime_identity(),
+        "gate_heads":approved_heads,
         "story_sha256":timeline["story_sha256"],
         "audio_sha256":timeline["audio_sha256"],
         "word_map_sha256":timeline["word_map_sha256"],
@@ -112,13 +155,21 @@ def publish(store, project, timeline, blueprint, maps, map_requests, font_identi
             "SELECT generation,project_revision,manifest_sha256 "
             "FROM g4_compiled_drafts WHERE project_id=?", (project,)).fetchone()
         if previous is None:
-            if row:
+            if refresh:
+                if row != (refresh["generation"],refresh["revision"],refresh["manifest_sha256"]):
+                    _fail("G4_DRAFT_STALE",project,"A newer G4 source draft won the race.")
+                db.execute("UPDATE g4_compiled_drafts SET generation=?,project_revision=?,"
+                           "manifest_sha256=? WHERE project_id=?",
+                           (generation,new_revision,manifest_sha,project))
+                mark_stale(db,project,"scene_layout")
+            elif row:
                 if row == (generation, new_revision, manifest_sha):
-                    return  # idempotent baseline; never rewrite a later G4 edit
+                    return  # exact idempotent recompile with unchanged approved heads
                 _fail("G4_DRAFT_EXISTS", project,
-                      "A registered compiler draft exists; revise that draft or refresh source approvals.")
-            db.execute("INSERT INTO g4_compiled_drafts VALUES(?,?,?,?)",
-                       (project, generation, new_revision, manifest_sha))
+                      "Same upstream approval heads cannot reset an existing G4 edit.")
+            else:
+                db.execute("INSERT INTO g4_compiled_drafts VALUES(?,?,?,?)",
+                           (project, generation, new_revision, manifest_sha))
         else:
             if row != (previous["generation"], previous["revision"],
                        previous["manifest_sha256"]):
