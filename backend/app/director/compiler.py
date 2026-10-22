@@ -494,6 +494,9 @@ def revise_g4(store, project_id: str, previous: dict, original_blueprint: dict,
         _block("G4_BLUEPRINT_TAMPERED", project_id,
                "Original visual blueprint does not match the registered draft source plan.")
     manifest = trusted["manifest"]
+    if manifest["gate_heads"] != draft.current_gate_heads(store, project_id):
+        _block("G4_SOURCE_STALE", project_id,
+               "A current G1/G2/G3 approval identity changed after the trusted draft.")
     from backend.app.director.layout import windows_font_measure
     from pathlib import Path
     import os
