@@ -142,6 +142,21 @@ def compile_timeline(story: dict, blueprint: dict, word_map: dict, final_audio: 
     if any(r not in required for r in approved_assets):
         _block("G3_ASSET_UNAPPROVED", blueprint["project_id"], "G3 snapshot references an unknown G1 requirement.")
     maps = maps or {}
+    for plan in blueprint["setup_plans"]:
+        sid = plan["setup_id"]
+        current = maps.get(sid, {})
+        for binding in plan["asset_slot_bindings"]:
+            rid = binding["requirement_id"]
+            if required[rid]["asset_class"] != "HISTORICAL_MAP":
+                continue
+            source = current.get("sources", {}).get(rid)
+            head = approved_assets.get(rid)
+            if (not source or not head or
+                    source["source_original_sha256"] != head["original_sha256"]
+                    or source["historical_map"]["source_asset_id"] != head["candidate_id"]
+                    or source["historical_map"]["rights_review_record_id"] != head["approval_record_id"]):
+                _block("MAP_GEOMETRY_INVALID", sid,
+                       "Compile only validated B1-02 period maps with exact original and G3 source identity.")
     windows = bind_beats(blueprint, word_map, audio_sha256=final_audio["audio_sha256"],
                          transcript_sha256=final_audio["transcript_sha256"],
                          audio_total_samples=final_audio["duration_samples"])
@@ -180,6 +195,7 @@ def compile_timeline(story: dict, blueprint: dict, word_map: dict, final_audio: 
 
 def compile_from_store(store, project_id: str, blueprint: dict, word_map: dict,
                        final_audio: dict, *, maps: dict | None = None,
+                       map_requests: dict | None = None,
                        font_measure=None, font_identity: dict | None = None) -> dict:
     """Production authorization: SQLite G1/G2/G3 heads, immutable audio, G3 assets."""
     from backend.app.assets.provenance import AssetCandidates
@@ -226,8 +242,51 @@ def compile_from_store(store, project_id: str, blueprint: dict, word_map: dict,
                 _block("G3_ASSET_UNAPPROVED", rid, "Immutable approved original bytes failed SHA validation.")
             approved[rid] = {**head, "asset_class": requirement["asset_class"],
                              "source_kind": head.get("evidence", {}).get("source_kind", "")}
+    # Caller-supplied map booleans are not G3 source truth. Re-ingest every
+    # requested geographic layer against the current project/requirement head.
+    from backend.app.maps.ingest import ingest_current_approved
+    from backend.app.maps.projection import common_viewport
+    if maps:
+        _block("MAP_GEOMETRY_INVALID", project_id,
+               "Production map contexts must be derived from the current SQLite G3 approvals, not caller JSON.")
+    trusted_maps = {}
+    for plan in blueprint["setup_plans"]:
+        map_payload = plan["template_payload"]
+        requested = []
+        if "map" in map_payload and isinstance(map_payload["map"], dict):
+            requested.append(map_payload["map"])
+        for key in ("before_map","after_map"):
+            if key in map_payload:
+                requested.append(map_payload[key])
+        if not requested:
+            continue
+        sid = plan["setup_id"]
+        ctx = {"sources": {}, "reviewed_period_map": True}
+        for item in requested:
+            rid = item["map_requirement_id"]
+            request = (map_requests or {}).get(rid)
+            if not request or request.get("year") != item["year"]:
+                _block("MAP_GEOMETRY_INVALID", sid,
+                       "Supply an explicit period-map ingest request matching authored map year.")
+            result = ingest_current_approved(
+                store, project_id, rid, request["map_record"], year=request["year"],
+                feature_ids=request["feature_ids"],
+                route_feature_id=request.get("route_feature_id"),
+                reviewed_tie_points=request.get("reviewed_tie_points"))
+            ctx["sources"][rid] = result
+            ctx["historical_map_id"] = result["historical_map"]["historical_map_id"]
+            ctx["era_year"] = request["year"]
+            ctx["approved_feature_ids"] = [x["id"] for x in result["features"]]
+            ctx["route_feature_id"] = result.get("route_feature_id")
+            ctx["geometry_type"] = "LineString" if ctx["route_feature_id"] else None
+        if plan["template_id"] == "T07":
+            source = list(ctx["sources"].values())
+            viewport = common_viewport(source[0]["historical_map"], source[1]["historical_map"])
+            ctx["shared_projection"] = viewport["projection"]
+            ctx["shared_viewport"] = viewport["bbox"]
+        trusted_maps[sid] = ctx
     return compile_timeline(story_obj.data(), blueprint, word_map, final_audio, approved,
-                            maps=maps, font_measure=font_measure, font_identity=font_identity,
+                            maps=trusted_maps, font_measure=font_measure, font_identity=font_identity,
                             expected_story_sha256=story_obj.sha256)
 
 
