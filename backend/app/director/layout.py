@@ -64,3 +64,47 @@ def role_bounds(layout: dict, layers: list[dict]) -> None:
         if not rule["min_count"] <= num <= rule["max_count"]:
             raise ContractViolation("LAYOUT_ROLE_MISMATCH", layout["template_id"],
                                     "Provide the registered number of reviewed layers for each required role.")
+
+
+def windows_font_measure(path: str, expected_sha256: str, *, family: str = "Arial"):
+    """Measure pinned installed Windows font with GDI, not approximate character widths.
+
+    Font file/hash/family are explicit caller inputs. B2 must separately validate
+    rendered font parity. No alternate font fallback is selected here.
+    """
+    import ctypes
+    import hashlib
+    import sys
+    from ctypes import wintypes
+    font_file = Path(path)
+    if sys.platform != "win32" or not font_file.is_file():
+        raise ContractViolation("FONT_METRICS_REQUIRED", str(path),
+                                "Install and explicitly pin a Windows font file for GDI glyph measurement.")
+    actual_sha = hashlib.sha256(font_file.read_bytes()).hexdigest()
+    if actual_sha != expected_sha256:
+        raise ContractViolation("FONT_IDENTITY_STALE", str(path),
+                                "Expected font SHA differs from the actual font bytes.")
+    gdi = ctypes.windll.gdi32
+    hdc = gdi.CreateCompatibleDC(0)
+    if not hdc:
+        raise ContractViolation("FONT_METRICS_REQUIRED", str(path), "Cannot create Windows GDI measurement context.")
+    cache = {}
+    def measure(text, size):
+        key = (text, size)
+        if key in cache:
+            return cache[key]
+        handle = gdi.CreateFontW(-size, 0, 0, 0, 400, 0, 0, 0, 1, 0, 0, 0, 0, family)
+        if not handle:
+            raise ContractViolation("FONT_METRICS_REQUIRED", str(path), "Failed to select the pinned measurement face.")
+        previous = gdi.SelectObject(hdc, handle)
+        bounds = wintypes.SIZE()
+        try:
+            if not gdi.GetTextExtentPoint32W(hdc, text, len(text), ctypes.byref(bounds)):
+                raise ContractViolation("FONT_METRICS_REQUIRED", str(path), "GDI glyph measurement failed.")
+            cache[key] = (bounds.cx, bounds.cy)
+            return cache[key]
+        finally:
+            gdi.SelectObject(hdc, previous)
+            gdi.DeleteObject(handle)
+    return measure, {"font_sha256": actual_sha, "font_family": family,
+                     "font_file": font_file.name, "measurement_engine": "win32_gdi"}
