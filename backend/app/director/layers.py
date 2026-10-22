@@ -76,9 +76,9 @@ def build_layers(plan: dict, approved: dict, requirements: dict, *,
             possible = [x for x in sources.values()
                         if requirements.get(x["requirement_id"], {}).get("asset_class") in ASSET_CLASSES[role]]
             if len(possible)==1 and len([s for s in layout["slots"]
-                   if s["role"] in ASSET_CLASSES and
+                   if s["required"] and s["role"] in ASSET_CLASSES and
                    requirements.get(possible[0]["requirement_id"], {}).get("asset_class")
-                       in ASSET_CLASSES[s["role"]]]) == 1:
+                       in ASSET_CLASSES[s["role"]]]) == 1 and slot["required"]:
                 source = possible[0]
         txt = texts.get(sid)
         if txt is None and role in TEXT_ROLES:
