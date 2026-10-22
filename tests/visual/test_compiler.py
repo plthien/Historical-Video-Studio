@@ -658,9 +658,13 @@ def test_b1_production_compiler_all_ten_templates_native_samples_and_sources():
     from backend.tools.b1_smoke import synthetic_ten_template_inputs
     from backend.app.director.compiler import compile_timeline
     story, bp, words, final, assets, maps = synthetic_ten_template_inputs()
-    kwargs = {"maps":maps, "font_measure":lambda text, size: (len(text)*size//2,size),
-              "font_identity":{"font_sha256":"a"*64,"font_family":"SYNTHETIC_METRICS",
-                               "measurement_engine":"synthetic_fixture"},
+    import os
+    from backend.app.director.layout import windows_font_measure
+    if os.name != "nt":
+        pytest.skip("Production font gate requires native Windows GDI")
+    font = Path(os.environ["WINDIR"]) / "Fonts" / "arial.ttf"
+    measure, font_identity = windows_font_measure(str(font), hashlib.sha256(font.read_bytes()).hexdigest())
+    kwargs = {"maps":maps, "font_measure":measure, "font_identity":font_identity,
               "expected_story_sha256":bp["story_revision_sha256"]}
     result = compile_timeline(story,bp,words,final,assets,**kwargs)
     validate_document("CompiledTimeline.v1",result)
