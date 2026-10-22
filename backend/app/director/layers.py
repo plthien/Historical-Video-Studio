@@ -133,6 +133,19 @@ def build_layers(plan: dict, approved: dict, requirements: dict, *,
         if txt is not None:
             ref_map[txt["text_id"]] = ident
         rect = rects[sid]
+        map_binding = None
+        if role in ("map", "territory") and candidate is not None:
+            map_source = (maps or {}).get(plan["setup_id"], {}).get("sources", {}).get(source["requirement_id"])
+            if map_source is not None:
+                if (map_source.get("source_original_sha256") != candidate["original_sha256"]
+                        or map_source["historical_map"]["source_asset_id"] != candidate["candidate_id"]
+                        or map_source["historical_map"]["rights_review_record_id"] != candidate["approval_record_id"]):
+                    _blocked("MAP_RIGHTS_UNREVIEWED", sid,
+                             "Normalized historical map must match exact current G3 original and review event.")
+                coord = ("raster_uv" if map_source["coordinate_space"]=="UV_ONLY" else "geo_wgs84")
+                map_binding = {"historical_map_id":map_source["historical_map"]["historical_map_id"],
+                               "feature_id":map_source["features"][0]["id"] if map_source["features"] else None,
+                               "coordinate_kind":coord,"anchor_latlon":None}
         layer = {
             "layer_id": ident, "layer_kind": role,
             "asset_id": candidate["candidate_id"] if candidate else None,
@@ -146,7 +159,7 @@ def build_layers(plan: dict, approved: dict, requirements: dict, *,
             "style": {"font_token": "headline_sans" if txt else None,
                       "color_token": None, "stroke_token": None,
                       "max_lines": min(slot["max_lines"], 8)},
-            "map_binding": None,
+            "map_binding": map_binding,
             "parent_layer_id": None, "group_id": "group_" + plan["setup_id"],
             "transform_origin": {"x": .5, "y": .5}, "depth_order": slot["z_index"],
             "treatment": {"kind": ("headline_text" if txt else
