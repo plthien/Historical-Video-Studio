@@ -1227,28 +1227,33 @@ def test_b1_g4_real_sqlite_positive_invalid_staging_selective_revision_and_stale
                   font_measure=measure,
                   crop_overrides={"setup_001":{map_layer["layer_id"]:reviewed_crop}})
     assert store.revision(pid)==current_revision
-    # Re-approval of G1 review evidence changes an approval-head identity
-    # even if StoryPackage/G2 WAV/G3 original hashes remain identical.
-    # A fresh verified compile must create the next trusted draft generation;
-    # callers cannot reset the G4 draft while approval heads are unchanged.
+    # A changed G3 rights-review approval ID (same immutable original SHA)
+    # must invalidate the prior G4 source snapshot and allow ONLY a freshly
+    # source-authorized compile to establish the next trusted baseline.
     from backend.app.director.fingerprint import digest
     with store._transaction() as db:
         db.execute("UPDATE word_maps SET map_sha256=? WHERE project_id=?",
                    (digest(words),pid))
-    reviewed_rev=gates.review_claim(pid,"claim_001","REVIEWED",
-        "Synthetic re-review for approval lineage identity",store.revision(pid))
-    g1_review=gates.board(pid)[0]
-    assert g1_review["state"]=="READY_FOR_REVIEW"
-    gates.decide(pid,"G1",{"decision":"APPROVED",
-        "candidate_sha256":g1_review["candidate_sha256"],
-        "dependency_fingerprint":g1_review["dependency_fingerprint"],
+    reviewed=resolver.approve_batch(pid,[{
+        "requirement_id":"req_001","candidate_id":candidate["candidate_id"],
+        "original_sha256":candidate["original_sha256"],"rights_status":"ELIGIBLE",
+        "rights_evidence_note":"Second synthetic rights approval generation",
+        "historical_context_note":"Local test map"}],store.revision(pid))
+    g3_review=gates.board(pid)[2]
+    assert g3_review["state"]=="READY_FOR_REVIEW"
+    gates.decide(pid,"G3",{"decision":"APPROVED",
+        "candidate_sha256":g3_review["candidate_sha256"],
+        "dependency_fingerprint":g3_review["dependency_fingerprint"],
         "expected_revision":store.revision(pid)})
-    assert all(x["state"]=="APPROVED" for x in gates.board(pid)[:3])
+    assert all(x["state"]=="APPROVED" for x in gates.board(pid)[:3]),gates.board(pid)[:3]
+    fresh_record=copy.deepcopy(record)
+    fresh_record["rights_review_record_id"]=reviewed["approved"][0]["approval_record_id"]
+    fresh_requests={"req_001":{"year":1871,"map_record":fresh_record,"feature_ids":[]}}
     recompiled=compile_from_store(store,pid,bp,words,frozen,
-        map_requests=requests,font_measure=measure,font_identity=identity)
+        map_requests=fresh_requests,font_measure=measure,font_identity=identity)
     refreshed=draft.load(store,pid)
     assert refreshed["generation"]==4
-    assert refreshed["manifest"]["gate_heads"]["G1"]!=new_head["manifest"]["gate_heads"]["G1"]
+    assert refreshed["manifest"]["gate_heads"]["G3"]!=new_head["manifest"]["gate_heads"]["G3"]
     assert canonical(refreshed["timeline"])==canonical(recompiled)
     assert store.revision(pid)==refreshed["revision"]
     assert all(x["state"]!="APPROVED" for x in gates.board(pid)[3:])
