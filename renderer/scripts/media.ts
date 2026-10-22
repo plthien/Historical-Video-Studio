@@ -1,4 +1,4 @@
-import {readFileSync,realpathSync,statSync} from 'node:fs';
+import {readFileSync,realpathSync,statSync,writeFileSync,mkdirSync} from 'node:fs';
 import {resolve,relative,isAbsolute} from 'node:path';
 import {createHash} from 'node:crypto';
 import type {Timeline,ResolvedMedia,MediaItem,Geometry} from '../remotion/schema';
@@ -36,7 +36,6 @@ export function loadApprovedMedia(t:Timeline, manifest:ResolveManifest):Resolved
 }
 /** Generated *only* for test fixtures; never claims a current G3 review. */
 export function makeSyntheticManifest(t:Timeline,directory:string,fontFile:string):ResolveManifest{
- const {writeFileSync,mkdirSync}=requireFs();
  mkdirSync(directory,{recursive:true});
  const ids=[...new Set(t.scenes.flatMap(s=>s.layers.map(l=>l.asset_id).filter((x):x is string=>Boolean(x))))];
  const assets=ids.map((id,i)=>{
@@ -66,4 +65,3 @@ export function makeSyntheticManifest(t:Timeline,directory:string,fontFile:strin
   mediaRoot:directory,assets,geometries:geos,fontFile,fontSha256:sha(readFileSync(fontFile)),
   fontFamily:'Arial',sourceKind:'SYNTHETIC'};
 }
-function requireFs(){return {writeFileSync,mkdirSync} as typeof import('node:fs');}
