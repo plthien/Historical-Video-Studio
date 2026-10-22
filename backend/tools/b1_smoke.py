@@ -87,4 +87,145 @@ def run(case, mode):
         else:raise RuntimeError("Out-of-range repeated cue must block.")
         print("align-scene-cues: LOCAL_PASS SYNTHETIC word_id=word_001 cue_frames=[0,9) scene_frames=[0,30)")
         return
-    raise ContractViolation("B1_SMOKE_CASE_UNKNOWN",case,"Use one of the three B1 cases.")
+    if case=="compile-layout":
+        from backend.app.director.layout import windows_font_measure, pixel_geometry
+        from backend.app.director.layers import build_layers
+        from backend.app.director.blueprint import normalize_story
+        import os
+        if os.name!="nt":
+            raise ContractViolation("FONT_METRICS_REQUIRED",case,"B1 native font smoke requires Windows.")
+        font=Path(os.environ["WINDIR"])/"Fonts"/"arial.ttf"
+        measure,identity=windows_font_measure(str(font),hashlib.sha256(font.read_bytes()).hexdigest())
+        story=fixture("contracts/examples/visual_cases/StoryPackage.visual_cases.synthetic.json")
+        source=fixture("contracts/examples/visual_cases/VisualBlueprint.visual_cases.synthetic.json")
+        plans=normalize_story(story,{p["setup_id"]:p["template_payload"] for p in source["setup_plans"]})
+        p=plans["setup_plans"][0]
+        rid=p["asset_slot_bindings"][0]["requirement_id"]
+        approved={rid:{"candidate_id":"candidate_synthetic_map","approval_record_id":"approval_synthetic_map",
+                       "original_sha256":"a"*64,"asset_class":"HISTORICAL_MAP","source_kind":"ARCHIVE"}}
+        requirements={r["requirement_id"]:r for r in story["asset_requirements"]}
+        layers,_=build_layers(p,approved,requirements,font_measure=measure)
+        if (len(layers)<2 or not layers[0]["source_asset_slot_id"] or
+                not layers[1]["text_layout"] or layers[0]["rect_px"]!=pixel_geometry(p)[layers[0]["template_slot_id"]]):
+            raise RuntimeError("Registered geometry, real font measurement or G3 slot binding missing.")
+        print("compile-layout: LOCAL_PASS SYNTHETIC slots="+str(len(layers))+
+              " first_rect="+str(layers[0]["rect_px"])+" font_sha="+identity["font_sha256"])
+        return
+    if case=="compile-motion":
+        from backend.app.director.motion import presets,compile_event
+        target={"layer_id":"layer_smoke","layer_kind":"headline","source_claim_id":"claim_001"}
+        e=compile_event("title-mask-reveal",target,[target],
+                        event_id="event_smoke",start_frame=10,duration_frames=18,
+                        cue_word_id="word_001",evidence={"claim_ids":["claim_001"]})
+        if (len(presets())!=19 or e["start_frame"]!=10 or e["keyframes"][0]["frame"]!=0 or
+                e["keyframes"][-1]["frame"]!=18 or
+                sum(x["duration_frames"] for x in e["phases"])!=18):
+            raise RuntimeError("Registered motion did not produce a real bounded frame-local recipe.")
+        print("compile-motion: LOCAL_PASS SYNTHETIC registered=19 primitive="+e["preset_id"]+
+              " keyframes="+str(e["keyframes"]))
+        return
+    if case=="compile-longform":
+        from backend.app.director.compiler import compile_timeline
+        from backend.app.director.layout import windows_font_measure
+        import os
+        if os.name!="nt":
+            raise ContractViolation("FONT_METRICS_REQUIRED",case,"B1 native font smoke requires Windows.")
+        font=Path(os.environ["WINDIR"])/"Fonts"/"arial.ttf"
+        measure,identity=windows_font_measure(str(font),hashlib.sha256(font.read_bytes()).hexdigest())
+        story,bp,words,final,assets=synthetic_longform_inputs()
+        result=compile_timeline(story,bp,words,final,assets,
+                                font_measure=measure,font_identity=identity,
+                                expected_story_sha256=bp["story_revision_sha256"])
+        if (len(result["scenes"])!=48 or result["total_frames"]!=10800 or
+                any(not s["layers"] or not s["events"] or not s["camera"]["focus_path"] for s in result["scenes"]) or
+                any(a["start_frame"]+a["duration_frames"]!=b["start_frame"]
+                    for a,b in zip(result["scenes"],result["scenes"][1:]))):
+            raise RuntimeError("The actual 48-scene compiler produced a gap or inert scene.")
+        repeat=compile_timeline(story,bp,words,final,assets,font_measure=measure,
+                                font_identity=identity,
+                                expected_story_sha256=bp["story_revision_sha256"])
+        if json.dumps(result,sort_keys=True)!=json.dumps(repeat,sort_keys=True):
+            raise RuntimeError("Repeated approved synthetic inputs must produce identical timeline bytes.")
+        print("compile-longform: LOCAL_PASS SYNTHETIC scenes=48 frames="+
+              str(result["total_frames"])+" sha="+result["dependency_fingerprint"]+
+              " LIVE_HISTORY=NOT_RUN MP4=NOT_RUN")
+        return
+    raise ContractViolation("B1_SMOKE_CASE_UNKNOWN",case,"Use the six B1 smoke cases.")
+
+
+
+def synthetic_longform_inputs():
+    """Explicitly synthetic boundary adapter for the original 24-section/48-setup fixtures.
+
+    These G2/G3 approvals and samples are NOT production proof. The checked-in
+    longform fixture anchors BOTH setups of each section to the SAME 'In'/0 cue;
+    here its SECOND synthetic cue is re-authored to an actually spoken mid-section
+    word so B1-03 correctly receives non-overlapping, native-sample boundaries.
+    G1 source narration and claims are never edited.
+    """
+    from backend.app.director.blueprint import normalize_story
+    from backend.app.projects.models import StoryCandidate
+    from backend.app.voice.word_map import normalized
+    import copy
+    story=fixture("contracts/examples/longform/StoryPackage.longform.synthetic.json")
+    bp_base=fixture("contracts/examples/longform/VisualBlueprint.longform.synthetic.json")
+    params={p["setup_id"]:p["template_payload"] for p in bp_base["setup_plans"]}
+    second_by_section={}
+    for setup in story["visual_setups"]:
+        section=setup["section_refs"][0]
+        if section in second_by_section:
+            narration=next(s["narration"] for s in story["sections"] if s["section_id"]==section)
+            tokens=narration.split()
+            chosen=len(tokens)//2
+            token=tokens[chosen]
+            occurrence=sum(1 for word in tokens[:chosen] if normalized(word)==normalized(token))
+            cue={"section_id":section,"phrase":token,"occurrence":occurrence}
+            setup["direction"]["visual_beats"][0]["cue"]=cue
+            # Legacy synthetic direction points at a non-visible background asset
+            # for T08. Use its explicitly authored fact_text_id instead.
+            if setup["preferred_template"]=="T08":
+                payload=params[setup["setup_id"]]
+                setup["direction"]["visual_beats"][0]["focus_ref"]=payload["fact_text_id"]
+                setup["direction"]["visual_beats"][0]["staging"][0]["ref"]=payload["fact_text_id"]
+        else:
+            second_by_section[section]=setup["setup_id"]
+            if setup["preferred_template"]=="T08":
+                payload=params[setup["setup_id"]]
+                setup["direction"]["visual_beats"][0]["focus_ref"]=payload["fact_text_id"]
+                setup["direction"]["visual_beats"][0]["staging"][0]["ref"]=payload["fact_text_id"]
+    blueprint=normalize_story(story,params)
+    sample_rate=24000
+    per_section=360000
+    words=[]
+    offsets=[]
+    for sec_index,section in enumerate(story["sections"]):
+        tokens=section["narration"].split()
+        start=sec_index*per_section
+        offsets.append({"section_id":section["section_id"],
+                        "start_sample":start,"end_sample":start+per_section})
+        for i,word in enumerate(tokens):
+            a=start+(i*per_section)//len(tokens)
+            b=start+((i+1)*per_section)//len(tokens)
+            words.append({"word_id":f"word_{len(words)+1:05d}",
+                          "section_id":section["section_id"],"text":word,
+                          "start_sample":a,"end_sample":b})
+    audio_hash=hashlib.sha256(b"SYNTHETIC B1 G2 WAV for fixture, NOT actual TTS").hexdigest()
+    transcript_hash=hashlib.sha256(b"SYNTHETIC transcript identity").hexdigest()
+    word_map={"schema_version":"WordTimingMap.v1","project_id":blueprint["project_id"],
+              "provider_id":"elevenlabs_forced_alignment",
+              "audio_sha256":audio_hash,"transcript_sha256":transcript_hash,
+              "sample_rate":sample_rate,"words":words,"anomalies":[]}
+    final={"schema_version":"FinalAudio.v1","project_id":blueprint["project_id"],
+           "story_revision_sha256":blueprint["story_revision_sha256"],
+           "selected_attempt_ids":[f"attempt_{i+1:03d}" for i in range(len(offsets))],
+           "audio_sha256":audio_hash,"transcript_sha256":transcript_hash,
+           "sample_rate":sample_rate,"channels":1,
+           "duration_samples":per_section*len(offsets),"section_offsets":offsets}
+    approvals={}
+    for requirement in story["asset_requirements"]:
+        rid=requirement["requirement_id"]
+        approvals[rid]={"candidate_id":"candidate_"+rid,
+                        "approval_record_id":"approval_"+rid,
+                        "original_sha256":hashlib.sha256(("SYNTHETIC original "+rid).encode()).hexdigest(),
+                        "asset_class":requirement["asset_class"],"source_kind":"SYNTHETIC"}
+    return story,blueprint,word_map,final,approvals
