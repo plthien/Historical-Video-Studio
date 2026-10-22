@@ -320,12 +320,17 @@ def synthetic_ten_template_inputs():
              "properties":{}}
         ]}, sort_keys=True, separators=(",",":")).encode()
     approved = {}
+    map_bytes = {}
     for req in story["asset_requirements"]:
         rid = req["requirement_id"]
+        if req["asset_class"]=="HISTORICAL_MAP":
+            unique_source=json.loads(raw)
+            unique_source["features"][0]["properties"]["synthetic_requirement_id"]=rid
+            map_bytes[rid]=json.dumps(unique_source,sort_keys=True,separators=(",",":")).encode()
         approved[rid] = {"candidate_id":"candidate_"+rid,
                          "approval_record_id":"approval_"+rid,
-                         "original_sha256":(hashlib.sha256(raw).hexdigest()
-                            if req["asset_class"]=="HISTORICAL_MAP"
+                         "original_sha256":(hashlib.sha256(map_bytes[rid]).hexdigest()
+                            if rid in map_bytes
                             else hashlib.sha256(("SYNTHETIC "+rid).encode()).hexdigest()),
                          "asset_class":req["asset_class"],"source_kind":"SYNTHETIC"}
     maps = {}
@@ -356,7 +361,7 @@ def synthetic_ten_template_inputs():
                         ("original_sha256","candidate_id","approval_record_id")}
             route = "geometry_route_001" if plan["template_id"]=="T04" else None
             record["geometry_format"]="GeoJSON"
-            result = ingest(record,raw,year=year,feature_ids=["feature_001","geometry_route_001"],
+            result = ingest(record,map_bytes[rid],year=year,feature_ids=["feature_001","geometry_route_001"],
                             route_feature_id=route,approval=original)
             ctx["sources"][rid] = result
             ctx["historical_map_id"] = result["historical_map"]["historical_map_id"]
