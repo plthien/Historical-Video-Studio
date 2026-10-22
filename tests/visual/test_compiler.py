@@ -450,6 +450,12 @@ def test_layers_registered_variants_and_g3_source_binding():
     assert map_layer["source_asset_slot_id"]==first["editorial_direction"]["asset_slots"][0]["slot_id"]
     assert map_layer["asset_id"]=="candidate_test_map"
     assert layers[1]["text_layout"]["font_size_px"]>=20
+    # Registered text must be fitted from real pinned Windows glyph metrics,
+    # never clipped or silently shrunk below the 20px schema minimum.
+    overlong=copy.deepcopy(first)
+    overlong["editorial_direction"]["on_screen_text"][0]["text"]="W"*260
+    with pytest.raises(ContractViolation,match="TYPOGRAPHY_OVERFLOW"):
+        build_layers(overlong,approval,classes,font_measure=measure)
     with pytest.raises(ContractViolation,match="G3_ASSET_UNAPPROVED"):
         build_layers(first,{},classes,font_measure=measure)
     with pytest.raises(ContractViolation,match="G3_ASSET_UNAPPROVED"):
@@ -614,6 +620,11 @@ def test_b1_authored_t03_stagger_dispatch_actual_scene():
         for card in plan["template_payload"]["cards"] if card["card_id"] == card_id]
     assert len(e["affected_layer_ids"]) == 3
     assert e["cue_binding"]["word_id"] == "word_1"
+    edges=scene["staging"]["composition_graph"]["edges"]
+    assert len(edges)==2
+    assert all(item["relation"]=="foreground_of" for item in edges)
+    assert all(layer["group_id"]=="group_"+plan["setup_id"]
+               and layer["parent_layer_id"] is None for layer in scene["layers"])
 
 
 def test_b1_authored_t04_route_draw_targets_route_not_focus_map():
