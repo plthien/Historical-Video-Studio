@@ -414,3 +414,83 @@ def test_map_real_local_g3_original_and_approval_lineage(tmp_path):
     store.import_story(StoryCandidate.parse(changed),store.revision(pid))
     with pytest.raises(ContractViolation,match="G3_APPROVAL_REQUIRED"):
         ingest_current_approved(store,pid,rid,map_record,year=1871,feature_ids=[])
+
+
+
+def test_layers_registered_variants_and_g3_source_binding():
+    from backend.app.director.layout import layouts, pixel_geometry, windows_font_measure
+    from backend.app.director.layers import build_layers
+    from backend.app.director.blueprint import normalize_story
+    import os
+    if os.name != "nt":
+        pytest.skip("Pinned real Windows GDI font measurement is Windows-only")
+    path=Path(os.environ["WINDIR"])/"Fonts"/"arial.ttf"
+    measure,identity=windows_font_measure(str(path),hashlib.sha256(path.read_bytes()).hexdigest())
+    story,payloads=visual()
+    bp=normalize_story(story,payloads)
+    assert len(layouts())==30
+    first=bp["setup_plans"][0]
+    all_geom=[]
+    for variant in ("A","B","C"):
+        selected=copy.deepcopy(first)
+        selected["variant_id"]=variant
+        selected["layout_control"]["layout_id"]=f"T01.{variant}.v1"
+        all_geom.append(pixel_geometry(selected))
+    assert all_geom[0]!=all_geom[1] and all_geom[1]!=all_geom[2]
+    req=first["editorial_direction"]["asset_slots"][0]["requirement_id"]
+    approval={req:{"candidate_id":"candidate_test_map",
+                    "approval_record_id":"approval_test_map",
+                    "original_sha256":"a"*64,
+                    "asset_class":"HISTORICAL_MAP","source_kind":"ARCHIVE"}}
+    classes={x["requirement_id"]:x for x in story["asset_requirements"]}
+    layers,refs=build_layers(first,approval,classes,font_measure=measure)
+    assert len(layers)>=2
+    map_layer=next(x for x in layers if x["layer_kind"]=="map")
+    assert map_layer["template_slot_id"]=="map_main"
+    assert map_layer["source_asset_slot_id"]==first["editorial_direction"]["asset_slots"][0]["slot_id"]
+    assert map_layer["asset_id"]=="candidate_test_map"
+    assert layers[1]["text_layout"]["font_size_px"]>=20
+    with pytest.raises(ContractViolation,match="G3_ASSET_UNAPPROVED"):
+        build_layers(first,{},classes,font_measure=measure)
+    with pytest.raises(ContractViolation,match="G3_ASSET_UNAPPROVED"):
+        bad=copy.deepcopy(approval)
+        bad[req]["asset_class"]="ARCHIVAL_PHOTO"
+        build_layers(first,bad,classes,font_measure=measure)
+
+
+def test_motion_nineteen_distinct_registered_grammars_and_blockers():
+    from backend.app.director.motion import presets,compile_event
+    entries=presets()
+    assert len(entries)==19 and len({p["render_recipe"]["primitive"] for p in entries.values()})==19
+    for name,preset in entries.items():
+        kind=("archival_photo" if name=="parallax-layers" else
+              "text" if name in ("typewriter","number-count","text-highlight") else
+              "route" if name=="route-line-draw" else
+              "annotation" if name=="editorial-connector-draw" else
+              preset["compatible_layer_kinds"][0])
+        target={"layer_id":"layer_test_primary","layer_kind":kind,
+                "source_claim_id":"claim_001","path_geometry_ref":(
+                    "geometry_001" if kind=="route" else "connector_001")}
+        other={"layer_id":"layer_test_secondary","layer_kind":"archival_photo",
+               "source_claim_id":"claim_001","path_geometry_ref":None}
+        evidence={"source_sha":"a"*64,"claim_ids":["claim_001"],"number_value":1914,
+                  "historical_map_id":"map_001","era_year":1914,
+                  "approved_feature_ids":["feature_001"],"reviewed_period_map":True,
+                  "route_feature_id":"geometry_001","geometry_type":(
+                      "LineString" if name=="route-line-draw" else "editorial"),
+                  "editorial_connector":True}
+        event=compile_event(name,target,[target,other],event_id="event_test_"+name.replace("-","_"),
+                            start_frame=3,duration_frames=preset["default_duration_frames"],
+                            cue_word_id="word_001",evidence=evidence)
+        assert event["preset_id"]==name
+        assert event["motion_space"]==preset["render_recipe"]["transform_space"]
+        assert event["keyframes"][0]["frame"]==0
+        assert event["keyframes"][-1]["frame"]==event["duration_frames"]
+        assert sum(p["duration_frames"] for p in event["phases"])==event["duration_frames"]
+    target={"layer_id":"layer_test_primary","layer_kind":"route","path_geometry_ref":"geometry_001"}
+    with pytest.raises(ContractViolation,match="MOTION_GEOGRAPHY_UNREVIEWED"):
+        compile_event("route-line-draw",target,[target],event_id="event_negative",
+                      start_frame=0,duration_frames=8,cue_word_id="word_001",evidence={})
+    with pytest.raises(ContractViolation,match="MOTION_TIME_INVALID"):
+        compile_event("route-line-draw",target,[target],event_id="event_negative",
+                      start_frame=-1,duration_frames=8,cue_word_id="word_001",evidence={})
