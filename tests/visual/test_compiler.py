@@ -1069,8 +1069,10 @@ def test_b1_g4_real_sqlite_positive_invalid_staging_selective_revision_and_stale
     assert store.revision(pid)==baseline_revision
     forged_bp=copy.deepcopy(bp)
     forged_bp["setup_plans"][1]["layout_control"]["safe_area_pct"]["left"]=0.12
+    forged_edited=copy.deepcopy(edited)
+    forged_edited["setup_plans"][1]["layout_control"]["safe_area_pct"]["left"]=0.12
     with pytest.raises(ContractViolation,match="G4_BLUEPRINT_TAMPERED"):
-        revise_g4(store,pid,original,forged_bp,edited,words,frozen,current,
+        revise_g4(store,pid,original,forged_bp,forged_edited,words,frozen,current,
             expected_revision=baseline_revision,operator_reason="Reject forged original source plan",
             maps=None,font_measure=measure)
     assert store.revision(pid)==baseline_revision
