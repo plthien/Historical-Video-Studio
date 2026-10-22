@@ -20,6 +20,7 @@ function eventProgress(e:Motion,f:number){
 }
 function motionForLayer(scene:Scene,layer:Layer,frame:number){
  let opacity=1,scale=1,translateX=0,translateY=0,rotation=0,reveal=1,highlight=0;
+ let visibleText:string|undefined;
  for(const e of scene.events){
   const ordered=(e.params.ordered_layer_ids as string[]|undefined);
   const stagger=e.preset_id==='stagger-reveal'&&ordered?.includes(layer.layer_id);
@@ -33,6 +34,15 @@ function motionForLayer(scene:Scene,layer:Layer,frame:number){
    case 'title-mask-reveal':case 'typewriter':reveal=Math.min(reveal,p);opacity*=p;translateY+=(1-p)*Number(e.params.distance_px??20);break;
    case 'mask-transition':case 'map-region-wipe':reveal=Math.min(reveal,p);break;
    case 'text-highlight':highlight=Math.max(highlight,p);break;
+   case 'kinetic-type':translateY+=(1-p)*Number(e.params.max_offset_px??24);break;
+   case 'number-count':{
+    const source=e.params.source_claim_id, end=Number(e.params.end_value);
+    if(source!==layer.source_claim_id||!layer.text||Number(layer.text.replace(/,/g,''))!==end||
+       e.params.intermediate_truthful!==true)
+      fail('RENDER_COUNT_FACT_UNVERIFIED',e.event_id,'Number progression must be explicitly truth-safe and equal frozen exact factual text');
+    visibleText=mix(Number(e.params.start_value??0),end,p).toFixed(Number(e.params.precision??0));
+    break;
+   }
    case 'parallax-layers':translateX+=p*Number(e.params.max_drift_px??40)*.5;break;
    case 'camera-push':case 'camera-pan':break; // camera is sampled separately
    case 'freeze-hold':break;
@@ -41,7 +51,7 @@ function motionForLayer(scene:Scene,layer:Layer,frame:number){
    default:fail('RENDER_MOTION_UNIMPLEMENTED',e.event_id,'Compiled motion not implemented in B2-01..03; cannot silently ignore');
   }
  }
- return {opacity,scale,translateX,translateY,rotation,reveal,highlight};
+ return {opacity,scale,translateX,translateY,rotation,reveal,highlight,visibleText};
 }
 function firstAppearance(scene:Scene,layerId:string){
  const beats=scene.staging.beat_sequence.filter(b=>b.activated_layer_ids.includes(layerId));
@@ -99,7 +109,7 @@ export const CompiledLayer:React.FC<{scene:Scene;layer:Layer;frame:number;media:
    </div>;
  }
  if(layer.text!==null){
-  const txt=layer.text;const layout=layer.text_layout;
+  const txt=effect.visibleText??layer.text;const layout=layer.text_layout;
   if(!layout)fail('RENDER_TEXT_LAYOUT',layer.layer_id,'Text needs pinned glyph layout');
   const isHeading=layer.layer_kind==='headline';
   return <div style={{...style,padding:isHeading?10:6,display:'flex',alignItems:layout.vertical_align==='center'?'center':'flex-start',
