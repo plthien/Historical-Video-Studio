@@ -27,7 +27,7 @@ mkdirSync(output,{recursive:true});
 const templateList=selected.length?selected:isShared?['T01']:isSingle?['T01']:Array.from({length:10},(_,i)=>'T'+String(i+1).padStart(2,'0'));
 const sourceCases=Array.from({length:3},(_,i)=>['A','B','C'][i]).flatMap(variant=>compiled[variant].scenes.filter(s=>templateList.includes(s.template_id)).map(s=>({variant,scene:s})));
 const entrypoint=resolve(root,'remotion','entry.tsx');
-const bundlePath=await bundle({entryPoint:entrypoint,webpackOverride:(config)=>config,logLevel:'error'});
+const bundlePath=await bundle({entryPoint:entrypoint,webpackOverride:(config)=>config});
 const metrics:unknown[]=[];
 async function oneStill(timeline:Timeline,frame:number,label:string,mediaDir:string){
  const manifest=makeSyntheticManifest(timeline,mediaDir,fontFile);
