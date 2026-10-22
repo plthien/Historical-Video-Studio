@@ -690,6 +690,9 @@ def test_b1_production_compiler_all_ten_templates_native_samples_and_sources():
     t10 = next(s for s in scenes if s["template_id"] == "T10")
     assert any(x["layer_kind"] == "annotation" and x["path_geometry_ref"].startswith("connector_")
                for x in t10["layers"])
+    assert t10["events"][2]["preset_id"] == "editorial-connector-draw"
+    assert t10["events"][2]["layer_id"].endswith("causal_path")
+    assert t10["events"][2]["motion_space"] != "map_world"
 
 
 
