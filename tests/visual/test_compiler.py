@@ -1049,34 +1049,6 @@ def test_b1_g4_real_sqlite_positive_invalid_staging_selective_revision_and_stale
         "kind":"operator_visual_edit","source_story_revision_sha256":original["story_sha256"],
         "edited_paths":["layout_variant_hint"],
         "operator_confirmed":True,"edit_reason":"Improve map framing"}
-    # Historical RED control, isolated on a copied *real SQLite* fixture.
-    # Execute the pinned pre-G10 compiler from Git history (not from the
-    # current fixed production import) to demonstrate actual retained-scene
-    # leakage on an otherwise authorized presentation edit.
-    import sqlite3
-    import subprocess
-    import types
-    legacy_database=tmp_path/"pre_g10.sqlite"
-    with sqlite3.connect(store.database) as source_db, sqlite3.connect(legacy_database) as target_db:
-        source_db.backup(target_db)
-    legacy_store=ProjectStore(legacy_database,store.artifacts.root)
-    legacy_sha="5a666f6d450441973d4e5075ea976dcb3f6d0fe1"
-    prior_source=subprocess.run(
-        ["git","show",legacy_sha+":backend/app/director/compiler.py"],
-        cwd=ROOT,check=True,text=True,capture_output=True).stdout
-    prior_module=types.ModuleType("historical_b1_compiler_before_g10")
-    exec(compile(prior_source,"pinned-pre-g10-compiler.py","exec"),prior_module.__dict__)
-    prior_timeline=copy.deepcopy(original)
-    prior_retained=next(x for x in prior_timeline["scenes"][1]["layers"] if x["text"])
-    prior_retained["text"]="FORGED HISTORY"
-    validate_document("CompiledTimeline.v1",prior_timeline)
-    old_result=prior_module.revise_g4(legacy_store,pid,prior_timeline,bp,edited,
-        words,frozen,current,expected_revision=store.revision(pid),
-        operator_reason="Historic vulnerable baseline proof",
-        maps={"setup_001":ctx,"setup_002":ctx},font_measure=measure)
-    assert old_result["timeline"]["scenes"][1]["layers"]!=original["scenes"][1]["layers"]
-    assert next(x for x in old_result["timeline"]["scenes"][1]["layers"] if x["text"])["text"]=="FORGED HISTORY"
-    print("G10_LEGACY_RED_REPRODUCED: untouched retained scene inherited forged factual text")
     # G10-V3 RED-A/B/C: these caller inputs must never establish authority.
     # The two-scene baseline above is compiled from real approved local SQLite.
     # No hash field is recomputed when tampering with a retained scene.
