@@ -12,6 +12,13 @@ def _fail(code, project, remedy):
     raise ContractViolation(code, project, remedy)
 
 
+def _runtime_identity():
+    from backend.app.director.fingerprint import ROOT, SOURCES, COMPILER_VERSION
+    return {"compiler_version":COMPILER_VERSION,
+            "registry_sha256":{key:sha256((ROOT / path).read_bytes()).hexdigest()
+                               for key,path in SOURCES.items()}}
+
+
 def ensure(store):
     # This table is deliberately separate from operator gate_heads: a draft is
     # never approval evidence for G4 or G5.
@@ -48,6 +55,9 @@ def load(store, project):
               "Run compile_from_store against currently approved G1/G2/G3 first.")
     generation, revision, manifest_sha = head
     manifest = _read_canonical(store, manifest_sha, project)
+    if manifest.get("runtime_identity") != _runtime_identity():
+        _fail("G4_DRAFT_STALE", project,
+              "Compiler or registered motion/layout definitions changed; recompile with approval.")
     if (manifest.get("schema_version") != "G4CompiledDraft.v1"
             or manifest.get("project_id") != project
             or manifest.get("generation") != generation
@@ -88,6 +98,7 @@ def publish(store, project, timeline, blueprint, maps, map_requests, font_identi
         "timeline_sha256":timeline_sha, "blueprint_sha256":blueprint_sha,
         "map_context_sha256":digest(maps), "map_requests_sha256":digest(map_requests),
         "maps":maps, "map_requests":map_requests, "font_identity":font_identity,
+        "runtime_identity":_runtime_identity(),
         "story_sha256":timeline["story_sha256"],
         "audio_sha256":timeline["audio_sha256"],
         "word_map_sha256":timeline["word_map_sha256"],
