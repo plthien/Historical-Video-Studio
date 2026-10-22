@@ -54,15 +54,22 @@ for(const {variant,scene} of sourceCases){
  const timeline=isolated(scene,variant);
  const caseDir=resolve(root,'.artifacts','media',variant,scene.template_id);
  const early=8, middle=Math.floor(scene.duration_frames/2),late=scene.duration_frames-3;
- const samples=mode==='render'?[middle]:[early,middle,late];
+ const samples=mode==='render'||variant!=='A'?[middle]:[early,middle,late];
  const shots=[];
  for(const frame of samples)shots.push(await oneStill(timeline,frame,`${scene.template_id}-${variant}-f${frame}`,caseDir));
- if(mode==='frames'){
+ if(mode==='frames'&&variant==='A'){
   const same=await oneStill(timeline,middle,`${scene.template_id}-${variant}-repeat-f${middle}`,caseDir);
-  if(same.pixelSha256!==shots[1].pixelSha256)throw new Error('RENDER_COLD_PIXEL_NONDETERMINISTIC: '+scene.template_id+'-'+variant);
-  if(shots[0].pixelSha256===shots[2].pixelSha256&&scene.events.some(e=>e.preset_id!=='freeze-hold'))throw new Error('RENDER_MOTION_INERT: '+scene.template_id+'-'+variant);
+  if(same.pixelSha256!==shots.find(x=>x.frame===middle)!.pixelSha256)throw new Error('RENDER_COLD_PIXEL_NONDETERMINISTIC: '+scene.template_id+'-'+variant);
+  if(shots[0].pixelSha256===shots[shots.length-1].pixelSha256&&scene.events.some(e=>e.preset_id!=='freeze-hold'))throw new Error('RENDER_MOTION_INERT: '+scene.template_id+'-'+variant);
  }
  metrics.push({template:scene.template_id,variant,shots});
+}
+// Every registered A/B/C input must change real rendered geometry, not only a variant label.
+for(const template of templateList){
+ const samples=metrics.filter((x:any)=>x.template===template) as any[];
+ if(samples.length!==3)throw Error('RENDER_30_VARIANTS_INCOMPLETE: '+template);
+ const distinct=new Set(samples.map(x=>x.shots.find((y:any)=>y.frame===Math.floor(compiled[x.variant].scenes.find((z:any)=>z.template_id===template).duration_frames/2)).pixelSha256));
+ if(distinct.size!==3)throw Error('RENDER_VARIANT_GEOMETRY_INERT: '+template);
 }
 if(mode==='render'){
  const chosen=isolated(compiled.A.scenes.find(s=>s.template_id==='T03')!, 'A');
