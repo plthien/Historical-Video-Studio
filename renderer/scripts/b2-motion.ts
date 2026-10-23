@@ -216,20 +216,33 @@ if(process.argv[2]==='render'){
  result.push({mp4:out,sha256:hashing(readFileSync(out)),ffprobe:info,source:'SYNTHETIC'});
 }
 const executedNames=new Set([...cases.map(c=>c.name),'title-mask-reveal','freeze-hold']);
+const contractBlockers:Record<string,string>={
+ 'number-count':'The frozen grammar has one claim ID and a self-declared intermediate_truthful flag, but no approved evidence for each displayed intermediate value.',
+ 'mask-transition':'The frozen grammar has mask shape/direction/feather only; CompiledTimeline has no authored incoming/outgoing surface identity for a true two-surface transition.',
+};
 const semanticRows=presets.presets.map(p=>({
  preset_id:p.preset_id,primitive:p.render_recipe.primitive,motion_space:p.render_recipe.transform_space,
  source_provenance:'SYNTHETIC_B1_COMPILED_NOT_OPERATOR_RIGHTS',
  evidence:result.filter((entry):entry is Record<string,unknown>=>typeof entry==='object'&&entry!==null&&
    'preset' in entry&&(entry as {preset:string}).preset===p.preset_id),
- result:executedNames.has(p.preset_id)?'PARTIAL_PHASE_PIXEL_PROOF':'NOT_RUN',
+ result:contractBlockers[p.preset_id]?'BLOCKED_DEPENDENCY':
+   executedNames.has(p.preset_id)?'PARTIAL_PHASE_PIXEL_PROOF':'NOT_RUN',
+ blocker:contractBlockers[p.preset_id]??null,
  negative_case:p.preset_id==='cross-dissolve'?'forged_target_blocked':null
 }));
 writeFileSync(resolve(output,'b2-motion-19-presets.json'),JSON.stringify({
- status:'PARTIAL',registryCount:19,
- note:'Actual semantic coverage only for sampled presets; registry names do not establish 19/19.',
+ status:'FAIL',registryCount:19,
+ note:'Strict owner failure: actual semantic coverage is incomplete and frozen source contracts block truthful positive proof for named presets.',
  rows:semanticRows
 },null,2));
-writeFileSync(resolve(output,'b2-motion-phases.json'),JSON.stringify({status:'LOCAL_PASS',
+writeFileSync(resolve(output,'b2-motion-phases.json'),JSON.stringify({status:'FAIL',
  registryCount:19,cases:result,source:'SYNTHETIC_B1_COMPILED_NOT_LIVE_APPROVED'},null,2));
-console.log(JSON.stringify({status:'LOCAL_PASS',renderer:'Remotion Chromium',
+const incomplete=semanticRows.filter(row=>row.result!=='PASS');
+if(incomplete.length){
+ console.error(JSON.stringify({status:'FAIL',renderer:'Remotion Chromium',
+  phasePNGs:cases.length*3,source:'SYNTHETIC',mp4:process.argv[2]==='render',
+  incomplete:incomplete.map(row=>({preset_id:row.preset_id,result:row.result,blocker:row.blocker}))}));
+ throw Error('B2_MOTION_SEMANTIC_LEDGER_INCOMPLETE: every one of 19 registered presets requires PASS');
+}
+console.log(JSON.stringify({status:'PASS',renderer:'Remotion Chromium',
  phasePNGs:cases.length*3,source:'SYNTHETIC',mp4:process.argv[2]==='render'}));
