@@ -187,7 +187,7 @@ def mount(app, store, idempotent):
                 if actual is None or item.layer_id in layer_patch:
                     blocked("G4_LAYOUT_INVALID", item.layer_id, "Choose an existing, unique frozen layer.")
                 if item.approved_asset_id is not None and item.approved_asset_id != actual["asset_id"]:
-                    blocked("G3_ASSET_UNAPPROVED", item.layer_id, "G4 cannot rebind to a different G3 original.")
+                    blocked("G4_ASSET_SELECTION_FORBIDDEN", item.layer_id, "G4 cannot rebind to a different G3 original.")
                 patch = {key: value for key, value in (
                     ("x", item.x_px), ("y", item.y_px), ("w", item.w_px), ("h", item.h_px))
                          if value is not None}
