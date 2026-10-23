@@ -26,7 +26,7 @@ if(ownerCase==='60-scene-longform'){
 if(ownerCase==='player-renderer-parity'){
  if(process.platform!=='win32')throw Error('B2_PLAYER_NODE_PARITY_REQUIRES_NATIVE_WINDOWS');
  const result=spawnSync('cmd.exe',['/d','/s','/c',
-   'npm --prefix frontend run test:e2e -- --grep "browser Player vs Node"'],
+   'npm --prefix frontend run test:e2e -- tests/e2e/parity.spec.ts'],
    {cwd:repo,env:{...process.env,HVS_B2_FIXTURE:'1'},stdio:'inherit'});
  if(result.status!==0)throw Error('B2_PLAYER_NODE_PARITY_FAILED: '+result.status);
  process.exit(0);
