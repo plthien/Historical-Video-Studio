@@ -230,14 +230,20 @@ function reviewedClip(layer:Layer,reveal:number,direction:'left'|'right'|'up'|'d
 }
 export const CompiledLayer:React.FC<{scene:Scene;layer:Layer;frame:number;media:ResolvedMedia}>=({scene,layer,frame,media})=>{
  const first=firstAppearance(scene,layer.layer_id);
- const effect=motionForLayer(scene,layer,frame);
+ // freeze-hold belongs to layer_local space. Freeze only this layer's
+ // animation state, never the scene camera, unrelated layers or G2 timing.
+ const frozen=scene.events.find(e=>e.preset_id==='freeze-hold'&&
+   (e.layer_id===layer.layer_id||e.affected_layer_ids.includes(layer.layer_id))&&
+   frame>=e.start_frame&&frame<e.start_frame+e.duration_frames);
+ const localFrame=frozen?frozen.start_frame:frame;
+ const effect=motionForLayer(scene,layer,localFrame);
  const r=layer.rect_px,c=layer.crop_normalized;
  const shown=frame>=first;
  const style:React.CSSProperties={position:'absolute',left:r.x,top:r.y,width:r.w,height:r.h,zIndex:layer.z_index,overflow:'hidden',
    opacity:shown?effect.opacity:0,transform:`translate(${effect.translateX}px,${effect.translateY}px) rotate(${effect.rotation}deg) scale(${effect.scale})`,
    transformOrigin:'center',borderRadius:layer.layer_kind==='archival_photo'?4:0, boxSizing:'border-box'};
  if(layer.layer_kind==='route'||layer.layer_kind==='annotation'){
-  const progress=pathProgress(scene,layer,frame);
+  const progress=pathProgress(scene,layer,localFrame);
   const points=pathPoints(layer,media),d=pathD(points);
   const event=scene.events.find(e=>e.layer_id===layer.layer_id&&
     (e.preset_id==='editorial-connector-draw'||e.preset_id==='route-line-draw'));
