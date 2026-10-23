@@ -95,37 +95,119 @@ jobs:
             & .venv/Scripts/python.exe -m backend.tools.smoke --case $case --mode local
             if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           }
-      - name: B2-II native Windows motion G4 editor Player parity and long-project owners
+
+      # Owners remain independent: a failed Player must not suppress the later
+      # renderer/SQLite/long-project evidence. 'outcome', not 'conclusion',
+      # is checked by the final aggregate nonzero gate.
+      - name: B2 motion phase Chromium frames
+        id: motion
+        continue-on-error: true
         shell: pwsh
         run: |
           npm --prefix renderer run test:frames -- --case motion-phases
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: B2 multi-layer H264 Chromium render
+        id: multilayer
+        if: always()
+        continue-on-error: true
+        shell: pwsh
+        run: |
           npm --prefix renderer run render:smoke -- --case multi-layer-visual
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: B2 G4 real SQLite editor API smoke
+        id: sqlite
+        if: always()
+        continue-on-error: true
+        shell: pwsh
+        run: |
           & .venv/Scripts/python.exe -m backend.tools.smoke --case scene-edit --mode local
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: B2 frontend pinned dependencies and Chromium
+        id: browser_setup
+        if: always()
+        continue-on-error: true
+        shell: pwsh
+        run: |
+          npm --prefix frontend ci --no-audit --no-fund
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           Push-Location frontend
           try {
-            npm ci --no-audit --no-fund
-            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
             npx playwright install chromium
             if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           } finally { Pop-Location }
           npm --prefix frontend run typecheck
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          $env:HVS_B2_FIXTURE = '1'
-          npm --prefix frontend run test:e2e -- --grep "storyboard-editor"
+          npm --prefix frontend run build
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: B2 real browser Storyboard and Player frames
+        id: editor
+        if: always()
+        continue-on-error: true
+        shell: pwsh
+        run: |
+          $env:HVS_B2_FIXTURE = '1'
+          npm --prefix frontend run test:e2e -- --grep "storyboard-editor uses"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: B2 real Browser Node paired frame parity
+        id: parity
+        if: always()
+        continue-on-error: true
+        shell: pwsh
+        run: |
           npm --prefix renderer run test:frames -- --case player-renderer-parity
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: B2 prepare 61 scene SQLite native fixture
+        id: fixture61
+        if: always()
+        continue-on-error: true
+        shell: pwsh
+        run: |
           & .venv/Scripts/python.exe -m renderer.scripts.prepare_host_fixture --scene-count 61
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: B2 61 scene UI real Player performance
+        id: longui
+        if: always()
+        continue-on-error: true
+        shell: pwsh
+        run: |
+          $env:HVS_B2_FIXTURE = '1'
           $env:HVS_B2_LONGFORM = '1'
           npm --prefix frontend run test:e2e -- --grep "longform-storyboard"
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          Remove-Item Env:\HVS_B2_LONGFORM
+      - name: B2 61 scene registered Composition stills and H264 excerpt
+        id: longrender
+        if: always()
+        continue-on-error: true
+        shell: pwsh
+        run: |
           npm --prefix renderer run render:smoke -- --case 60-scene-longform
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: B2 mandatory owner aggregate verdict
+        if: always()
+        shell: pwsh
+        env:
+          B2_MOTION: ${{ steps.motion.outcome }}
+          B2_MULTILAYER: ${{ steps.multilayer.outcome }}
+          B2_SQLITE: ${{ steps.sqlite.outcome }}
+          B2_SETUP: ${{ steps.browser_setup.outcome }}
+          B2_EDITOR: ${{ steps.editor.outcome }}
+          B2_PARITY: ${{ steps.parity.outcome }}
+          B2_FIXTURE61: ${{ steps.fixture61.outcome }}
+          B2_LONGUI: ${{ steps.longui.outcome }}
+          B2_LONGRENDER: ${{ steps.longrender.outcome }}
+        run: |
+          $results = @{
+            motion=$env:B2_MOTION; multilayer=$env:B2_MULTILAYER; sqlite=$env:B2_SQLITE;
+            browser_setup=$env:B2_SETUP; editor=$env:B2_EDITOR; parity=$env:B2_PARITY;
+            fixture61=$env:B2_FIXTURE61; longui=$env:B2_LONGUI; longrender=$env:B2_LONGRENDER
+          }
+          $results | ConvertTo-Json | Out-File -FilePath "b2-owners.json" -Encoding utf8
+          foreach ($entry in $results.GetEnumerator()) {
+            Write-Host "$($entry.Key): $($entry.Value)"
+          }
+          if (@($results.Values | Where-Object { $_ -ne 'success' }).Count -gt 0) {
+            throw "B2 required owner failure or skipped dependency (see b2-owners.json)"
+          }
       - name: Upload exact-render screenshot MP4 and ffprobe evidence
         if: always()
         uses: actions/upload-artifact@v4
@@ -137,4 +219,5 @@ jobs:
             frontend/.artifacts/parity/
             frontend/.artifacts/longform/
             frontend/test-results/
+            b2-owners.json
           if-no-files-found: warn
