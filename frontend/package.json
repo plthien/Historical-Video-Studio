@@ -16,6 +16,9 @@
     "test:e2e": "playwright test"
   },
   "dependencies": {
+    "@remotion/player": "4.0.524",
+    "remotion": "4.0.524",
+    "ajv": "8.17.1",
     "react": "19.2.0",
     "react-dom": "19.2.0"
   },
