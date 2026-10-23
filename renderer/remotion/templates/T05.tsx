@@ -3,6 +3,21 @@ import type {Scene,ResolvedMedia,Layer} from '../schema';
 import {fail} from '../schema';
 import {BaseTemplate} from '../Primitives';
 
+/** Strict authored year grammar: c. optional; BCE/BC and CE/AD; prefix AD;
+ * bare 3–4 digit years mean CE for B1 backward compatibility. No year 0.
+ * Comparison coordinate 0 represents historical 1 BCE, NOT a year-zero label.
+ */
+function chronologyYear(label:string,layerId:string):number{
+ const match=/^(?:c\.\s*)?(?:AD\s+([1-9]\d{0,3})|([1-9]\d{0,3})(?:\s+(BCE|BC|CE|AD))?)$/i.exec(label.trim());
+ if(!match)fail('T05_CHRONOLOGY_INVALID',layerId,'Unparseable, ambiguous or zero-year authored date label');
+ const raw=match![1]??match![2];
+ const era=(match![1]?'AD':match![3]??'CE').toUpperCase();
+ if(!match![1]&&!match![3]&&raw.length<3)
+  fail('T05_CHRONOLOGY_INVALID',layerId,'Bare 1–2 digit year requires an explicit era');
+ const year=Number(raw);
+ return era==='BCE'||era==='BC'?1-year:year;
+}
+
 /** Exact source-date ports and frozen beat windows; all SVG geometry is camera-local. */
 export function timelineRail(scene:Scene){
  const dates=scene.layers.filter(l=>l.layer_kind==='date');
@@ -21,9 +36,9 @@ export function timelineRail(scene:Scene){
  if(!before&&!after)fail('RENDER_TIMELINE_COLLISION',scene.setup_id,'No safe non-text rail outside authored dates');
  const axis=before?end+42:start-42;
  const ordered=[...dates].sort((a,b)=>(horizontal?a.rect_px.x-b.rect_px.x:a.rect_px.y-b.rect_px.y));
- const years=ordered.map(l=>l.text!.match(/\b\d{3,4}\b/)?.[0]).map(x=>x?Number(x):null);
- if(years.every(x=>x!==null)&&years.some((y,i)=>i>0&&y!<=years[i-1]!))
-  fail('T05_CHRONOLOGY_INVALID',scene.setup_id,'Authored dates must be strictly increasing');
+ const years=ordered.map(l=>chronologyYear(l.text!,l.layer_id));
+ if(years.some((year,i)=>i>0&&year<=years[i-1]!))
+  fail('T05_CHRONOLOGY_INVALID',scene.setup_id,'Dates must increase in frozen spatial reading order');
  const anchor=(layer:Layer):[number,number]=>{
   const b=layer.rect_px;
   return horizontal?[b.x+b.w/2,before?b.y+b.h:b.y]:
