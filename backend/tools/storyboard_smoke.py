@@ -129,14 +129,14 @@ def main():
             assert stale.status_code==409,stale.text
             illegal=client.patch(
                 f"/api/v1/projects/{project}/storyboard/scenes/{first['scene_id']}",
-                json={"expected_revision":original_revision+3,"scene_id":first["scene_id"],
+                json={"expected_revision":original_revision+5,"scene_id":first["scene_id"],
                       "changes":{"layer_edits":[{"layer_id": first["layers"][0]["layer_id"],
                                                 "approved_asset_id":"candidate_forged"}]}},
                 headers={"Idempotency-Key":"synthetic-forged-asset-05"})
             assert illegal.status_code==422,illegal.text
             attempted=client.patch(
                 f"/api/v1/projects/{project}/storyboard/scenes/{first['scene_id']}",
-                json={"expected_revision":original_revision+3,"scene_id":first["scene_id"],
+                json={"expected_revision":original_revision+5,"scene_id":first["scene_id"],
                       "changes":{"template_id":"T08" if first["template_id"]!="T08" else "T02"}},
                 headers={"Idempotency-Key":"synthetic-template-edit-06"})
             assert attempted.status_code==422,attempted.text
