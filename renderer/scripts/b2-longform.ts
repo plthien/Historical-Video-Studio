@@ -51,8 +51,9 @@ for(const row of samples){
 }
 const video=resolve(out,'b2-61-scene-project-first-60f-EXCERPT.mp4');
 const rangeEnd=Math.min(59,timeline.total_frames-1);
-await renderMedia({serveUrl,composition:comp,inputProps:{timeline,media},codec:'h264',
- outputLocation:video,pixelFormat:'yuv420p',crf:22,overwrite:true,framesToRender:[0,rangeEnd]});
+await renderMedia({serveUrl,composition:{...comp,durationInFrames:rangeEnd+1},
+ inputProps:{timeline,media},codec:'h264',
+ outputLocation:video,pixelFormat:'yuv420p',crf:22,overwrite:true});
 const probe=spawnSync('ffprobe',['-v','error','-select_streams','v:0',
  '-show_entries','stream=codec_name,width,height,r_frame_rate,nb_frames','-of','json',video],{encoding:'utf8'});
 if(probe.status!==0)throw Error('B2_LONGFORM_FFPROBE_FAILED '+probe.stderr);
