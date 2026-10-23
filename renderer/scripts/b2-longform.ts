@@ -42,12 +42,14 @@ const comp=await selectComposition({serveUrl,id:'HistoricalTimelineV1',inputProp
 const samples=[0,30,60].map(i=>({scene:i,frame:scenes[i].start_frame+Math.floor(scenes[i].duration_frames/2)}));
 const hashes=[];
 for(const row of samples){
+ const owner=activeScene(timeline,row.frame).scene;
+ if(owner.scene_id!==scenes[row.scene].scene_id)throw Error('B2_LONGFORM_SCENE_OWNER_INVALID '+row.scene);
  const file=resolve(out,'b2-longform-scene-'+row.scene+'.png');
  await renderStill({serveUrl,composition:comp,inputProps:{timeline,media},frame:row.frame,output:file,imageFormat:'png'});
  const bytes=readFileSync(file),png=PNG.sync.read(bytes);
  if(png.width!==1920||png.height!==1080||new Set(png.data).size<3)
   throw Error('B2_LONGFORM_FRAME_BLANK '+row.scene);
- hashes.push({scene:row.scene,frame:row.frame,sha256:createHash('sha256').update(bytes).digest('hex')});
+ hashes.push({scene:row.scene,sceneId:owner.scene_id,frame:row.frame,width:png.width,height:png.height,sha256:createHash('sha256').update(bytes).digest('hex')});
 }
 const video=resolve(out,'b2-61-scene-project-first-60f-EXCERPT.mp4');
 const rangeEnd=Math.min(59,timeline.total_frames-1);
@@ -55,11 +57,13 @@ await renderMedia({serveUrl,composition:{...comp,durationInFrames:rangeEnd+1},
  inputProps:{timeline,media},codec:'h264',
  outputLocation:video,pixelFormat:'yuv420p',crf:22,overwrite:true});
 const probe=spawnSync('ffprobe',['-v','error','-select_streams','v:0',
- '-show_entries','stream=codec_name,width,height,r_frame_rate,nb_frames','-of','json',video],{encoding:'utf8'});
+ '-count_frames','-show_entries','stream=codec_name,width,height,r_frame_rate,nb_frames,nb_read_frames,duration','-of','json',video],{encoding:'utf8'});
 if(probe.status!==0)throw Error('B2_LONGFORM_FFPROBE_FAILED '+probe.stderr);
 const info=JSON.parse(probe.stdout).streams[0];
-if(info.codec_name!=='h264'||info.width!==1920||info.height!==1080||info.r_frame_rate!=='30/1')
- throw Error('B2_LONGFORM_MP4_INVALID');
+if(info.codec_name!=='h264'||info.width!==1920||info.height!==1080||info.r_frame_rate!=='30/1'||
+    Number(info.nb_read_frames)!==rangeEnd+1||Number(info.nb_frames)!==rangeEnd+1||
+    Math.abs(Number(info.duration)-(rangeEnd+1)/30)>1/30)
+ throw Error('B2_LONGFORM_MP4_INVALID '+JSON.stringify(info));
 const evidence={status:'LOCAL_PASS',scope:'61_SCENE_PROJECT_PIXEL_SMOKE_AND_REAL_MP4_EXCERPT_ONLY',
  provenance:'SYNTHETIC_B1_COMPILER_NOT_OPERATOR_APPROVED',sceneCount:61,totalFrames:timeline.total_frames,
  navigation:{seeks:1000,elapsedMs:seekMs,thresholdMs:seekThresholdMs},snapshots:hashes,
