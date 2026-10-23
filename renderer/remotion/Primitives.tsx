@@ -209,9 +209,9 @@ function reviewedClip(layer:Layer,reveal:number,direction:'left'|'right'|'up'|'d
    masks.push(`linear-gradient(to bottom,transparent,#000 ${nativeFeather}px,#000 calc(100% - ${nativeFeather}px),transparent)`);
  }
  if(p<1&&direction==='center_out'){
-   const radius=(p*72).toFixed(5)+'%';
+   const radius=(p*100).toFixed(5)+'%';
    const inner=transitionFeather>0?`calc(${radius} - ${transitionFeather}px)`:radius;
-   masks.push(`radial-gradient(ellipse closest-side at center,#000 0,#000 ${inner},transparent ${radius},transparent 100%)`);
+   masks.push(`radial-gradient(ellipse farthest-corner at center,#000 0,#000 ${inner},transparent ${radius},transparent 100%)`);
  }else if(p<1){
    const end=(p*100).toFixed(5)+'%';
    const start=transitionFeather>0?`calc(${end} - ${transitionFeather}px)`:end;
