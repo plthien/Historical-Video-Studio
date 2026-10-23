@@ -25,6 +25,7 @@ jobs:
           git diff --check origin/main...HEAD
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Install exact Remotion lock on Windows
+        id: renderer_deps
         shell: pwsh
         run: |
           Push-Location renderer
@@ -52,6 +53,7 @@ jobs:
             if (-not $installed) { throw "FFmpeg and ffprobe unavailable on Windows runner" }
           }
       - name: Produce genuine B1 compiler A/B/C synthetic inputs
+        id: b1_fixture
         shell: pwsh
         run: |
           powershell -NoProfile -ExecutionPolicy Bypass -File scripts/windows/verify-environment.ps1
@@ -59,6 +61,7 @@ jobs:
           & .venv/Scripts/python.exe -m renderer.scripts.export_b1_fixture
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: B2 targeted visual-functional real-frame repair gates
+        id: host_fixture
         shell: pwsh
         run: |
           & .venv/Scripts/python.exe -m renderer.scripts.prepare_host_fixture
@@ -101,7 +104,7 @@ jobs:
       # is checked by the final aggregate nonzero gate.
       - name: B2 motion phase Chromium frames
         id: motion
-        if: always()
+        if: ${{ always() && steps.b1_fixture.outcome == 'success' }}
         continue-on-error: true
         shell: pwsh
         run: |
@@ -109,7 +112,7 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: B2 multi-layer H264 Chromium render
         id: multilayer
-        if: always()
+        if: ${{ always() && steps.b1_fixture.outcome == 'success' }}
         continue-on-error: true
         shell: pwsh
         run: |
@@ -117,7 +120,7 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: B2 G4 real SQLite editor API smoke
         id: sqlite
-        if: always()
+        if: ${{ always() && steps.host_fixture.outcome == 'success' }}
         continue-on-error: true
         shell: pwsh
         run: |
@@ -125,7 +128,7 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: B2 frontend pinned dependencies and Chromium
         id: browser_setup
-        if: always()
+        if: ${{ always() && steps.b1_fixture.outcome == 'success' }}
         continue-on-error: true
         shell: pwsh
         run: |
@@ -142,7 +145,7 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: B2 real browser Storyboard and Player frames
         id: editor
-        if: always()
+        if: ${{ always() && steps.host_fixture.outcome == 'success' && steps.browser_setup.outcome == 'success' }}
         continue-on-error: true
         shell: pwsh
         run: |
@@ -151,7 +154,7 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: B2 real Browser Node paired frame parity
         id: parity
-        if: always()
+        if: ${{ always() && steps.host_fixture.outcome == 'success' && steps.browser_setup.outcome == 'success' }}
         continue-on-error: true
         shell: pwsh
         run: |
@@ -159,7 +162,7 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: B2 prepare 61 scene SQLite native fixture
         id: fixture61
-        if: always()
+        if: ${{ always() && steps.b1_fixture.outcome == 'success' }}
         continue-on-error: true
         shell: pwsh
         run: |
@@ -167,7 +170,7 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: B2 61 scene UI real Player performance
         id: longui
-        if: always()
+        if: ${{ always() && steps.fixture61.outcome == 'success' && steps.browser_setup.outcome == 'success' }}
         continue-on-error: true
         shell: pwsh
         run: |
@@ -177,7 +180,7 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: B2 61 scene registered Composition stills and H264 excerpt
         id: longrender
-        if: always()
+        if: ${{ always() && steps.b1_fixture.outcome == 'success' }}
         continue-on-error: true
         shell: pwsh
         run: |
