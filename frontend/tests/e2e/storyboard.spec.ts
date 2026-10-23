@@ -21,6 +21,14 @@ test('storyboard-editor uses real persisted G4 scenes and native read-only Playe
  await page.getByRole('button',{name:/Save G4 revision/}).click();
  await expect(page.getByRole('status').filter({hasText:'Save storyboard variant completed'})).toBeVisible({timeout:25000});
  await expect(variant).toHaveValue(target);
+ const layerX=page.getByLabel('X (pixels)');
+ const oldX=Number(await layerX.inputValue());
+ await layerX.fill(String(oldX+1));
+ await page.getByRole('button',{name:/Save position/}).click();
+ await expect(page.getByRole('status').filter({hasText:'Save layer position completed'}))
+  .toBeVisible({timeout:30000});
+ await expect(layerX).toHaveValue(String(oldX+1));
  await page.getByRole('button',{name:'Reload persisted draft'}).click();
  await expect(variant).toHaveValue(target);
+ await expect(layerX).toHaveValue(String(oldX+1));
 });
