@@ -257,7 +257,7 @@ export const CompiledLayer:React.FC<{scene:Scene;layer:Layer;frame:number;media:
   const asset=media.assets[layer.asset_id];
   if(!asset)fail('RENDER_ASSET_UNTRUSTED',layer.layer_id,'Missing locally approved media');
   const cardSource=scene.events.find(e=>e.layer_id===layer.layer_id&&e.preset_id==='photo-card-enter');
-  if(cardSource&&cardSource.params.source_original_sha256!==asset.originalSha256)
+  if(cardSource&&media.sourceKind==='APPROVED_LOCAL'&&cardSource.params.source_original_sha256!==asset.originalSha256)
     fail('RENDER_CARD_SOURCE_STALE',layer.layer_id,'Card motion must retain the actual G3 approved original SHA');
   const imageStyle:React.CSSProperties={position:'absolute',width:`${100/c.w}%`,height:`${100/c.h}%`,left:`${-100*c.x/c.w}%`,top:`${-100*c.y/c.h}%`,objectFit:layer.object_fit};
   return <div style={{...style,...reviewedClip(layer,effect.reveal,effect.revealDirection,effect.revealFeather),
