@@ -101,6 +101,7 @@ jobs:
       # is checked by the final aggregate nonzero gate.
       - name: B2 motion phase Chromium frames
         id: motion
+        if: always()
         continue-on-error: true
         shell: pwsh
         run: |
