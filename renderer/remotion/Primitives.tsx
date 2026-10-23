@@ -48,6 +48,7 @@ function eventProgress(e:Motion,f:number){
 function motionForLayer(scene:Scene,layer:Layer,frame:number){
  let opacity=1,scale=1,translateX=0,translateY=0,rotation=0,reveal=1,highlight=0;
  let visibleText:string|undefined;
+ let revealDirection:'left'|'right'|'up'|'down'='left',revealFeather=0;
  for(const e of scene.events){
   const ordered=(e.params.ordered_layer_ids as string[]|undefined);
   const stagger=e.preset_id==='stagger-reveal'&&ordered?.includes(layer.layer_id);
@@ -82,7 +83,9 @@ function motionForLayer(scene:Scene,layer:Layer,frame:number){
    case 'photo-card-enter':opacity*=p;scale*=mix(.93,1,p);rotation+=mix(Number(e.params.start_rotation_deg??-2),Number(e.params.end_rotation_deg??0),p);break;
    case 'pop-in':opacity*=p;scale*=mix(Number(e.params.from_scale??.95),Number(e.params.to_scale??1),p);break;
    case 'stagger-reveal':opacity*=p;translateY+=(1-p)*24;break;
-   case 'title-mask-reveal':reveal=Math.min(reveal,p);opacity*=p;translateY+=(1-p)*Number(e.params.distance_px??20);break;
+   case 'title-mask-reveal':reveal=Math.min(reveal,p);opacity*=p;translateY+=(1-p)*Number(e.params.distance_px??20);
+    revealDirection=String(e.params.direction??'left') as typeof revealDirection;
+    revealFeather=Number(e.params.feather_px??0);break;
    case 'typewriter':{
     if(e.params.text_layer_id!==layer.layer_id||e.params.quoted_source_claim_id!==layer.source_claim_id||layer.text===null)
      fail('RENDER_TYPEWRITER_CLAIM',e.event_id,'Typewriter must reveal the authored claim-backed text layer');
@@ -90,7 +93,9 @@ function motionForLayer(scene:Scene,layer:Layer,frame:number){
     visibleText=Array.from(claimText).slice(0,Math.floor(Array.from(claimText).length*p)).join('');
     break;
    }
-   case 'mask-transition':case 'map-region-wipe':reveal=Math.min(reveal,p);break;
+   case 'mask-transition':case 'map-region-wipe':reveal=Math.min(reveal,p);
+    revealDirection=String(e.params.wipe_direction??'left') as typeof revealDirection;
+    revealFeather=Number(e.params.feather_px??0);break;
    case 'text-highlight':highlight=Math.max(highlight,p);break;
    case 'kinetic-type':translateY+=(1-p)*Number(e.params.max_offset_px??24);break;
    case 'number-count':{
@@ -132,7 +137,7 @@ function motionForLayer(scene:Scene,layer:Layer,frame:number){
    default:fail('RENDER_MOTION_UNIMPLEMENTED',e.event_id,'Compiled motion not implemented in B2-01..03; cannot silently ignore');
   }
  }
- return {opacity,scale,translateX,translateY,rotation,reveal,highlight,visibleText};
+ return {opacity,scale,translateX,translateY,rotation,reveal,revealDirection,revealFeather,highlight,visibleText};
 }
 function firstAppearance(scene:Scene,layerId:string){
  const beats=scene.staging.beat_sequence.filter(b=>b.activated_layer_ids.includes(layerId));
@@ -187,14 +192,33 @@ function pathProgress(scene:Scene,layer:Layer,frame:number){
  return eventProgress(event!,frame);
 }
 const ink='#303b39';
-function reviewedClip(layer:Layer,reveal:number):React.CSSProperties{
- const p=clamp(reveal);
- const kind=layer.mask.kind;
+function reviewedClip(layer:Layer,reveal:number,direction:'left'|'right'|'up'|'down',transitionFeather:number):React.CSSProperties{
+ const p=clamp(reveal),kind=layer.mask.kind;
  if(kind==='polygon_asset')fail('RENDER_MASK_DERIVATIVE_UNAPPROVED',layer.layer_id,'No G3-reviewed derivative mask resolver exists');
- const dir=kind==='ellipse'?'ellipse(50% 50% at 50% 50%)':undefined;
- const wipe=p<1?`inset(0 ${(1-p)*100}% 0 0)`:undefined;
- const clipPath=wipe??dir;
- return clipPath?{clipPath}:{};
+ const nativeFeather=layer.mask.feather_px;
+ if(!Number.isFinite(nativeFeather)||nativeFeather<0||nativeFeather>40||
+    !Number.isFinite(transitionFeather)||transitionFeather<0||transitionFeather>60)
+   fail('RENDER_MASK_FEATHER',layer.layer_id,'Native/reveal feather outside approved bounds');
+ // Reviewed native shape stays clipped while the authored reveal progresses.
+ // Independent CSS masks intersect; neither may replace the other.
+ const masks:string[]=[];
+ if(kind==='ellipse'&&nativeFeather>0)
+   masks.push(`radial-gradient(ellipse 50% 50% at center,#000 calc(100% - ${nativeFeather}px),transparent 100%)`);
+ if(kind==='rectangle'&&nativeFeather>0){
+   masks.push(`linear-gradient(to right,transparent,#000 ${nativeFeather}px,#000 calc(100% - ${nativeFeather}px),transparent)`);
+   masks.push(`linear-gradient(to bottom,transparent,#000 ${nativeFeather}px,#000 calc(100% - ${nativeFeather}px),transparent)`);
+ }
+ if(p<1){
+   const end=(p*100).toFixed(5)+'%';
+   const start=transitionFeather>0?`calc(${end} - ${transitionFeather}px)`:end;
+   const dir={left:'right',right:'left',up:'top',down:'bottom'}[direction];
+   if(!dir)fail('RENDER_REVEAL_DIRECTION',layer.layer_id,'Unsupported authored reveal direction');
+   masks.push(`linear-gradient(to ${dir},#000 0,#000 ${start},transparent ${end},transparent 100%)`);
+ }
+ return {
+   ...(kind==='ellipse'?{clipPath:'ellipse(50% 50% at 50% 50%)'}:{}),
+   ...(masks.length?{maskImage:masks.join(','),maskComposite:masks.slice(1).map(()=>'intersect').join(',')}:{}),
+ };
 }
 export const CompiledLayer:React.FC<{scene:Scene;layer:Layer;frame:number;media:ResolvedMedia}>=({scene,layer,frame,media})=>{
  const first=firstAppearance(scene,layer.layer_id);
@@ -225,7 +249,7 @@ export const CompiledLayer:React.FC<{scene:Scene;layer:Layer;frame:number;media:
   const asset=media.assets[layer.asset_id];
   if(!asset)fail('RENDER_ASSET_UNTRUSTED',layer.layer_id,'Missing locally approved media');
   const imageStyle:React.CSSProperties={position:'absolute',width:`${100/c.w}%`,height:`${100/c.h}%`,left:`${-100*c.x/c.w}%`,top:`${-100*c.y/c.h}%`,objectFit:layer.object_fit};
-  return <div style={{...style,...reviewedClip(layer,effect.reveal),
+  return <div style={{...style,...reviewedClip(layer,effect.reveal,effect.revealDirection,effect.revealFeather),
        border:layer.layer_kind==='archival_photo'?'5px solid #f0e7d6':undefined,
        boxShadow:layer.layer_kind==='archival_photo'?'0 9px 20px #0004':undefined}} data-layer={layer.layer_id} data-asset={layer.asset_id} data-claim={layer.source_claim_id??undefined}>
     <Img src={asset.dataUri} style={imageStyle}/>
@@ -236,7 +260,7 @@ export const CompiledLayer:React.FC<{scene:Scene;layer:Layer;frame:number;media:
   if(!layout)fail('RENDER_TEXT_LAYOUT',layer.layer_id,'Text needs pinned glyph layout');
   const measured=layout!;
   const isHeading=layer.layer_kind==='headline';
-  return <div style={{...style,...reviewedClip(layer,effect.reveal),padding:isHeading?10:6,display:'flex',alignItems:measured.vertical_align==='center'?'center':'flex-start',
+  return <div style={{...style,...reviewedClip(layer,effect.reveal,effect.revealDirection,effect.revealFeather),padding:isHeading?10:6,display:'flex',alignItems:measured.vertical_align==='center'?'center':'flex-start',
     justifyContent:measured.horizontal_align==='center'?'center':'flex-start',background:layer.layer_kind==='date'?'#e6d6b9c9':undefined,
     }}
     data-layer={layer.layer_id} data-claim={layer.source_claim_id??undefined}>
