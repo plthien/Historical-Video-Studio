@@ -19,6 +19,18 @@ if(ownerCase==='motion-phases'||ownerCase==='multi-layer-visual'){
  await import('./b2-motion');
  process.exit(0);
 }
+if(ownerCase==='60-scene-longform'){
+ await import('./b2-longform');
+ process.exit(0);
+}
+if(ownerCase==='player-renderer-parity'){
+ if(process.platform!=='win32')throw Error('B2_PLAYER_NODE_PARITY_REQUIRES_NATIVE_WINDOWS');
+ const result=spawnSync('cmd.exe',['/d','/s','/c',
+   'npm --prefix frontend run test:e2e -- --grep "browser Player vs Node"'],
+   {cwd:repo,env:{...process.env,HVS_B2_FIXTURE:'1'},stdio:'inherit'});
+ if(result.status!==0)throw Error('B2_PLAYER_NODE_PARITY_FAILED: '+result.status);
+ process.exit(0);
+}
 
 const selected=(args.find((x)=>x==='--templates')!==undefined?args[args.indexOf('--templates')+1].split(','):[]);
 const isShared=args.includes('shared-composition');
