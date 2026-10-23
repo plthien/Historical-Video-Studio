@@ -91,6 +91,7 @@ function motionForLayer(scene:Scene,layer:Layer,frame:number){
     revealDirection=String(e.params.direction??'left') as typeof revealDirection;
     revealFeather=Number(e.params.feather_px??0);break;
    case 'typewriter':{
+    if(frame<e.start_frame)break; // Never erase already staged factual text before the authored typing cue.
     if(e.params.text_layer_id!==layer.layer_id||e.params.quoted_source_claim_id!==layer.source_claim_id||layer.text===null)
      fail('RENDER_TYPEWRITER_CLAIM',e.event_id,'Typewriter must reveal the authored claim-backed text layer');
     const claimText=layer.text ?? fail('RENDER_TYPEWRITER_CLAIM',e.event_id,'Missing frozen factual source text');
