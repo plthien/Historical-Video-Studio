@@ -42,8 +42,7 @@ export async function prepareApprovedPlayerOnLocalHost(
 }
 /** The public mount does NOT accept {timeline, media} or a caller-declared G4 hash. */
 export const HistoricalPlayer:React.FC<{prepared:PreparedHistoryPlayer}>=({prepared})=>{
- const props=prepared&&issued.get(prepared);
- if(!props)
+ const props=(prepared&&issued.get(prepared)) ??
   fail('PLAYER_UNTRUSTED_PROPS','Player','Host must verify the current SQLite G4 head and local bytes before mounting');
  return <Player component={HistoryComposition} inputProps={props} compositionWidth={1920}
   compositionHeight={1080} fps={30} durationInFrames={props.timeline.total_frames} controls />;
