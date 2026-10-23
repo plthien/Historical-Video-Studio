@@ -48,7 +48,7 @@ function eventProgress(e:Motion,f:number){
 function motionForLayer(scene:Scene,layer:Layer,frame:number){
  let opacity=1,scale=1,translateX=0,translateY=0,rotation=0,reveal=1,highlight=0;
  let visibleText:string|undefined;
- let revealDirection:'left'|'right'|'up'|'down'='left',revealFeather=0;
+ let revealDirection:'left'|'right'|'up'|'down'|'center_out'='left',revealFeather=0;
  for(const e of scene.events){
   const ordered=(e.params.ordered_layer_ids as string[]|undefined);
   const stagger=e.preset_id==='stagger-reveal'&&ordered?.includes(layer.layer_id);
@@ -192,7 +192,7 @@ function pathProgress(scene:Scene,layer:Layer,frame:number){
  return eventProgress(event!,frame);
 }
 const ink='#303b39';
-function reviewedClip(layer:Layer,reveal:number,direction:'left'|'right'|'up'|'down',transitionFeather:number):React.CSSProperties{
+function reviewedClip(layer:Layer,reveal:number,direction:'left'|'right'|'up'|'down'|'center_out',transitionFeather:number):React.CSSProperties{
  const p=clamp(reveal),kind=layer.mask.kind;
  if(kind==='polygon_asset')fail('RENDER_MASK_DERIVATIVE_UNAPPROVED',layer.layer_id,'No G3-reviewed derivative mask resolver exists');
  const nativeFeather=layer.mask.feather_px;
@@ -208,7 +208,11 @@ function reviewedClip(layer:Layer,reveal:number,direction:'left'|'right'|'up'|'d
    masks.push(`linear-gradient(to right,transparent,#000 ${nativeFeather}px,#000 calc(100% - ${nativeFeather}px),transparent)`);
    masks.push(`linear-gradient(to bottom,transparent,#000 ${nativeFeather}px,#000 calc(100% - ${nativeFeather}px),transparent)`);
  }
- if(p<1){
+ if(p<1&&direction==='center_out'){
+   const radius=(p*72).toFixed(5)+'%';
+   const inner=transitionFeather>0?`calc(${radius} - ${transitionFeather}px)`:radius;
+   masks.push(`radial-gradient(ellipse closest-side at center,#000 0,#000 ${inner},transparent ${radius},transparent 100%)`);
+ }else if(p<1){
    const end=(p*100).toFixed(5)+'%';
    const start=transitionFeather>0?`calc(${end} - ${transitionFeather}px)`:end;
    const dir={left:'right',right:'left',up:'top',down:'bottom'}[direction];
