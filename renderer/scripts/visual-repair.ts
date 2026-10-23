@@ -71,7 +71,7 @@ for(const total of [3,6]){
  const newDates=Array.from({length:total},(_,i)=>({...structuredClone(base),
   layer_id:'synthetic_date_'+total+'_'+i,text:String(1800+10*i),
   rect_px:{x:Math.round(100+i*(1700/total)),y:365,w:140,h:150},
-  text_layout:{...base.text_layout,font_size_px:36},source_claim_id:base.source_claim_id}));
+  text_layout:{...base.text_layout!,font_size_px:36},source_claim_id:base.source_claim_id}));
  s.layers=[...rest,...newDates];
  s.staging.beat_sequence=newDates.map((date,i)=>({
   beat_id:'beat_synthetic_'+total+'_'+i,
