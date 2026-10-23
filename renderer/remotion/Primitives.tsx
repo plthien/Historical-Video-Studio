@@ -37,6 +37,10 @@ export function interpolateKeys(keys:{frame:number;value:number}[],frame:number)
  return keys[keys.length-1].value;
 }
 function eventProgress(e:Motion,f:number){
+ // B1 tracks for screen transitions carry pixels/opacity rather than normalized
+ // fractions. Their phase is time-based, never treat 150px as a 150x progress.
+ if(e.preset_id==='cross-dissolve'||e.preset_id==='whip-pan')
+  return clamp((f-e.start_frame)/e.duration_frames);
  if(f<e.start_frame)return 0;
  if(f>=e.start_frame+e.duration_frames)return 1;
  return clamp(interpolateKeys(e.keyframes,f-e.start_frame));
@@ -74,7 +78,13 @@ function motionForLayer(scene:Scene,layer:Layer,frame:number){
    case 'photo-card-enter':opacity*=p;scale*=mix(.93,1,p);rotation+=mix(Number(e.params.start_rotation_deg??-2),Number(e.params.end_rotation_deg??0),p);break;
    case 'pop-in':opacity*=p;scale*=mix(Number(e.params.from_scale??.95),Number(e.params.to_scale??1),p);break;
    case 'stagger-reveal':opacity*=p;translateY+=(1-p)*24;break;
-   case 'title-mask-reveal':case 'typewriter':reveal=Math.min(reveal,p);opacity*=p;translateY+=(1-p)*Number(e.params.distance_px??20);break;
+   case 'title-mask-reveal':reveal=Math.min(reveal,p);opacity*=p;translateY+=(1-p)*Number(e.params.distance_px??20);break;
+   case 'typewriter':{
+    if(e.params.text_layer_id!==layer.layer_id||e.params.quoted_source_claim_id!==layer.source_claim_id||layer.text===null)
+     fail('RENDER_TYPEWRITER_CLAIM',e.event_id,'Typewriter must reveal the authored claim-backed text layer');
+    visibleText=Array.from(layer.text).slice(0,Math.floor(Array.from(layer.text).length*p)).join('');
+    break;
+   }
    case 'mask-transition':case 'map-region-wipe':reveal=Math.min(reveal,p);break;
    case 'text-highlight':highlight=Math.max(highlight,p);break;
    case 'kinetic-type':translateY+=(1-p)*Number(e.params.max_offset_px??24);break;
@@ -83,10 +93,20 @@ function motionForLayer(scene:Scene,layer:Layer,frame:number){
     if(source!==layer.source_claim_id||!layer.text||Number(layer.text.replace(/,/g,''))!==end||
        e.params.intermediate_truthful!==true)
       fail('RENDER_COUNT_FACT_UNVERIFIED',e.event_id,'Number progression must be explicitly truth-safe and equal frozen exact factual text');
-    visibleText=mix(Number(e.params.start_value??0),end,p).toFixed(Number(e.params.precision??0));
+    // Intermediate values are not independently proved by G1; reveal the
+    // exact claim rather than fabricating apparent historical measurements.
+    reveal=Math.min(reveal,p);highlight=Math.max(highlight,p);
     break;
    }
-   case 'parallax-layers':translateX+=p*Number(e.params.max_drift_px??40)*.5;break;
+   case 'parallax-layers':{
+    const near=e.params.near_layer_ids as string[],far=e.params.far_layer_ids as string[];
+    if(!Array.isArray(near)||!Array.isArray(far)||near.some(x=>far.includes(x)))
+     fail('RENDER_PARALLAX_GROUP',e.event_id,'Parallax depth groups must be distinct');
+    const factor=near.includes(layer.layer_id)?Number(e.params.near_strength):
+      far.includes(layer.layer_id)?Number(e.params.far_strength):0;
+    translateX+=p*Number(e.params.max_drift_px)*factor;
+    break;
+   }
    case 'cross-dissolve':{
     const outgoing=e.params.out_layer_id,incoming=e.params.in_layer_id;
     if(typeof outgoing!=='string'||typeof incoming!=='string'||outgoing===incoming||
@@ -162,6 +182,15 @@ function pathProgress(scene:Scene,layer:Layer,frame:number){
  return eventProgress(event!,frame);
 }
 const ink='#303b39';
+function reviewedClip(layer:Layer,reveal:number):React.CSSProperties{
+ const p=clamp(reveal);
+ const kind=layer.mask.kind;
+ if(kind==='polygon_asset')fail('RENDER_MASK_DERIVATIVE_UNAPPROVED',layer.layer_id,'No G3-reviewed derivative mask resolver exists');
+ const dir=kind==='ellipse'?'ellipse(50% 50% at 50% 50%)':undefined;
+ const wipe=p<1?`inset(0 ${(1-p)*100}% 0 0)`:undefined;
+ const clipPath=wipe??dir;
+ return clipPath?{clipPath}:{};
+}
 export const CompiledLayer:React.FC<{scene:Scene;layer:Layer;frame:number;media:ResolvedMedia}>=({scene,layer,frame,media})=>{
  const first=firstAppearance(scene,layer.layer_id);
  const effect=motionForLayer(scene,layer,frame);
@@ -191,7 +220,7 @@ export const CompiledLayer:React.FC<{scene:Scene;layer:Layer;frame:number;media:
   const asset=media.assets[layer.asset_id];
   if(!asset)fail('RENDER_ASSET_UNTRUSTED',layer.layer_id,'Missing locally approved media');
   const imageStyle:React.CSSProperties={position:'absolute',width:`${100/c.w}%`,height:`${100/c.h}%`,left:`${-100*c.x/c.w}%`,top:`${-100*c.y/c.h}%`,objectFit:layer.object_fit};
-  return <div style={{...style,clipPath:effect.reveal<1?`inset(0 ${(1-effect.reveal)*100}% 0 0)`:undefined,
+  return <div style={{...style,...reviewedClip(layer,effect.reveal),
        border:layer.layer_kind==='archival_photo'?'5px solid #f0e7d6':undefined,
        boxShadow:layer.layer_kind==='archival_photo'?'0 9px 20px #0004':undefined}} data-layer={layer.layer_id} data-asset={layer.asset_id} data-claim={layer.source_claim_id??undefined}>
     <Img src={asset.dataUri} style={imageStyle}/>
@@ -202,9 +231,9 @@ export const CompiledLayer:React.FC<{scene:Scene;layer:Layer;frame:number;media:
   if(!layout)fail('RENDER_TEXT_LAYOUT',layer.layer_id,'Text needs pinned glyph layout');
   const measured=layout!;
   const isHeading=layer.layer_kind==='headline';
-  return <div style={{...style,padding:isHeading?10:6,display:'flex',alignItems:measured.vertical_align==='center'?'center':'flex-start',
+  return <div style={{...style,...reviewedClip(layer,effect.reveal),padding:isHeading?10:6,display:'flex',alignItems:measured.vertical_align==='center'?'center':'flex-start',
     justifyContent:measured.horizontal_align==='center'?'center':'flex-start',background:layer.layer_kind==='date'?'#e6d6b9c9':undefined,
-    clipPath:effect.reveal<1?`inset(0 ${(1-effect.reveal)*100}% 0 0)`:undefined}}
+    }}
     data-layer={layer.layer_id} data-claim={layer.source_claim_id??undefined}>
    <span style={{fontFamily:media.fontFamily,color:effect.highlight>0.2?'#a65d20':ink,
      fontSize:measured.font_size_px,fontWeight:isHeading?700:500,lineHeight:measured.line_height,whiteSpace:'pre-wrap',overflow:'hidden',
