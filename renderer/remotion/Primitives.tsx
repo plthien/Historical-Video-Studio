@@ -82,7 +82,8 @@ function motionForLayer(scene:Scene,layer:Layer,frame:number){
    case 'typewriter':{
     if(e.params.text_layer_id!==layer.layer_id||e.params.quoted_source_claim_id!==layer.source_claim_id||layer.text===null)
      fail('RENDER_TYPEWRITER_CLAIM',e.event_id,'Typewriter must reveal the authored claim-backed text layer');
-    visibleText=Array.from(layer.text).slice(0,Math.floor(Array.from(layer.text).length*p)).join('');
+    const claimText=layer.text ?? fail('RENDER_TYPEWRITER_CLAIM',e.event_id,'Missing frozen factual source text');
+    visibleText=Array.from(claimText).slice(0,Math.floor(Array.from(claimText).length*p)).join('');
     break;
    }
    case 'mask-transition':case 'map-region-wipe':reveal=Math.min(reveal,p);break;
