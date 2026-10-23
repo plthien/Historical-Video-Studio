@@ -647,7 +647,15 @@ def revise_g4(store, project_id: str, previous: dict, original_blueprint: dict,
             for key, value in patch.items():
                 if type(value) not in (int, float, str, bool) or isinstance(original_params[key], (dict, list)):
                     _block("G4_MOTION_INVALID", event_id, "Only registered scalar presentation parameters are editable.")
+            # Camera preset parameters currently do not feed the B1 sampled
+            # camera track. Never commit a JSON-only motion change as a visual
+            # edit until that rendering semantic has been implemented and proved.
+            if event["preset_id"] in ("camera-push", "camera-pan"):
+                _block("G4_MOTION_UNSUPPORTED", event_id,
+                       "Camera motion parameters are source-locked until G4 recomputes validated camera keyframes.")
             candidate = {**original_params, **patch}
+            if candidate == original_params:
+                _block("G4_MOTION_NO_EFFECT", event_id, "No motion parameter changed.")
             from backend.app.director.motion import presets
             from jsonschema import Draft202012Validator
             errors = list(Draft202012Validator(presets()[event["preset_id"]]["parameter_schema"]).iter_errors(candidate))
