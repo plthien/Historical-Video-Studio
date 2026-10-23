@@ -166,6 +166,8 @@ const frozenEvent=sampleEvent('freeze-hold',{hold_frames:6,preserve_voice:true},
 frozenEvent.start_frame=start+3;
 frozenEvent.duration_frames=6;
 frozenEvent.keyframes=[{frame:0,value:1,easing:'linear'},{frame:6,value:1,easing:'linear'}];
+frozenEvent.animated_property='opacity';
+frozenEvent.phases=[{phase_id:'phase_b2_freeze_hold',kind:'hold',start_offset_frames:0,duration_frames:6,depends_on_phase_ids:[]}];
 heldTimeline.scenes[0].events.push(frozenEvent);
 assertTimeline(heldTimeline);
 const holdFrame=start+7;
