@@ -136,6 +136,26 @@ if(maskLedger.reveal.changedPixels<15)throw Error('B2_SHAPE_REVEAL_VISUALLY_INER
 writeFileSync(resolve(output,'b2-mask-roi.json'),JSON.stringify(maskLedger,null,2));
 result.push({kind:'native_mask_pixels',...maskLedger});
 
+const cropFixture=structuredClone(timeline);
+const cropTarget=cropFixture.scenes[0].layers.find(l=>l.layer_id===maskSource.layer_id)!;
+cropTarget.crop_normalized={x:0.1,y:0.1,w:0.8,h:0.8};
+assertTimeline(cropFixture);
+const cropBaseline=await maskStill(timeline,maskFrame,'crop-before');
+const cropAfter=await maskStill(cropFixture,maskFrame,'crop-after');
+const cropPixelChange=maskDiff(cropBaseline.png,cropAfter.png,maskSource);
+if(cropPixelChange.changedPixels<15)throw Error('B2_APPROVED_ORIGINAL_CROP_VISUALLY_INERT');
+const cropMediaBefore=makeSyntheticManifest(timeline,sourceDir,font).assets.find(a=>a.assetId===maskSource.asset_id);
+const cropMediaAfter=makeSyntheticManifest(cropFixture,sourceDir,font).assets.find(a=>a.assetId===maskSource.asset_id);
+if(!cropMediaBefore||!cropMediaAfter||cropMediaBefore.originalSha256!==cropMediaAfter.originalSha256)
+ throw Error('B2_CROP_MUTATED_SYNTHETIC_SOURCE_BYTES');
+const cropLedger={source:'SYNTHETIC_B1_COMPILED_NOT_REAL_RIGHTS',layer:maskSource.layer_id,
+ frame:maskFrame,originalSha256:cropMediaBefore.originalSha256,
+ before:{path:cropBaseline.path,sha256:cropBaseline.sha256},
+ after:{path:cropAfter.path,sha256:cropAfter.sha256},roi:cropPixelChange};
+writeFileSync(resolve(output,'b2-crop-roi.json'),JSON.stringify(cropLedger,null,2));
+result.push({kind:'source_preserving_crop_pixels',...cropLedger});
+
+
 if(presets.presets.length!==19||new Set(presets.presets.map(x=>x.render_recipe.primitive)).size!==19)
  throw Error('B2_MOTION_REGISTRY_INCOMPLETE');
 let malformed=structuredClone(timeline);
