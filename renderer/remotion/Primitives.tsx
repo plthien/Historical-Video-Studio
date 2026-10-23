@@ -259,7 +259,7 @@ export const BaseTemplate:React.FC<{scene:Scene;frame:number;media:ResolvedMedia
  if(whips.length>1)fail('RENDER_WHIP_DUPLICATE',scene.setup_id,'Only one screen-space whip may affect a scene at once');
  const whip=whips[0];
  let screenStyle:React.CSSProperties={position:'absolute',inset:0};
- if(whip){
+ if(whip&&frame>=whip.start_frame&&frame<whip.start_frame+whip.duration_frames){
   const {direction,sweep_px,motion_blur_px}=whip.params;
   if((direction!=='left'&&direction!=='right')||typeof sweep_px!=='number'||
      sweep_px<40||sweep_px>480||typeof motion_blur_px!=='number'||
