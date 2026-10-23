@@ -121,14 +121,15 @@ def sources(store, project: str):
 
 
 def revise(store, project: str, expected: int, original: dict, edited: dict,
-           reason: str, crop: dict | None = None):
+           reason: str, crop: dict | None = None, layers: dict | None = None):
     head = current(store, project)
     if expected != head["revision"]:
         blocked("REVISION_CONFLICT", project, "Reload storyboard; project revision changed.")
     word_map, final_audio, approved = sources(store, project)
     return revise_g4(store, project, head["timeline"], original, edited,
                      word_map, final_audio, approved, expected_revision=expected,
-                     operator_reason=reason, crop_overrides=crop)
+                     operator_reason=reason, crop_overrides=crop,
+                     layer_overrides=layers)
 
 
 def mark(plan: dict, story_sha: str, reason: str, fields: list[str]):
@@ -179,8 +180,20 @@ def mount(app, store, idempotent):
                 blocked("G4_SOURCE_EDIT_FORBIDDEN", scene_id, "Template choice is frozen by G1.")
             if edits.motion_edits or edits.cue_word_ids:
                 blocked("G4_EDIT_UNSUPPORTED", scene_id, "Motion/cue edits require authored staging; use direction-revisions without rewriting G2 words.")
-            if edits.layer_edits:
-                blocked("G4_EDIT_UNSUPPORTED", scene_id, "Direct pixel/asset replacement is not authorized by the immutable B1 compiler. Only normalized crop and authored variant changes are available.")
+            layer_patch = {}
+            known = {layer["layer_id"]: layer for layer in previous["layers"]}
+            for item in edits.layer_edits:
+                actual = known.get(item.layer_id)
+                if actual is None or item.layer_id in layer_patch:
+                    blocked("G4_LAYOUT_INVALID", item.layer_id, "Choose an existing, unique frozen layer.")
+                if item.approved_asset_id is not None and item.approved_asset_id != actual["asset_id"]:
+                    blocked("G3_ASSET_UNAPPROVED", item.layer_id, "G4 cannot rebind to a different G3 original.")
+                patch = {key: value for key, value in (
+                    ("x", item.x_px), ("y", item.y_px), ("w", item.w_px), ("h", item.h_px))
+                         if value is not None}
+                if not patch:
+                    blocked("G4_EDIT_INVALID", item.layer_id, "Choose an actual presentation coordinate change.")
+                layer_patch[item.layer_id] = patch
             edited = copy.deepcopy(head["blueprint"])
             plan = next(p for p in edited["setup_plans"] if p["setup_id"] == previous["setup_id"])
             if edits.variant_id:
@@ -192,7 +205,8 @@ def mount(app, store, idempotent):
             mark(plan, head["timeline"]["story_sha256"],
                  f"Operator storyboard variant update: {scene_id}", ["layout_variant_hint"])
             return revise(store, project_id, body.expected_revision, head["blueprint"],
-                          edited, f"Storyboard presentation edit: {scene_id}")
+                          edited, f"Storyboard presentation edit: {scene_id}",
+                          layers={previous["setup_id"]: layer_patch} if layer_patch else None)
         return idempotent(project_id, "storyboard-scene:"+scene_id, key, body.model_dump(), action)
 
     @app.post("/api/v1/projects/{project_id}/storyboard/direction-revisions")
