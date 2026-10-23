@@ -409,7 +409,8 @@ def _derive_trusted_maps(store, project_id, story: dict, blueprint: dict, map_re
 def revise_g4(store, project_id: str, previous: dict, original_blueprint: dict,
               edited_blueprint: dict, word_map: dict, final_audio: dict,
               approved_assets: dict, *, expected_revision: int, operator_reason: str,
-              maps: dict | None = None, font_measure=None, crop_overrides: dict | None = None) -> dict:
+              maps: dict | None = None, font_measure=None, crop_overrides: dict | None = None,
+              layer_overrides: dict | None = None) -> dict:
     """CAS-guarded presentation-only local edit; never auto-approve G4/G5.
 
     Only changed scenes are compiled anew. The unchanged scene dictionaries
@@ -469,7 +470,9 @@ def revise_g4(store, project_id: str, previous: dict, original_blueprint: dict,
                        "Record an authorized operator direction_revision and source SHA.")
             changed.add(a["setup_id"])
     crop_overrides = crop_overrides or {}
+    layer_overrides = layer_overrides or {}
     changed.update(crop_overrides.keys())
+    changed.update(layer_overrides.keys())
     if not changed or not changed <= {p["setup_id"] for p in old}:
         _block("G4_EDIT_INVALID", project_id, "Select at least one existing scene to revise.")
     # Reject presentation-only input when current upstream approvals have changed.
@@ -494,6 +497,16 @@ def revise_g4(store, project_id: str, previous: dict, original_blueprint: dict,
         _block("G4_BLUEPRINT_TAMPERED", project_id,
                "Original visual blueprint does not match the registered draft source plan.")
     manifest = trusted["manifest"]
+    persisted_layers = copy.deepcopy(manifest.get("layer_overrides", {}))
+    # A new registered variant owns a new geometry family; old operator pixel
+    # offsets must not silently carry into a different frozen slot layout.
+    for prior_plan, next_plan in zip(old, revised):
+        if prior_plan["variant_id"] != next_plan["variant_id"]:
+            persisted_layers.pop(next_plan["setup_id"], None)
+    for sid, rows in layer_overrides.items():
+        if not isinstance(rows, dict):
+            _block("G4_LAYOUT_INVALID", sid, "Layer edits must identify reviewed scene layer IDs.")
+        persisted_layers.setdefault(sid, {}).update(copy.deepcopy(rows))
     if manifest["gate_heads"] != draft.current_gate_heads(store, project_id):
         _block("G4_SOURCE_STALE", project_id,
                "A current G1/G2/G3 approval identity changed after the trusted draft.")
@@ -571,7 +584,24 @@ def revise_g4(store, project_id: str, previous: dict, original_blueprint: dict,
         rows = [x for x in windows if x["setup_id"] == sid]
         scene = _scene(plan, staging[sid], rows, approved_assets, requirements,
                        current_maps, font_measure)
+        previous_layers = {item["layer_id"]: item for item in previous["scenes"][index[sid]]["layers"]}
+        chosen_layers = persisted_layers.get(sid, {})
+        if set(chosen_layers) - {x["layer_id"] for x in scene["layers"]}:
+            _block("G4_LAYOUT_INVALID", sid, "Layout edit references an unregistered compiled layer.")
         for layer in scene["layers"]:
+            patch = chosen_layers.get(layer["layer_id"])
+            if patch is not None:
+                if not isinstance(patch, dict) or not patch or set(patch)-{"x", "y", "w", "h"}:
+                    _block("G4_LAYOUT_INVALID", layer["layer_id"], "Pixel edit must contain only position or dimensions.")
+                original = previous_layers.get(layer["layer_id"])
+                if not original or original["asset_id"] != layer["asset_id"] or original["source_claim_id"] != layer["source_claim_id"]:
+                    _block("G4_LAYOUT_INVALID", layer["layer_id"], "Only the same frozen factual layer can be repositioned.")
+                rectangle = {**layer["rect_px"], **patch}
+                if any(type(v) is not int for v in rectangle.values()) or rectangle["x"] < 0 or rectangle["y"] < 0 or rectangle["w"] < 1 or rectangle["h"] < 1 or rectangle["x"]+rectangle["w"] > 1920 or rectangle["y"]+rectangle["h"] > 1080:
+                    _block("G4_LAYOUT_INVALID", layer["layer_id"], "Keep amended geometry inside the 1920x1080 canvas.")
+                if layer["text"] is not None and (rectangle["w"] != layer["rect_px"]["w"] or rectangle["h"] != layer["rect_px"]["h"]):
+                    _block("TYPOGRAPHY_OVERFLOW", layer["layer_id"], "Pinned GDI glyph layout cannot be resized without remeasurement.")
+                layer["rect_px"] = rectangle
             crop = crop_overrides.get(sid, {}).get(layer["layer_id"])
             if crop is not None:
                 if (set(crop) != {"x","y","w","h"} or
@@ -590,12 +620,14 @@ def revise_g4(store, project_id: str, previous: dict, original_blueprint: dict,
                "Presentation edit produced no observable scene change; do not bump revision.")
     out["dependency_fingerprint"] = digest({"prior_identity": previous["dependency_fingerprint"],
                                              "new_direction": edited_blueprint,
-                                             "crop_overrides": crop_overrides})
+                                             "crop_overrides": crop_overrides,
+                                             "layer_overrides": persisted_layers})
     validate_document("CompiledTimeline.v1", out)
     draft.publish(store, project_id, out, edited_blueprint, current_maps,
                   manifest["map_requests"], manifest["font_identity"],
                   expected_revision=expected_revision, previous=trusted,
-                  edit_kind="scene_layout" if edited_blueprint != original_blueprint else "scene_crop")
+                  edit_kind="scene_layout" if edited_blueprint != original_blueprint or layer_overrides else "scene_crop",
+                  layer_overrides=persisted_layers)
     return {"timeline": out, "recomputed_setup_ids": sorted(changed),
             "retained_setup_ids": sorted(set(index) - changed),
             "project_revision": expected_revision+1, "stale_gates": ["G4","G5"]}
