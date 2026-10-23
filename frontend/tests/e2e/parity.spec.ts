@@ -61,7 +61,16 @@ test('storyboard-editor real browser Player vs Node renderStill same immutable f
   expect(owningScene,'every sampled global frame must have one owning scene').toBeDefined();
   await expect(stage.locator(`[data-global-frame="${frame}"][data-scene-id="${owningScene!.scene_id}"]`)).toBeVisible({timeout:10000});
   expect(fatalErrors,'shared Browser Player must not throw runtime errors').toEqual([]);
-  const browserPNG=PNG.sync.read(await stage.screenshot());
+  // Stage wrappers can round to 1081 CSS pixels. Capture the actual shared
+  // Composition's 1920x1080 surface, not its responsive wrapper/border.
+  const renderedSurface=stage.locator(`[data-global-frame="${frame}"][data-scene-id="${owningScene!.scene_id}"]`);
+  const bounds=await renderedSurface.boundingBox();
+  expect(bounds,'Composition surface must be mounted').not.toBeNull();
+  expect(Math.abs(bounds!.width-1920)).toBeLessThan(1.01);
+  expect(Math.abs(bounds!.height-1080)).toBeLessThan(1.01);
+  const browserPNG=PNG.sync.read(await page.screenshot({
+   clip:{x:bounds!.x,y:bounds!.y,width:1920,height:1080}
+  }));
   const file=path.join(output,'node-f'+frame+'.png');
   await renderStill({serveUrl,composition,inputProps:props,frame,output:file,imageFormat:'png'});
   const nodePNG=PNG.sync.read(readFileSync(file));
