@@ -7,7 +7,7 @@ import {renderStill,selectComposition} from '@remotion/renderer';
 import {PNG} from 'pngjs';
 import {sampleCamera,arrowPolygon} from '../remotion/Primitives';
 import {timelineRail} from '../remotion/templates/T05';
-import {HistoricalPlayer} from '../remotion/PlayerMount';
+import {HistoricalPlayer,prepareApprovedPlayerOnLocalHost} from '../remotion/PlayerMount';
 import {assertTimeline,RenderBlocked,type Timeline,type Scene} from '../remotion/schema';
 import {makeSyntheticManifest,loadApprovedMedia} from './media';
 const root=resolve(import.meta.dirname,'..');
@@ -115,15 +115,40 @@ expect(evaluated.x_px===52&&evaluated.rotation_deg===2&&evaluated.opacity===.8,'
 const midFrame=await frame(keyScene,middle.at_frame,'CAMERA-3KEY');
 const originalFrame=await frame(t05,middle.at_frame,'CAMERA-2KEY');
 expect(roiDiff(midFrame,originalFrame,900,520,400)>1000,'Camera middle key must alter real rendered pixels');
-const invalid=[
- {timeline:t03,media:{...loadApprovedMedia(t03,makeSyntheticManifest(t03,resolve(root,'.artifacts/media/repair-bad'),font)),sourceKind:'APPROVED_LOCAL'}},
+const raw=loadApprovedMedia(t03,makeSyntheticManifest(t03,resolve(root,'.artifacts/media/repair-bad'),font));
+const firstId=Object.keys(raw.assets)[0];
+const variants=[
+ {...raw,sourceKind:'APPROVED_LOCAL'},
+ {...raw,assets:{...raw.assets,[firstId]:{...raw.assets[firstId],dataUri:'data:image/png;base64,AAAA'}}},
+ {...raw,fontDataUri:'data:font/ttf;base64,AAAA'},
+ {...raw,authorizingG4ManifestSha256:'a'.repeat(64)},
+ {...raw,assets:{...raw.assets,[firstId]:{...raw.assets[firstId],dataUri:'https://not-approved.test/pic.png'}}}
 ];
-for(const bad of invalid){
+for(const [i,media] of variants.entries()){
  let rejected=false;
- try{HistoricalPlayer({prepared:{props:bad} as any});}catch(e){rejected=e instanceof RenderBlocked&&e.code==='PLAYER_UNTRUSTED_PROPS';}
- expect(rejected,'Unissued public Player props must be rejected before a frame');
+ try{HistoricalPlayer({prepared:{props:{timeline:t03,media}} as any});}
+ catch(e){rejected=e instanceof RenderBlocked&&e.code==='PLAYER_UNTRUSTED_PROPS';}
+ expect(rejected,'P1-05 public Player rejects forged props case '+i);
 }
-evidence.push({case:'Player raw forged props',result:'REJECTED before first frame',note:'Approved host UI serialization B2-05 NOT_RUN'});
+evidence.push({case:'Player public actual mount boundary',attacks:variants.length,
+ result:'REJECTED before first frame',note:'B2-05 browser host serialization NOT_RUN'});
+const preparedConfig=JSON.parse(readFileSync(resolve(root,'.artifacts/approved-player-test.json'),'utf8')) as
+ {db:string;artifactRoot:string;project:string;source:string};
+const authorized=await prepareApprovedPlayerOnLocalHost(
+ preparedConfig.db,preparedConfig.artifactRoot,preparedConfig.project);
+expect(authorized.props.media.sourceKind==='APPROVED_LOCAL','Current SQLite host must issue local approved capability');
+const mounted=HistoricalPlayer({prepared:authorized});
+expect(Boolean(mounted),'Current SQLite verified Player must mount same HistoryComposition');
+// Render the exact host-issued props through the same HistoryComposition used by Player.
+const shared=await selectComposition({serveUrl,id:'HistoricalTimelineV1',inputProps:authorized.props});
+const path=resolve(dir,'repair-approved-player-host-f0.png');
+await renderStill({serveUrl,composition:shared,inputProps:authorized.props,output:path,imageFormat:'png',frame:0});
+evidence.push({case:'Approved Player/Node shared composition',source:preparedConfig.source,
+ path,sha256:sha(readFileSync(path)),g4Head:authorized.props.media.authorizingG4ManifestSha256});
+let badHost=false;
+try{await prepareApprovedPlayerOnLocalHost(preparedConfig.db+'-missing',preparedConfig.artifactRoot,preparedConfig.project);}
+catch(e){badHost=e instanceof RenderBlocked&&e.code==='RENDER_G4_NOT_AUTHORIZED';}
+expect(badHost,'Host must fail closed when trusted SQLite G4 source is not present');
 writeFileSync(resolve(dir,'b2-repair-evidence.json'),JSON.stringify({status:'LOCAL_PASS',source:'SYNTHETIC',
  samples:evidence,platform:process.platform,node:process.version},null,2));
 console.log(JSON.stringify({status:'LOCAL_PASS',repair:'P1-01..05 discriminators',frames:evidence.filter(x=>x.path).length,
