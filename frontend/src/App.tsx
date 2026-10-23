@@ -3,6 +3,7 @@ import {api, ApiError, type Gate, type GateDecision, type GateId, type JobInfo, 
 import {workspaces} from "./routes/workspaces";
 import {VoiceStudio} from "./workspaces/Voice/VoiceStudio";
 import {AssetStudio} from "./workspaces/Assets/AssetStudio";
+import {StoryboardStudio} from "./workspaces/Storyboard/StoryboardStudio";
 
 type Notice = {kind: "success" | "error"; message: string};
 const idKey = () => crypto.randomUUID();
@@ -149,7 +150,8 @@ export function App() {
         {!active.enabled ? <div className="unavailable" role="note">
           <strong>Not available in A1</strong>
           <p>This workspace requires the {active.owner} owner implementation. No provider, approved media, alignment, render, or export result is simulated.</p>
-        </div> : workspace === "assets" && project ?
+        </div> : workspace === "storyboard" && project ?
+          <StoryboardStudio projectId={project.project_id} onRefresh={() => refresh(project.project_id)}/> : workspace === "assets" && project ?
           <AssetStudio projectId={project.project_id} projectRevision={project.project_revision} onRefresh={() => refresh(project.project_id)}/> : workspace === "voice" && project ?
           <VoiceStudio project={project} story={storyView} onRefresh={() => refresh(project.project_id)}/> : workspace === "project" ?
           <div className="stack">
