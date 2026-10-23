@@ -47,7 +47,9 @@ function motionForLayer(scene:Scene,layer:Layer,frame:number){
  for(const e of scene.events){
   const ordered=(e.params.ordered_layer_ids as string[]|undefined);
   const stagger=e.preset_id==='stagger-reveal'&&ordered?.includes(layer.layer_id);
-  if(e.layer_id!==layer.layer_id&&!e.affected_layer_ids.includes(layer.layer_id)&&!stagger)continue;
+  const dissolve=e.preset_id==='cross-dissolve'&&
+   (e.params.out_layer_id===layer.layer_id||e.params.in_layer_id===layer.layer_id);
+  if(e.layer_id!==layer.layer_id&&!e.affected_layer_ids.includes(layer.layer_id)&&!stagger&&!dissolve)continue;
   const delay=stagger?ordered!.indexOf(layer.layer_id)*Number(e.params.gap_frames??6):0;
   const starts=e.start_frame+delay;
   // The repeated B1 stagger events describe sequential beats for the
@@ -85,6 +87,19 @@ function motionForLayer(scene:Scene,layer:Layer,frame:number){
     break;
    }
    case 'parallax-layers':translateX+=p*Number(e.params.max_drift_px??40)*.5;break;
+   case 'cross-dissolve':{
+    const outgoing=e.params.out_layer_id,incoming=e.params.in_layer_id;
+    if(typeof outgoing!=='string'||typeof incoming!=='string'||outgoing===incoming||
+       !scene.layers.some(x=>x.layer_id===outgoing)||!scene.layers.some(x=>x.layer_id===incoming))
+      fail('RENDER_CROSSFADE_TARGET',e.event_id,'Cross dissolve needs distinct authored, existing incoming/outgoing layers');
+    if(e.params.mix_curve!=='linear'&&e.params.mix_curve!=='ease_in_out')
+      fail('RENDER_CROSSFADE_CURVE',e.event_id,'Unsupported authored mix curve');
+    const t=e.params.mix_curve==='ease_in_out'?p*p*(3-2*p):p;
+    if(layer.layer_id===outgoing)opacity*=1-t;
+    if(layer.layer_id===incoming)opacity*=t;
+    break;
+   }
+   case 'whip-pan':break; // Screen-space transition is applied once outside the camera subtree.
    case 'camera-push':case 'camera-pan':break; // camera is sampled separately
    case 'freeze-hold':break;
    case 'hard-cut':opacity*=p>0?1:0;break;
@@ -210,9 +225,24 @@ export const BaseTemplate:React.FC<{scene:Scene;frame:number;media:ResolvedMedia
    opacity:camera.opacity,
    transform:`translate(${camera.x_px}px,${camera.y_px}px) rotate(${camera.rotation_deg}deg) scale(${camera.scale})`,
    transformOrigin:'960px 540px'};
+ const whips=scene.events.filter(e=>e.preset_id==='whip-pan');
+ if(whips.length>1)fail('RENDER_WHIP_DUPLICATE',scene.setup_id,'Only one screen-space whip may affect a scene at once');
+ const whip=whips[0];
+ let screenStyle:React.CSSProperties={position:'absolute',inset:0};
+ if(whip){
+  const {direction,sweep_px,motion_blur_px}=whip.params;
+  if((direction!=='left'&&direction!=='right')||typeof sweep_px!=='number'||
+     sweep_px<40||sweep_px>480||typeof motion_blur_px!=='number'||
+     motion_blur_px<0||motion_blur_px>40)
+   fail('RENDER_WHIP_PARAMS',whip.event_id,'Invalid registered screen transition params');
+  const p=eventProgress(whip,frame);
+  const dir=direction==='left'?-1:1;
+  screenStyle={...screenStyle,transform:`translateX(${dir*(1-p)*sweep_px}px)`,
+   filter:`blur(${(1-p)*motion_blur_px}px)`};
+ }
  const back:Record<string,string>={map:'#dfddcf',portrait:'#ded8c9',collage:'#cbc3b2',timeline:'#f0e7d4',paper:'#e6ddcb',split:'#d8d5c7',fact:'#f3ebde',quote:'#e8dfd1',causal:'#d9d4c4'};
  return <div style={{width:1920,height:1080,position:'relative',overflow:'hidden',background:back[decor??'paper']}}>
-  <div style={cameraStyle}>{underlay}{[...scene.layers].sort((x,y)=>x.depth_order-y.depth_order).map(layer=>
-    <CompiledLayer key={layer.layer_id} scene={scene} frame={local} layer={layer} media={media}/>)}</div>
+  <div style={screenStyle}><div style={cameraStyle}>{underlay}{[...scene.layers].sort((x,y)=>x.depth_order-y.depth_order).map(layer=>
+    <CompiledLayer key={layer.layer_id} scene={scene} frame={local} layer={layer} media={media}/>)}</div></div>
  </div>;
 };
