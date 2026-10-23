@@ -33,6 +33,9 @@ def main():
     out=ROOT/"renderer"/".artifacts"/"approved-player-test"
     out.mkdir(parents=True,exist_ok=True)
     story=load("contracts/examples/StoryPackage.v1.valid.json")
+    # Source claim is present in G1; pin that existing claim to its authored
+    # map headline before the controlled G1 import/approval (not at render time).
+    story["visual_setups"][0]["direction"]["on_screen_text"][0]["claim_ref"]="claim_001"
     second=copy.deepcopy(story["visual_setups"][0])
     second["setup_id"]="setup_002"
     second["direction"]["visual_beats"][0]["beat_id"]="beat_setup_002"
