@@ -52,34 +52,49 @@ def main():
                 json=payload,headers=keys)
             assert dup.status_code==200 and dup.json()==output
             assert store.revision(project)==original_revision+1
+            revised_layer=output["timeline"]["scenes"][0]["layers"][0]
+            rect=revised_layer["rect_px"]
+            shifted_x=rect["x"]+1 if rect["x"]+rect["w"]<1920 else rect["x"]-1
+            position=client.patch(
+                f"/api/v1/projects/{project}/storyboard/scenes/{first['scene_id']}",
+                json={"expected_revision":original_revision+1,"scene_id":first["scene_id"],
+                      "changes":{"layer_edits":[{"layer_id":revised_layer["layer_id"],
+                                                 "x_px":shifted_x}]}},
+                headers={"Idempotency-Key":"synthetic-position-edit-02"})
+            assert position.status_code==200,position.text
+            positioned=position.json()
+            assert positioned["project_revision"]==original_revision+2
+            assert positioned["timeline"]["scenes"][0]["layers"][0]["rect_px"]["x"]==shifted_x
+            assert canonical(positioned["timeline"]["scenes"][1])==canonical(second)
+            assert draft.current_gate_heads(store,project)==before_heads
             stale=client.patch(
                 f"/api/v1/projects/{project}/storyboard/scenes/{first['scene_id']}",
                 json=payload,headers={"Idempotency-Key":"synthetic-stale-cas-002"})
             assert stale.status_code==409,stale.text
             illegal=client.patch(
                 f"/api/v1/projects/{project}/storyboard/scenes/{first['scene_id']}",
-                json={"expected_revision":original_revision+1,"scene_id":first["scene_id"],
+                json={"expected_revision":original_revision+2,"scene_id":first["scene_id"],
                       "changes":{"layer_edits":[{"layer_id": first["layers"][0]["layer_id"],
                                                 "approved_asset_id":"candidate_forged"}]}},
                 headers={"Idempotency-Key":"synthetic-forged-asset-03"})
             assert illegal.status_code==422,illegal.text
             attempted=client.patch(
                 f"/api/v1/projects/{project}/storyboard/scenes/{first['scene_id']}",
-                json={"expected_revision":original_revision+1,"scene_id":first["scene_id"],
+                json={"expected_revision":original_revision+2,"scene_id":first["scene_id"],
                       "changes":{"template_id":"T08" if first["template_id"]!="T08" else "T02"}},
                 headers={"Idempotency-Key":"synthetic-template-edit-04"})
             assert attempted.status_code==422,attempted.text
-            assert store.revision(project)==original_revision+1
+            assert store.revision(project)==original_revision+2
             reread=client.get(f"/api/v1/projects/{project}/storyboard/timeline")
             assert reread.status_code==200
-            assert reread.json()["timeline"]["dependency_fingerprint"]==output["timeline"]["dependency_fingerprint"]
+            assert reread.json()["timeline"]["dependency_fingerprint"]==positioned["timeline"]["dependency_fingerprint"]
             assert reread.json()["draft_manifest_sha256"]!=before["manifest_sha256"]
         # A cold process must read the newly published immutable G4 manifest.
         reopened=draft.load(ProjectStore(dest/"g4.sqlite",dest/"artifacts"),project)
-        assert reopened["revision"]==original_revision+1
+        assert reopened["revision"]==original_revision+2
         assert canonical(reopened["timeline"]["scenes"][1])==canonical(second)
         print(json.dumps({"status":"LOCAL_PASS","source":"SYNTHETIC_SQLITE_APPROVAL_FIXTURE_NOT_REAL_RIGHTS",
-                          "cases":["paged_read","current_manifest","variant_CAS","selective_recompile",
+                          "cases":["paged_read","current_manifest","variant_CAS","position_CAS","selective_recompile",
                                    "upstream_heads","idempotent_replay","stale_409","forged_asset_422",
                                    "template_rewrite_422","cold_reload"],
                           "changed_setup_ids": output["recomputed_setup_ids"],
