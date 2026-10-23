@@ -94,7 +94,15 @@ function motionForLayer(scene:Scene,layer:Layer,frame:number){
     if(e.params.text_layer_id!==layer.layer_id||e.params.quoted_source_claim_id!==layer.source_claim_id||layer.text===null)
      fail('RENDER_TYPEWRITER_CLAIM',e.event_id,'Typewriter must reveal the authored claim-backed text layer');
     const claimText=layer.text ?? fail('RENDER_TYPEWRITER_CLAIM',e.event_id,'Missing frozen factual source text');
-    visibleText=Array.from(claimText).slice(0,Math.floor(Array.from(claimText).length*p)).join('');
+    const chars=Array.from(claimText),cps=Number(e.params.characters_per_second);
+    if(!Number.isFinite(cps)||cps<6||cps>55||typeof e.params.cursor_visible!=='boolean')
+      fail('RENDER_TYPEWRITER_PARAMS',e.event_id,'Use the pinned characters-per-second and cursor grammar');
+    if(Math.floor(e.duration_frames*cps/30)<chars.length)
+      fail('RENDER_TYPEWRITER_DURATION',e.event_id,'Approved cue window cannot reveal every frozen claim character at authored speed');
+    const elapsed=Math.max(0,Math.min(e.duration_frames,frame-e.start_frame));
+    const count=Math.min(chars.length,Math.floor(elapsed*cps/30));
+    visibleText=chars.slice(0,count).join('')+
+      (e.params.cursor_visible&&count<chars.length&&frame>=e.start_frame?'▍':'');
     break;
    }
    case 'mask-transition':case 'map-region-wipe':reveal=Math.min(reveal,p);
