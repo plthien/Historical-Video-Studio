@@ -86,6 +86,9 @@ for(const total of [3,6]){
  const bad=structuredClone(s);bad.layers.find(l=>l.layer_id===newDates[0].layer_id)!.text='9999';
  let rejected=false;try{timelineRail(bad);}catch(e){rejected=e instanceof RenderBlocked;}
  expect(rejected,'T05 reversed chronology must fail closed');
+ const missing=structuredClone(s);missing.layers.find(l=>l.layer_id===newDates[0].layer_id)!.source_claim_id=null;
+ let noClaim=false;try{timelineRail(missing);}catch(e){noClaim=e instanceof RenderBlocked;}
+ expect(noClaim,'T05 missing date claim must fail closed');
  evidence.push({case:'T05 2–6 sourced synthetic chronology',count:total,connectors:g.edges.length,
   source:'SYNTHETIC derived from frozen T05 date layers'});
 }
@@ -96,7 +99,10 @@ const coords:[[number,number],[number,number],[number,number]]=[[.08,.5],[.45,.2
 const points=coords.map(([x,y])=>[x*connector.rect_px.w,y*connector.rect_px.h] as [number,number]);
 expect(Boolean(arrowPolygon(points,1)),'T10 actual reviewed annotation has a directional tip');
 const end=Math.min(causal.duration_frames-1,draw.start_frame+draw.duration_frames+2);
+const earlyArrow=await frame(t10,Math.max(0,draw.start_frame+3),'T10-A-start');
+const midArrow=await frame(t10,Math.min(end,draw.start_frame+Math.floor(draw.duration_frames/2)),'T10-A-mid');
 const arrowPng=await frame(t10,end,'T10-A-arrow');
+expect(earlyArrow!==midArrow,'T10 source path changes across authored event frames');
 const noArrow=structuredClone(t10);
 const noEvent=noArrow.scenes[0].events.find(e=>e.event_id===draw.event_id)!;
 noEvent.params.arrowhead=false;
