@@ -79,6 +79,56 @@ for(const row of cases){
   result.push({preset:row.name,frame:before,preStartPixelMatch:true,source:'SYNTHETIC'});
  }
 }
+// Pixel discriminators for native shape + timed directional reveal.
+// A source-preserving change of native mask may not replace the G3 original.
+const maskSource=cards[0];
+const maskEvent=sampleEvent('title-mask-reveal',
+  {direction:'left',distance_px:0,feather_px:12},'layer_local',[maskSource.layer_id]);
+const nativeMask=(kind:'none'|'rectangle'|'ellipse',feather_px:number,withReveal:boolean)=>{
+ const t=structuredClone(timeline);
+ const layer=t.scenes[0].layers.find(l=>l.layer_id===maskSource.layer_id)!;
+ layer.mask={kind,asset_id:null,feather_px};
+ if(withReveal)t.scenes[0].events.push(maskEvent);
+ assertTimeline(t);
+ return t;
+};
+async function maskStill(t:Timeline,frame:number,label:string){
+ const media=loadApprovedMedia(t,makeSyntheticManifest(t,sourceDir,font));
+ const comp=await selectComposition({serveUrl,id:'HistoricalTimelineV1',inputProps:{timeline:t,media}});
+ const file=resolve(output,'b2-mask-'+label+'.png');
+ await renderStill({serveUrl,composition:comp,inputProps:{timeline:t,media},frame,output:file,imageFormat:'png'});
+ const bytes=readFileSync(file),png=PNG.sync.read(bytes);
+ if(png.width!==1920||png.height!==1080)throw Error('B2_MASK_INVALID_FRAME_'+label);
+ return {path:file,sha256:hashing(bytes),png};
+}
+function maskDiff(a:PNG,b:PNG,layer:typeof maskSource){
+ const r=layer.rect_px;
+ let changed=0,count=0,total=0;
+ for(let y=r.y;y<r.y+r.h;y+=2)for(let x=r.x;x<r.x+r.w;x+=2){
+  const k=(y*1920+x)*4,delta=Math.abs(a.data[k]-b.data[k])+
+    Math.abs(a.data[k+1]-b.data[k+1])+Math.abs(a.data[k+2]-b.data[k+2]);
+  changed+=delta>12?1:0;total+=delta/3;count++;
+ }
+ return {changedPixels:changed,sampledPixels:count,meanRGBDifference:total/count};
+}
+const maskFrame=Math.min(start+Math.floor(duration/2),scene.duration_frames-2);
+const maskedRect=await maskStill(nativeMask('rectangle',0,false),maskFrame,'rectangle');
+const maskedEllipse=await maskStill(nativeMask('ellipse',0,false),maskFrame,'ellipse');
+const maskedFeather=await maskStill(nativeMask('ellipse',16,false),maskFrame,'ellipse-feather16');
+const maskedReveal=await maskStill(nativeMask('ellipse',16,true),maskFrame,'ellipse-feather16-reveal-mid');
+const maskLedger={
+ source:'SYNTHETIC_B1_COMPILED_NOT_REAL_RIGHTS',frame:maskFrame,layerId:maskSource.layer_id,
+ nativeShape:maskDiff(maskedRect.png,maskedEllipse.png,maskSource),
+ feather:maskDiff(maskedEllipse.png,maskedFeather.png,maskSource),
+ reveal:maskDiff(maskedFeather.png,maskedReveal.png,maskSource),
+ PNGs:[maskedRect,maskedEllipse,maskedFeather,maskedReveal].map(({path,sha256})=>({path,sha256}))
+};
+if(maskLedger.nativeShape.changedPixels<15)throw Error('B2_NATIVE_ELLIPSE_VISUALLY_INERT');
+if(maskLedger.feather.changedPixels<15)throw Error('B2_NATIVE_FEATHER_VISUALLY_INERT');
+if(maskLedger.reveal.changedPixels<15)throw Error('B2_SHAPE_REVEAL_VISUALLY_INERT');
+writeFileSync(resolve(output,'b2-mask-roi.json'),JSON.stringify(maskLedger,null,2));
+result.push({kind:'native_mask_pixels',...maskLedger});
+
 if(presets.presets.length!==19||new Set(presets.presets.map(x=>x.render_recipe.primitive)).size!==19)
  throw Error('B2_MOTION_REGISTRY_INCOMPLETE');
 let malformed=structuredClone(timeline);
