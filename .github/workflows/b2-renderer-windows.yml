@@ -61,6 +61,8 @@ jobs:
       - name: B2 targeted visual-functional real-frame repair gates
         shell: pwsh
         run: |
+          & .venv/Scripts/python.exe -m renderer.scripts.prepare_host_fixture
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           npm --prefix renderer run test:repair
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Verify shared composition with real pixel hashes
