@@ -49,6 +49,7 @@ function motionForLayer(scene:Scene,layer:Layer,frame:number){
  let opacity=1,scale=1,translateX=0,translateY=0,rotation=0,reveal=1,highlight=0;
  let visibleText:string|undefined;
  let revealDirection:'left'|'right'|'up'|'down'|'center_out'='left',revealFeather=0;
+ let cardBorder:number|undefined,cardShadow:number|undefined;
  for(const e of scene.events){
   const ordered=(e.params.ordered_layer_ids as string[]|undefined);
   const stagger=e.preset_id==='stagger-reveal'&&ordered?.includes(layer.layer_id);
@@ -80,8 +81,11 @@ function motionForLayer(scene:Scene,layer:Layer,frame:number){
   }
   const p=eventProgress({...e,start_frame:starts},frame);
   switch(e.preset_id){
-   case 'photo-card-enter':opacity*=p;scale*=mix(.93,1,p);rotation+=mix(Number(e.params.start_rotation_deg??-2),Number(e.params.end_rotation_deg??0),p);break;
-   case 'pop-in':opacity*=p;scale*=mix(Number(e.params.from_scale??.95),Number(e.params.to_scale??1),p);break;
+   case 'photo-card-enter':opacity*=p;scale*=mix(.93,1,p);rotation+=mix(Number(e.params.start_rotation_deg??-2),Number(e.params.end_rotation_deg??0),p);
+    cardBorder=Number(e.params.border_px);cardShadow=Number(e.params.shadow_px);break;
+   case 'pop-in':opacity*=p;
+    scale*=mix(Number(e.params.from_scale??.95),Number(e.params.to_scale??1),p)+
+      Number(e.params.overshoot??0)*4*p*(1-p);break;
    case 'stagger-reveal':opacity*=p;translateY+=(1-p)*24;break;
    case 'title-mask-reveal':reveal=Math.min(reveal,p);opacity*=p;translateY+=(1-p)*Number(e.params.distance_px??20);
     revealDirection=String(e.params.direction??'left') as typeof revealDirection;
@@ -137,7 +141,7 @@ function motionForLayer(scene:Scene,layer:Layer,frame:number){
    default:fail('RENDER_MOTION_UNIMPLEMENTED',e.event_id,'Compiled motion not implemented in B2-01..03; cannot silently ignore');
   }
  }
- return {opacity,scale,translateX,translateY,rotation,reveal,revealDirection,revealFeather,highlight,visibleText};
+ return {opacity,scale,translateX,translateY,rotation,reveal,revealDirection,revealFeather,highlight,visibleText,cardBorder,cardShadow};
 }
 function firstAppearance(scene:Scene,layerId:string){
  const beats=scene.staging.beat_sequence.filter(b=>b.activated_layer_ids.includes(layerId));
@@ -252,10 +256,13 @@ export const CompiledLayer:React.FC<{scene:Scene;layer:Layer;frame:number;media:
  if(layer.asset_id){
   const asset=media.assets[layer.asset_id];
   if(!asset)fail('RENDER_ASSET_UNTRUSTED',layer.layer_id,'Missing locally approved media');
+  const cardSource=scene.events.find(e=>e.layer_id===layer.layer_id&&e.preset_id==='photo-card-enter');
+  if(cardSource&&cardSource.params.source_original_sha256!==asset.originalSha256)
+    fail('RENDER_CARD_SOURCE_STALE',layer.layer_id,'Card motion must retain the actual G3 approved original SHA');
   const imageStyle:React.CSSProperties={position:'absolute',width:`${100/c.w}%`,height:`${100/c.h}%`,left:`${-100*c.x/c.w}%`,top:`${-100*c.y/c.h}%`,objectFit:layer.object_fit};
   return <div style={{...style,...reviewedClip(layer,effect.reveal,effect.revealDirection,effect.revealFeather),
-       border:layer.layer_kind==='archival_photo'?'5px solid #f0e7d6':undefined,
-       boxShadow:layer.layer_kind==='archival_photo'?'0 9px 20px #0004':undefined}} data-layer={layer.layer_id} data-asset={layer.asset_id} data-claim={layer.source_claim_id??undefined}>
+       border:layer.layer_kind==='archival_photo'?`${effect.cardBorder??5}px solid #f0e7d6`:undefined,
+       boxShadow:layer.layer_kind==='archival_photo'?`0 9px ${effect.cardShadow??20}px #0004`:undefined}} data-layer={layer.layer_id} data-asset={layer.asset_id} data-claim={layer.source_claim_id??undefined}>
     <Img src={asset.dataUri} style={imageStyle}/>
    </div>;
  }
