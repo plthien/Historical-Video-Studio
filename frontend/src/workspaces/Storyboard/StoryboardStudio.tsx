@@ -15,6 +15,7 @@ export function StoryboardStudio({projectId,onRefresh}:{projectId:string;onRefre
  const [layerId,setLayerId]=useState<string>('');
  const [layerX,setLayerX]=useState<number>(0);
  const [layerY,setLayerY]=useState<number>(0);
+ const [stageOp,setStageOp]=useState('');
  const [snapshot,setSnapshot]=useState<BrowserPreview|null>(null);
  const [pending,setPending]=useState<string|null>(null);
  const [error,setError]=useState('');
@@ -42,6 +43,8 @@ export function StoryboardStudio({projectId,onRefresh}:{projectId:string;onRefre
  useEffect(()=>{
    if(selectedLayer){setLayerX(selectedLayer.rect_px.x);setLayerY(selectedLayer.rect_px.y);}
  },[selectedLayer?.layer_id,selectedLayer?.rect_px.x,selectedLayer?.rect_px.y]);
+ useEffect(()=>{setStageOp(scene?.direction_beats[0]?.staging[0]?.operation??'');},
+   [scene?.scene_id,scene?.direction_beats[0]?.staging[0]?.operation]);
  async function operation(label:string,run:()=>Promise<void>){
    if(pending)return;
    setPending(label);setError('');setSuccess('');
@@ -113,6 +116,27 @@ export function StoryboardStudio({projectId,onRefresh}:{projectId:string;onRefre
        {l.text&&<span> · {l.text}</span>}
        {l.asset_id&&<small> · approved source {l.asset_id}</small>}</p>)}
     </div>
+    <h4>Frozen-cue beat staging (G4 presentation only)</h4>
+    {scene.direction_beats[0]&&<>
+      <p><strong>{scene.direction_beats[0].beat_id}</strong> · {scene.direction_beats[0].shot_goal}</p>
+      <label htmlFor="sb-stage-op">First authored staging operation</label>
+      <select id="sb-stage-op" value={stageOp} onChange={e=>setStageOp(e.target.value)}>
+        {['enter','hold','highlight','exit','reposition','focus','draw_path','reveal_mask'].map(op=>
+          <option value={op} key={op}>{op}</option>)}
+      </select>
+      <button disabled={!!pending||stageOp===scene.direction_beats[0].staging[0]?.operation}
+       onClick={()=>void operation('Save authored G4 beat staging',async()=>{
+        const first=scene.direction_beats[0];
+        const staging=first.staging.map((step,i)=>i===0?{...step,operation:stageOp}:step);
+        await storyboardApi.direction(projectId,{
+          expected_revision:page.project_revision,
+          story_revision_sha256:page.story_revision_sha256,setup_id:scene.setup_id,
+          edit_reason:'Operator staging adjustment for '+first.beat_id,
+          edits:[{beat_id:first.beat_id,shot_goal:first.shot_goal,focus_move:'none',staging}]
+        },crypto.randomUUID());
+        await load(offset,scene.scene_id);setSnapshot(null);await onRefresh();
+       })}>Save staging (G4/G5 stale)</button>
+    </>}
     <h4>Authored motion events</h4>
     <ul>{scene.events.map(e=><li key={e.event_id}>{e.preset_id} · {e.event_id} · frames {e.start_frame}–{e.start_frame+e.duration_frames}</li>)}</ul>
     <p><small>Source claim/cue identities and G3 asset IDs cannot be overwritten by direct browser props. Unsupported direct layout/motion replacement is rejected by the API.</small></p>
