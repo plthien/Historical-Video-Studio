@@ -237,8 +237,8 @@ export const BaseTemplate:React.FC<{scene:Scene;frame:number;media:ResolvedMedia
    fail('RENDER_WHIP_PARAMS',whip.event_id,'Invalid registered screen transition params');
   const p=eventProgress(whip,frame);
   const dir=direction==='left'?-1:1;
-  screenStyle={...screenStyle,transform:`translateX(${dir*(1-p)*sweep_px}px)`,
-   filter:`blur(${(1-p)*motion_blur_px}px)`};
+  screenStyle={...screenStyle,transform:`translateX(${dir*(1-p)*Number(sweep_px)}px)`,
+   filter:`blur(${(1-p)*Number(motion_blur_px)}px)`};
  }
  const back:Record<string,string>={map:'#dfddcf',portrait:'#ded8c9',collage:'#cbc3b2',timeline:'#f0e7d4',paper:'#e6ddcb',split:'#d8d5c7',fact:'#f3ebde',quote:'#e8dfd1',causal:'#d9d4c4'};
  return <div style={{width:1920,height:1080,position:'relative',overflow:'hidden',background:back[decor??'paper']}}>
