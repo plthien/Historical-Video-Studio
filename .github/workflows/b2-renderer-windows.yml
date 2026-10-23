@@ -118,6 +118,12 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           npm --prefix renderer run test:frames -- --case player-renderer-parity
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          & .venv/Scripts/python.exe -m renderer.scripts.prepare_host_fixture --scene-count 61
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          $env:HVS_B2_LONGFORM = '1'
+          npm --prefix frontend run test:e2e -- --grep "longform-storyboard"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          Remove-Item Env:\HVS_B2_LONGFORM
           npm --prefix renderer run render:smoke -- --case 60-scene-longform
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Upload exact-render screenshot MP4 and ffprobe evidence
@@ -129,5 +135,6 @@ jobs:
             renderer/.artifacts/renders/
             renderer/.artifacts/compiled-30.json
             frontend/.artifacts/parity/
+            frontend/.artifacts/longform/
             frontend/test-results/
           if-no-files-found: warn
