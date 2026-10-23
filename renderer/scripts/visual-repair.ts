@@ -70,7 +70,8 @@ for(const total of [3,6]){
  const rest=s.layers.filter(x=>x.layer_kind!=='date');
  const newDates=Array.from({length:total},(_,i)=>({...structuredClone(base),
   layer_id:'synthetic_date_'+total+'_'+i,text:String(1800+10*i),
-  rect_px:{x:Math.round(100+i*(1700/total)),y:365,w:140,h:150},source_claim_id:base.source_claim_id}));
+  rect_px:{x:Math.round(100+i*(1700/total)),y:365,w:140,h:150},
+  text_layout:{...base.text_layout,font_size_px:36},source_claim_id:base.source_claim_id}));
  s.layers=[...rest,...newDates];
  s.staging.beat_sequence=newDates.map((date,i)=>({
   beat_id:'beat_synthetic_'+total+'_'+i,
@@ -83,6 +84,7 @@ for(const total of [3,6]){
  assertTimeline(t);
  const g=timelineRail(s);expect(g.edges.length===total-1,'T05 exact N−1 rail connectors');
  await frame(t,150,'T05-SYNTHETIC-'+total+'-date');
+ await frame(t,s.duration_frames-2,'T05-SYNTHETIC-'+total+'-hold');
  const bad=structuredClone(s);bad.layers.find(l=>l.layer_id===newDates[0].layer_id)!.text='9999';
  let rejected=false;try{timelineRail(bad);}catch(e){rejected=e instanceof RenderBlocked;}
  expect(rejected,'T05 reversed chronology must fail closed');
