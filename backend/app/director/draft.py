@@ -98,7 +98,7 @@ def load(store, project):
 
 
 def publish(store, project, timeline, blueprint, maps, map_requests, font_identity,
-            *, expected_revision, previous=None, edit_kind=None):
+            *, expected_revision, previous=None, edit_kind=None, layer_overrides=None):
     """Immutable artifact publication first; atomic pointer/CAS/revision second.
 
     Failed CAS may leave unreachable content-addressed artifacts, never an
@@ -147,6 +147,7 @@ def publish(store, project, timeline, blueprint, maps, map_requests, font_identi
         "word_map_sha256":timeline["word_map_sha256"],
         "asset_snapshot_sha256":timeline["asset_snapshot_sha256"],
         "dependency_fingerprint":timeline["dependency_fingerprint"],
+        "layer_overrides":layer_overrides or {},
     }
     manifest_sha = store.put_artifact(canonical(manifest), "g4_compiled_manifest")
     with store._transaction() as db:
