@@ -12,7 +12,7 @@ import type {HistoryProps} from '../../../renderer/remotion/HistoryComposition';
 
 const root=path.resolve(import.meta.dirname,'../../..');
 const output=path.join(root,'frontend','.artifacts','parity');
-const hash=(input:string)=>createHash('sha256').update(input).digest('hex');
+const hash=(input:string|Buffer)=>createHash('sha256').update(input).digest('hex');
 
 test('storyboard-editor real browser Player vs Node renderStill same immutable frame',async({page,request})=>{
  test.skip(process.env.HVS_B2_FIXTURE!=='1','Requires Windows SQLite controlled G4 approval fixture and both Chromium runtimes');
@@ -26,6 +26,9 @@ test('storyboard-editor real browser Player vs Node renderStill same immutable f
  const identity={timeline:hash(JSON.stringify(props.timeline)),font:props.media.fontSha256,
    sources:Object.values(props.media.assets).map(x=>[x.assetId,x.originalSha256]),
    composition:'HistoricalTimelineV1',fps:30,manifest:approved.draft_manifest_sha256};
+ const fatalErrors:string[]=[];
+ page.on('pageerror',e=>fatalErrors.push(e.message));
+ page.on('console',m=>{if(m.type()==='error'&&/Invalid hook call|useContext|HistoryComposition|React/i.test(m.text()))fatalErrors.push(m.text());});
  const serveUrl=await bundle({entryPoint:path.join(root,'renderer','remotion','entry.tsx')});
  const composition=await selectComposition({serveUrl,id:'HistoricalTimelineV1',inputProps:props});
  mkdirSync(output,{recursive:true});
@@ -54,7 +57,10 @@ test('storyboard-editor real browser Player vs Node renderStill same immutable f
   await page.getByLabel('Seek exact frame').fill(String(frame));
   // Seek input state is not visual evidence.  Wait for the shared Composition
   // to report the requested frame before capturing a Player pixel.
-  await expect(page.locator(`[data-global-frame="${frame}"]`)).toBeVisible({timeout:5000});
+  const owningScene=props.timeline.scenes.find(s=>frame>=s.start_frame&&frame<s.start_frame+s.duration_frames);
+  expect(owningScene,'every sampled global frame must have one owning scene').toBeDefined();
+  await expect(stage.locator(`[data-global-frame="${frame}"][data-scene-id="${owningScene!.scene_id}"]`)).toBeVisible({timeout:10000});
+  expect(fatalErrors,'shared Browser Player must not throw runtime errors').toEqual([]);
   const browserPNG=PNG.sync.read(await stage.screenshot());
   const file=path.join(output,'node-f'+frame+'.png');
   await renderStill({serveUrl,composition,inputProps:props,frame,output:file,imageFormat:'png'});
@@ -77,9 +83,11 @@ test('storyboard-editor real browser Player vs Node renderStill same immutable f
   const browserFile=path.join(output,'browser-f'+frame+'.png');
   writeFileSync(browserFile,PNG.sync.write(browserPNG));
   evidence.push({frame,width:1920,height:1080,meanDiff,pixelMismatch,nodeFile:file,browserFile,
-   nodeSha256:hash(readFileSync(file).toString('base64')),
-   browserSha256:hash(readFileSync(browserFile).toString('base64'))});
+   sceneId:owningScene!.scene_id,
+   nodeSha256:hash(readFileSync(file)),
+   browserSha256:hash(readFileSync(browserFile))});
  }
+ expect(fatalErrors,'no uncaught browser runtime failures').toEqual([]);
  writeFileSync(path.join(output,'b2-player-node-parity.json'),JSON.stringify({status:'LOCAL_PASS',
   source:'SYNTHETIC_SQLITE_APPROVAL_FIXTURE_NOT_REAL_RIGHTS',identity,evidence,
   bounds:{meanDiffLt:20,pixelMismatchLt:0.14}},null,2));
