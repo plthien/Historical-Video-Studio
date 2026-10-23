@@ -155,6 +155,34 @@ const cropLedger={source:'SYNTHETIC_B1_COMPILED_NOT_REAL_RIGHTS',layer:maskSourc
 writeFileSync(resolve(output,'b2-crop-roi.json'),JSON.stringify(cropLedger,null,2));
 result.push({kind:'source_preserving_crop_pixels',...cropLedger});
 
+// Layer-local freeze-hold must visibly pause an overlapping motion phase,
+// while keeping the camera and unrelated layer schedule unchanged.
+const activePop=cases.find(c=>c.name==='pop-in')!.event;
+const popTimeline=structuredClone(timeline);
+popTimeline.scenes[0].events.push(activePop);
+const heldTimeline=structuredClone(popTimeline);
+const frozenEvent=sampleEvent('freeze-hold',{hold_frames:6,preserve_voice:true},
+  'layer_local',[cards[0].layer_id]);
+frozenEvent.start_frame=start+3;
+frozenEvent.duration_frames=6;
+frozenEvent.keyframes=[{frame:0,value:1,easing:'linear'},{frame:6,value:1,easing:'linear'}];
+heldTimeline.scenes[0].events.push(frozenEvent);
+assertTimeline(heldTimeline);
+const holdFrame=start+7;
+const baselineHold=await maskStill(popTimeline,holdFrame,'freeze-baseline');
+const activeHold=await maskStill(heldTimeline,holdFrame,'freeze-active');
+const frozenROI=maskDiff(baselineHold.png,activeHold.png,maskSource);
+if(frozenROI.changedPixels<15)throw Error('B2_LAYER_FREEZE_INERT');
+const preHold=await maskStill(popTimeline,start+2,'freeze-pre-baseline');
+const withPreHold=await maskStill(heldTimeline,start+2,'freeze-pre-candidate');
+if(!preHold.png.data.equals(withPreHold.png.data))throw Error('B2_FREEZE_RETROACTIVE_FRAMES');
+const holdLedger={preset:'freeze-hold',source:'SYNTHETIC',frame:holdFrame,
+ unchangedPreStart:true,roi:frozenROI,
+ PNGs:[baselineHold,activeHold].map(x=>({path:x.path,sha256:x.sha256}))};
+writeFileSync(resolve(output,'b2-freeze-hold.json'),JSON.stringify(holdLedger,null,2));
+result.push(holdLedger);
+
+
 
 if(presets.presets.length!==19||new Set(presets.presets.map(x=>x.render_recipe.primitive)).size!==19)
  throw Error('B2_MOTION_REGISTRY_INCOMPLETE');
