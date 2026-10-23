@@ -15,6 +15,8 @@ export function StoryboardStudio({projectId,onRefresh}:{projectId:string;onRefre
  const [layerId,setLayerId]=useState<string>('');
  const [layerX,setLayerX]=useState<number>(0);
  const [layerY,setLayerY]=useState<number>(0);
+ const [layerW,setLayerW]=useState<number>(1);
+ const [layerH,setLayerH]=useState<number>(1);
  const [cropX,setCropX]=useState<number>(0);
  const [cropY,setCropY]=useState<number>(0);
  const [cropW,setCropW]=useState<number>(1);
@@ -53,9 +55,11 @@ export function StoryboardStudio({projectId,onRefresh}:{projectId:string;onRefre
  },[scene?.scene_id,scene?.variant_id]);
  useEffect(()=>{
    if(selectedLayer){setLayerX(selectedLayer.rect_px.x);setLayerY(selectedLayer.rect_px.y);
+    setLayerW(selectedLayer.rect_px.w);setLayerH(selectedLayer.rect_px.h);
     setCropX(selectedLayer.crop_normalized.x);setCropY(selectedLayer.crop_normalized.y);
     setCropW(selectedLayer.crop_normalized.w);setCropH(selectedLayer.crop_normalized.h);}
  },[selectedLayer?.layer_id,selectedLayer?.rect_px.x,selectedLayer?.rect_px.y,
+    selectedLayer?.rect_px.w,selectedLayer?.rect_px.h,
     selectedLayer?.crop_normalized.x,selectedLayer?.crop_normalized.y,
     selectedLayer?.crop_normalized.w,selectedLayer?.crop_normalized.h]);
  useEffect(()=>{setStageOp(scene?.direction_beats[0]?.staging[0]?.operation??'');},
@@ -123,6 +127,8 @@ export function StoryboardStudio({projectId,onRefresh}:{projectId:string;onRefre
     <input type="number" id="sb-layer-y" value={layerY} min={0} max={1079}
       onChange={e=>setLayerY(Number(e.target.value))}/>
     <button disabled={!!pending||!selectedLayer||
+      !Number.isInteger(layerX)||!Number.isInteger(layerY)||layerX<0||layerY<0||
+      layerX+selectedLayer.rect_px.w>1920||layerY+selectedLayer.rect_px.h>1080||
       (selectedLayer.rect_px.x===layerX&&selectedLayer.rect_px.y===layerY)}
       onClick={()=>void operation('Save layer position',async()=>{
         if(!selectedLayer)return;
@@ -130,6 +136,26 @@ export function StoryboardStudio({projectId,onRefresh}:{projectId:string;onRefre
           {x_px:layerX,y_px:layerY},page.project_revision,crypto.randomUUID());
         await load(offset,scene.scene_id);setSnapshot(null);await onRefresh();
       })}>Save position (G4/G5 stale)</button>
+    <h4>Media layer dimensions — unchanged approved source</h4>
+    <label htmlFor="sb-layer-w">Width (pixels)</label>
+    <input type="number" id="sb-layer-w" min={1} max={1920-layerX}
+      value={layerW} disabled={!!pending||!selectedLayer||selectedLayer.text!==null}
+      onChange={e=>setLayerW(Number(e.target.value))}/>
+    <label htmlFor="sb-layer-h">Height (pixels)</label>
+    <input type="number" id="sb-layer-h" min={1} max={1080-layerY}
+      value={layerH} disabled={!!pending||!selectedLayer||selectedLayer.text!==null}
+      onChange={e=>setLayerH(Number(e.target.value))}/>
+    {selectedLayer?.text!=null&&<small>Text box dimensions are fixed by pinned GDI font geometry; resizing requires remeasurement.</small>}
+    <button disabled={!!pending||!selectedLayer||selectedLayer.text!==null||
+      !Number.isInteger(layerW)||!Number.isInteger(layerH)||layerW<1||layerH<1||
+      layerX+layerW>1920||layerY+layerH>1080||
+      (layerW===selectedLayer.rect_px.w&&layerH===selectedLayer.rect_px.h)}
+      onClick={()=>void operation('Save media dimensions',async()=>{
+        if(!selectedLayer)return;
+        await storyboardApi.geometry(projectId,scene.scene_id,selectedLayer.layer_id,
+          {w_px:layerW,h_px:layerH},page.project_revision,crypto.randomUUID());
+        await load(offset,scene.scene_id);setSnapshot(null);await onRefresh();
+      })}>Save size (G4/G5 stale)</button>
     <h4>Normalized crop — same approved original</h4>
     <div className="buttonrow">
       <label>X <input aria-label="Crop X" type="number" min={0} max={1} step={0.01} value={cropX} onChange={e=>setCropX(Number(e.target.value))}/></label>
