@@ -30,7 +30,7 @@ export const storyboardApi={
  variant:(id:string,scene:string,variant:string,revision:number,key:string)=>
   request<EditResult>(path(id)+'/scenes/'+encodeURIComponent(scene),'PATCH',
     {expected_revision:revision,scene_id:scene,changes:{variant_id:variant}},key),
- geometry:(id:string,scene:string,layer:string,patch:{x_px:number;y_px:number},revision:number,key:string)=>
+ geometry:(id:string,scene:string,layer:string,patch:Partial<{x_px:number;y_px:number;w_px:number;h_px:number}>,revision:number,key:string)=>
   request<EditResult>(path(id)+'/scenes/'+encodeURIComponent(scene),'PATCH',
     {expected_revision:revision,scene_id:scene,changes:{layer_edits:[{layer_id:layer,...patch}]}},key),
  crop:(id:string,scene:string,layer:string,crop_normalized:{x:number;y:number;w:number;h:number},revision:number,key:string)=>
