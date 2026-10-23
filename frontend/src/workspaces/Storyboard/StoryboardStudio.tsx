@@ -12,11 +12,15 @@ export function StoryboardStudio({projectId,onRefresh}:{projectId:string;onRefre
  const [offset,setOffset]=useState(0);
  const [selected,setSelected]=useState<string|null>(null);
  const [variant,setVariant]=useState('A');
+ const [layerId,setLayerId]=useState<string>('');
+ const [layerX,setLayerX]=useState<number>(0);
+ const [layerY,setLayerY]=useState<number>(0);
  const [snapshot,setSnapshot]=useState<BrowserPreview|null>(null);
  const [pending,setPending]=useState<string|null>(null);
  const [error,setError]=useState('');
  const [success,setSuccess]=useState('');
  const scene=useMemo(()=>page?.scenes.find(s=>s.scene_id===selected)??null,[page,selected]);
+ const selectedLayer=useMemo(()=>scene?.layers.find(l=>l.layer_id===layerId)??null,[scene,layerId]);
  const load=useCallback(async (nextOffset:number,preferred?:string)=>{
    const result=await storyboardApi.scenes(projectId,nextOffset,24);
    setPage(result);setOffset(nextOffset);
@@ -30,7 +34,14 @@ export function StoryboardStudio({projectId,onRefresh}:{projectId:string;onRefre
    }).catch(e=>{if(live)setError(describe(e));});
    return ()=>{live=false;};
  },[projectId]);
- useEffect(()=>{if(scene)setVariant(scene.variant_id);},[scene?.scene_id,scene?.variant_id]);
+ useEffect(()=>{
+   if(scene){setVariant(scene.variant_id);
+    setLayerId(scene.layers[0]?.layer_id??'');
+   }
+ },[scene?.scene_id,scene?.variant_id]);
+ useEffect(()=>{
+   if(selectedLayer){setLayerX(selectedLayer.rect_px.x);setLayerY(selectedLayer.rect_px.y);}
+ },[selectedLayer?.layer_id,selectedLayer?.rect_px.x,selectedLayer?.rect_px.y]);
  async function operation(label:string,run:()=>Promise<void>){
    if(pending)return;
    setPending(label);setError('');setSuccess('');
@@ -77,6 +88,25 @@ export function StoryboardStudio({projectId,onRefresh}:{projectId:string;onRefre
         await storyboardApi.variant(projectId,scene.scene_id,variant,page.project_revision,crypto.randomUUID());
         await load(offset,scene.scene_id);setSnapshot(null);await onRefresh();
       })}>{pending==='Save storyboard variant'?'Saving…':'Save G4 revision (G4/G5 stale)'}</button>
+    <h4>Presentation geometry — frozen layer source</h4>
+    <label htmlFor="sb-layer">Layer to reposition</label>
+    <select id="sb-layer" value={layerId} onChange={e=>setLayerId(e.target.value)}>
+      {scene.layers.map(l=><option key={l.layer_id} value={l.layer_id}>{l.layer_kind} · {l.layer_id}</option>)}
+    </select>
+    <label htmlFor="sb-layer-x">X (pixels)</label>
+    <input type="number" id="sb-layer-x" value={layerX} min={0} max={1919}
+      onChange={e=>setLayerX(Number(e.target.value))}/>
+    <label htmlFor="sb-layer-y">Y (pixels)</label>
+    <input type="number" id="sb-layer-y" value={layerY} min={0} max={1079}
+      onChange={e=>setLayerY(Number(e.target.value))}/>
+    <button disabled={!!pending||!selectedLayer||
+      (selectedLayer.rect_px.x===layerX&&selectedLayer.rect_px.y===layerY)}
+      onClick={()=>void operation('Save layer position',async()=>{
+        if(!selectedLayer)return;
+        await storyboardApi.geometry(projectId,scene.scene_id,selectedLayer.layer_id,
+          {x_px:layerX,y_px:layerY},page.project_revision,crypto.randomUUID());
+        await load(offset,scene.scene_id);setSnapshot(null);await onRefresh();
+      })}>Save position (G4/G5 stale)</button>
     <h4>Frozen layers / approved sources</h4>
     <div style={{maxHeight:220,overflowY:'auto'}}>
      {scene.layers.map(l=><p key={l.layer_id}><strong>{l.layer_kind}</strong> · {l.layer_id}
