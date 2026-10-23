@@ -5,7 +5,8 @@ import type {HistoryProps} from '../../../renderer/remotion/HistoryComposition';
 export interface StoryboardScene {
   scene_id:string;setup_id:string;template_id:string;variant_id:string;
   start_frame:number;duration_frames:number;
-  layers:{layer_id:string;layer_kind:string;text:string|null;asset_id:string|null}[];
+  layers:{layer_id:string;layer_kind:string;text:string|null;asset_id:string|null;
+    rect_px:{x:number;y:number;w:number;h:number}}[];
   events:{event_id:string;preset_id:string;start_frame:number;duration_frames:number}[];
   diagnostics:string[];
 }
@@ -27,6 +28,9 @@ export const storyboardApi={
  variant:(id:string,scene:string,variant:string,revision:number,key:string)=>
   request<EditResult>(path(id)+'/scenes/'+encodeURIComponent(scene),'PATCH',
     {expected_revision:revision,scene_id:scene,changes:{variant_id:variant}},key),
+ geometry:(id:string,scene:string,layer:string,patch:{x_px:number;y_px:number},revision:number,key:string)=>
+  request<EditResult>(path(id)+'/scenes/'+encodeURIComponent(scene),'PATCH',
+    {expected_revision:revision,scene_id:scene,changes:{layer_edits:[{layer_id:layer,...patch}]}},key),
  direction:(id:string,body:unknown,key:string)=>
   request<EditResult>(path(id)+'/direction-revisions','POST',body,key)
 };
