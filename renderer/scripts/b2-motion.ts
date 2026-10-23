@@ -1,0 +1,97 @@
+/** B2-04 native Windows Remotion motion-phase discriminators, synthetic B1 inputs. */
+import {createHash} from 'node:crypto';
+import {readFileSync,writeFileSync,mkdirSync} from 'node:fs';
+import {resolve} from 'node:path';
+import {spawnSync} from 'node:child_process';
+import {bundle} from '@remotion/bundler';
+import {renderMedia,renderStill,selectComposition} from '@remotion/renderer';
+import {PNG} from 'pngjs';
+import type {Timeline,Motion,Scene} from '../remotion/schema';
+import {assertTimeline,RenderBlocked} from '../remotion/schema';
+import {loadApprovedMedia,makeSyntheticManifest} from './media';
+import presets from '../../contracts/registries/motion-presets.v1.json';
+
+const root=resolve(import.meta.dirname,'..');
+const output=resolve(root,'.artifacts/renders');
+mkdirSync(output,{recursive:true});
+const compiled=JSON.parse(readFileSync(resolve(root,'.artifacts/compiled-30.json'),'utf8')) as Record<string,Timeline>;
+const scene=compiled.A.scenes.find(s=>s.template_id==='T03');
+if(!scene)throw Error('B2_MOTION_T03_MISSING');
+const timeline=structuredClone(compiled.A);
+timeline.scenes=[{...structuredClone(scene),start_frame:0}];
+timeline.total_frames=scene.duration_frames;
+const cards=timeline.scenes[0].layers.filter(l=>l.layer_kind==='archival_photo');
+if(cards.length!==3)throw Error('B2_MOTION_CARD_ASSETS_MISSING');
+const font=resolve(process.env.WINDIR??'C:\\Windows','Fonts','arial.ttf');
+const sourceDir=resolve(root,'.artifacts/media/b2-motion');
+const hashing=(bytes:Buffer)=>createHash('sha256').update(bytes).digest('hex');
+const baseline=structuredClone(timeline.scenes[0].events[0]);
+const duration=Math.min(20,Math.max(3,Math.floor(scene.duration_frames/8)));
+const start=Math.min(scene.duration_frames-duration-1,Math.max(0,Math.floor(scene.duration_frames/3)));
+function sampleEvent(preset:string,params:Record<string,unknown>,space:string,targets:string[]):Motion{
+ return {...structuredClone(baseline),event_id:'event_b2_'+preset.replace(/-/g,'_'),
+  preset_id:preset,layer_id:targets[0],affected_layer_ids:targets,
+  start_frame:start,duration_frames:duration,motion_space:space,params,
+  stagger:null,keyframes:[{frame:0,value:0,easing:'linear'},{frame:duration,value:1,easing:'ease_in_out'}]};
+}
+const cases=[
+ {name:'cross-dissolve',event:sampleEvent('cross-dissolve',
+  {out_layer_id:cards[0].layer_id,in_layer_id:cards[1].layer_id,mix_curve:'ease_in_out'},
+  'screen',[cards[0].layer_id,cards[1].layer_id])},
+ {name:'whip-pan',event:sampleEvent('whip-pan',
+  {direction:'left',sweep_px:150,motion_blur_px:8,max_use_per_minute:1},
+  'screen',[cards[0].layer_id])},
+];
+const serveUrl=await bundle({entryPoint:resolve(root,'remotion/entry.tsx')});
+const result:unknown[]=[];
+for(const row of cases){
+ const t=structuredClone(timeline);
+ t.scenes[0].events.push(row.event);
+ assertTimeline(t);
+ const media=loadApprovedMedia(t,makeSyntheticManifest(t,sourceDir,font));
+ const comp=await selectComposition({serveUrl,id:'HistoricalTimelineV1',inputProps:{timeline:t,media}});
+ const sampleFrames=[start,start+Math.floor(duration/2),start+duration];
+ const hashes:string[]=[];
+ for(const frame of sampleFrames){
+  const file=resolve(output,'b2-'+row.name+'-'+frame+'.png');
+  await renderStill({serveUrl,composition:comp,inputProps:{timeline:t,media},frame,output:file,imageFormat:'png'});
+  const bytes=readFileSync(file),png=PNG.sync.read(bytes);
+  if(png.width!==1920||png.height!==1080||new Set(png.data).size<3)throw Error('B2_MOTION_BLANK_'+row.name);
+  hashes.push(hashing(Buffer.from(png.data)));
+  result.push({preset:row.name,frame,sha256:hashing(bytes),pixelHash:hashes.at(-1),source:'SYNTHETIC'});
+ }
+ if(new Set(hashes).size<2)throw Error('B2_MOTION_PHASES_INERT_'+row.name);
+}
+if(presets.presets.length!==19||new Set(presets.presets.map(x=>x.render_recipe.primitive)).size!==19)
+ throw Error('B2_MOTION_REGISTRY_INCOMPLETE');
+let malformed=structuredClone(timeline);
+malformed.scenes[0].events.push({...cases[0].event,params:{...cases[0].event.params,in_layer_id:'layer_does_not_exist'}});
+let failClosed=false;
+try{assertTimeline(malformed);}catch(e){failClosed=e instanceof RenderBlocked&&e.code==='RENDER_MOTION_PARAMS';}
+if(!failClosed) {
+ // The property passes the schema's identifier grammar; the compositor must
+ // still reject the unresolvable target before rendering.
+ const media=loadApprovedMedia(malformed,makeSyntheticManifest(malformed,sourceDir,font));
+ const comp=await selectComposition({serveUrl,id:'HistoricalTimelineV1',inputProps:{timeline:malformed,media}});
+ try{await renderStill({serveUrl,composition:comp,inputProps:{timeline:malformed,media},frame:start+5,
+   output:resolve(output,'b2-forged-crossfade.png'),imageFormat:'png'});}catch{failClosed=true;}
+}
+if(!failClosed)throw Error('B2_CROSSFADE_FORGED_TARGET_ACCEPTED');
+if(process.argv[2]==='render'){
+ const media=loadApprovedMedia(timeline,makeSyntheticManifest(timeline,sourceDir,font));
+ const comp=await selectComposition({serveUrl,id:'HistoricalTimelineV1',inputProps:{timeline,media}});
+ const out=resolve(output,'b2-multi-layer-synthetic.mp4');
+ await renderMedia({serveUrl,composition:comp,inputProps:{timeline,media},outputLocation:out,
+  codec:'h264',pixelFormat:'yuv420p',crf:22,overwrite:true});
+ const probe=spawnSync('ffprobe',['-v','error','-show_entries','stream=codec_name,width,height,r_frame_rate',
+ '-select_streams','v:0','-of','json',out],{encoding:'utf8'});
+ if(probe.status!==0)throw Error('B2_FFPROBE_FAILED '+probe.stderr);
+ const info=JSON.parse(probe.stdout).streams[0];
+ if(info.codec_name!=='h264'||info.width!==1920||info.height!==1080||info.r_frame_rate!=='30/1')
+  throw Error('B2_MOTION_MP4_INVALID');
+ result.push({mp4:out,sha256:hashing(readFileSync(out)),ffprobe:info,source:'SYNTHETIC'});
+}
+writeFileSync(resolve(output,'b2-motion-phases.json'),JSON.stringify({status:'LOCAL_PASS',
+ registryCount:19,cases:result,source:'SYNTHETIC_B1_COMPILED_NOT_LIVE_APPROVED'},null,2));
+console.log(JSON.stringify({status:'LOCAL_PASS',renderer:'Remotion Chromium',
+ phasePNGs:cases.length*3,source:'SYNTHETIC',mp4:process.argv[2]==='render'}));
