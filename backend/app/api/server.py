@@ -23,6 +23,7 @@ from backend.app.voice.attempts import VoiceService
 from backend.app.voice.workflow import FinalVoiceWorkflow
 from backend.app.api.voice import mount as mount_voice
 from backend.app.api.assets import mount as mount_assets
+from backend.app.api.storyboard import mount as mount_storyboard
 
 
 class ProjectInput(BaseModel):
@@ -88,7 +89,7 @@ def create_app(database: str | Path | None = None, media_root: str | Path | None
 
     app = FastAPI(title="Historical Video Studio Local API", version="1.0.0", lifespan=lifespan)
     app.add_middleware(CORSMiddleware, allow_origins=["http://127.0.0.1:5173", "http://localhost:5173"],
-                       allow_credentials=False, allow_methods=["GET", "POST", "PUT"],
+                       allow_credentials=False, allow_methods=["GET", "POST", "PUT", "PATCH"],
                        allow_headers=["Content-Type", "Idempotency-Key"])
     app.state.store, app.state.gates, app.state.queue = store, gates, queue
     app.state.voice = voice_service
@@ -96,9 +97,9 @@ def create_app(database: str | Path | None = None, media_root: str | Path | None
 
     @app.exception_handler(ContractViolation)
     async def violation(_request: Request, exc: ContractViolation):
-        if "CONFLICT" in exc.code or exc.code in ("GATE_ILLEGAL_TRANSITION", "JOB_RETRY_FORBIDDEN", "IDEMPOTENCY_IN_PROGRESS"):
+        if "CONFLICT" in exc.code or exc.code in ("GATE_ILLEGAL_TRANSITION", "JOB_RETRY_FORBIDDEN", "IDEMPOTENCY_IN_PROGRESS", "G4_DRAFT_STALE"):
             status = 409
-        elif exc.code in ("STORY_NOT_FOUND", "CANDIDATE_NOT_READY", "WORD_MAP_STALE",
+        elif exc.code in ("STORY_NOT_FOUND", "CANDIDATE_NOT_READY", "WORD_MAP_STALE", "G4_SOURCE_STALE", "G4_DRAFT_UNREGISTERED", "G3_ASSET_UNAPPROVED", "PLAYER_PREVIEW_UNAVAILABLE",
                                "G1_APPROVAL_REQUIRED", "VOICE_STORY_STALE", "VOICE_SOURCE_STALE",
                                 "FINAL_AUDIO_SOURCE_STALE", "FINAL_AUDIO_SELECTION_INCOMPLETE"):
             status = 424
@@ -226,6 +227,7 @@ def create_app(database: str | Path | None = None, media_root: str | Path | None
 
     mount_voice(app, voice_service, idempotent, final_voice)
     mount_assets(app, store, gates, queue, idempotent)
+    mount_storyboard(app, store, idempotent)
 
     @app.api_route("/api/v1/{remaining:path}", methods=["GET", "POST", "PUT", "PATCH", "DELETE"])
     def unavailable(remaining: str):
