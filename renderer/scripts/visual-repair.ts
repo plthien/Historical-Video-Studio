@@ -10,6 +10,7 @@ import {timelineRail} from '../remotion/templates/T05';
 import {HistoricalPlayer,prepareApprovedPlayerOnLocalHost} from '../remotion/PlayerMount';
 import {assertTimeline,RenderBlocked,type Timeline,type Scene} from '../remotion/schema';
 import {makeSyntheticManifest,loadApprovedMedia} from './media';
+import {adaptSyntheticT05Chronology} from './synthetic-t05-chronology';
 const root=resolve(import.meta.dirname,'..');
 const input=JSON.parse(readFileSync(resolve(root,'.artifacts/compiled-30.json'),'utf8')) as Record<string,Timeline>;
 const font=resolve(process.env.WINDIR??'C:\\Windows','Fonts','arial.ttf');
@@ -19,7 +20,8 @@ const expect=(v:boolean,why:string)=>{if(!v)throw Error('REPAIR_ASSERTION_FAIL: 
 const selected=(id:string):Timeline=>{
  const t=structuredClone(input.A),s=t.scenes.find(x=>x.template_id===id);
  if(!s)throw Error('Missing real B1 '+id);
- t.scenes=[{...s,start_frame:0}];t.total_frames=s.duration_frames;assertTimeline(t);return t;
+ t.scenes=[{...s,start_frame:0}];t.total_frames=s.duration_frames;
+ const adapted=adaptSyntheticT05Chronology(t);assertTimeline(adapted);return adapted;
 };
 const serveUrl=await bundle({entryPoint:resolve(root,'remotion/entry.tsx')});
 const evidence:any[]=[];
