@@ -22,7 +22,7 @@ export function timelineRail(scene:Scene){
  const axis=before?end+42:start-42;
  const ordered=[...dates].sort((a,b)=>(horizontal?a.rect_px.x-b.rect_px.x:a.rect_px.y-b.rect_px.y));
  const years=ordered.map(l=>l.text!.match(/\b\d{3,4}\b/)?.[0]).map(x=>x?Number(x):null);
- if(years.every(x=>x!==null)&&years.some((y,i)=>i>0&&y!>years[i-1]!))
+ if(years.every(x=>x!==null)&&years.some((y,i)=>i>0&&y!<=years[i-1]!))
   fail('T05_CHRONOLOGY_INVALID',scene.setup_id,'Authored dates must be strictly increasing');
  const anchor=(layer:Layer):[number,number]=>{
   const b=layer.rect_px;
