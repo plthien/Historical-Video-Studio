@@ -69,7 +69,15 @@ test('storyboard-editor real browser Player vs Node renderStill same immutable f
   expect(bounds,'Composition surface must be mounted').not.toBeNull();
   expect(Math.abs(bounds!.width-1920)).toBeLessThan(1.01);
   expect(Math.abs(bounds!.height-1080)).toBeLessThan(1.01);
-  const browserPNG=PNG.sync.read(await renderedSurface.screenshot({scale:'css'}));
+  const screenshot=PNG.sync.read(await renderedSurface.screenshot({scale:'css'}));
+  // The Chromium screenshot may ceil a fractional CSS surface by one pixel.
+  // Trim that raster overhang only; never rescale Composition pixels or raise thresholds.
+  expect(screenshot.width).toBeGreaterThanOrEqual(1920);
+  expect(screenshot.width).toBeLessThanOrEqual(1921);
+  expect(screenshot.height).toBeGreaterThanOrEqual(1080);
+  expect(screenshot.height).toBeLessThanOrEqual(1081);
+  const browserPNG=new PNG({width:1920,height:1080});
+  PNG.bitblt(screenshot,browserPNG,0,0,1920,1080,0,0);
   const file=path.join(output,'node-f'+frame+'.png');
   await renderStill({serveUrl,composition,inputProps:props,frame,output:file,imageFormat:'png'});
   const nodePNG=PNG.sync.read(readFileSync(file));
