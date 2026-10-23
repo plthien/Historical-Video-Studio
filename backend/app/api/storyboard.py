@@ -148,13 +148,18 @@ def mount(app, store, idempotent):
                limit: int = Query(default=30, ge=1, le=100)):
         head = current(store, project_id)
         items = head["timeline"]["scenes"]
+        authored_plans = {p["setup_id"]: p for p in head["blueprint"]["setup_plans"]}
         return {"project_revision": head["revision"], "draft_manifest_sha256": head["manifest_sha256"],
+                "story_revision_sha256": head["blueprint"]["story_revision_sha256"],
                 "status": "G4_DRAFT_NOT_OPERATOR_APPROVED",
                 "total": len(items), "offset": offset, "limit": limit,
                 "scenes": [{"scene_id": s["scene_id"], "setup_id": s["setup_id"],
                             "template_id": s["template_id"], "variant_id": s["variant_id"],
                             "start_frame": s["start_frame"], "duration_frames": s["duration_frames"],
                             "layers": s["layers"], "events": s["events"],
+                            "direction_beats": [{"beat_id": b["beat_id"], "shot_goal": b["shot_goal"],
+                                                 "staging": b["staging"]}
+                                                for b in authored_plans[s["setup_id"]]["editorial_direction"]["visual_beats"]],
                             "diagnostics": []} for s in items[offset:offset+limit]]}
 
     @app.get("/api/v1/projects/{project_id}/storyboard/timeline")
