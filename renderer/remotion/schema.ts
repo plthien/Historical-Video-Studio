@@ -20,6 +20,16 @@ const ajv=new Ajv2020({allErrors:true,strict:false});
 const validate=ajv.compile(timelineSchema);
 const validLayouts=new Set(layouts.layouts.map(l=>l.template_id+':'+l.variant_id));
 const motionById=new Map(motions.presets.map(m=>[m.preset_id,m]));
+const paramValidators=new Map(motions.presets.map(m=>[m.preset_id,ajv.compile(m.parameter_schema)]));
+const implementedPrimitives=new Set([
+ 'layer_scale','layer_stagger','svg_path_length','mask_progress','verified_text_reveal',
+ 'number_interpolate','word_transform','layer_depth_separation','two_scene_mask_wipe',
+ 'camera_focus_tracking','camera_focus_push','static_hold','short_transition_pan',
+ 'dual_opacity_mix','frame_cut','word_mask_highlight','verified_geometry_mask',
+ 'paper_card_transform','editorial_bezier_or_line_draw',
+]);
+if(motionById.size!==19||motions.presets.some(m=>!implementedPrimitives.has(m.render_recipe.primitive)))
+ fail('RENDER_MOTION_PRIMITIVE_UNSUPPORTED','registry','All 19 pinned v1.2.0 recipes must be implemented');
 export class RenderBlocked extends Error{constructor(readonly code:string, readonly subject:string, detail:string){super(code+' at '+subject+': '+detail);this.name='RenderBlocked';}}
 export const fail=(code:string,at:string,message:string):never=>{throw new RenderBlocked(code,at,message)};
 export function assertTimeline(input:unknown):asserts input is Timeline {
@@ -37,7 +47,13 @@ export function assertTimeline(input:unknown):asserts input is Timeline {
    const r=l.rect_px,c=l.crop_normalized;
    if(r.w<=0||r.h<=0||r.x<0||r.y<0||r.x+r.w>1920||r.y+r.h>1080)fail('RENDER_RECT_INVALID',l.layer_id,'Compiled rect exceeds canvas');
    if(c.x<0||c.y<0||c.w<=0||c.h<=0||c.x+c.w>1.0000001||c.y+c.h>1.0000001)fail('RENDER_CROP_INVALID',l.layer_id,'UV outside original');
-   if(l.mask.kind!=='none')fail('RENDER_MASK_UNSUPPORTED',l.layer_id,'Requires separately verified G3 derivative mask');
+   if(l.mask.kind==='polygon_asset')
+    fail('RENDER_MASK_DERIVATIVE_UNAPPROVED',l.layer_id,'Polygon mask needs a separately reviewed G3 derivative source, unavailable in this contract');
+   if(!['none','rectangle','ellipse'].includes(l.mask.kind)||
+      (l.mask.kind==='none'&&l.mask.feather_px!==0)||
+      (l.mask.kind!=='none'&&l.mask.asset_id!==null))
+    fail('RENDER_MASK_UNTRUSTED',l.layer_id,'Only geometry-native masks can omit a G3 mask asset');
+   if(l.mask.feather_px>40)fail('RENDER_MASK_FEATHER',l.layer_id,'Limit native feather to 40 pixels');
    if(l.parent_layer_id&&!ids.has(l.parent_layer_id))fail('RENDER_PARENT_UNKNOWN',l.layer_id,'Unknown hierarchy parent');
    if(l.asset_id&&!s.asset_ids.includes(l.asset_id))fail('RENDER_ASSET_UNLISTED',l.layer_id,'Asset absent from frozen scene manifest');
   }
@@ -47,6 +63,18 @@ export function assertTimeline(input:unknown):asserts input is Timeline {
    if(!ids.has(e.layer_id)||e.affected_layer_ids.some(id=>!ids.has(id)))fail('RENDER_MOTION_TARGET',e.event_id,'Unresolved layer reference');
    if(e.start_frame<0||e.start_frame+e.duration_frames>s.duration_frames)fail('RENDER_MOTION_BOUNDS',e.event_id,'Event outside scene');
    if(e.motion_space!==spec!.render_recipe.transform_space)fail('RENDER_MOTION_SPACE',e.event_id,'Compiled motion-space mismatches registered preset');
+   if(!implementedPrimitives.has(spec!.render_recipe.primitive))
+    fail('RENDER_MOTION_PRIMITIVE_UNSUPPORTED',e.event_id,'Compiled recipe has no compositor');
+   const validateParams=paramValidators.get(e.preset_id)!;
+   if(!validateParams(e.params))fail('RENDER_MOTION_PARAMS',e.event_id,
+    ajv.errorsText(validateParams.errors,{separator:'; '}));
+   if(e.duration_frames<spec!.min_duration_frames||e.duration_frames>spec!.max_duration_frames)
+    fail('RENDER_MOTION_DURATION',e.event_id,'Duration differs from registered bounds');
+   if(e.keyframes.length<2||e.keyframes[0]?.frame!==0||
+     e.keyframes[e.keyframes.length-1]?.frame!==e.duration_frames||
+     e.keyframes.some((k,i)=>!Number.isFinite(k.value)||
+      i>0&&k.frame<=e.keyframes[i-1]!.frame))
+    fail('RENDER_MOTION_KEYFRAMES',e.event_id,'Invalid compiled local frame keys');
   }
  }
  if(end!==t.total_frames)fail('RENDER_FRAME_COVERAGE',t.project_id,'Total frame ceiling does not equal scene sum');
