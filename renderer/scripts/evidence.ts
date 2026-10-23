@@ -7,6 +7,7 @@ import {renderStill,renderMedia,selectComposition} from '@remotion/renderer';
 import {PNG} from 'pngjs';
 import {assertTimeline,activeScene,RenderBlocked,type Timeline} from '../remotion/schema';
 import {loadApprovedMedia,makeSyntheticManifest} from './media';
+import {adaptSyntheticT05Chronology} from './synthetic-t05-chronology';
 
 const root=resolve(import.meta.dirname,'..');
 const repo=resolve(root,'..');
@@ -46,9 +47,10 @@ async function oneStill(timeline:Timeline,frame:number,label:string,mediaDir:str
 }
 function isolated(scene:Timeline['scenes'][number], variant:string):Timeline{
  const copy=structuredClone(compiled[variant]) as Timeline;
- copy.scenes=[{...scene,start_frame:0}];copy.total_frames=scene.duration_frames;
- assertTimeline(copy);
- return copy;
+ copy.scenes=[{...structuredClone(scene),start_frame:0}];copy.total_frames=scene.duration_frames;
+ const adapted=adaptSyntheticT05Chronology(copy);
+ assertTimeline(adapted);
+ return adapted;
 }
 for(const {variant,scene} of sourceCases){
  const timeline=isolated(scene,variant);
