@@ -28,8 +28,10 @@ test('longform-storyboard 61 scene real SQLite pagination preview edit and reope
  });
  const list=page.getByRole('listbox',{name:'Storyboard scenes'});
  await expect(list.getByRole('option')).toHaveCount(24);
+ const firstPageFirstOption=await list.getByRole('option').first().textContent();
  await measure('middle page',15000,async()=>{
   await page.getByRole('button',{name:'Next 24'}).click();
+  await expect(list.getByRole('option').first()).not.toHaveText(firstPageFirstOption!);
   await expect(list.getByRole('option')).toHaveCount(24);
   await list.getByRole('option').nth(6).click();
   await expect(list.getByRole('option').nth(6)).toHaveAttribute('aria-selected','true');
@@ -88,8 +90,10 @@ test('longform-storyboard 61 scene real SQLite pagination preview edit and reope
   await list.getByRole('option').nth(6).click();
  });
  const middleRendered=await proveRenderedOwner('render middle scene',list.getByRole('option').nth(6));
+ const middleFirstOption=await list.getByRole('option').first().textContent();
  await measure('navigate back to first',15000,async()=>{
   await page.getByRole('button',{name:'Previous 24'}).click();
+  await expect(list.getByRole('option').first()).not.toHaveText(middleFirstOption!);
   await expect(list.getByRole('option')).toHaveCount(24);
   await list.getByRole('option').first().click();
  });
