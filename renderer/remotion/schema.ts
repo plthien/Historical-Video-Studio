@@ -28,10 +28,11 @@ const implementedPrimitives=new Set([
  'dual_opacity_mix','frame_cut','word_mask_highlight','verified_geometry_mask',
  'paper_card_transform','editorial_bezier_or_line_draw',
 ]);
-if(motionById.size!==19||motions.presets.some(m=>!implementedPrimitives.has(m.render_recipe.primitive)))
- fail('RENDER_MOTION_PRIMITIVE_UNSUPPORTED','registry','All 19 pinned v1.2.0 recipes must be implemented');
+
 export class RenderBlocked extends Error{constructor(readonly code:string, readonly subject:string, detail:string){super(code+' at '+subject+': '+detail);this.name='RenderBlocked';}}
 export const fail=(code:string,at:string,message:string):never=>{throw new RenderBlocked(code,at,message)};
+if(motionById.size!==19||motions.presets.some(m=>!implementedPrimitives.has(m.render_recipe.primitive)))
+ fail('RENDER_MOTION_PRIMITIVE_UNSUPPORTED','registry','All 19 pinned v1.2.0 recipes must be implemented');
 export function assertTimeline(input:unknown):asserts input is Timeline {
  if(!validate(input))fail('RENDER_SCHEMA_INVALID','timeline',ajv.errorsText(validate.errors,{separator:'; '}));
  const t=input as Timeline;
