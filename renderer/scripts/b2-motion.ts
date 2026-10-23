@@ -34,7 +34,14 @@ function sampleEvent(preset:string,params:Record<string,unknown>,space:string,ta
   start_frame:start,duration_frames:duration,motion_space:space,params,
   stagger:null,keyframes:[{frame:0,value:0,easing:'linear'},{frame:duration,value:1,easing:'ease_in_out'}]};
 }
+const syntheticOriginal=makeSyntheticManifest(timeline,sourceDir,font).assets.find(a=>a.assetId===cards[0].asset_id);
+if(!syntheticOriginal)throw Error('B2_PHOTO_SOURCE_UNTRUSTED');
 const cases=[
+ {name:'pop-in',event:sampleEvent('pop-in',
+  {from_scale:0.88,to_scale:1,overshoot:0.07},'layer_local',[cards[0].layer_id])},
+ {name:'photo-card-enter',event:sampleEvent('photo-card-enter',
+  {border_px:11,shadow_px:24,start_rotation_deg:-3,end_rotation_deg:0,
+   source_original_sha256:syntheticOriginal.originalSha256},'layer_local',[cards[0].layer_id])},
  {name:'cross-dissolve',event:sampleEvent('cross-dissolve',
   {out_layer_id:cards[0].layer_id,in_layer_id:cards[1].layer_id,mix_curve:'ease_in_out'},
   'screen',[cards[0].layer_id,cards[1].layer_id])},
@@ -158,6 +165,20 @@ if(process.argv[2]==='render'){
   throw Error('B2_MOTION_MP4_INVALID');
  result.push({mp4:out,sha256:hashing(readFileSync(out)),ffprobe:info,source:'SYNTHETIC'});
 }
+const executedNames=new Set(cases.map(c=>c.name));
+const semanticRows=presets.presets.map(p=>({
+ preset_id:p.preset_id,primitive:p.render_recipe.primitive,motion_space:p.render_recipe.transform_space,
+ source_provenance:'SYNTHETIC_B1_COMPILED_NOT_OPERATOR_RIGHTS',
+ evidence:result.filter((entry):entry is Record<string,unknown>=>typeof entry==='object'&&entry!==null&&
+   'preset' in entry&&(entry as {preset:string}).preset===p.preset_id),
+ result:executedNames.has(p.preset_id)?'PARTIAL_PHASE_PIXEL_PROOF':'NOT_RUN',
+ negative_case:p.preset_id==='cross-dissolve'?'forged_target_blocked':null
+}));
+writeFileSync(resolve(output,'b2-motion-19-presets.json'),JSON.stringify({
+ status:'PARTIAL',registryCount:19,
+ note:'Actual semantic coverage only for sampled presets; registry names do not establish 19/19.',
+ rows:semanticRows
+},null,2));
 writeFileSync(resolve(output,'b2-motion-phases.json'),JSON.stringify({status:'LOCAL_PASS',
  registryCount:19,cases:result,source:'SYNTHETIC_B1_COMPILED_NOT_LIVE_APPROVED'},null,2));
 console.log(JSON.stringify({status:'LOCAL_PASS',renderer:'Remotion Chromium',
