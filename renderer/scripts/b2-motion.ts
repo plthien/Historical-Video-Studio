@@ -134,7 +134,7 @@ if(maskLedger.nativeShape.changedPixels<15)throw Error('B2_NATIVE_ELLIPSE_VISUAL
 if(maskLedger.feather.changedPixels<15)throw Error('B2_NATIVE_FEATHER_VISUALLY_INERT');
 if(maskLedger.reveal.changedPixels<15)throw Error('B2_SHAPE_REVEAL_VISUALLY_INERT');
 writeFileSync(resolve(output,'b2-mask-roi.json'),JSON.stringify(maskLedger,null,2));
-result.push({kind:'native_mask_pixels',...maskLedger});
+result.push({preset:'title-mask-reveal',kind:'native_mask_pixels',...maskLedger});
 
 const cropFixture=structuredClone(timeline);
 const cropTarget=cropFixture.scenes[0].layers.find(l=>l.layer_id===maskSource.layer_id)!;
@@ -215,7 +215,7 @@ if(process.argv[2]==='render'){
   throw Error('B2_MOTION_MP4_INVALID');
  result.push({mp4:out,sha256:hashing(readFileSync(out)),ffprobe:info,source:'SYNTHETIC'});
 }
-const executedNames=new Set(cases.map(c=>c.name));
+const executedNames=new Set([...cases.map(c=>c.name),'title-mask-reveal','freeze-hold']);
 const semanticRows=presets.presets.map(p=>({
  preset_id:p.preset_id,primitive:p.render_recipe.primitive,motion_space:p.render_recipe.transform_space,
  source_provenance:'SYNTHETIC_B1_COMPILED_NOT_OPERATOR_RIGHTS',
