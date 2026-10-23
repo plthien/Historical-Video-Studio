@@ -61,6 +61,23 @@ for(const row of cases){
   result.push({preset:row.name,frame,sha256:hashing(bytes),pixelHash:hashes.at(-1),source:'SYNTHETIC'});
  }
  if(new Set(hashes).size<2)throw Error('B2_MOTION_PHASES_INERT_'+row.name);
+ if(row.name==='whip-pan'&&start>0){
+  const before=start-1;
+  const baseMedia=loadApprovedMedia(timeline,makeSyntheticManifest(timeline,sourceDir,font));
+  const baseComp=await selectComposition({serveUrl,id:'HistoricalTimelineV1',
+    inputProps:{timeline,media:baseMedia}});
+  const basePath=resolve(output,'b2-whip-before-baseline.png');
+  const alteredPath=resolve(output,'b2-whip-before-event.png');
+  await renderStill({serveUrl,composition:baseComp,inputProps:{timeline,media:baseMedia},
+    frame:before,output:basePath,imageFormat:'png'});
+  await renderStill({serveUrl,composition:comp,inputProps:{timeline:t,media},
+    frame:before,output:alteredPath,imageFormat:'png'});
+  const basePixels=PNG.sync.read(readFileSync(basePath)).data;
+  const alteredPixels=PNG.sync.read(readFileSync(alteredPath)).data;
+  if(!basePixels.equals(alteredPixels))
+    throw Error('B2_WHIP_RETROACTIVE_MOTION: transition changed pre-start frame');
+  result.push({preset:row.name,frame:before,preStartPixelMatch:true,source:'SYNTHETIC'});
+ }
 }
 if(presets.presets.length!==19||new Set(presets.presets.map(x=>x.render_recipe.primitive)).size!==19)
  throw Error('B2_MOTION_REGISTRY_INCOMPLETE');
