@@ -1,0 +1,106 @@
+name: B2 Remotion I Native Windows
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+jobs:
+  b2-real-render:
+    runs-on: windows-latest
+    timeout-minutes: 65
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Diff/lineage
+        shell: pwsh
+        run: |
+          git diff --check origin/main...HEAD
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Install exact Remotion lock on Windows
+        shell: pwsh
+        run: |
+          Push-Location renderer
+          try {
+            npm ci --no-audit --no-fund
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          }
+          finally { Pop-Location }
+          npm --prefix renderer run verify:toolchain
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          npm --prefix renderer run typecheck
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Verify real FFmpeg and FFprobe binaries before B1 fixture generation
+        shell: pwsh
+        run: |
+          if (-not (Get-Command ffmpeg -ErrorAction SilentlyContinue) -or -not (Get-Command ffprobe -ErrorAction SilentlyContinue)) {
+            $installed = $false
+            for ($attempt = 1; $attempt -le 3; $attempt++) {
+              choco install ffmpeg --yes --no-progress
+              if ($LASTEXITCODE -eq 0 -and (Get-Command ffmpeg -ErrorAction SilentlyContinue) -and (Get-Command ffprobe -ErrorAction SilentlyContinue)) {
+                $installed = $true; break
+              }
+              if ($attempt -lt 3) { Start-Sleep -Seconds (5 * $attempt) }
+            }
+            if (-not $installed) { throw "FFmpeg and ffprobe unavailable on Windows runner" }
+          }
+      - name: Produce genuine B1 compiler A/B/C synthetic inputs
+        shell: pwsh
+        run: |
+          powershell -NoProfile -ExecutionPolicy Bypass -File scripts/windows/verify-environment.ps1
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          & .venv/Scripts/python.exe -m renderer.scripts.export_b1_fixture
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: B2 targeted visual-functional real-frame repair gates
+        shell: pwsh
+        run: |
+          & .venv/Scripts/python.exe -m renderer.scripts.prepare_host_fixture
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          npm --prefix renderer run test:repair
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Verify shared composition with real pixel hashes
+        shell: pwsh
+        run: |
+          npm --prefix renderer run test:frames -- --case shared-composition
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          npm --prefix renderer run render:smoke -- --case single-scene
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Real Remotion scenes T01 to T05
+        shell: pwsh
+        run: |
+          npm --prefix renderer run test:frames -- --templates T01,T02,T03,T04,T05
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          npm --prefix renderer run render:smoke -- --templates T01,T02,T03,T04,T05
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Real Remotion scenes T06 to T10
+        shell: pwsh
+        run: |
+          npm --prefix renderer run test:frames -- --templates T06,T07,T08,T09,T10
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          npm --prefix renderer run render:smoke -- --templates T06,T07,T08,T09,T10
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Protected B1 regression owners and six smoke checks
+        shell: pwsh
+        run: |
+          & .venv/Scripts/python.exe -m pytest -q tests/visual/test_compiler.py
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          foreach ($case in @("normalize-visual","historical-map","align-scene-cues","compile-layout","compile-motion","compile-longform")) {
+            & .venv/Scripts/python.exe -m backend.tools.smoke --case $case --mode local
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          }
+      - name: Upload exact-render screenshot MP4 and ffprobe evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: b2-real-render-native-windows
+          path: |
+            renderer/.artifacts/renders/
+            renderer/.artifacts/compiled-30.json
+          if-no-files-found: warn
