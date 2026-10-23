@@ -1,0 +1,89 @@
+"""B2-05 real SQLite/G4 host-authorized API regression, SYNTHETIC inputs only."""
+from __future__ import annotations
+import json
+import shutil
+from pathlib import Path
+from tempfile import TemporaryDirectory
+from fastapi.testclient import TestClient
+from backend.app.api.server import create_app
+from backend.app.director import draft
+from backend.app.director.fingerprint import canonical
+from backend.app.projects.storage import ProjectStore
+
+ROOT = Path(__file__).resolve().parents[2]
+
+def main():
+    source = ROOT / "renderer" / ".artifacts" / "approved-player-test"
+    assert (source / "g4.sqlite").is_file(), "Run native Windows prepare_host_fixture first"
+    with TemporaryDirectory(prefix="hvs-b2-storyboard-") as directory:
+        dest = Path(directory)
+        shutil.copy2(source / "g4.sqlite", dest / "g4.sqlite")
+        shutil.copytree(source / "artifacts", dest / "artifacts")
+        store = ProjectStore(dest / "g4.sqlite", dest / "artifacts")
+        project = "proj_001"
+        before = draft.load(store, project)
+        original_revision = store.revision(project)
+        before_heads = draft.current_gate_heads(store, project)
+        assert len(before["timeline"]["scenes"]) >= 2
+        first, second = before["timeline"]["scenes"][:2]
+        keys = {"Idempotency-Key": "synthetic-scene-edit-001"}
+        payload = {"expected_revision": original_revision,"scene_id": first["scene_id"],
+                   "changes":{"variant_id": "B" if first["variant_id"] != "B" else "A"}}
+        with TestClient(create_app(dest / "g4.sqlite", dest / "artifacts")) as client:
+            scenes=client.get(f"/api/v1/projects/{project}/storyboard/scenes?offset=0&limit=1")
+            assert scenes.status_code == 200, scenes.text
+            assert scenes.json()["total"] >= 2 and len(scenes.json()["scenes"]) == 1
+            old=client.get(f"/api/v1/projects/{project}/storyboard/timeline")
+            assert old.status_code==200 and old.json()["draft_manifest_sha256"]==before["manifest_sha256"]
+            changed=client.patch(
+                f"/api/v1/projects/{project}/storyboard/scenes/{first['scene_id']}",
+                json=payload,headers=keys)
+            assert changed.status_code==200,changed.text
+            output=changed.json()
+            assert output["project_revision"]==original_revision+1
+            assert output["stale_gates"]==["G4","G5"]
+            assert output["recomputed_setup_ids"]==[first["setup_id"]]
+            assert second["setup_id"] in output["retained_setup_ids"]
+            assert canonical(output["timeline"]["scenes"][1])==canonical(second)
+            assert store.revision(project)==original_revision+1
+            assert draft.current_gate_heads(store,project)==before_heads
+            dup=client.patch(
+                f"/api/v1/projects/{project}/storyboard/scenes/{first['scene_id']}",
+                json=payload,headers=keys)
+            assert dup.status_code==200 and dup.json()==output
+            assert store.revision(project)==original_revision+1
+            stale=client.patch(
+                f"/api/v1/projects/{project}/storyboard/scenes/{first['scene_id']}",
+                json=payload,headers={"Idempotency-Key":"synthetic-stale-cas-002"})
+            assert stale.status_code==409,stale.text
+            illegal=client.patch(
+                f"/api/v1/projects/{project}/storyboard/scenes/{first['scene_id']}",
+                json={"expected_revision":original_revision+1,"scene_id":first["scene_id"],
+                      "changes":{"layer_edits":[{"layer_id": first["layers"][0]["layer_id"],
+                                                "approved_asset_id":"candidate_forged"}]}},
+                headers={"Idempotency-Key":"synthetic-forged-asset-03"})
+            assert illegal.status_code==422,illegal.text
+            attempted=client.patch(
+                f"/api/v1/projects/{project}/storyboard/scenes/{first['scene_id']}",
+                json={"expected_revision":original_revision+1,"scene_id":first["scene_id"],
+                      "changes":{"template_id":"T08" if first["template_id"]!="T08" else "T02"}},
+                headers={"Idempotency-Key":"synthetic-template-edit-04"})
+            assert attempted.status_code==422,attempted.text
+            assert store.revision(project)==original_revision+1
+            reread=client.get(f"/api/v1/projects/{project}/storyboard/timeline")
+            assert reread.status_code==200
+            assert reread.json()["timeline"]["dependency_fingerprint"]==output["timeline"]["dependency_fingerprint"]
+            assert reread.json()["draft_manifest_sha256"]!=before["manifest_sha256"]
+        # A cold process must read the newly published immutable G4 manifest.
+        reopened=draft.load(ProjectStore(dest/"g4.sqlite",dest/"artifacts"),project)
+        assert reopened["revision"]==original_revision+1
+        assert canonical(reopened["timeline"]["scenes"][1])==canonical(second)
+        print(json.dumps({"status":"LOCAL_PASS","source":"SYNTHETIC_SQLITE_APPROVAL_FIXTURE_NOT_REAL_RIGHTS",
+                          "cases":["paged_read","current_manifest","variant_CAS","selective_recompile",
+                                   "upstream_heads","idempotent_replay","stale_409","forged_asset_422",
+                                   "template_rewrite_422","cold_reload"],
+                          "changed_setup_ids": output["recomputed_setup_ids"],
+                          "retained_setup_ids": output["retained_setup_ids"],
+                          "stale_gates": output["stale_gates"]}))
+if __name__=="__main__":
+    main()
