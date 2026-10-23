@@ -219,7 +219,7 @@ function reviewedClip(layer:Layer,reveal:number,direction:'left'|'right'|'up'|'d
  }else if(p<1){
    const end=(p*100).toFixed(5)+'%';
    const start=transitionFeather>0?`calc(${end} - ${transitionFeather}px)`:end;
-   const dir={left:'right',right:'left',up:'top',down:'bottom'}[direction];
+   const dir={left:'right',right:'left',up:'top',down:'bottom'}[direction as 'left'|'right'|'up'|'down'];
    if(!dir)fail('RENDER_REVEAL_DIRECTION',layer.layer_id,'Unsupported authored reveal direction');
    masks.push(`linear-gradient(to ${dir},#000 0,#000 ${start},transparent ${end},transparent 100%)`);
  }
