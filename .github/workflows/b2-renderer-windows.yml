@@ -95,6 +95,31 @@ jobs:
             & .venv/Scripts/python.exe -m backend.tools.smoke --case $case --mode local
             if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           }
+      - name: B2-II native Windows motion G4 editor Player parity and long-project owners
+        shell: pwsh
+        run: |
+          npm --prefix renderer run test:frames -- --case motion-phases
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          npm --prefix renderer run render:smoke -- --case multi-layer-visual
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          & .venv/Scripts/python.exe -m backend.tools.smoke --case scene-edit --mode local
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          Push-Location frontend
+          try {
+            npm ci --no-audit --no-fund
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+            npx playwright install chromium
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          } finally { Pop-Location }
+          npm --prefix frontend run typecheck
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          $env:HVS_B2_FIXTURE = '1'
+          npm --prefix frontend run test:e2e -- --grep "storyboard-editor"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          npm --prefix renderer run test:frames -- --case player-renderer-parity
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          npm --prefix renderer run render:smoke -- --case 60-scene-longform
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Upload exact-render screenshot MP4 and ffprobe evidence
         if: always()
         uses: actions/upload-artifact@v4
@@ -103,4 +128,6 @@ jobs:
           path: |
             renderer/.artifacts/renders/
             renderer/.artifacts/compiled-30.json
+            frontend/.artifacts/parity/
+            frontend/test-results/
           if-no-files-found: warn
