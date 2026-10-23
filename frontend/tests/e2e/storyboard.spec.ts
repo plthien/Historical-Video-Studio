@@ -40,6 +40,16 @@ test('storyboard-editor uses real persisted G4 scenes and native read-only Playe
  await expect(page.getByRole('status').filter({hasText:'Save layer position completed'}))
   .toBeVisible({timeout:30000});
  await expect(layerX).toHaveValue(String(oldX+1));
+ const widthInput=page.getByLabel('Width (pixels)');
+ if(await widthInput.isEnabled()){
+  const originalWidth=Number(await widthInput.inputValue());
+  const targetWidth=originalWidth>1?originalWidth-1:originalWidth+1;
+  await widthInput.fill(String(targetWidth));
+  await page.getByRole('button',{name:/Save size/}).click();
+  await expect(page.getByRole('status').filter({hasText:'Save media dimensions completed'}))
+   .toBeVisible({timeout:30000});
+  await expect(widthInput).toHaveValue(String(targetWidth));
+ }
  await page.getByRole('button',{name:'Reload persisted draft'}).click();
  await expect(variant).toHaveValue(target);
  await expect(layerX).toHaveValue(String(oldX+1));
