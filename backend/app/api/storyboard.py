@@ -33,6 +33,7 @@ class LayerEdit(Strict):
     w_px: int | None = Field(default=None, ge=1)
     h_px: int | None = Field(default=None, ge=1)
     approved_asset_id: str | None = None
+    crop_normalized: dict[str, float] | None = None
 
 
 class MotionEdit(Strict):
@@ -121,7 +122,8 @@ def sources(store, project: str):
 
 
 def revise(store, project: str, expected: int, original: dict, edited: dict,
-           reason: str, crop: dict | None = None, layers: dict | None = None):
+           reason: str, crop: dict | None = None, layers: dict | None = None,
+           motion: dict | None = None):
     head = current(store, project)
     if expected != head["revision"]:
         blocked("REVISION_CONFLICT", project, "Reload storyboard; project revision changed.")
@@ -129,7 +131,7 @@ def revise(store, project: str, expected: int, original: dict, edited: dict,
     return revise_g4(store, project, head["timeline"], original, edited,
                      word_map, final_audio, approved, expected_revision=expected,
                      operator_reason=reason, crop_overrides=crop,
-                     layer_overrides=layers)
+                     layer_overrides=layers, motion_overrides=motion)
 
 
 def mark(plan: dict, story_sha: str, reason: str, fields: list[str]):
@@ -183,9 +185,10 @@ def mount(app, store, idempotent):
             edits = body.changes
             if edits.template_id and edits.template_id != previous["template_id"]:
                 blocked("G4_SOURCE_EDIT_FORBIDDEN", scene_id, "Template choice is frozen by G1.")
-            if edits.motion_edits or edits.cue_word_ids:
-                blocked("G4_EDIT_UNSUPPORTED", scene_id, "Motion/cue edits require authored staging; use direction-revisions without rewriting G2 words.")
+            if edits.cue_word_ids:
+                blocked("G4_EDIT_UNSUPPORTED", scene_id, "G2 cue identities are frozen and cannot be edited at G4.")
             layer_patch = {}
+            crop_patch = {}
             known = {layer["layer_id"]: layer for layer in previous["layers"]}
             for item in edits.layer_edits:
                 actual = known.get(item.layer_id)
@@ -193,12 +196,26 @@ def mount(app, store, idempotent):
                     blocked("G4_LAYOUT_INVALID", item.layer_id, "Choose an existing, unique frozen layer.")
                 if item.approved_asset_id is not None and item.approved_asset_id != actual["asset_id"]:
                     blocked("G4_ASSET_SELECTION_FORBIDDEN", item.layer_id, "G4 cannot rebind to a different G3 original.")
+                if item.crop_normalized is not None:
+                    if item.layer_id in crop_patch:
+                        blocked("G4_CROP_INVALID", item.layer_id, "Choose one crop per frozen layer.")
+                    crop_patch[item.layer_id] = item.crop_normalized
                 patch = {key: value for key, value in (
                     ("x", item.x_px), ("y", item.y_px), ("w", item.w_px), ("h", item.h_px))
                          if value is not None}
-                if not patch:
+                if not patch and item.crop_normalized is None:
                     blocked("G4_EDIT_INVALID", item.layer_id, "Choose an actual presentation coordinate change.")
-                layer_patch[item.layer_id] = patch
+                if patch:
+                    layer_patch[item.layer_id] = patch
+            motion_patch = {}
+            events = {event["event_id"]: event for event in previous["events"]}
+            for item in edits.motion_edits:
+                event = events.get(item.event_id)
+                if not event or item.event_id in motion_patch:
+                    blocked("G4_MOTION_INVALID", item.event_id, "Select one existing authored event.")
+                if item.preset_id != event["preset_id"]:
+                    blocked("G4_MOTION_FORBIDDEN", item.event_id, "G4 cannot replace the authored preset.")
+                motion_patch[item.event_id] = item.params
             edited = copy.deepcopy(head["blueprint"])
             plan = next(p for p in edited["setup_plans"] if p["setup_id"] == previous["setup_id"])
             if edits.variant_id:
@@ -211,7 +228,9 @@ def mount(app, store, idempotent):
                  f"Operator storyboard variant update: {scene_id}", ["layout_variant_hint"])
             return revise(store, project_id, body.expected_revision, head["blueprint"],
                           edited, f"Storyboard presentation edit: {scene_id}",
-                          layers={previous["setup_id"]: layer_patch} if layer_patch else None)
+                          layers={previous["setup_id"]: layer_patch} if layer_patch else None,
+                          crop={previous["setup_id"]: crop_patch} if crop_patch else None,
+                          motion={previous["setup_id"]: motion_patch} if motion_patch else None)
         return idempotent(project_id, "storyboard-scene:"+scene_id, key, body.model_dump(), action)
 
     @app.post("/api/v1/projects/{project_id}/storyboard/direction-revisions")
@@ -250,7 +269,7 @@ def mount(app, store, idempotent):
     @app.get("/api/v1/projects/{project_id}/storyboard/preview")
     def preview(project_id: str):
         """Host is sole preview-input issuer; browser carries no transferable Node capability."""
-        current(store, project_id)
+        baseline = current(store, project_id)
         exe = ROOT / "renderer" / "node_modules" / ".bin" / "tsx.cmd"
         if os.name != "nt" or not exe.is_file():
             blocked("PLAYER_HOST_REQUIRED", project_id, "Install the pinned renderer on native Windows.")
@@ -269,6 +288,11 @@ def mount(app, store, idempotent):
             data = json.loads(proc.stdout)
         except (ValueError, TypeError):
             blocked("PLAYER_PREVIEW_INVALID", project_id, "Verified host did not return canonical JSON.")
-        return {"status": "G4_DRAFT_VIEW_ONLY", "project_revision": store.revision(project_id),
-                "draft_manifest_sha256": current(store, project_id)["manifest_sha256"],
+        verified = current(store, project_id)
+        if (verified["revision"] != baseline["revision"] or
+                verified["manifest_sha256"] != baseline["manifest_sha256"] or
+                data.get("media", {}).get("authorizingG4ManifestSha256") != baseline["manifest_sha256"]):
+            blocked("G4_DRAFT_STALE", project_id, "A new G4 generation appeared while preview inputs were verified.")
+        return {"status": "G4_DRAFT_VIEW_ONLY", "project_revision": baseline["revision"],
+                "draft_manifest_sha256": baseline["manifest_sha256"],
                 "props": data}

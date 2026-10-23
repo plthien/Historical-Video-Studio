@@ -98,7 +98,8 @@ def load(store, project):
 
 
 def publish(store, project, timeline, blueprint, maps, map_requests, font_identity,
-            *, expected_revision, previous=None, edit_kind=None, layer_overrides=None):
+            *, expected_revision, previous=None, edit_kind=None, layer_overrides=None,
+            crop_overrides=None, motion_overrides=None):
     """Immutable artifact publication first; atomic pointer/CAS/revision second.
 
     Failed CAS may leave unreachable content-addressed artifacts, never an
@@ -148,6 +149,11 @@ def publish(store, project, timeline, blueprint, maps, map_requests, font_identi
         "asset_snapshot_sha256":timeline["asset_snapshot_sha256"],
         "dependency_fingerprint":timeline["dependency_fingerprint"],
         "layer_overrides":layer_overrides or {},
+        # These overlays are presentation-only and stay tied to the immutable
+        # G4 generation.  They are replayed only after the source heads and
+        # compiled layer/event identities have been verified by revise_g4.
+        "crop_overrides":crop_overrides or {},
+        "motion_overrides":motion_overrides or {},
     }
     manifest_sha = store.put_artifact(canonical(manifest), "g4_compiled_manifest")
     with store._transaction() as db:

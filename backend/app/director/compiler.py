@@ -410,7 +410,7 @@ def revise_g4(store, project_id: str, previous: dict, original_blueprint: dict,
               edited_blueprint: dict, word_map: dict, final_audio: dict,
               approved_assets: dict, *, expected_revision: int, operator_reason: str,
               maps: dict | None = None, font_measure=None, crop_overrides: dict | None = None,
-              layer_overrides: dict | None = None) -> dict:
+              layer_overrides: dict | None = None, motion_overrides: dict | None = None) -> dict:
     """CAS-guarded presentation-only local edit; never auto-approve G4/G5.
 
     Only changed scenes are compiled anew. The unchanged scene dictionaries
@@ -471,8 +471,10 @@ def revise_g4(store, project_id: str, previous: dict, original_blueprint: dict,
             changed.add(a["setup_id"])
     crop_overrides = crop_overrides or {}
     layer_overrides = layer_overrides or {}
+    motion_overrides = motion_overrides or {}
     changed.update(crop_overrides.keys())
     changed.update(layer_overrides.keys())
+    changed.update(motion_overrides.keys())
     if not changed or not changed <= {p["setup_id"] for p in old}:
         _block("G4_EDIT_INVALID", project_id, "Select at least one existing scene to revise.")
     # Reject presentation-only input when current upstream approvals have changed.
@@ -498,6 +500,8 @@ def revise_g4(store, project_id: str, previous: dict, original_blueprint: dict,
                "Original visual blueprint does not match the registered draft source plan.")
     manifest = trusted["manifest"]
     persisted_layers = copy.deepcopy(manifest.get("layer_overrides", {}))
+    persisted_crops = copy.deepcopy(manifest.get("crop_overrides", {}))
+    persisted_motion = copy.deepcopy(manifest.get("motion_overrides", {}))
     # A new registered variant owns a new geometry family; old operator pixel
     # offsets must not silently carry into a different frozen slot layout.
     for prior_plan, next_plan in zip(old, revised):
@@ -507,6 +511,14 @@ def revise_g4(store, project_id: str, previous: dict, original_blueprint: dict,
         if not isinstance(rows, dict):
             _block("G4_LAYOUT_INVALID", sid, "Layer edits must identify reviewed scene layer IDs.")
         persisted_layers.setdefault(sid, {}).update(copy.deepcopy(rows))
+    for sid, rows in crop_overrides.items():
+        if not isinstance(rows, dict):
+            _block("G4_CROP_INVALID", sid, "Crop edits must identify reviewed scene layer IDs.")
+        persisted_crops.setdefault(sid, {}).update(copy.deepcopy(rows))
+    for sid, rows in motion_overrides.items():
+        if not isinstance(rows, dict):
+            _block("G4_MOTION_INVALID", sid, "Motion edits must identify authored event IDs.")
+        persisted_motion.setdefault(sid, {}).update(copy.deepcopy(rows))
     if manifest["gate_heads"] != draft.current_gate_heads(store, project_id):
         _block("G4_SOURCE_STALE", project_id,
                "A current G1/G2/G3 approval identity changed after the trusted draft.")
@@ -602,7 +614,7 @@ def revise_g4(store, project_id: str, previous: dict, original_blueprint: dict,
                 if layer["text"] is not None and (rectangle["w"] != layer["rect_px"]["w"] or rectangle["h"] != layer["rect_px"]["h"]):
                     _block("TYPOGRAPHY_OVERFLOW", layer["layer_id"], "Pinned GDI glyph layout cannot be resized without remeasurement.")
                 layer["rect_px"] = rectangle
-            crop = crop_overrides.get(sid, {}).get(layer["layer_id"])
+            crop = persisted_crops.get(sid, {}).get(layer["layer_id"])
             if crop is not None:
                 if (set(crop) != {"x","y","w","h"} or
                     any(type(x) not in (int,float) for x in crop.values()) or
@@ -610,9 +622,38 @@ def revise_g4(store, project_id: str, previous: dict, original_blueprint: dict,
                          and 0 < crop["h"] <= 1-crop["y"])):
                     _block("G4_CROP_INVALID", layer["layer_id"], "Keep reviewed original and valid normalized crop.")
                 layer["crop_normalized"] = dict(crop)
-        unknown = set(crop_overrides.get(sid, {})) - {x["layer_id"] for x in scene["layers"]}
+        unknown = set(persisted_crops.get(sid, {})) - {x["layer_id"] for x in scene["layers"]}
         if unknown:
             _block("G4_CROP_INVALID", sid, "Crop only layers that exist in the selected setup.")
+        prior_events = {event["event_id"]: event for event in previous["scenes"][index[sid]]["events"]}
+        current_events = {event["event_id"]: event for event in scene["events"]}
+        unknown_events = set(persisted_motion.get(sid, {})) - set(current_events)
+        if unknown_events:
+            _block("G4_MOTION_INVALID", sid, "Motion edit references an event absent from the selected setup.")
+        for event_id, patch in persisted_motion.get(sid, {}).items():
+            event = current_events[event_id]
+            prior = prior_events.get(event_id)
+            if not prior or event["preset_id"] != prior["preset_id"] or event["layer_id"] != prior["layer_id"]:
+                _block("G4_MOTION_INVALID", event_id, "G4 cannot rebind an authored event to another source layer.")
+            if not isinstance(patch, dict) or not patch:
+                _block("G4_MOTION_INVALID", event_id, "Choose one authorized scalar motion parameter.")
+            original_params = event["params"]
+            # Parameters which name source entities can never be changed by a
+            # presentation edit. Arrays/objects are deliberately excluded by
+            # the published scalar StoryboardEdit transport.
+            forbidden = {key for key in original_params if key.endswith("_id") or key.endswith("_ids") or "sha" in key or "claim" in key or "word" in key or "geometry" in key or "map" in key or "era" in key}
+            if set(patch) - set(original_params) or set(patch) & forbidden:
+                _block("G4_MOTION_FORBIDDEN", event_id, "G4 motion edits cannot alter source identity, cue, map or geometry.")
+            for key, value in patch.items():
+                if type(value) not in (int, float, str, bool) or isinstance(original_params[key], (dict, list)):
+                    _block("G4_MOTION_INVALID", event_id, "Only registered scalar presentation parameters are editable.")
+            candidate = {**original_params, **patch}
+            from backend.app.director.motion import presets
+            from jsonschema import Draft202012Validator
+            errors = list(Draft202012Validator(presets()[event["preset_id"]]["parameter_schema"]).iter_errors(candidate))
+            if errors:
+                _block("G4_MOTION_INVALID", event_id, "Registered motion bounds rejected this presentation edit.")
+            event["params"] = candidate
         out["scenes"][index[sid]] = scene
     if all(canonical(out["scenes"][index[sid]]) == canonical(previous["scenes"][index[sid]])
            for sid in changed):
@@ -620,14 +661,16 @@ def revise_g4(store, project_id: str, previous: dict, original_blueprint: dict,
                "Presentation edit produced no observable scene change; do not bump revision.")
     out["dependency_fingerprint"] = digest({"prior_identity": previous["dependency_fingerprint"],
                                              "new_direction": edited_blueprint,
-                                             "crop_overrides": crop_overrides,
-                                             "layer_overrides": persisted_layers})
+                                             "crop_overrides": persisted_crops,
+                                             "layer_overrides": persisted_layers,
+                                             "motion_overrides": persisted_motion})
     validate_document("CompiledTimeline.v1", out)
     draft.publish(store, project_id, out, edited_blueprint, current_maps,
                   manifest["map_requests"], manifest["font_identity"],
                   expected_revision=expected_revision, previous=trusted,
-                  edit_kind="scene_layout" if edited_blueprint != original_blueprint or layer_overrides else "scene_crop",
-                  layer_overrides=persisted_layers)
+                  edit_kind="scene_layout" if edited_blueprint != original_blueprint or layer_overrides or motion_overrides else "scene_crop",
+                  layer_overrides=persisted_layers, crop_overrides=persisted_crops,
+                  motion_overrides=persisted_motion)
     return {"timeline": out, "recomputed_setup_ids": sorted(changed),
             "retained_setup_ids": sorted(set(index) - changed),
             "project_revision": expected_revision+1, "stale_gates": ["G4","G5"]}

@@ -2,8 +2,11 @@ import {test,expect} from '@playwright/test';
 import {createHash} from 'node:crypto';
 import {readFileSync,writeFileSync,mkdirSync} from 'node:fs';
 import path from 'node:path';
-import {bundle} from '../../../renderer/node_modules/@remotion/bundler';
-import {renderStill,selectComposition} from '../../../renderer/node_modules/@remotion/renderer';
+// Playwright executes ESM directly: importing a package directory is rejected
+// by Node on Windows.  Keep the test on the renderer's pinned packages rather
+// than introducing a duplicate browser-render stack in frontend.
+import {bundle} from '../../../renderer/node_modules/@remotion/bundler/dist/index.js';
+import {renderStill,selectComposition} from '../../../renderer/node_modules/@remotion/renderer/dist/index.js';
 import {PNG} from 'pngjs';
 import type {HistoryProps} from '../../../renderer/remotion/HistoryComposition';
 
@@ -36,11 +39,22 @@ test('storyboard-editor real browser Player vs Node renderStill same immutable f
  await expect(page.getByTestId('player-stage')).toBeVisible({timeout:30000});
  const stage=page.getByTestId('player-stage');
  await stage.evaluate(el=>{el.style.width='1920px';el.style.height='1080px';});
- const samples=[0,10,Math.min(32,props.timeline.total_frames-1)];
+ const transitionFrames=props.timeline.scenes.flatMap(scene=>scene.events.flatMap(event=>[
+   Math.max(0,scene.start_frame+event.start_frame-1),scene.start_frame+event.start_frame,
+   scene.start_frame+event.start_frame+Math.floor(event.duration_frames/2),
+   Math.min(props.timeline.total_frames-1,scene.start_frame+event.start_frame+event.duration_frames),
+   Math.min(props.timeline.total_frames-1,scene.start_frame+event.start_frame+event.duration_frames+1),
+ ]));
+ const boundaries=props.timeline.scenes.flatMap(scene=>[scene.start_frame,
+   Math.min(props.timeline.total_frames-1,scene.start_frame+scene.duration_frames-1)]);
+ const samples=[...new Set([...transitionFrames,...boundaries])].sort((a,b)=>a-b).slice(0,14);
+ expect(samples.length).toBeGreaterThan(2);
  const evidence=[];
  for(const frame of samples){
   await page.getByLabel('Seek exact frame').fill(String(frame));
-  await page.waitForTimeout(350);
+  // Seek input state is not visual evidence.  Wait for the shared Composition
+  // to report the requested frame before capturing a Player pixel.
+  await expect(page.locator(`[data-global-frame="${frame}"]`)).toBeVisible({timeout:5000});
   const browserPNG=PNG.sync.read(await stage.screenshot());
   const file=path.join(output,'node-f'+frame+'.png');
   await renderStill({serveUrl,composition,inputProps:props,frame,output:file,imageFormat:'png'});
@@ -62,7 +76,9 @@ test('storyboard-editor real browser Player vs Node renderStill same immutable f
   expect(pixelMismatch,'Fraction >30 RGB error per channel').toBeLessThan(0.14);
   const browserFile=path.join(output,'browser-f'+frame+'.png');
   writeFileSync(browserFile,PNG.sync.write(browserPNG));
-  evidence.push({frame,width:1920,height:1080,meanDiff,pixelMismatch,nodeFile:file,browserFile});
+  evidence.push({frame,width:1920,height:1080,meanDiff,pixelMismatch,nodeFile:file,browserFile,
+   nodeSha256:hash(readFileSync(file).toString('base64')),
+   browserSha256:hash(readFileSync(browserFile).toString('base64'))});
  }
  writeFileSync(path.join(output,'b2-player-node-parity.json'),JSON.stringify({status:'LOCAL_PASS',
   source:'SYNTHETIC_SQLITE_APPROVAL_FIXTURE_NOT_REAL_RIGHTS',identity,evidence,

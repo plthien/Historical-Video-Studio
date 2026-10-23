@@ -6,8 +6,8 @@ export interface StoryboardScene {
   scene_id:string;setup_id:string;template_id:string;variant_id:string;
   start_frame:number;duration_frames:number;
   layers:{layer_id:string;layer_kind:string;text:string|null;asset_id:string|null;
-    rect_px:{x:number;y:number;w:number;h:number}}[];
-  events:{event_id:string;preset_id:string;start_frame:number;duration_frames:number}[];
+    rect_px:{x:number;y:number;w:number;h:number};crop_normalized:{x:number;y:number;w:number;h:number}}[];
+  events:{event_id:string;preset_id:string;start_frame:number;duration_frames:number;params:Record<string,string|number|boolean>}[];
   direction_beats:{beat_id:string;shot_goal:string;staging:{
     ref:string;operation:string;after_ref:string|null;motion_hint:string;priority:number;}[]}[];
   diagnostics:string[];
@@ -33,6 +33,12 @@ export const storyboardApi={
  geometry:(id:string,scene:string,layer:string,patch:{x_px:number;y_px:number},revision:number,key:string)=>
   request<EditResult>(path(id)+'/scenes/'+encodeURIComponent(scene),'PATCH',
     {expected_revision:revision,scene_id:scene,changes:{layer_edits:[{layer_id:layer,...patch}]}},key),
+ crop:(id:string,scene:string,layer:string,crop_normalized:{x:number;y:number;w:number;h:number},revision:number,key:string)=>
+  request<EditResult>(path(id)+'/scenes/'+encodeURIComponent(scene),'PATCH',
+    {expected_revision:revision,scene_id:scene,changes:{layer_edits:[{layer_id:layer,crop_normalized}]}},key),
+ motion:(id:string,scene:string,event_id:string,preset_id:string,params:Record<string,string|number|boolean>,revision:number,key:string)=>
+  request<EditResult>(path(id)+'/scenes/'+encodeURIComponent(scene),'PATCH',
+    {expected_revision:revision,scene_id:scene,changes:{motion_edits:[{event_id,preset_id,params}]}},key),
  direction:(id:string,body:unknown,key:string)=>
   request<EditResult>(path(id)+'/direction-revisions','POST',body,key)
 };

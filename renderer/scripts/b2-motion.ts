@@ -61,13 +61,13 @@ for(const row of cases){
   result.push({preset:row.name,frame,sha256:hashing(bytes),pixelHash:hashes.at(-1),source:'SYNTHETIC'});
  }
  if(new Set(hashes).size<2)throw Error('B2_MOTION_PHASES_INERT_'+row.name);
- if(row.name==='whip-pan'&&start>0){
+ if((row.name==='whip-pan'||row.name==='cross-dissolve')&&start>0){
   const before=start-1;
   const baseMedia=loadApprovedMedia(timeline,makeSyntheticManifest(timeline,sourceDir,font));
   const baseComp=await selectComposition({serveUrl,id:'HistoricalTimelineV1',
     inputProps:{timeline,media:baseMedia}});
-  const basePath=resolve(output,'b2-whip-before-baseline.png');
-  const alteredPath=resolve(output,'b2-whip-before-event.png');
+  const basePath=resolve(output,`b2-${row.name}-before-baseline.png`);
+  const alteredPath=resolve(output,`b2-${row.name}-before-event.png`);
   await renderStill({serveUrl,composition:baseComp,inputProps:{timeline,media:baseMedia},
     frame:before,output:basePath,imageFormat:'png'});
   await renderStill({serveUrl,composition:comp,inputProps:{timeline:t,media},
@@ -75,7 +75,7 @@ for(const row of cases){
   const basePixels=PNG.sync.read(readFileSync(basePath)).data;
   const alteredPixels=PNG.sync.read(readFileSync(alteredPath)).data;
   if(!basePixels.equals(alteredPixels))
-    throw Error('B2_WHIP_RETROACTIVE_MOTION: transition changed pre-start frame');
+    throw Error(`B2_${row.name.toUpperCase().replace(/-/g,'_')}_RETROACTIVE_MOTION: transition changed pre-start frame`);
   result.push({preset:row.name,frame:before,preStartPixelMatch:true,source:'SYNTHETIC'});
  }
 }

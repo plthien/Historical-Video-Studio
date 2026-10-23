@@ -15,6 +15,13 @@ export function StoryboardStudio({projectId,onRefresh}:{projectId:string;onRefre
  const [layerId,setLayerId]=useState<string>('');
  const [layerX,setLayerX]=useState<number>(0);
  const [layerY,setLayerY]=useState<number>(0);
+ const [cropX,setCropX]=useState<number>(0);
+ const [cropY,setCropY]=useState<number>(0);
+ const [cropW,setCropW]=useState<number>(1);
+ const [cropH,setCropH]=useState<number>(1);
+ const [motionEventId,setMotionEventId]=useState('');
+ const [motionKey,setMotionKey]=useState('');
+ const [motionValue,setMotionValue]=useState<string|number|boolean>('');
  const [stageOp,setStageOp]=useState('');
  const [snapshot,setSnapshot]=useState<BrowserPreview|null>(null);
  const [pending,setPending]=useState<string|null>(null);
@@ -22,6 +29,10 @@ export function StoryboardStudio({projectId,onRefresh}:{projectId:string;onRefre
  const [success,setSuccess]=useState('');
  const scene=useMemo(()=>page?.scenes.find(s=>s.scene_id===selected)??null,[page,selected]);
  const selectedLayer=useMemo(()=>scene?.layers.find(l=>l.layer_id===layerId)??null,[scene,layerId]);
+ const motionEvent=useMemo(()=>scene?.events.find(event=>event.event_id===motionEventId)??null,[scene,motionEventId]);
+ const editableMotionKeys=useMemo(()=>motionEvent?Object.entries(motionEvent.params).filter(([key])=>
+   !key.endsWith('_id')&&!key.endsWith('_ids')&&!key.includes('sha')&&!key.includes('claim')&&!key.includes('word')&&
+   !key.includes('geometry')&&!key.includes('map')&&!key.includes('era')):[],[motionEvent]);
  const load=useCallback(async (nextOffset:number,preferred?:string)=>{
    const result=await storyboardApi.scenes(projectId,nextOffset,24);
    setPage(result);setOffset(nextOffset);
@@ -41,10 +52,19 @@ export function StoryboardStudio({projectId,onRefresh}:{projectId:string;onRefre
    }
  },[scene?.scene_id,scene?.variant_id]);
  useEffect(()=>{
-   if(selectedLayer){setLayerX(selectedLayer.rect_px.x);setLayerY(selectedLayer.rect_px.y);}
- },[selectedLayer?.layer_id,selectedLayer?.rect_px.x,selectedLayer?.rect_px.y]);
+   if(selectedLayer){setLayerX(selectedLayer.rect_px.x);setLayerY(selectedLayer.rect_px.y);
+    setCropX(selectedLayer.crop_normalized.x);setCropY(selectedLayer.crop_normalized.y);
+    setCropW(selectedLayer.crop_normalized.w);setCropH(selectedLayer.crop_normalized.h);}
+ },[selectedLayer?.layer_id,selectedLayer?.rect_px.x,selectedLayer?.rect_px.y,
+    selectedLayer?.crop_normalized.x,selectedLayer?.crop_normalized.y,
+    selectedLayer?.crop_normalized.w,selectedLayer?.crop_normalized.h]);
  useEffect(()=>{setStageOp(scene?.direction_beats[0]?.staging[0]?.operation??'');},
    [scene?.scene_id,scene?.direction_beats[0]?.staging[0]?.operation]);
+ useEffect(()=>{const event=scene?.events.find(item=>Object.entries(item.params).some(([key])=>
+   !key.endsWith('_id')&&!key.endsWith('_ids')&&!key.includes('sha')&&!key.includes('claim')&&!key.includes('word')&&!key.includes('geometry')&&!key.includes('map')&&!key.includes('era')));
+   setMotionEventId(event?.event_id??'');
+ },[scene?.scene_id]);
+ useEffect(()=>{const first=editableMotionKeys[0];setMotionKey(first?.[0]??'');setMotionValue(first?.[1]??'');},[motionEventId,scene?.scene_id]);
  async function operation(label:string,run:()=>Promise<void>){
    if(pending)return;
    setPending(label);setError('');setSuccess('');
@@ -110,6 +130,20 @@ export function StoryboardStudio({projectId,onRefresh}:{projectId:string;onRefre
           {x_px:layerX,y_px:layerY},page.project_revision,crypto.randomUUID());
         await load(offset,scene.scene_id);setSnapshot(null);await onRefresh();
       })}>Save position (G4/G5 stale)</button>
+    <h4>Normalized crop — same approved original</h4>
+    <div className="buttonrow">
+      <label>X <input aria-label="Crop X" type="number" min={0} max={1} step={0.01} value={cropX} onChange={e=>setCropX(Number(e.target.value))}/></label>
+      <label>Y <input aria-label="Crop Y" type="number" min={0} max={1} step={0.01} value={cropY} onChange={e=>setCropY(Number(e.target.value))}/></label>
+      <label>W <input aria-label="Crop width" type="number" min={0.01} max={1} step={0.01} value={cropW} onChange={e=>setCropW(Number(e.target.value))}/></label>
+      <label>H <input aria-label="Crop height" type="number" min={0.01} max={1} step={0.01} value={cropH} onChange={e=>setCropH(Number(e.target.value))}/></label>
+    </div>
+    <button disabled={!!pending||!selectedLayer||
+      (selectedLayer.crop_normalized.x===cropX&&selectedLayer.crop_normalized.y===cropY&&selectedLayer.crop_normalized.w===cropW&&selectedLayer.crop_normalized.h===cropH)}
+      onClick={()=>void operation('Save normalized crop',async()=>{
+        if(!selectedLayer)return;
+        await storyboardApi.crop(projectId,scene.scene_id,selectedLayer.layer_id,{x:cropX,y:cropY,w:cropW,h:cropH},page.project_revision,crypto.randomUUID());
+        await load(offset,scene.scene_id);setSnapshot(null);await onRefresh();
+      })}>Save crop (G4/G5 stale)</button>
     <h4>Frozen layers / approved sources</h4>
     <div style={{maxHeight:220,overflowY:'auto'}}>
      {scene.layers.map(l=><p key={l.layer_id}><strong>{l.layer_kind}</strong> · {l.layer_id}
@@ -138,6 +172,21 @@ export function StoryboardStudio({projectId,onRefresh}:{projectId:string;onRefre
        })}>Save staging (G4/G5 stale)</button>
     </>}
     <h4>Authored motion events</h4>
+    {motionEvent&&editableMotionKeys.length>0&&<div className="stack">
+      <label htmlFor="sb-motion-event">Authored motion event</label>
+      <select id="sb-motion-event" value={motionEventId} onChange={e=>setMotionEventId(e.target.value)}>
+       {scene.events.filter(event=>Object.entries(event.params).some(([key])=>!key.endsWith('_id')&&!key.endsWith('_ids')&&!key.includes('sha')&&!key.includes('claim')&&!key.includes('word')&&!key.includes('geometry')&&!key.includes('map')&&!key.includes('era'))).map(event=><option key={event.event_id} value={event.event_id}>{event.preset_id} / {event.event_id}</option>)}
+      </select>
+      <label htmlFor="sb-motion-param">Authorized scalar presentation parameter</label>
+      <select id="sb-motion-param" value={motionKey} onChange={e=>{setMotionKey(e.target.value);setMotionValue(motionEvent.params[e.target.value]??'');}}>
+       {editableMotionKeys.map(([key])=><option key={key} value={key}>{key}</option>)}
+      </select>
+      <input aria-label="Motion parameter value" value={String(motionValue)} onChange={e=>setMotionValue(typeof motionEvent.params[motionKey]==='number'?Number(e.target.value):e.target.value)}/>
+      <button disabled={!!pending||!motionKey||motionValue===motionEvent.params[motionKey]} onClick={()=>void operation('Save motion parameter',async()=>{
+        await storyboardApi.motion(projectId,scene.scene_id,motionEvent.event_id,motionEvent.preset_id,{[motionKey]:motionValue},page.project_revision,crypto.randomUUID());
+        await load(offset,scene.scene_id);setSnapshot(null);await onRefresh();
+      })}>Save motion (G4/G5 stale)</button>
+    </div>}
     <ul>{scene.events.map(e=><li key={e.event_id}>{e.preset_id} · {e.event_id} · frames {e.start_frame}–{e.start_frame+e.duration_frames}</li>)}</ul>
     <p><small>Source claim/cue identities and G3 asset IDs cannot be overwritten by direct browser props. Unsupported direct layout/motion replacement is rejected by the API.</small></p>
    </section>}

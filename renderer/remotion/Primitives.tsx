@@ -56,6 +56,10 @@ function motionForLayer(scene:Scene,layer:Layer,frame:number){
   if(e.layer_id!==layer.layer_id&&!e.affected_layer_ids.includes(layer.layer_id)&&!stagger&&!dissolve)continue;
   const delay=stagger?ordered!.indexOf(layer.layer_id)*Number(e.params.gap_frames??6):0;
   const starts=e.start_frame+delay;
+  // A transition cannot retrospectively hide a layer that was already staged
+  // before its authored boundary. First-appearance staging remains governed
+  // by `shown` below, not an early transition opacity multiplier.
+  if(e.preset_id==='cross-dissolve'&&frame<starts)continue;
   // The repeated B1 stagger events describe sequential beats for the
   // same source-card set. Pick the entrance nearest its FIRST activation,
   // not a future replay (which would re-hide an already revealed card).
