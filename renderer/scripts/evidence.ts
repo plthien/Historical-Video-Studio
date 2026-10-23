@@ -14,6 +14,12 @@ const repo=resolve(root,'..');
 const sha=(bytes:Buffer)=>createHash('sha256').update(bytes).digest('hex');
 const args=process.argv.slice(2);
 const mode=args[0]??'frames';
+const ownerCase=args.includes('--case')?args[args.indexOf('--case')+1]:undefined;
+if(ownerCase==='motion-phases'||ownerCase==='multi-layer-visual'){
+ await import('./b2-motion');
+ process.exit(0);
+}
+
 const selected=(args.find((x)=>x==='--templates')!==undefined?args[args.indexOf('--templates')+1].split(','):[]);
 const isShared=args.includes('shared-composition');
 const isSingle=args.includes('single-scene');
