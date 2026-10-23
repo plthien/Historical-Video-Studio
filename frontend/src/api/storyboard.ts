@@ -8,10 +8,12 @@ export interface StoryboardScene {
   layers:{layer_id:string;layer_kind:string;text:string|null;asset_id:string|null;
     rect_px:{x:number;y:number;w:number;h:number}}[];
   events:{event_id:string;preset_id:string;start_frame:number;duration_frames:number}[];
+  direction_beats:{beat_id:string;shot_goal:string;staging:{
+    ref:string;operation:string;after_ref:string|null;motion_hint:string;priority:number;}[]}[];
   diagnostics:string[];
 }
 export interface ScenePage {
- project_revision:number;draft_manifest_sha256:string;status:'G4_DRAFT_NOT_OPERATOR_APPROVED';
+ project_revision:number;draft_manifest_sha256:string;story_revision_sha256:string;status:'G4_DRAFT_NOT_OPERATOR_APPROVED';
  total:number;offset:number;limit:number;scenes:StoryboardScene[];
 }
 export interface TimelineView {project_revision:number;draft_manifest_sha256:string;
