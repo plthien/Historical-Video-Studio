@@ -4,7 +4,7 @@ import {readFileSync,writeFileSync,mkdirSync} from 'node:fs';
 import path from 'node:path';
 import {bundle} from '../../../renderer/node_modules/@remotion/bundler';
 import {renderStill,selectComposition} from '../../../renderer/node_modules/@remotion/renderer';
-import {PNG} from '../../../renderer/node_modules/pngjs';
+import {PNG} from 'pngjs';
 import type {HistoryProps} from '../../../renderer/remotion/HistoryComposition';
 
 const root=path.resolve(import.meta.dirname,'../../..');
