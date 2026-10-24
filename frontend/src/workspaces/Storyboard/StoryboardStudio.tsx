@@ -27,6 +27,7 @@ export function StoryboardStudio({projectId,onRefresh}:{projectId:string;onRefre
  const [beatId,setBeatId]=useState('');
  const [focusMove,setFocusMove]=useState('none');
  const [stageOp,setStageOp]=useState('');
+ const [stageIndex,setStageIndex]=useState(0);
  const [snapshot,setSnapshot]=useState<BrowserPreview|null>(null);
  const [pending,setPending]=useState<string|null>(null);
  const [error,setError]=useState('');
@@ -37,6 +38,7 @@ export function StoryboardStudio({projectId,onRefresh}:{projectId:string;onRefre
  const selectedLayer=useMemo(()=>scene?.layers.find(l=>l.layer_id===layerId)??null,[scene,layerId]);
  const motionEvent=useMemo(()=>scene?.events.find(event=>event.event_id===motionEventId)??null,[scene,motionEventId]);
  const selectedBeat=useMemo(()=>scene?.direction_beats.find(beat=>beat.beat_id===beatId)??null,[scene,beatId]);
+ const selectedStage=selectedBeat?.staging[stageIndex]??null;
  const editableMotionKeys=useMemo(()=>motionEvent&&!['camera-push','camera-pan'].includes(motionEvent.preset_id)?Object.entries(motionEvent.params).filter(([key])=>
    !key.endsWith('_id')&&!key.endsWith('_ids')&&!key.includes('sha')&&!key.includes('claim')&&!key.includes('word')&&
    !key.includes('geometry')&&!key.includes('map')&&!key.includes('era')):[],[motionEvent]);
@@ -67,10 +69,12 @@ export function StoryboardStudio({projectId,onRefresh}:{projectId:string;onRefre
     selectedLayer?.rect_px.w,selectedLayer?.rect_px.h,
     selectedLayer?.crop_normalized.x,selectedLayer?.crop_normalized.y,
     selectedLayer?.crop_normalized.w,selectedLayer?.crop_normalized.h]);
- useEffect(()=>{setBeatId(scene?.direction_beats[0]?.beat_id??'');},[scene?.scene_id]);
- useEffect(()=>{setStageOp(selectedBeat?.staging[0]?.operation??'');
-   setFocusMove(selectedBeat?.focus_move??'none');},
-   [selectedBeat?.beat_id,selectedBeat?.staging[0]?.operation,selectedBeat?.focus_move]);
+ useEffect(()=>{setBeatId(scene?.direction_beats[0]?.beat_id??'');setStageIndex(0);},[scene?.scene_id]);
+ useEffect(()=>{setStageIndex(0);},[selectedBeat?.beat_id]);
+ useEffect(()=>{setStageOp(selectedStage?.operation??'');},
+   [selectedBeat?.beat_id,stageIndex,selectedStage?.operation]);
+ useEffect(()=>{setFocusMove(selectedBeat?.focus_move??'none');},
+   [selectedBeat?.beat_id,selectedBeat?.focus_move]);
  useEffect(()=>{const event=scene?.events.find(item=>Object.entries(item.params).some(([key])=>
    !key.endsWith('_id')&&!key.endsWith('_ids')&&!key.includes('sha')&&!key.includes('claim')&&!key.includes('word')&&!key.includes('geometry')&&!key.includes('map')&&!key.includes('era')));
    setMotionEventId(event&&!['camera-push','camera-pan'].includes(event.preset_id)?event.event_id:scene?.events.find(e=>!['camera-push','camera-pan'].includes(e.preset_id)&&Object.keys(e.params).some(k=>!k.endsWith('_id')&&!k.endsWith('_ids')&&!k.includes('claim')&&!k.includes('word')&&!k.includes('geometry')&&!k.includes('map')&&!k.includes('era')))?.event_id??'');
@@ -204,15 +208,19 @@ export function StoryboardStudio({projectId,onRefresh}:{projectId:string;onRefre
         .map(move=><option value={move} key={move}>{move}</option>)}
       </select>
       <p><strong>{selectedBeat.beat_id}</strong> · {selectedBeat.shot_goal}</p>
-      <label htmlFor="sb-stage-op">First authored staging operation</label>
+      <label htmlFor="sb-stage-step">Authored staging step</label>
+      <select id="sb-stage-step" aria-label="Authored staging step" value={stageIndex} onChange={e=>setStageIndex(Number(e.target.value))}>
+        {selectedBeat.staging.map((step,i)=><option key={i} value={i}>Step {i+1} · {step.ref} · priority {step.priority}</option>)}
+      </select>
+      <label htmlFor="sb-stage-op">Selected authored staging operation</label>
       <select id="sb-stage-op" value={stageOp} onChange={e=>setStageOp(e.target.value)}>
         {['enter','hold','highlight','exit','reposition','focus','draw_path','reveal_mask'].map(op=>
           <option value={op} key={op}>{op}</option>)}
       </select>
-      <button disabled={!!pending||(stageOp===selectedBeat.staging[0]?.operation&&
+      <button disabled={!!pending||!selectedStage||(stageOp===selectedStage.operation&&
         focusMove===selectedBeat.focus_move)}
        onClick={()=>void operation('Save authored G4 beat staging',async()=>{
-        const staging=selectedBeat.staging.map((step,i)=>i===0?{...step,operation:stageOp}:step);
+        const staging=selectedBeat.staging.map((step,i)=>i===stageIndex?{...step,operation:stageOp}:step);
         await storyboardApi.direction(projectId,{
           expected_revision:page.project_revision,
           story_revision_sha256:page.story_revision_sha256,setup_id:scene.setup_id,
