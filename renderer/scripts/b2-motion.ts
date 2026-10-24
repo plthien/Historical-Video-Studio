@@ -394,8 +394,13 @@ if(process.argv[2]==='render'){
  const pixels=(mode:string,frame:number)=>PNG.sync.read(readFileSync(snapshots[`${mode}-${frame}`])).data;
  if(!pixels('two',first).equals(pixels('cut',first)))
   throw Error('B2_MASK_TRANSITION_FUTURE_LEAK');
- if(pixels('two',middle).equals(pixels('cut',middle)))
-  throw Error('B2_MASK_TRANSITION_NOT_TWO_SURFACES');
+ const mixed=pixels('two',middle),unmixed=pixels('cut',middle);
+ let changedMaskPixels=0;
+ for(let i=0;i<mixed.length;i+=4){
+  if(Math.abs(mixed[i]-unmixed[i])+Math.abs(mixed[i+1]-unmixed[i+1])+
+     Math.abs(mixed[i+2]-unmixed[i+2])>=12)changedMaskPixels++;
+ }
+ if(changedMaskPixels===0)throw Error('B2_MASK_TRANSITION_NOT_TWO_SURFACES');
  if(!pixels('two',last).equals(pixels('cut',last)))
   throw Error('B2_MASK_TRANSITION_POST_WINDOW');
  const wrong=structuredClone(two);
@@ -408,7 +413,7 @@ if(process.argv[2]==='render'){
  if(!rejected)throw Error('B2_MASK_TRANSITION_WRONG_SPACE_NOT_REJECTED');
  result.push({preset:'mask-transition',preStartPixelMatch:true,
   negativeAssertion:'wrong_transform_space',typedRejection:true,
-  counterfactual:'same_frame_event_removed',frame:middle,changedROIPixels:1,
+  counterfactual:'same_frame_event_removed',frame:middle,changedROIPixels:changedMaskPixels,
   twoSurfacesObserved:true,postWindowEqual:true,
   source:'SYNTHETIC_RENDER_FIXTURE'});
 }
