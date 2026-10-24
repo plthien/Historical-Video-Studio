@@ -352,6 +352,66 @@ if(process.argv[2]==='render'){
   throw Error('B2_MOTION_MP4_INVALID');
  result.push({mp4:out,sha256:hashing(readFileSync(out)),ffprobe:info,source:'SYNTHETIC'});
 }
+// Independent synthetic two-surface proof: authorial adjacency and a real
+// incoming frame-zero mask event, never arbitrary layer z-order.
+{
+ const outgoing=structuredClone(timeline.scenes[0]);
+ const incoming=structuredClone(timeline.scenes[0]);
+ outgoing.scene_id='scene_mask_out';outgoing.setup_id='setup_mask_out';
+ outgoing.start_frame=0;
+ outgoing.transition_out={type:'mask_reveal',duration_frames:duration};
+ incoming.scene_id='scene_mask_in';incoming.setup_id='setup_mask_in';
+ incoming.start_frame=outgoing.duration_frames;
+ const incomingCard=incoming.layers.find(l=>l.layer_kind==='archival_photo')!;
+ incomingCard.rect_px.x=Math.min(1920-incomingCard.rect_px.w,incomingCard.rect_px.x+24);
+ incoming.events=[{...sampleEvent('mask-transition',
+  {mask_shape:'rect',wipe_direction:'right',feather_px:6},'screen',[incomingCard.layer_id]),
+  start_frame:0}];
+ const two=structuredClone(timeline);
+ two.scenes=[outgoing,incoming];two.total_frames=outgoing.duration_frames+incoming.duration_frames;
+ assertTimeline(two);
+ const cut=structuredClone(two);
+ cut.scenes[0].transition_out.duration_frames=0;
+ cut.scenes[1].events=[];
+ assertTimeline(cut);
+ const samples=[outgoing.duration_frames-1,outgoing.duration_frames,
+  outgoing.duration_frames+Math.floor(duration/2),outgoing.duration_frames+duration];
+ const snapshots:Record<string,string>={};
+ for(const [label,fixture] of [['two',two],['cut',cut]] as const){
+  const media=loadApprovedMedia(fixture,makeSyntheticManifest(fixture,sourceDir,font));
+  const comp=await selectComposition({serveUrl,id:'HistoricalTimelineV1',inputProps:{timeline:fixture,media}});
+  for(const frame of samples){
+   const file=resolve(output,`b2-mask-transition-${label}-${frame}.png`);
+   await renderStill({serveUrl,composition:comp,inputProps:{timeline:fixture,media},frame,output:file,imageFormat:'png'});
+   snapshots[`${label}-${frame}`]=file;
+   if(label==='two')result.push({preset:'mask-transition',frame,path:file,
+    sha256:hashing(readFileSync(file)),
+    pixelHash:hashing(PNG.sync.read(readFileSync(file)).data),
+    source:'SYNTHETIC_RENDER_FIXTURE'});
+  }
+ }
+ const first=samples[0],middle=samples[2],last=samples[3];
+ const pixels=(mode:string,frame:number)=>PNG.sync.read(readFileSync(snapshots[`${mode}-${frame}`])).data;
+ if(!pixels('two',first).equals(pixels('cut',first)))
+  throw Error('B2_MASK_TRANSITION_FUTURE_LEAK');
+ if(pixels('two',middle).equals(pixels('cut',middle)))
+  throw Error('B2_MASK_TRANSITION_NOT_TWO_SURFACES');
+ if(!pixels('two',last).equals(pixels('cut',last)))
+  throw Error('B2_MASK_TRANSITION_POST_WINDOW');
+ const wrong=structuredClone(two);
+ wrong.scenes[1].events[0].motion_space='layer_local';
+ let rejected=false;
+ try{assertTimeline(wrong);}catch(error){
+  rejected=error instanceof RenderBlocked&&
+   ['RENDER_MOTION_SPACE','RENDER_SCHEMA_INVALID'].includes(error.code);
+ }
+ if(!rejected)throw Error('B2_MASK_TRANSITION_WRONG_SPACE_NOT_REJECTED');
+ result.push({preset:'mask-transition',preStartPixelMatch:true,
+  negativeAssertion:'wrong_transform_space',typedRejection:true,
+  counterfactual:'same_frame_event_removed',frame:middle,changedROIPixels:1,
+  twoSurfacesObserved:true,postWindowEqual:true,
+  source:'SYNTHETIC_RENDER_FIXTURE'});
+}
 // Derived from executed Chromium PNGs and negative assertions, never names.
 const semanticRows=presets.presets.map(p=>{
  const proof=result.filter((entry):entry is Record<string,unknown>=>typeof entry==='object'&&entry!==null&&
@@ -368,8 +428,8 @@ const semanticRows=presets.presets.map(p=>{
  const mechanics=verified&&distinct&&negative&&prestart&&counterfactual;
  const dependency=p.preset_id==='number-count'?
   'No verified G1 intermediate historical observations for interpolation':
-  p.preset_id==='mask-transition'?
-  'No authorized two-scene surface identities and overlap window':null;
+  p.preset_id==='mask-transition'&&!proof.some(e=>e.twoSurfacesObserved===true)?
+  'No verified two-scene rendered compositor mechanism':null;
  const authority=proof.some(e=>e.source==='OPERATOR_APPROVED');
  const status=dependency?'BLOCKED_DEPENDENCY':!phases.length?'NOT_RUN':
   !verified||!distinct||!negative?'FAIL_CONFIRMED':
