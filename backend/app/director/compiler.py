@@ -732,6 +732,13 @@ def revise_g4(store, project_id: str, previous: dict, original_blueprint: dict,
             if errors:
                 _block("G4_MOTION_INVALID", event_id, "Registered motion bounds rejected this presentation edit.")
             # Event params, phase keys and camera track were rebuilt by _scene.
+        requested_camera = [event_id for event_id in motion_overrides.get(sid, {})
+                            if event_id in current_events and
+                            current_events[event_id]["preset_id"] in ("camera-pan", "camera-push")]
+        if requested_camera and (scene["camera"]["keyframes"] ==
+                                 previous["scenes"][index[sid]]["camera"]["keyframes"]):
+            _block("G4_MOTION_INERT", requested_camera[0],
+                   "Camera scalar edit did not change real compiled keyframes; do not persist inert JSON.")
         out["scenes"][index[sid]] = scene
     if all(canonical(out["scenes"][index[sid]]) == canonical(previous["scenes"][index[sid]])
            for sid in changed):
