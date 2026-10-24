@@ -112,7 +112,12 @@ function motionForLayer(scene:Scene,layer:Layer,frame:number){
       (e.params.cursor_visible&&count<chars.length&&frame>=e.start_frame?'▍':'');
     break;
    }
-   case 'mask-transition':case 'map-region-wipe':reveal=Math.min(reveal,p);
+   case 'mask-transition':
+    // True two-surface rendering is owned by HistoryComposition after it
+    // verifies outgoing/incoming chronology. Never use this one-layer fallback.
+    fail('RENDER_TWO_SURFACE_UNAUTHORIZED',e.event_id,
+      'Missing authored adjacent scene pairing for mask-transition');
+   case 'map-region-wipe':reveal=Math.min(reveal,p);
     revealDirection=String(e.params.wipe_direction??'left') as typeof revealDirection;
     revealFeather=Number(e.params.feather_px??0);break;
    case 'text-highlight':{
