@@ -66,7 +66,7 @@ test('storyboard-editor uses real persisted G4 scenes and native read-only Playe
   .toBeVisible({timeout:30000});
  const persistedCamera=await request.get('http://127.0.0.1:8000/api/v1/projects/proj_001/storyboard/timeline');
  expect(persistedCamera.ok()).toBeTruthy();
- const cameraRevision=(await persistedCamera.json()).timeline.scenes[0];
+ const cameraRevision=(await persistedCamera.json() as {timeline:typeof initialPreview.props.timeline}).timeline.scenes[0];
  expect(cameraRevision.events.find(e=>e.event_id===cameraEvent!.event_id)?.params.to_scale).toBeCloseTo(newScalar);
  expect(cameraRevision.camera.keyframes).not.toEqual(currentCameraTrack);
  await page.getByRole('button',{name:'Load real read-only Remotion Player'}).click();
