@@ -7,7 +7,7 @@ from backend.app.contracts import ContractViolation, validate_document, validate
 from backend.app.director.layout import selected_layout
 from backend.app.director.layers import build_layers
 from backend.app.director.motion import compile_event, presets
-from backend.app.director.camera import build_camera
+from backend.app.director.camera import build_camera, compose_camera_events
 from backend.app.director.fingerprint import canonical, digest, dependency_identity
 from backend.app.director.timing import bind_beats
 from backend.app.director.staging import group_staging
@@ -20,7 +20,7 @@ def _block(code, entity, help_text):
     raise ContractViolation(code, entity, help_text)
 
 
-def _scene(plan, staging, beats, assets, requirements, maps, font_measure):
+def _scene(plan, staging, beats, assets, requirements, maps, font_measure, motion_patches=None):
     layout = selected_layout(plan)
     sid = plan["setup_id"]
     layers, refs = build_layers(plan, assets, requirements, maps=maps, font_measure=font_measure)
@@ -163,13 +163,26 @@ def _scene(plan, staging, beats, assets, requirements, maps, font_measure):
                 "approved_feature_ids": [feature["id"] for feature in approved_map["features"]],
                 "reviewed_period_map": True,
             })
+        if kind == "camera-pan":
+            previous_focus = (refs.get(beats[i-1]["focus_ref"])
+                              if i else focus)
+            params.update(start_target_layer_id=previous_focus,
+                          end_target_layer_id=focus)
+        elif kind == "camera-push":
+            params["focus_layer_id"] = focus
+        event_id = "event_" + beat["beat_id"]
+        # Re-enter the canonical grammar with the persisted G4 scalar patch.
+        # Never mutate compiled JSON without recompiling its camera/track.
+        params.update((motion_patches or {}).get(event_id, {}))
         event = compile_event(kind, target, layers,
-                              event_id="event_" + beat["beat_id"],
+                              event_id=event_id,
                               start_frame=event_at, duration_frames=length,
                               cue_word_id=beat["word_ids"][0], params=params, evidence=evidence)
         events.append(event)
     camera = build_camera(plan, layers, beats, refs, duration_frames=duration,
                           limits=layout["camera_limits"])
+    camera = compose_camera_events(camera, events, layers, duration_frames=duration,
+                                   limits=layout["camera_limits"])
     if camera["focus_path"][-1]["at_frame"] >= duration:
         _block("CAMERA_FRAME_INVALID", sid, "Camera focus may not exceed its scene.")
     extra_carry = plan["editorial_direction"]["visual_beats"][-1]["continuity"]["carry_refs"]
@@ -596,7 +609,7 @@ def revise_g4(store, project_id: str, previous: dict, original_blueprint: dict,
             continue
         rows = [x for x in windows if x["setup_id"] == sid]
         scene = _scene(plan, staging[sid], rows, approved_assets, requirements,
-                       current_maps, font_measure)
+                       current_maps, font_measure, persisted_motion.get(sid, {}))
         previous_layers = {item["layer_id"]: item for item in previous["scenes"][index[sid]]["layers"]}
         chosen_layers = persisted_layers.get(sid, {})
         if set(chosen_layers) - {x["layer_id"] for x in scene["layers"]}:
@@ -638,7 +651,7 @@ def revise_g4(store, project_id: str, previous: dict, original_blueprint: dict,
                 _block("G4_MOTION_INVALID", event_id, "G4 cannot rebind an authored event to another source layer.")
             if not isinstance(patch, dict) or not patch:
                 _block("G4_MOTION_INVALID", event_id, "Choose one authorized scalar motion parameter.")
-            original_params = event["params"]
+            original_params = prior["params"]
             # Parameters which name source entities can never be changed by a
             # presentation edit. Arrays/objects are deliberately excluded by
             # the published scalar StoryboardEdit transport.
@@ -648,21 +661,18 @@ def revise_g4(store, project_id: str, previous: dict, original_blueprint: dict,
             for key, value in patch.items():
                 if type(value) not in (int, float, str, bool) or isinstance(original_params[key], (dict, list)):
                     _block("G4_MOTION_INVALID", event_id, "Only registered scalar presentation parameters are editable.")
-            # Camera preset parameters currently do not feed the B1 sampled
-            # camera track. Never commit a JSON-only motion change as a visual
-            # edit until that rendering semantic has been implemented and proved.
-            if event["preset_id"] in ("camera-push", "camera-pan"):
-                _block("G4_MOTION_UNSUPPORTED", event_id,
-                       "Camera motion parameters are source-locked until G4 recomputes validated camera keyframes.")
             candidate = {**original_params, **patch}
-            if candidate == original_params:
-                _block("G4_MOTION_NO_EFFECT", event_id, "No motion parameter changed.")
+            # A typed patch is only acceptable when the rebuilt event truly
+            # contains the full registered canonical parameter grammar.
+            if event["params"] != candidate:
+                _block("G4_MOTION_INERT", event_id,
+                       "The compiler did not apply the complete registered motion edit.")
             from backend.app.director.motion import presets
             from jsonschema import Draft202012Validator
             errors = list(Draft202012Validator(presets()[event["preset_id"]]["parameter_schema"]).iter_errors(candidate))
             if errors:
                 _block("G4_MOTION_INVALID", event_id, "Registered motion bounds rejected this presentation edit.")
-            event["params"] = candidate
+            # Event params, phase keys and camera track were rebuilt by _scene.
         out["scenes"][index[sid]] = scene
     if all(canonical(out["scenes"][index[sid]]) == canonical(previous["scenes"][index[sid]])
            for sid in changed):
