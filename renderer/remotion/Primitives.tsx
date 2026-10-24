@@ -52,6 +52,8 @@ function eventProgress(e:Motion,f:number){
 function motionForLayer(scene:Scene,layer:Layer,frame:number){
  let opacity=1,scale=1,translateX=0,translateY=0,rotation=0,reveal=1,highlight=0;
  let visibleText:string|undefined;
+ const wordOffsets:Record<string,number>={};
+ const wordColors:Record<string,string>={};
  let revealDirection:'left'|'right'|'up'|'down'|'center_out'='left',revealFeather=0;
  let cardBorder:number|undefined,cardShadow:number|undefined;
  for(const e of scene.events){
@@ -113,8 +115,26 @@ function motionForLayer(scene:Scene,layer:Layer,frame:number){
    case 'mask-transition':case 'map-region-wipe':reveal=Math.min(reveal,p);
     revealDirection=String(e.params.wipe_direction??'left') as typeof revealDirection;
     revealFeather=Number(e.params.feather_px??0);break;
-   case 'text-highlight':highlight=Math.max(highlight,p);break;
-   case 'kinetic-type':translateY+=(1-p)*Number(e.params.max_offset_px??24);break;
+   case 'text-highlight':{
+    const ids=e.params.source_word_ids as string[];
+    if(!Array.isArray(ids)||!ids.length||ids.some(id=>!layer.word_spans?.some(span=>span.word_id===id)))
+     fail('RENDER_WORD_SPAN_UNVERIFIED',e.event_id,'Word identity must resolve to exact visible G2 offsets');
+    if(frame<=e.start_frame+e.duration_frames+Number(e.params.hold_after_frames)){
+     const palette:Record<string,string>={gold:'#a65d20',red:'#a84438',slate:'#56616a'};
+     const color=palette[String(e.params.highlight_color_token)];
+     if(!color)fail('RENDER_WORD_HIGHLIGHT_INVALID',e.event_id,'Unregistered word color token');
+     ids.forEach(id=>{wordColors[id]=color;});
+    }
+    break;
+   }
+   case 'kinetic-type':{
+    const ids=e.params.word_ids as string[];
+    if(!Array.isArray(ids)||!ids.length||ids.some(id=>!layer.word_spans?.some(span=>span.word_id===id)))
+     fail('RENDER_WORD_SPAN_UNVERIFIED',e.event_id,'Word identity must resolve to exact visible G2 offsets');
+    if(e.params.line_preservation!==true)fail('RENDER_WORD_LAYOUT_INVALID',e.event_id,'Frozen word line layout required');
+    ids.forEach(id=>{wordOffsets[id]=(1-p)*Number(e.params.max_offset_px);});
+    break;
+   }
    case 'number-count':{
     const source=e.params.source_claim_id, end=Number(e.params.end_value);
     if(source!==layer.source_claim_id||!layer.text||Number(layer.text.replace(/,/g,''))!==end||
@@ -154,7 +174,7 @@ function motionForLayer(scene:Scene,layer:Layer,frame:number){
    default:fail('RENDER_MOTION_UNIMPLEMENTED',e.event_id,'Compiled motion not implemented in B2-01..03; cannot silently ignore');
   }
  }
- return {opacity,scale,translateX,translateY,rotation,reveal,revealDirection,revealFeather,highlight,visibleText,cardBorder,cardShadow};
+ return {opacity,scale,translateX,translateY,rotation,reveal,revealDirection,revealFeather,highlight,visibleText,cardBorder,cardShadow,wordOffsets,wordColors};
 }
 function firstAppearance(scene:Scene,layerId:string){
  const beats=scene.staging.beat_sequence.filter(b=>b.activated_layer_ids.includes(layerId));
@@ -290,13 +310,27 @@ export const CompiledLayer:React.FC<{scene:Scene;layer:Layer;frame:number;media:
   if(!layout)fail('RENDER_TEXT_LAYOUT',layer.layer_id,'Text needs pinned glyph layout');
   const measured=layout!;
   const isHeading=layer.layer_kind==='headline';
+  const spans=layer.word_spans??[];
+  if(spans.length&&txt!==layer.text)
+   fail('RENDER_WORD_TEXT_CHANGED',layer.layer_id,'Word offsets cannot index altered factual text');
+  const fragments:React.ReactNode[]=[];
+  let cursor=0;
+  for(const span of spans){
+   fragments.push(txt.slice(cursor,span.start));
+   fragments.push(<span key={span.word_id} data-g2-word={span.word_id}
+     style={{display:'inline-block',color:effect.wordColors[span.word_id]??ink,
+       transform:`translateY(${effect.wordOffsets[span.word_id]??0}px)`}}>
+     {txt.slice(span.start,span.end)}</span>);
+   cursor=span.end;
+  }
+  if(spans.length)fragments.push(txt.slice(cursor));
   return <div style={{...style,...reviewedClip(layer,effect.reveal,effect.revealDirection,effect.revealFeather),padding:isHeading?10:6,display:'flex',alignItems:measured.vertical_align==='center'?'center':'flex-start',
     justifyContent:measured.horizontal_align==='center'?'center':'flex-start',background:layer.layer_kind==='date'?'#e6d6b9c9':undefined,
     }}
     data-layer={layer.layer_id} data-claim={layer.source_claim_id??undefined}>
    <span style={{fontFamily:media.fontFamily,color:effect.highlight>0.2?'#a65d20':ink,
      fontSize:measured.font_size_px,fontWeight:isHeading?700:500,lineHeight:measured.line_height,whiteSpace:'pre-wrap',overflow:'hidden',
-     display:'-webkit-box',WebkitBoxOrient:'vertical',WebkitLineClamp:measured.max_lines}}>{txt}</span></div>;
+     display:'-webkit-box',WebkitBoxOrient:'vertical',WebkitLineClamp:measured.max_lines}}>{spans.length?fragments:txt}</span></div>;
  }
  return null;
 };
