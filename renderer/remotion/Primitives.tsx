@@ -37,13 +37,17 @@ export function interpolateKeys(keys:{frame:number;value:number}[],frame:number)
  return keys[keys.length-1].value;
 }
 function eventProgress(e:Motion,f:number){
- // B1 tracks for screen transitions carry pixels/opacity rather than normalized
- // fractions. Their phase is time-based, never treat 150px as a 150x progress.
- if(e.preset_id==='cross-dissolve'||e.preset_id==='whip-pan')
-  return clamp((f-e.start_frame)/e.duration_frames);
+ // The event property keyframes may be scales, angles or pixel distances.
+ // Those values are NOT opacity or normalized phase progress. All primitives
+ // share authored scene-local timing; their own property uses this phase.
  if(f<e.start_frame)return 0;
+ if(e.preset_id==='hard-cut')return 1; // one-frame boundary, never a fade
  if(f>=e.start_frame+e.duration_frames)return 1;
- return clamp(interpolateKeys(e.keyframes,f-e.start_frame));
+ const t=clamp((f-e.start_frame)/e.duration_frames);
+ const curve=e.keyframes[e.keyframes.length-1]?.easing??'linear';
+ if(curve==='cubic_soft')return t*t*(3-2*t);
+ if(curve==='spring_subtle')return clamp(t+0.04*Math.sin(Math.PI*2*t)*(1-t));
+ return easing(t,curve);
 }
 function motionForLayer(scene:Scene,layer:Layer,frame:number){
  let opacity=1,scale=1,translateX=0,translateY=0,rotation=0,reveal=1,highlight=0;
