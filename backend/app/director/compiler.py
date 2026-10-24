@@ -312,6 +312,18 @@ def compile_timeline(story: dict, blueprint: dict, word_map: dict, final_audio: 
         scenes.append(_scene(plan, by_setup[plan["setup_id"]], beats,
                              approved_assets, required, maps, font_measure,
                              word_map=word_map))
+    # A two-surface wipe is authorized only by the outgoing G1-authored
+    # transition intent AND an incoming boundary event at frame zero. Other
+    # single-layer wipes are not silently promoted to a cross-scene transition.
+    for index in range(1, len(scenes)):
+        outgoing, incoming = scenes[index-1], scenes[index]
+        boundary = [e for e in incoming["events"] if
+                    e["preset_id"] == "mask-transition" and e["start_frame"] == 0]
+        if (outgoing["transition_out"]["type"] == "mask_reveal" and
+                len(boundary) == 1 and
+                0 < boundary[0]["duration_frames"] <= min(
+                    outgoing["duration_frames"], incoming["duration_frames"])):
+            outgoing["transition_out"]["duration_frames"] = boundary[0]["duration_frames"]
     total = (final_audio["duration_samples"]*30 + word_map["sample_rate"]-1)//word_map["sample_rate"]
     last = 0
     for s in scenes:
