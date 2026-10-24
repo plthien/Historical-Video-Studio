@@ -28,7 +28,9 @@ test('storyboard-editor uses real persisted G4 scenes and native read-only Playe
  const beforeFocus=PNG.sync.read(await stage.screenshot());
  expect(fatalErrors,'browser Player must not throw React hook or runtime errors').toEqual([]);
  const focus=page.getByLabel('Authorized focus movement');
- await focus.selectOption('overview_to_detail');
+ const originalFocus=await focus.inputValue();
+ const targetFocus=originalFocus==='overview_to_detail'?'detail_to_overview':'overview_to_detail';
+ await focus.selectOption(targetFocus);
  await page.getByRole('button',{name:/Save staging/}).click();
  await expect(page.getByRole('status').filter({hasText:'Save authored G4 beat staging completed'}))
   .toBeVisible({timeout:30000});

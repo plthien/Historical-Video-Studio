@@ -325,11 +325,13 @@ writeFileSync(resolve(output,'b2-motion-19-presets.json'),JSON.stringify({
 writeFileSync(resolve(output,'b2-motion-phases.json'),JSON.stringify({status:'FAIL',
  registryCount:19,cases:result,source:'SYNTHETIC_B1_COMPILED_NOT_LIVE_APPROVED'},null,2));
 const incomplete=semanticRows.filter(row=>row.result!=='PASS');
-if(incomplete.length){
+const strictSemanticOwner=process.argv[2]!=='render';
+if(incomplete.length&&strictSemanticOwner){
  console.error(JSON.stringify({status:'FAIL',renderer:'Remotion Chromium',
   phasePNGs:cases.length*3,source:'SYNTHETIC',mp4:process.argv[2]==='render',
   incomplete:incomplete.map(row=>({preset_id:row.preset_id,result:row.result,blocker:row.blocker}))}));
  throw Error('B2_MOTION_SEMANTIC_LEDGER_INCOMPLETE: every one of 19 registered presets requires PASS');
 }
-console.log(JSON.stringify({status:'PASS',renderer:'Remotion Chromium',
- phasePNGs:cases.length*3,source:'SYNTHETIC',mp4:process.argv[2]==='render'}));
+console.log(JSON.stringify({status:incomplete.length?'MULTILAYER_PASS_MOTION_INCOMPLETE':'PASS',renderer:'Remotion Chromium',
+ phasePNGs:cases.length*3,source:'SYNTHETIC',mp4:process.argv[2]==='render',
+ semanticOwner:strictSemanticOwner}));
