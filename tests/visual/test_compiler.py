@@ -1296,3 +1296,58 @@ def test_g4_direction_revision_itemizes_the_complete_current_source_delta():
     plan["editorial_direction"]["layout_variant_hint"] = "A"
     mark(plan, "a" * 64, "Restore layout variant", source)
     assert plan["direction_revision"]["edited_paths"] == ["visual_beats"]
+
+
+def test_b2_camera_event_params_compile_into_real_causal_track():
+    from backend.app.director.camera import compose_camera_events
+    from backend.app.contracts import ContractViolation
+    import pytest
+
+    k = lambda frame: {"at_frame": frame, "x_px": 0, "y_px": 0,
+                       "scale": 1, "rotation_deg": 0, "opacity": 1,
+                       "easing": "linear"}
+    baseline = {"mode": "static", "keyframes": [k(0), k(19)],
+                "focus_path": [{"at_frame": 0, "focus_layer_id": "layer_a",
+                                "focus_geo_feature_id": None, "framing": "subject_center"}],
+                "focus_entity_id": "layer_a", "clamp_to_content": True,
+                "transform_order": "layer_then_group_then_camera"}
+    layers = [
+        {"layer_id": "layer_a", "rect_px": {"x": 100, "y": 200, "w": 200, "h": 200}},
+        {"layer_id": "layer_b", "rect_px": {"x": 1300, "y": 200, "w": 200, "h": 200}},
+    ]
+    limits = {"min_scale": .9, "max_scale": 1.2, "max_translation_px": 300}
+    pan = {"event_id": "event_pan", "preset_id": "camera-pan", "motion_space": "screen",
+           "start_frame": 5, "duration_frames": 10,
+           "params": {"start_target_layer_id": "layer_a",
+                      "end_target_layer_id": "layer_b",
+                      "max_translate_px": 240, "keep_context_visible": True}}
+    before = compose_camera_events(baseline, [pan], layers, duration_frames=20, limits=limits)
+    bounded = compose_camera_events(baseline, [{**pan, "params": {
+        **pan["params"], "max_translate_px": 40}}], layers,
+        duration_frames=20, limits=limits)
+    assert before["keyframes"][4]["x_px"] == bounded["keyframes"][4]["x_px"] == 0
+    assert before["keyframes"][5]["x_px"] == bounded["keyframes"][5]["x_px"] == 0
+    assert before["keyframes"][10]["x_px"] < bounded["keyframes"][10]["x_px"] < 0
+    assert before["keyframes"][19]["x_px"] == -240
+    assert bounded["keyframes"][19]["x_px"] == -40
+    assert baseline["keyframes"] == [k(0), k(19)]  # no hidden source mutation
+    push = {"event_id": "event_push", "preset_id": "camera-push",
+            "motion_space": "screen", "start_frame": 5, "duration_frames": 10,
+            "params": {"focus_layer_id": "layer_b", "from_scale": 1,
+                       "to_scale": 1.1, "max_drift_px": 30}}
+    zoom = compose_camera_events(baseline, [push], layers,
+                                 duration_frames=20, limits=limits)
+    assert zoom["keyframes"][4]["scale"] == zoom["keyframes"][5]["scale"] == 1
+    assert zoom["keyframes"][10]["scale"] > 1
+    assert zoom["keyframes"][19]["scale"] == 1.1
+    with pytest.raises(ContractViolation):
+        compose_camera_events(baseline, [{**pan, "params": {
+            **pan["params"], "end_target_layer_id": "layer_forged"}}],
+            layers, duration_frames=20, limits=limits)
+    with pytest.raises(ContractViolation):
+        compose_camera_events(baseline, [{**pan, "motion_space": "layer_local"}],
+            layers, duration_frames=20, limits=limits)
+    with pytest.raises(ContractViolation):
+        compose_camera_events(baseline, [pan, {**pan, "event_id": "event_overlap",
+                                               "start_frame": 8}], layers,
+            duration_frames=20, limits=limits)
