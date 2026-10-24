@@ -140,10 +140,11 @@ function motionForLayer(scene:Scene,layer:Layer,frame:number){
     if(source!==layer.source_claim_id||!layer.text||Number(layer.text.replace(/,/g,''))!==end||
        e.params.intermediate_truthful!==true)
       fail('RENDER_COUNT_FACT_UNVERIFIED',e.event_id,'Number progression must be explicitly truth-safe and equal frozen exact factual text');
-    // Intermediate values are not independently proved by G1; reveal the
-    // exact claim rather than fabricating apparent historical measurements.
-    reveal=Math.min(reveal,p);highlight=Math.max(highlight,p);
-    break;
+    // A final scalar plus a self-asserted boolean cannot authenticate each
+    // intermediate historical observation. Refuse to label a mask reveal as
+    // genuine registered number interpolation; G1 source authority is required.
+    fail('RENDER_NUMBER_SERIES_UNVERIFIED',e.event_id,
+      'Frozen G1 lacks a certified factual intermediate value series for number-count');
    }
    case 'parallax-layers':{
     const near=e.params.near_layer_ids as string[],far=e.params.far_layer_ids as string[];
