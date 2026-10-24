@@ -13,7 +13,9 @@ test('storyboard-editor uses real persisted G4 scenes and native read-only Playe
  await page.getByRole('button',{name:/Motion Storyboard/}).click();
  await expect(page.getByText(/Scenes \(2\)/)).toBeVisible({timeout:25000});
  await expect(page.getByRole('listbox',{name:'Storyboard scenes'}).getByRole('option')).toHaveCount(2);
+ const initialPreviewResponse=page.waitForResponse(response=>response.url().endsWith('/storyboard/preview'));
  await page.getByRole('button',{name:'Load real read-only Remotion Player'}).click();
+ const initialPreview=await (await initialPreviewResponse).json();
  await expect(page.getByLabel('Read-only local Remotion Player')).toBeVisible({timeout:30000});
  await expect(page.getByText(/G4 DRAFT · VIEW ONLY/)).toBeVisible();
  // A visible Player wrapper or updated seek input is NOT a rendered frame.
@@ -28,8 +30,8 @@ test('storyboard-editor uses real persisted G4 scenes and native read-only Playe
  const beforeFocus=PNG.sync.read(await stage.screenshot());
  expect(fatalErrors,'browser Player must not throw React hook or runtime errors').toEqual([]);
  const focus=page.getByLabel('Authorized focus movement');
- const originalFocus=await focus.inputValue();
- const targetFocus=originalFocus==='overview_to_detail'?'detail_to_overview':'overview_to_detail';
+ const currentCameraMode=initialPreview.props.timeline.scenes[0].camera.mode;
+ const targetFocus=currentCameraMode==='pull_out'?'overview_to_detail':'detail_to_overview';
  await focus.selectOption(targetFocus);
  await page.getByRole('button',{name:/Save staging/}).click();
  await expect(page.getByRole('status').filter({hasText:'Save authored G4 beat staging completed'}))

@@ -134,7 +134,12 @@ def revise(store, project: str, expected: int, original: dict, edited: dict,
                      layer_overrides=layers, motion_overrides=motion)
 
 
-def mark(plan: dict, story_sha: str, reason: str, fields: list[str]):
+def mark(plan: dict, story_sha: str, reason: str, source_direction: dict):
+    fields = sorted(key for key, value in source_direction.items()
+                    if plan["editorial_direction"].get(key) != value)
+    if not fields:
+        blocked("G4_EDIT_INVALID", plan["setup_id"],
+                "Choose an actual presentation-direction change.")
     plan["direction_revision"] = {
         "kind": "operator_visual_edit",
         "source_story_revision_sha256": story_sha,
@@ -224,8 +229,11 @@ def mount(app, store, idempotent):
                 plan["variant_id"] = edits.variant_id
                 plan["layout_control"]["layout_id"] = f'{plan["template_id"]}.{edits.variant_id}.v1'
                 plan["editorial_direction"]["layout_variant_hint"] = edits.variant_id
-            mark(plan, head["timeline"]["story_sha256"],
-                 f"Operator storyboard variant update: {scene_id}", ["layout_variant_hint"])
+                story = store.get_story(project_id).data()
+                source = next(item["direction"] for item in story["visual_setups"]
+                              if item["setup_id"] == previous["setup_id"])
+                mark(plan, head["timeline"]["story_sha256"],
+                     f"Operator storyboard variant update: {scene_id}", source)
             return revise(store, project_id, body.expected_revision, head["blueprint"],
                           edited, f"Storyboard presentation edit: {scene_id}",
                           layers={previous["setup_id"]: layer_patch} if layer_patch else None,
@@ -262,7 +270,10 @@ def mount(app, store, idempotent):
                             "Choose a focus movement authorized by VisualDirectionEdit.")
                 beat["focus_move"] = item.focus_move
                 beat["staging"] = [s.model_dump() for s in item.staging]
-            mark(plan, head["timeline"]["story_sha256"], body.edit_reason, ["visual_beats"])
+            story = store.get_story(project_id).data()
+            source = next(item["direction"] for item in story["visual_setups"]
+                          if item["setup_id"] == body.setup_id)
+            mark(plan, head["timeline"]["story_sha256"], body.edit_reason, source)
             return revise(store, project_id, body.expected_revision, head["blueprint"],
                           edited, body.edit_reason)
         return idempotent(project_id, "storyboard-direction:"+body.setup_id,

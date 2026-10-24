@@ -1283,3 +1283,16 @@ def test_g4_authorized_focus_move_changes_bounded_camera_without_rebinding_sourc
     assert 1 < pushed["keyframes"][-1]["scale"] <= limits["max_scale"]
     assert abs(pushed["keyframes"][-1]["x_px"]) <= limits["max_translation_px"]
     assert abs(pushed["keyframes"][-1]["y_px"]) <= limits["max_translation_px"]
+
+
+def test_g4_direction_revision_itemizes_the_complete_current_source_delta():
+    from backend.app.api.storyboard import mark
+
+    source = {"layout_variant_hint": "A", "visual_beats": [{"focus_move": "static"}]}
+    plan = {"setup_id": "setup_001", "editorial_direction": {
+        "layout_variant_hint": "B", "visual_beats": [{"focus_move": "detail_to_overview"}]}}
+    mark(plan, "a" * 64, "Change authored focus", source)
+    assert plan["direction_revision"]["edited_paths"] == ["layout_variant_hint", "visual_beats"]
+    plan["editorial_direction"]["layout_variant_hint"] = "A"
+    mark(plan, "a" * 64, "Restore layout variant", source)
+    assert plan["direction_revision"]["edited_paths"] == ["visual_beats"]
