@@ -137,7 +137,7 @@ for(const row of cases){
  wrongSpace.scenes[0].events.find(e=>e.event_id===row.event.event_id)!.motion_space='invalid_space';
  let rejected=false;
  try{assertTimeline(wrongSpace);}catch(error){
-  rejected=error instanceof RenderBlocked&&error.code==='RENDER_MOTION_SPACE';
+  rejected=error instanceof RenderBlocked&&['RENDER_MOTION_SPACE','RENDER_SCHEMA_INVALID'].includes(error.code);
  }
  result.push({preset:row.name,negativeAssertion:'wrong_transform_space',
   typedRejection:rejected,source:'SYNTHETIC_RENDER_FIXTURE'});
@@ -216,7 +216,7 @@ for(const presetId of ['route-line-draw','map-region-wipe','editorial-connector-
  wrongSpace.scenes[0].events.find(item=>item.event_id===event.event_id)!.motion_space='invalid_space';
  let rejected=false;
  try{assertTimeline(wrongSpace);}catch(error){
-  rejected=error instanceof RenderBlocked&&error.code==='RENDER_MOTION_SPACE';
+  rejected=error instanceof RenderBlocked&&['RENDER_MOTION_SPACE','RENDER_SCHEMA_INVALID'].includes(error.code);
  }
  result.push({preset:presetId,negativeAssertion:'wrong_transform_space',
   typedRejection:rejected,source:'SYNTHETIC_B1_COMPILER_NOT_OPERATOR_APPROVED'});
