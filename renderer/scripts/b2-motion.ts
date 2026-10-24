@@ -76,7 +76,14 @@ const result:unknown[]=[];
 for(const row of cases){
  const t=structuredClone(timeline);
  t.scenes[0].events.push(row.event);
-
+ if(row.name==='kinetic-type'||row.name==='text-highlight'){
+  // Synthetic renderer mechanics only. This is not an approved G2 word mapping.
+  const target=t.scenes[0].layers.find(layer=>layer.layer_id===caption.layer_id)!;
+  const token=/[\\p{L}\\p{N}][^\\s]*/u.exec(target.text??'');
+  if(!token)throw Error('B2_SYNTHETIC_WORD_TEXT_MISSING');
+  target.word_spans=[{word_id:cueWord,word_text:token[0],
+    start:token.index,end:token.index+token[0].length}];
+ }
  assertTimeline(t);
  const media=loadApprovedMedia(t,makeSyntheticManifest(t,sourceDir,font));
  const comp=await selectComposition({serveUrl,id:'HistoricalTimelineV1',inputProps:{timeline:t,media}});
