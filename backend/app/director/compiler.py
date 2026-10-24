@@ -20,7 +20,51 @@ def _block(code, entity, help_text):
     raise ContractViolation(code, entity, help_text)
 
 
-def _scene(plan, staging, beats, assets, requirements, maps, font_measure, motion_patches=None):
+def _attach_verified_word_spans(layer: dict, event: dict, word_map: dict | None):
+    """Derive optional B2 glyph offsets only from exact frozen G2 words and G1 text.
+
+    Repeated/unmatched visible words have ambiguous identity and must not be
+    guessed, even if their spelling happens to match a narrated word.
+    """
+    import re
+    from backend.app.voice.word_map import normalized
+
+    text = layer.get("text")
+    if text is None or word_map is None:
+        _block("MOTION_WORD_SPAN_UNVERIFIED", event["event_id"],
+               "Word-level motion requires frozen G2 words and a G1 text layer.")
+    ids = (event["params"].get("word_ids") if event["preset_id"] == "kinetic-type"
+           else event["params"].get("source_word_ids"))
+    if not isinstance(ids, list) or not ids:
+        _block("MOTION_WORD_SPAN_UNVERIFIED", event["event_id"],
+               "Select a nonempty frozen G2 word identity set.")
+    g2 = {w["word_id"]: w for w in word_map["words"]}
+    candidates = [(m.start(), m.end(), normalized(m.group()))
+                  for m in re.finditer(r"\S+", text)]
+    spans = []
+    for word_id in ids:
+        word = g2.get(word_id)
+        if word is None:
+            _block("MOTION_WORD_SPAN_UNVERIFIED", event["event_id"],
+                   "Word identity is absent from the current immutable G2 map.")
+        matching = [(a, b) for a, b, token in candidates
+                    if token and token == normalized(word["text"])]
+        if len(matching) != 1:
+            _block("MOTION_WORD_SPAN_AMBIGUOUS", word_id,
+                   "Visible text has no unique exact G2 word occurrence; no inferred glyph binding.")
+        a, b = matching[0]
+        if any(a < old["end"] and old["start"] < b for old in spans):
+            _block("MOTION_WORD_SPAN_AMBIGUOUS", word_id,
+                   "Two spoken identities cannot own the same source text glyphs.")
+        spans.append({"word_id": word_id, "word_text": word["text"],
+                      "start": a, "end": b})
+    if layer.get("word_spans") and layer["word_spans"] != spans:
+        _block("MOTION_WORD_SPAN_AMBIGUOUS", layer["layer_id"],
+               "A second event conflicts with the already derived G2 glyph bindings.")
+    layer["word_spans"] = sorted(spans, key=lambda span: span["start"])
+
+
+def _scene(plan, staging, beats, assets, requirements, maps, font_measure, motion_patches=None, word_map=None):
     layout = selected_layout(plan)
     sid = plan["setup_id"]
     layers, refs = build_layers(plan, assets, requirements, maps=maps, font_measure=font_measure)
@@ -178,6 +222,8 @@ def _scene(plan, staging, beats, assets, requirements, maps, font_measure, motio
                               event_id=event_id,
                               start_frame=event_at, duration_frames=length,
                               cue_word_id=beat["word_ids"][0], params=params, evidence=evidence)
+        if kind in ("kinetic-type", "text-highlight"):
+            _attach_verified_word_spans(target, event, word_map)
         events.append(event)
     camera = build_camera(plan, layers, beats, refs, duration_frames=duration,
                           limits=layout["camera_limits"])
@@ -264,7 +310,8 @@ def compile_timeline(story: dict, blueprint: dict, word_map: dict, final_audio: 
         if not beats or plan["setup_id"] not in by_setup:
             _block("CUE_MISSING", plan["setup_id"], "Every setup needs bound spoken words.")
         scenes.append(_scene(plan, by_setup[plan["setup_id"]], beats,
-                             approved_assets, required, maps, font_measure))
+                             approved_assets, required, maps, font_measure,
+                             word_map=word_map))
     total = (final_audio["duration_samples"]*30 + word_map["sample_rate"]-1)//word_map["sample_rate"]
     last = 0
     for s in scenes:
@@ -609,7 +656,7 @@ def revise_g4(store, project_id: str, previous: dict, original_blueprint: dict,
             continue
         rows = [x for x in windows if x["setup_id"] == sid]
         scene = _scene(plan, staging[sid], rows, approved_assets, requirements,
-                       current_maps, font_measure, persisted_motion.get(sid, {}))
+                       current_maps, font_measure, persisted_motion.get(sid, {}), word_map)
         previous_layers = {item["layer_id"]: item for item in previous["scenes"][index[sid]]["layers"]}
         chosen_layers = persisted_layers.get(sid, {})
         if set(chosen_layers) - {x["layer_id"] for x in scene["layers"]}:
