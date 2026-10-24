@@ -1,0 +1,83 @@
+{
+  "schema_version": 1,
+  "source_head": "8020079b0fa50fffe5cddedc9e0e00d3c42b7a8c",
+  "provenance": "SOURCE_INSPECTION_ONLY_NOT_RUNTIME_VERIFICATION",
+  "dependencies": [
+    {
+      "dependency_id": "D01",
+      "frozen_authority_paths": [
+        "contracts/registries/motion-presets.v1.json",
+        "backend/app/director/motion.py",
+        "renderer/remotion/Primitives.tsx"
+      ],
+      "actual_current_schema_fields": [
+        "number-count.params.source_claim_id",
+        "start_value",
+        "end_value",
+        "precision",
+        "intermediate_truthful"
+      ],
+      "observed_approved_data": "No independently approved intermediate series confirmed; compile_event checks only final number_value and intermediate_truthful flag. Renderer reveals exact final claim instead of interpolating historical values.",
+      "authorized_positive_path_available": false,
+      "implemented_safe_behavior": "Renderer preserves exact-value reveal; cannot claim number_interpolate semantic PASS.",
+      "positive_test_ids": [],
+      "negative_test_ids": [],
+      "unresolved_clause": "A G1-approved truthful interpolation sequence or another explicitly authorized non-factual counter is required.",
+      "gate_impact": [
+        "G03",
+        "G04"
+      ],
+      "needs_owner_decision": true
+    },
+    {
+      "dependency_id": "D02",
+      "frozen_authority_paths": [
+        "contracts/registries/motion-presets.v1.json",
+        "backend/app/director/compiler.py",
+        "renderer/remotion/Primitives.tsx"
+      ],
+      "actual_current_schema_fields": [
+        "mask-transition.params.mask_shape",
+        "wipe_direction",
+        "feather_px",
+        "scene.transition_out.type",
+        "scene.transition_out.duration_frames"
+      ],
+      "observed_approved_data": "Registry mask-transition lacks explicit incoming/outgoing surface references. _scene sets transition_out.duration_frames=0. Renderer treats mask-transition as a single-layer reveal.",
+      "authorized_positive_path_available": false,
+      "implemented_safe_behavior": "Single-surface reveal cannot be counted as two-scene transition proof.",
+      "positive_test_ids": [],
+      "negative_test_ids": [],
+      "unresolved_clause": "Unique existing approved outgoing/incoming identities and positive overlap interval have not been demonstrated.",
+      "gate_impact": [
+        "G03",
+        "G04"
+      ],
+      "needs_owner_decision": true
+    },
+    {
+      "dependency_id": "D03",
+      "frozen_authority_paths": [
+        "backend/app/api/storyboard.py",
+        "backend/app/director/compiler.py",
+        "backend/app/assets/resolution.py"
+      ],
+      "actual_current_schema_fields": [
+        "LayerEdit.approved_asset_id",
+        "AssetResolution._head",
+        "approved_assets[requirement_id]"
+      ],
+      "observed_approved_data": "Current API explicitly rejects any changed approved_asset_id. Source accessor exposes current per-requirement G3 head, not a verified enumerable set of same-slot G3-approved alternatives. Live approved candidate records NOT_INSPECTED.",
+      "authorized_positive_path_available": false,
+      "implemented_safe_behavior": "Changed G3 asset binding is rejected; no upstream approval or source identity is manufactured.",
+      "positive_test_ids": [],
+      "negative_test_ids": [],
+      "unresolved_clause": "Proof of multiple currently G3-approved same-slot alternatives with immutable rights/source snapshot is required before enabling asset replacement.",
+      "gate_impact": [
+        "G06",
+        "G08"
+      ],
+      "needs_owner_decision": true
+    }
+  ]
+}

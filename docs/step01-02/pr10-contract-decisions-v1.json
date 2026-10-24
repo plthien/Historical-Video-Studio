@@ -1,0 +1,57 @@
+{
+  "task": "CODEX_PR10_CONTRACT_RESOLUTION_AND_MOTION_IMPLEMENTATION_TASK_V1_E994867",
+  "baseline": "e994867f8ce68a4a2df5415761ef69d380c63ba1",
+  "provenance": "SOURCE_CODE_CONTRACT_DECISIONS_NOT_LIVE_OPERATOR_APPROVAL",
+  "decisions": [
+    {
+      "id": "Q1_NUMBER_COUNT",
+      "classification": "REQUIRES_OWNER_APPROVAL",
+      "authority": [
+        "contracts/registries/motion-presets.v1.json",
+        "backend/app/director/motion.py",
+        "renderer/remotion/Primitives.tsx"
+      ],
+      "finding": "The scalar G1 claim is validated only at its final value. intermediate_truthful=true is self-reported, not an approved series. Historical interpolation has no source-backed intermediate values.",
+      "safe_implementation": "RENDER_NUMBER_SERIES_UNVERIFIED typed fail-closed for unsupported historical values; do not promote exact-value reveal to number-count semantic PASS.",
+      "minimum_owner_change": "G1 historical-source owner must authorize an immutable ordered numeric series or explicitly nonfactual counter semantics, including intermediate interpretation, units, precision, source claim IDs and reviewed evidence. B2 may then bind/revalidate exact values without changing G2/G3."
+    },
+    {
+      "id": "Q2_MASK_TRANSITION",
+      "classification": "B2_LOCAL_ADDITIVE_EXTENSION",
+      "authority": [
+        "backend/app/director/compiler.py",
+        "renderer/remotion/HistoryComposition.tsx",
+        "contracts/schema/CompiledTimeline.v1.schema.json"
+      ],
+      "finding": "Existing outgoing transition_intent=mask_reveal and chronological adjacency can authorize a uniquely defined next scene only when the incoming mask-transition event begins at local frame 0 and duration is within both scenes. Otherwise prior transition_out.duration_frames=0 is insufficient.",
+      "safe_implementation": "Compute bounded overlap from the eligible frozen pair. Shared Player/Node Composition renders previous frozen scene and incoming screen-space native mask in actual incoming window. Unpaired generic reveals are not two-surface semantic PASS.",
+      "minimum_owner_change": "If a desired transition lacks this uniquely authored boundary, require G1 storyboard source to specify the intended two scene identities and chronological window. Do not derive from z-order."
+    },
+    {
+      "id": "Q3_G3_ASSET_CHOICES",
+      "classification": "REQUIRES_OWNER_APPROVAL",
+      "authority": [
+        "backend/app/assets/resolution.py",
+        "backend/app/api/storyboard.py",
+        "backend/app/director/compiler.py"
+      ],
+      "finding": "asset_approval_heads has one current approval_id per (project_id,requirement_id). Old asset_approval_events are historical records, not concurrently approved alternatives. No current authorized choice set exists in the published model.",
+      "safe_implementation": "Reject changed approved_asset_id at G4; preserve original byte SHA, requirement/rights and G3 snapshot; no fabricated approval.",
+      "minimum_owner_change": "G3 asset owner must separately approve a same-requirement, same-slot candidate choice set with per-candidate rights/source SHA and immutable snapshot identity; B2 G4 can then select among that explicitly current set using CAS."
+    },
+    {
+      "id": "Q4_G2_WORD_GLYPHS",
+      "classification": "B2_LOCAL_ADDITIVE_EXTENSION",
+      "authority": [
+        "backend/app/voice/word_map.py",
+        "backend/app/director/compiler.py",
+        "contracts/schema/CompiledTimeline.v1.schema.json",
+        "renderer/remotion/schema.ts",
+        "renderer/remotion/Primitives.tsx"
+      ],
+      "finding": "G2 WordTimingMap holds exact word IDs/text/time, but G1 on-screen text is an independently authored string and supplies no general word-to-glyph identity mapping.",
+      "safe_implementation": "Add optional B2 layer.word_spans derived only where unchanged G2 token text matches exactly one unchanged G1 visible token; verify offset/text identities in renderer and transform/highlight only that span. Ambiguous/repeated/unmatched words block deterministically.",
+      "minimum_owner_change": "For repeated or visually paraphrased words, require an explicitly owner-reviewed G1/B2 visual span binding to unchanged G2 word IDs. Never infer which repeated token was spoken."
+    }
+  ]
+}

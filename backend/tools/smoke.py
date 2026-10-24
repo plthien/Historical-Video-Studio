@@ -16,7 +16,7 @@ EXAMPLE = ROOT / "contracts/examples/longform/StoryPackage.longform.synthetic.js
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--case", choices=["story-import", "reopen-project", "gate-transitions", "restart-running-job", "api-and-ui", "section-repair", "tts-kokoro", "tts-elevenlabs", "final-wav", "alignment-elevenlabs", "voice-ui", "archives-all", "archive-original-download", "glabs-image", "missing-asset-choice", "asset-ui", "phase-a", "normalize-visual", "historical-map", "align-scene-cues", "compile-layout", "compile-motion", "compile-longform"], required=False)
+    parser.add_argument("--case", choices=["story-import", "reopen-project", "gate-transitions", "restart-running-job", "api-and-ui", "section-repair", "tts-kokoro", "tts-elevenlabs", "final-wav", "alignment-elevenlabs", "voice-ui", "archives-all", "archive-original-download", "glabs-image", "missing-asset-choice", "asset-ui", "phase-a", "normalize-visual", "historical-map", "align-scene-cues", "compile-layout", "compile-motion", "compile-longform", "scene-edit"], required=False)
     parser.add_argument("--mode", choices=["local", "live"], default="local")
     parser.add_argument("--inspect", nargs=3, metavar=("DATABASE", "MEDIA_ROOT", "PROJECT_ID"))
     args = parser.parse_args()
@@ -28,6 +28,10 @@ def main() -> None:
         return
     if not args.case:
         parser.error("--case required")
+    if args.case == "scene-edit":
+        from backend.tools.storyboard_smoke import main as check_storyboard
+        check_storyboard()
+        return
     if args.case in ("normalize-visual","historical-map","align-scene-cues","compile-layout","compile-motion","compile-longform"):
         from backend.tools.b1_smoke import run
         run(args.case,args.mode)
