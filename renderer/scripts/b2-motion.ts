@@ -79,7 +79,7 @@ for(const row of cases){
  if(row.name==='kinetic-type'||row.name==='text-highlight'){
   // Synthetic renderer mechanics only. This is not an approved G2 word mapping.
   const target=t.scenes[0].layers.find(layer=>layer.layer_id===caption.layer_id)!;
-  const token=/[\\p{L}\\p{N}][^\\s]*/u.exec(target.text??'');
+  const token=/[\p{L}\p{N}][^\s]*/u.exec(target.text??'');
   if(!token)throw Error('B2_SYNTHETIC_WORD_TEXT_MISSING');
   target.word_spans=[{word_id:cueWord,word_text:token[0],
     start:token.index,end:token.index+token[0].length}];
