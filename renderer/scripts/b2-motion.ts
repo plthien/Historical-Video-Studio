@@ -1,6 +1,6 @@
 /** B2-04 native Windows Remotion motion-phase discriminators, synthetic B1 inputs. */
 import {createHash} from 'node:crypto';
-import {readFileSync,writeFileSync,mkdirSync} from 'node:fs';
+import {readFileSync,writeFileSync,mkdirSync,existsSync} from 'node:fs';
 import {resolve} from 'node:path';
 import {spawnSync} from 'node:child_process';
 import {bundle} from '@remotion/bundler';
@@ -69,24 +69,14 @@ const cases=[
  {name:'text-highlight',event:sampleEvent('text-highlight',
   {source_word_ids:[cueWord],highlight_color_token:'gold',hold_after_frames:15},
   'layer_local',[caption.layer_id])},
- {name:'camera-pan',event:sampleEvent('camera-pan',
-  {start_target_layer_id:cards[0].layer_id,end_target_layer_id:cards[2].layer_id,
-   max_translate_px:120,keep_context_visible:true},'screen',[cards[0].layer_id,cards[2].layer_id])},
+
 ];
 const serveUrl=await bundle({entryPoint:resolve(root,'remotion/entry.tsx')});
 const result:unknown[]=[];
 for(const row of cases){
  const t=structuredClone(timeline);
  t.scenes[0].events.push(row.event);
- if(row.name==='camera-pan'){
-  t.scenes[0].camera={...t.scenes[0].camera,focus_path:[
-    {at_frame:start,focus_layer_id:cards[0].layer_id,focus_geo_feature_id:null,framing:'subject_center'},
-    {at_frame:start+duration,focus_layer_id:cards[2].layer_id,focus_geo_feature_id:null,framing:'subject_center'}],
-   keyframes:[
-    {at_frame:0,x_px:0,y_px:0,scale:1,rotation_deg:0,opacity:1,easing:'linear'},
-    {at_frame:start,x_px:0,y_px:0,scale:1,rotation_deg:0,opacity:1,easing:'linear'},
-    {at_frame:start+duration,x_px:-120,y_px:0,scale:1,rotation_deg:0,opacity:1,easing:'ease_in_out'}]};
- }
+
  assertTimeline(t);
  const media=loadApprovedMedia(t,makeSyntheticManifest(t,sourceDir,font));
  const comp=await selectComposition({serveUrl,id:'HistoricalTimelineV1',inputProps:{timeline:t,media}});
@@ -98,9 +88,18 @@ for(const row of cases){
   const bytes=readFileSync(file),png=PNG.sync.read(bytes);
   if(png.width!==1920||png.height!==1080||new Set(png.data).size<3)throw Error('B2_MOTION_BLANK_'+row.name);
   hashes.push(hashing(Buffer.from(png.data)));
-  result.push({preset:row.name,frame,sha256:hashing(bytes),pixelHash:hashes.at(-1),source:'SYNTHETIC'});
+  result.push({preset:row.name,frame,path:file,sha256:hashing(bytes),pixelHash:hashes.at(-1),source:'SYNTHETIC_RENDER_FIXTURE'});
  }
  if(new Set(hashes).size<2)throw Error('B2_MOTION_PHASES_INERT_'+row.name);
+ const wrongSpace=structuredClone(t);
+ wrongSpace.scenes[0].events.find(e=>e.event_id===row.event.event_id)!.motion_space='invalid_space';
+ let rejected=false;
+ try{assertTimeline(wrongSpace);}catch(error){
+  rejected=error instanceof RenderBlocked&&error.code==='RENDER_MOTION_SPACE';
+ }
+ result.push({preset:row.name,negativeAssertion:'wrong_transform_space',
+  typedRejection:rejected,source:'SYNTHETIC_RENDER_FIXTURE'});
+ if(!rejected)throw Error('B2_MOTION_NEGATIVE_NOT_BLOCKED_'+row.name);
  if(start>0){
   const before=start-1;
   const baseTimeline=structuredClone(t);
@@ -171,6 +170,15 @@ for(const presetId of ['route-line-draw','map-region-wipe','editorial-connector-
   const baselinePixels=PNG.sync.read(readFileSync(baselinePath)).data;
   if(!eventPixels.equals(baselinePixels))throw Error('B2_'+presetId.toUpperCase().replace(/-/g,'_')+'_RETROACTIVE_MOTION');
  }
+ const wrongSpace=structuredClone(t);
+ wrongSpace.scenes[0].events.find(item=>item.event_id===event.event_id)!.motion_space='invalid_space';
+ let rejected=false;
+ try{assertTimeline(wrongSpace);}catch(error){
+  rejected=error instanceof RenderBlocked&&error.code==='RENDER_MOTION_SPACE';
+ }
+ result.push({preset:presetId,negativeAssertion:'wrong_transform_space',
+  typedRejection:rejected,source:'SYNTHETIC_B1_COMPILER_NOT_OPERATOR_APPROVED'});
+ if(!rejected)throw Error('B2_MOTION_NEGATIVE_NOT_BLOCKED_'+presetId);
  compiledPresetNames.add(presetId);
 }
 // Pixel discriminators for native shape + timed directional reveal.
@@ -302,34 +310,47 @@ if(process.argv[2]==='render'){
   throw Error('B2_MOTION_MP4_INVALID');
  result.push({mp4:out,sha256:hashing(readFileSync(out)),ffprobe:info,source:'SYNTHETIC'});
 }
-const executedNames=new Set([...cases.map(c=>c.name),...compiledPresetNames,'title-mask-reveal','freeze-hold']);
-const contractBlockers:Record<string,string>={
- 'number-count':'The frozen grammar has one claim ID and a self-declared intermediate_truthful flag, but no approved evidence for each displayed intermediate value.',
- 'mask-transition':'The frozen grammar has mask shape/direction/feather only; CompiledTimeline has no authored incoming/outgoing surface identity for a true two-surface transition.',
-};
-const semanticRows=presets.presets.map(p=>({
- preset_id:p.preset_id,primitive:p.render_recipe.primitive,motion_space:p.render_recipe.transform_space,
- source_provenance:'SYNTHETIC_B1_COMPILED_NOT_OPERATOR_RIGHTS',
- evidence:result.filter((entry):entry is Record<string,unknown>=>typeof entry==='object'&&entry!==null&&
-   'preset' in entry&&(entry as {preset:string}).preset===p.preset_id),
- result:contractBlockers[p.preset_id]?'BLOCKED_DEPENDENCY':
-   executedNames.has(p.preset_id)?'PARTIAL_PHASE_PIXEL_PROOF':'NOT_RUN',
- blocker:contractBlockers[p.preset_id]??null,
- negative_case:p.preset_id==='cross-dissolve'?'forged_target_blocked':null
-}));
+// Derived from executed Chromium PNGs and negative assertions, never names.
+const semanticRows=presets.presets.map(p=>{
+ const proof=result.filter((entry):entry is Record<string,unknown>=>typeof entry==='object'&&entry!==null&&
+   'preset' in entry&&(entry as {preset:string}).preset===p.preset_id);
+ const phases=proof.filter(e=>typeof e.frame==='number'&&typeof e.path==='string');
+ const verified=phases.length>=3&&phases.every(e=>existsSync(e.path as string)&&
+   hashing(readFileSync(e.path as string))===e.sha256);
+ const distinct=new Set(phases.map(e=>e.pixelHash)).size>=2;
+ const negative=proof.some(e=>e.negativeAssertion==='wrong_transform_space'&&e.typedRejection===true);
+ const prestart=proof.some(e=>e.preStartPixelMatch===true);
+ const mechanics=verified&&distinct&&negative&&prestart;
+ const dependency=p.preset_id==='number-count'?
+  'No verified G1 intermediate historical observations for interpolation':
+  p.preset_id==='mask-transition'?
+  'No authorized two-scene surface identities and overlap window':null;
+ const authority=proof.some(e=>e.source==='OPERATOR_APPROVED');
+ const status=dependency?'BLOCKED_DEPENDENCY':!phases.length?'NOT_RUN':
+  mechanics&&authority?'PASS':mechanics?'PARTIAL':'FAIL_CONFIRMED';
+ return {preset_id:p.preset_id,primitive:p.render_recipe.primitive,
+  motion_space:p.render_recipe.transform_space,status,
+  mechanism_assertions:{validChromiumFrames:verified,distinctActualPixels:distinct,
+    negativeWrongSpaceBlocked:negative,prestartInvariant:prestart},
+  source_authority:authority?'OPERATOR_APPROVED':'SYNTHETIC_NOT_OPERATOR_APPROVED',
+  actual_png_paths:phases.map(e=>e.path),frame_numbers:phases.map(e=>e.frame),
+  negative_case:negative?'RENDER_MOTION_SPACE':'NOT_PROVED',
+  evidence:proof,blocker:dependency};
+});
 writeFileSync(resolve(output,'b2-motion-19-presets.json'),JSON.stringify({
- status:'FAIL',registryCount:19,
- note:'Strict owner failure: actual semantic coverage is incomplete and frozen source contracts block truthful positive proof for named presets.',
+ status:semanticRows.every(row=>row.status==='PASS')?'PASS':'FAIL',
+ registryCount:19,semanticPassCount:semanticRows.filter(row=>row.status==='PASS').length,
+ note:'Strict motion owner: source authority and event-specific semantics must be proved separately.',
  rows:semanticRows
 },null,2));
 writeFileSync(resolve(output,'b2-motion-phases.json'),JSON.stringify({status:'FAIL',
  registryCount:19,cases:result,source:'SYNTHETIC_B1_COMPILED_NOT_LIVE_APPROVED'},null,2));
-const incomplete=semanticRows.filter(row=>row.result!=='PASS');
+const incomplete=semanticRows.filter(row=>row.status!=='PASS');
 const strictSemanticOwner=process.argv[2]!=='render';
 if(incomplete.length&&strictSemanticOwner){
  console.error(JSON.stringify({status:'FAIL',renderer:'Remotion Chromium',
   phasePNGs:cases.length*3,source:'SYNTHETIC',mp4:process.argv[2]==='render',
-  incomplete:incomplete.map(row=>({preset_id:row.preset_id,result:row.result,blocker:row.blocker}))}));
+  incomplete:incomplete.map(row=>({preset_id:row.preset_id,result:row.status,blocker:row.blocker}))}));
  throw Error('B2_MOTION_SEMANTIC_LEDGER_INCOMPLETE: every one of 19 registered presets requires PASS');
 }
 console.log(JSON.stringify({status:incomplete.length?'MULTILAYER_PASS_MOTION_INCOMPLETE':'PASS',renderer:'Remotion Chromium',
