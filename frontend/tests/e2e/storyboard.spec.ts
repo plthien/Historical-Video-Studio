@@ -42,6 +42,44 @@ test('storyboard-editor uses real persisted G4 scenes and native read-only Playe
  await expect(stage.locator('[data-global-frame="10"][data-scene-id]')).toBeVisible({timeout:10000});
  const focused=PNG.sync.read(await stage.screenshot());
  expect(focused.data.equals(beforeFocus.data),'authorized focus edit must change actual Player pixels').toBeFalsy();
+ // G4 camera scalar PATCH must recompile camera keys, change actual pixels,
+ // and survive SQLite-backed host preview/reload; no DOM-only success is enough.
+ const cameraEvent=initialPreview.props.timeline.scenes[0].events.find(event=>event.preset_id==='camera-push');
+ expect(cameraEvent,'native fixture requires an authored camera-push event').toBeDefined();
+ const cameraFrame=initialPreview.props.timeline.scenes[0].start_frame+
+  cameraEvent!.start_frame+Math.min(cameraEvent!.duration_frames-1,
+    Math.max(1,Math.floor(cameraEvent!.duration_frames/2)));
+ await page.getByLabel('Seek exact frame').fill(String(cameraFrame));
+ await expect(stage.locator(`[data-global-frame="${cameraFrame}"][data-scene-id]`)).toBeVisible();
+ const beforeCamera=PNG.sync.read(await stage.screenshot());
+ const currentCamera=await request.get('http://127.0.0.1:8000/api/v1/projects/proj_001/storyboard/timeline');
+ expect(currentCamera.ok()).toBeTruthy();
+ const currentCameraTrack=(await currentCamera.json()).timeline.scenes[0].camera.keyframes;
+ await page.getByLabel('Authored motion event').selectOption(cameraEvent!.event_id);
+ await page.getByLabel('Authorized scalar presentation parameter').selectOption('to_scale');
+ const scalar=page.getByLabel('Motion parameter value');
+ const oldScalar=Number(await scalar.inputValue());
+ const newScalar=oldScalar<=1.15?oldScalar+0.02:oldScalar-0.02;
+ await scalar.fill(String(newScalar));
+ await page.getByRole('button',{name:/Save motion/}).click();
+ await expect(page.getByRole('status').filter({hasText:'Save motion parameter completed'}))
+  .toBeVisible({timeout:30000});
+ const persistedCamera=await request.get('http://127.0.0.1:8000/api/v1/projects/proj_001/storyboard/timeline');
+ expect(persistedCamera.ok()).toBeTruthy();
+ const cameraRevision=(await persistedCamera.json()).timeline.scenes[0];
+ expect(cameraRevision.events.find(e=>e.event_id===cameraEvent!.event_id)?.params.to_scale).toBeCloseTo(newScalar);
+ expect(cameraRevision.camera.keyframes).not.toEqual(currentCameraTrack);
+ await page.getByRole('button',{name:'Load real read-only Remotion Player'}).click();
+ await page.getByLabel('Seek exact frame').fill(String(cameraFrame));
+ await expect(stage.locator(`[data-global-frame="${cameraFrame}"][data-scene-id]`)).toBeVisible();
+ const afterCamera=PNG.sync.read(await stage.screenshot());
+ let changedCameraPixels=0;
+ for(let i=0;i<beforeCamera.data.length;i+=4){
+  if(Math.abs(beforeCamera.data[i]-afterCamera.data[i])+
+     Math.abs(beforeCamera.data[i+1]-afterCamera.data[i+1])+
+     Math.abs(beforeCamera.data[i+2]-afterCamera.data[i+2])>12)changedCameraPixels++;
+ }
+ expect(changedCameraPixels,'registered camera scalar must move actual Chromium Player pixels').toBeGreaterThan(30);
  const variant=page.getByLabel('Registered presentation variant');
  const original=await variant.inputValue();
  const target=original==='A'?'B':'A';
