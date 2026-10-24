@@ -188,7 +188,9 @@ async function createAssetProject(page: import("@playwright/test").Page,title:st
   if(initialVisit)await page.goto("/");
   await page.getByRole("navigation").getByRole("button",{name:/Project & ChatGPT/}).click();
   await page.getByLabel("Project title").fill(title);
+  const previousId=(await page.locator(".topline strong").innerText()).trim();
   await page.getByRole("button",{name:"Create project"}).click();
+  await expect(page.locator(".topline strong")).not.toHaveText(previousId);
   await expect(page.getByRole("status")).toContainText("Project creation completed");
   const id=(await page.locator(".topline strong").innerText()).trim();
   const story=structuredClone(fixture);
