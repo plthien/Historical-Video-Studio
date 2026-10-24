@@ -98,6 +98,41 @@ for(const row of cases){
   result.push({preset:row.name,frame,path:file,sha256:hashing(bytes),pixelHash:hashes.at(-1),source:'SYNTHETIC_RENDER_FIXTURE'});
  }
  if(new Set(hashes).size<2)throw Error('B2_MOTION_PHASES_INERT_'+row.name);
+ // Same exact frame/input/media/font, removing ONLY the target event.
+ // This is an event-specific compositor oracle, not a hash-of-two-times test.
+ const control=structuredClone(t);
+ control.scenes[0].events=control.scenes[0].events.filter(e=>e.event_id!==row.event.event_id);
+ assertTimeline(control);
+ const controlMedia=loadApprovedMedia(control,makeSyntheticManifest(control,sourceDir,font));
+ const controlComp=await selectComposition({serveUrl,id:'HistoricalTimelineV1',
+  inputProps:{timeline:control,media:controlMedia}});
+ const mid=start+Math.floor(duration/2);
+ const controlPath=resolve(output,`b2-${row.name}-same-frame-without-event.png`);
+ await renderStill({serveUrl,composition:controlComp,
+  inputProps:{timeline:control,media:controlMedia},frame:mid,output:controlPath,imageFormat:'png'});
+ const positivePath=resolve(output,'b2-'+row.name+'-'+mid+'.png');
+ const pos=PNG.sync.read(readFileSync(positivePath)).data;
+ const neg=PNG.sync.read(readFileSync(controlPath)).data;
+ const targetRects=row.event.affected_layer_ids.map(id=>t.scenes[0].layers.find(l=>l.layer_id===id)?.rect_px)
+  .filter((rect):rect is NonNullable<typeof rect>=>Boolean(rect));
+ const screen=row.event.motion_space==='screen';
+ let changedROI=0,changedOutside=0;
+ for(let y=0;y<1080;y+=2)for(let x=0;x<1920;x+=2){
+  const index=(y*1920+x)*4;
+  const difference=Math.abs(pos[index]-neg[index])+Math.abs(pos[index+1]-neg[index+1])+
+   Math.abs(pos[index+2]-neg[index+2]);
+  if(difference<12)continue;
+  if(screen||targetRects.some(rect=>x>=rect.x&&y>=rect.y&&x<rect.x+rect.w&&y<rect.y+rect.h))
+   changedROI++;
+  else changedOutside++;
+ }
+ result.push({preset:row.name,counterfactual:'same_frame_event_removed',frame:mid,
+  event_id:row.event.event_id,positivePath,controlPath,
+  positiveSha256:hashing(readFileSync(positivePath)),
+  controlSha256:hashing(readFileSync(controlPath)),
+  changedROIPixels:changedROI,changedOutsidePixels:changedOutside,
+  source:'SYNTHETIC_RENDER_FIXTURE'});
+
  const wrongSpace=structuredClone(t);
  wrongSpace.scenes[0].events.find(e=>e.event_id===row.event.event_id)!.motion_space='invalid_space';
  let rejected=false;
@@ -327,7 +362,10 @@ const semanticRows=presets.presets.map(p=>{
  const distinct=new Set(phases.map(e=>e.pixelHash)).size>=2;
  const negative=proof.some(e=>e.negativeAssertion==='wrong_transform_space'&&e.typedRejection===true);
  const prestart=proof.some(e=>e.preStartPixelMatch===true);
- const mechanics=verified&&distinct&&negative&&prestart;
+ const counterfactual=proof.some(e=>e.counterfactual==='same_frame_event_removed'&&
+   typeof e.changedROIPixels==='number'&&e.changedROIPixels>0);
+
+ const mechanics=verified&&distinct&&negative&&prestart&&counterfactual;
  const dependency=p.preset_id==='number-count'?
   'No verified G1 intermediate historical observations for interpolation':
   p.preset_id==='mask-transition'?
@@ -338,7 +376,7 @@ const semanticRows=presets.presets.map(p=>{
  return {preset_id:p.preset_id,primitive:p.render_recipe.primitive,
   motion_space:p.render_recipe.transform_space,status,
   mechanism_assertions:{validChromiumFrames:verified,distinctActualPixels:distinct,
-    negativeWrongSpaceBlocked:negative,prestartInvariant:prestart},
+    negativeWrongSpaceBlocked:negative,prestartInvariant:prestart,eventSpecificROICausal:counterfactual},
   source_authority:authority?'OPERATOR_APPROVED':'SYNTHETIC_NOT_OPERATOR_APPROVED',
   actual_png_paths:phases.map(e=>e.path),frame_numbers:phases.map(e=>e.frame),
   negative_case:negative?'RENDER_MOTION_SPACE':'NOT_PROVED',
