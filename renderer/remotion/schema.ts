@@ -49,7 +49,7 @@ export function assertTimeline(input:unknown):asserts input is Timeline {
     if(l.text===null)fail('RENDER_WORD_SPAN_UNTRUSTED',l.layer_id,'Only source text can bind spoken words');
     let previous=0;
     const ids=new Set<string>();
-    const norm=(text:string)=>text.toLocaleLowerCase('en').replace(/[^\\p{L}\\p{N}_]+/gu,'');
+    const norm=(text:string)=>text.toLocaleLowerCase('en').replace(/[^\p{L}\p{N}_]+/gu,'');
     for(const span of l.word_spans){
      if(ids.has(span.word_id)||!Number.isInteger(span.start)||!Number.isInteger(span.end)||
         span.start<previous||span.end<=span.start||span.end>l.text!.length||
