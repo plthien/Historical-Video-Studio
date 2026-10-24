@@ -160,7 +160,7 @@ def mount(app, store, idempotent):
                             "start_frame": s["start_frame"], "duration_frames": s["duration_frames"],
                             "layers": s["layers"], "events": s["events"],
                             "direction_beats": [{"beat_id": b["beat_id"], "shot_goal": b["shot_goal"],
-                                                 "staging": b["staging"]}
+                                                 "focus_move": b["focus_move"], "staging": b["staging"]}
                                                 for b in authored_plans[s["setup_id"]]["editorial_direction"]["visual_beats"]],
                             "diagnostics": []} for s in items[offset:offset+limit]]}
 
@@ -256,9 +256,11 @@ def mount(app, store, idempotent):
                 if item.shot_goal != beat["shot_goal"]:
                     blocked("G4_SOURCE_EDIT_FORBIDDEN", item.beat_id,
                             "Changing authored shot goal requires a source-authorized plan revision.")
-                if item.focus_move not in ("none", "static"):
+                if item.focus_move not in ("none", "subject_to_subject", "detail_to_overview",
+                                           "overview_to_detail", "follow_path", "static"):
                     blocked("G4_EDIT_UNSUPPORTED", item.beat_id,
-                            "Only frozen focus movement is currently authoritative.")
+                            "Choose a focus movement authorized by VisualDirectionEdit.")
+                beat["focus_move"] = item.focus_move
                 beat["staging"] = [s.model_dump() for s in item.staging]
             mark(plan, head["timeline"]["story_sha256"], body.edit_reason, ["visual_beats"])
             return revise(store, project_id, body.expected_revision, head["blueprint"],

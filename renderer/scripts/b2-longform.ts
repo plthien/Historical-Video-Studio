@@ -39,7 +39,9 @@ const font=resolve(process.env.WINDIR??'C:\\Windows','Fonts','arial.ttf');
 const media=loadApprovedMedia(timeline,makeSyntheticManifest(timeline,resolve(root,'.artifacts/media/b2-longform'),font));
 const serveUrl=await bundle({entryPoint:resolve(root,'remotion/entry.tsx')});
 const comp=await selectComposition({serveUrl,id:'HistoricalTimelineV1',inputProps:{timeline,media}});
-const samples=[0,30,60].map(i=>({scene:i,frame:scenes[i].start_frame+Math.floor(scenes[i].duration_frames/2)}));
+// Sample three different compiler-owned templates rather than the former
+// repeated T01 indices 0/30/60, whose identical pixels were weak evidence.
+const samples=[0,31,59].map(i=>({scene:i,frame:scenes[i].start_frame+Math.floor(scenes[i].duration_frames/2)}));
 const hashes=[];
 for(const row of samples){
  const owner=activeScene(timeline,row.frame).scene;
@@ -51,6 +53,8 @@ for(const row of samples){
   throw Error('B2_LONGFORM_FRAME_BLANK '+row.scene);
  hashes.push({scene:row.scene,sceneId:owner.scene_id,frame:row.frame,width:png.width,height:png.height,sha256:createHash('sha256').update(bytes).digest('hex')});
 }
+if(new Set(hashes.map(row=>row.sha256)).size!==hashes.length)
+ throw Error('B2_LONGFORM_DISTINCT_SCENES_VISUALLY_IDENTICAL');
 const video=resolve(out,'b2-61-scene-project-first-60f-EXCERPT.mp4');
 const rangeEnd=Math.min(59,timeline.total_frames-1);
 await renderMedia({serveUrl,composition:{...comp,durationInFrames:rangeEnd+1},

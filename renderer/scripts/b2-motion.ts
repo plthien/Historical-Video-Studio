@@ -22,10 +22,13 @@ timeline.scenes=[{...structuredClone(scene),start_frame:0}];
 timeline.total_frames=scene.duration_frames;
 const cards=timeline.scenes[0].layers.filter(l=>l.layer_kind==='archival_photo');
 if(cards.length!==3)throw Error('B2_MOTION_CARD_ASSETS_MISSING');
+const caption=timeline.scenes[0].layers.find(l=>l.layer_kind==='text'&&l.text&&l.source_claim_id);
+if(!caption)throw Error('B2_MOTION_CLAIM_TEXT_MISSING');
 const font=resolve(process.env.WINDIR??'C:\\Windows','Fonts','arial.ttf');
 const sourceDir=resolve(root,'.artifacts/media/b2-motion');
 const hashing=(bytes:Buffer)=>createHash('sha256').update(bytes).digest('hex');
 const baseline=structuredClone(timeline.scenes[0].events[0]);
+const cueWord=String((baseline as Motion&{cue_word_id?:string}).cue_word_id??'word_001');
 const duration=Math.min(20,Math.max(3,Math.floor(scene.duration_frames/8)));
 const start=Math.min(scene.duration_frames-duration-1,Math.max(0,Math.floor(scene.duration_frames/3)));
 function sampleEvent(preset:string,params:Record<string,unknown>,space:string,targets:string[]):Motion{
@@ -48,12 +51,42 @@ const cases=[
  {name:'whip-pan',event:sampleEvent('whip-pan',
   {direction:'left',sweep_px:150,motion_blur_px:8,max_use_per_minute:1},
   'screen',[cards[0].layer_id])},
+ {name:'stagger-reveal',event:sampleEvent('stagger-reveal',
+  {ordered_layer_ids:cards.map(card=>card.layer_id),gap_frames:3,direction:'evidence_order'},
+  'group_local',cards.map(card=>card.layer_id))},
+ {name:'parallax-layers',event:sampleEvent('parallax-layers',
+  {near_layer_ids:[cards[0].layer_id],far_layer_ids:[cards[1].layer_id],
+   near_strength:.8,far_strength:.25,max_drift_px:80},
+  'group_local',[cards[0].layer_id,cards[1].layer_id])},
+ {name:'hard-cut',event:sampleEvent('hard-cut',
+  {cut_reason:'semantic_change'},'screen',[cards[2].layer_id])},
+ {name:'typewriter',event:sampleEvent('typewriter',
+  {text_layer_id:caption.layer_id,characters_per_second:55,cursor_visible:true,
+   quoted_source_claim_id:caption.source_claim_id!},'layer_local',[caption.layer_id])},
+ {name:'kinetic-type',event:sampleEvent('kinetic-type',
+  {word_ids:[cueWord],max_offset_px:24,line_preservation:true},
+  'layer_local',[caption.layer_id])},
+ {name:'text-highlight',event:sampleEvent('text-highlight',
+  {source_word_ids:[cueWord],highlight_color_token:'gold',hold_after_frames:15},
+  'layer_local',[caption.layer_id])},
+ {name:'camera-pan',event:sampleEvent('camera-pan',
+  {start_target_layer_id:cards[0].layer_id,end_target_layer_id:cards[2].layer_id,
+   max_translate_px:120,keep_context_visible:true},'screen',[cards[0].layer_id,cards[2].layer_id])},
 ];
 const serveUrl=await bundle({entryPoint:resolve(root,'remotion/entry.tsx')});
 const result:unknown[]=[];
 for(const row of cases){
  const t=structuredClone(timeline);
  t.scenes[0].events.push(row.event);
+ if(row.name==='camera-pan'){
+  t.scenes[0].camera={...t.scenes[0].camera,focus_path:[
+    {at_frame:start,focus_layer_id:cards[0].layer_id,focus_geo_feature_id:null,framing:'subject_center'},
+    {at_frame:start+duration,focus_layer_id:cards[2].layer_id,focus_geo_feature_id:null,framing:'subject_center'}],
+   keyframes:[
+    {at_frame:0,x_px:0,y_px:0,scale:1,rotation_deg:0,opacity:1,easing:'linear'},
+    {at_frame:start,x_px:0,y_px:0,scale:1,rotation_deg:0,opacity:1,easing:'linear'},
+    {at_frame:start+duration,x_px:-120,y_px:0,scale:1,rotation_deg:0,opacity:1,easing:'ease_in_out'}]};
+ }
  assertTimeline(t);
  const media=loadApprovedMedia(t,makeSyntheticManifest(t,sourceDir,font));
  const comp=await selectComposition({serveUrl,id:'HistoricalTimelineV1',inputProps:{timeline:t,media}});
@@ -68,23 +101,77 @@ for(const row of cases){
   result.push({preset:row.name,frame,sha256:hashing(bytes),pixelHash:hashes.at(-1),source:'SYNTHETIC'});
  }
  if(new Set(hashes).size<2)throw Error('B2_MOTION_PHASES_INERT_'+row.name);
- if((row.name==='whip-pan'||row.name==='cross-dissolve')&&start>0){
+ if(start>0){
   const before=start-1;
-  const baseMedia=loadApprovedMedia(timeline,makeSyntheticManifest(timeline,sourceDir,font));
+  const baseTimeline=structuredClone(t);
+  baseTimeline.scenes[0].events=baseTimeline.scenes[0].events.filter(event=>event.event_id!==row.event.event_id);
+  const baseMedia=loadApprovedMedia(baseTimeline,makeSyntheticManifest(baseTimeline,sourceDir,font));
   const baseComp=await selectComposition({serveUrl,id:'HistoricalTimelineV1',
-    inputProps:{timeline,media:baseMedia}});
+    inputProps:{timeline:baseTimeline,media:baseMedia}});
   const basePath=resolve(output,`b2-${row.name}-before-baseline.png`);
   const alteredPath=resolve(output,`b2-${row.name}-before-event.png`);
-  await renderStill({serveUrl,composition:baseComp,inputProps:{timeline,media:baseMedia},
+  await renderStill({serveUrl,composition:baseComp,inputProps:{timeline:baseTimeline,media:baseMedia},
     frame:before,output:basePath,imageFormat:'png'});
   await renderStill({serveUrl,composition:comp,inputProps:{timeline:t,media},
     frame:before,output:alteredPath,imageFormat:'png'});
   const basePixels=PNG.sync.read(readFileSync(basePath)).data;
   const alteredPixels=PNG.sync.read(readFileSync(alteredPath)).data;
-  if(!basePixels.equals(alteredPixels))
+   if(!basePixels.equals(alteredPixels))
     throw Error(`B2_${row.name.toUpperCase().replace(/-/g,'_')}_RETROACTIVE_MOTION: transition changed pre-start frame`);
   result.push({preset:row.name,frame:before,preStartPixelMatch:true,source:'SYNTHETIC'});
  }
+}
+// Presets that require compiler-owned reviewed map/connector geometry or a
+// compiled camera track use their real B1 scenes rather than fabricated T03
+// layer bindings.
+const compiledPresetNames=new Set<string>();
+for(const presetId of ['route-line-draw','map-region-wipe','editorial-connector-draw',
+                       'camera-pan','camera-push']){
+ const found=Object.entries(compiled).flatMap(([variant,value])=>
+   value.scenes.map(candidate=>({variant,value,candidate,
+     event:candidate.events.find(item=>item.preset_id===presetId)})))
+   .find(item=>item.event);
+ if(!found||!found.event)continue;
+ const t=structuredClone(found.value);
+ const isolatedScene={...structuredClone(found.candidate),start_frame:0};
+ t.scenes=[isolatedScene];t.total_frames=isolatedScene.duration_frames;
+ assertTimeline(t);
+ const mediaDir=resolve(root,'.artifacts/media/b2-motion-compiled',presetId);
+ const media=loadApprovedMedia(t,makeSyntheticManifest(t,mediaDir,font));
+ const comp=await selectComposition({serveUrl,id:'HistoricalTimelineV1',inputProps:{timeline:t,media}});
+ const event=isolatedScene.events.find(item=>item.event_id===found.event!.event_id)!;
+ const frames=[Math.max(0,event.start_frame-1),event.start_frame,
+   Math.min(isolatedScene.duration_frames-1,event.start_frame+Math.floor(event.duration_frames/2)),
+   Math.min(isolatedScene.duration_frames-1,event.start_frame+event.duration_frames)];
+ const phaseHashes:string[]=[];
+ for(const frame of frames){
+  const file=resolve(output,`b2-${presetId}-compiled-${frame}.png`);
+  await renderStill({serveUrl,composition:comp,inputProps:{timeline:t,media},frame,output:file,imageFormat:'png'});
+  const bytes=readFileSync(file),png=PNG.sync.read(bytes);
+  if(png.width!==1920||png.height!==1080||new Set(png.data).size<3)
+   throw Error('B2_MOTION_BLANK_'+presetId);
+  phaseHashes.push(hashing(Buffer.from(png.data)));
+  result.push({preset:presetId,frame,path:file,sha256:hashing(bytes),pixelHash:phaseHashes.at(-1),
+   source:'SYNTHETIC_B1_COMPILER_NOT_OPERATOR_APPROVED',
+   camera:presetId.startsWith('camera-')?isolatedScene.camera:null});
+ }
+ if(new Set(phaseHashes).size<2)throw Error('B2_MOTION_PHASES_INERT_'+presetId);
+ if(event.start_frame>0){
+  const baselineTimeline=structuredClone(t);
+  baselineTimeline.scenes[0].events=baselineTimeline.scenes[0].events.map(item=>
+    item.event_id===event.event_id&&item.start_frame+item.duration_frames<isolatedScene.duration_frames
+      ?{...item,start_frame:item.start_frame+1}:item);
+  const baselineMedia=loadApprovedMedia(baselineTimeline,makeSyntheticManifest(baselineTimeline,mediaDir,font));
+  const baselineComp=await selectComposition({serveUrl,id:'HistoricalTimelineV1',
+    inputProps:{timeline:baselineTimeline,media:baselineMedia}});
+  const baselinePath=resolve(output,`b2-${presetId}-compiled-pre-baseline.png`);
+  await renderStill({serveUrl,composition:baselineComp,inputProps:{timeline:baselineTimeline,media:baselineMedia},
+    frame:frames[0],output:baselinePath,imageFormat:'png'});
+  const eventPixels=PNG.sync.read(readFileSync(resolve(output,`b2-${presetId}-compiled-${frames[0]}.png`))).data;
+  const baselinePixels=PNG.sync.read(readFileSync(baselinePath)).data;
+  if(!eventPixels.equals(baselinePixels))throw Error('B2_'+presetId.toUpperCase().replace(/-/g,'_')+'_RETROACTIVE_MOTION');
+ }
+ compiledPresetNames.add(presetId);
 }
 // Pixel discriminators for native shape + timed directional reveal.
 // A source-preserving change of native mask may not replace the G3 original.
@@ -215,7 +302,7 @@ if(process.argv[2]==='render'){
   throw Error('B2_MOTION_MP4_INVALID');
  result.push({mp4:out,sha256:hashing(readFileSync(out)),ffprobe:info,source:'SYNTHETIC'});
 }
-const executedNames=new Set([...cases.map(c=>c.name),'title-mask-reveal','freeze-hold']);
+const executedNames=new Set([...cases.map(c=>c.name),...compiledPresetNames,'title-mask-reveal','freeze-hold']);
 const contractBlockers:Record<string,string>={
  'number-count':'The frozen grammar has one claim ID and a self-declared intermediate_truthful flag, but no approved evidence for each displayed intermediate value.',
  'mask-transition':'The frozen grammar has mask shape/direction/feather only; CompiledTimeline has no authored incoming/outgoing surface identity for a true two-surface transition.',

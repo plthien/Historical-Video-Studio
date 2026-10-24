@@ -8,7 +8,7 @@ export interface StoryboardScene {
   layers:{layer_id:string;layer_kind:string;text:string|null;asset_id:string|null;
     rect_px:{x:number;y:number;w:number;h:number};crop_normalized:{x:number;y:number;w:number;h:number}}[];
   events:{event_id:string;preset_id:string;start_frame:number;duration_frames:number;params:Record<string,string|number|boolean>}[];
-  direction_beats:{beat_id:string;shot_goal:string;staging:{
+  direction_beats:{beat_id:string;shot_goal:string;focus_move:string;staging:{
     ref:string;operation:string;after_ref:string|null;motion_hint:string;priority:number;}[]}[];
   diagnostics:string[];
 }
@@ -26,7 +26,7 @@ const path=(id:string)=>'/projects/'+encodeURIComponent(id)+'/storyboard';
 export const storyboardApi={
  scenes:(id:string,offset=0,limit=24)=>request<ScenePage>(path(id)+`/scenes?offset=${offset}&limit=${limit}`),
  timeline:(id:string)=>request<TimelineView>(path(id)+'/timeline'),
- preview:(id:string)=>request<BrowserPreview>(path(id)+'/preview'),
+ preview:(id:string,signal?:AbortSignal)=>request<BrowserPreview>(path(id)+'/preview','GET',undefined,undefined,signal),
  variant:(id:string,scene:string,variant:string,revision:number,key:string)=>
   request<EditResult>(path(id)+'/scenes/'+encodeURIComponent(scene),'PATCH',
     {expected_revision:revision,scene_id:scene,changes:{variant_id:variant}},key),

@@ -454,8 +454,9 @@ def revise_g4(store, project_id: str, previous: dict, original_blueprint: dict,
                     _block("G4_SOURCE_EDIT_FORBIDDEN", a["setup_id"],
                            "Cannot add or delete authored cue beats at G4.")
                 for source_beat, edited_beat in zip(aa, bb):
-                    if ({k:v for k,v in source_beat.items() if k != "staging"} !=
-                            {k:v for k,v in edited_beat.items() if k != "staging"}):
+                    editable = {"staging", "focus_move"}
+                    if ({k:v for k,v in source_beat.items() if k not in editable} !=
+                            {k:v for k,v in edited_beat.items() if k not in editable}):
                         _block("G4_SOURCE_EDIT_FORBIDDEN", a["setup_id"],
                                "G1 narration cues, word identity and claim connections remain immutable.")
             elif da[key] != db.get(key):

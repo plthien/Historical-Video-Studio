@@ -9,6 +9,7 @@ import copy
 import hashlib
 import json
 import os
+import shutil
 from pathlib import Path
 from unittest.mock import patch
 
@@ -38,6 +39,10 @@ def main():
         raise RuntimeError("APPROVED_PLAYER_TEST_FIXTURE_REQUIRES_NATIVE_WINDOWS")
     out=ROOT/"renderer"/".artifacts"/("approved-player-test-longform" if args.scene_count>2
                                       else "approved-player-test")
+    # Controlled generated fixture, never operator data. Owner commands must
+    # be repeatable without inheriting an earlier SQLite approval head.
+    if out.exists():
+        shutil.rmtree(out)
     out.mkdir(parents=True,exist_ok=True)
     story=load("contracts/examples/StoryPackage.v1.valid.json")
     # Source claim is present in G1; pin that existing claim to its authored
@@ -86,7 +91,8 @@ def main():
     with patch.object(attempts,"_provider_identity",return_value={"model_id":"synthetic"}):
         voice.enqueue(pid,"sec_001","kokoro_local","am_adam",1.0,
             "Synthetic local test",store.revision(pid),"test_b2_player_001")
-        assert voice.process_one(lambda *_:wav_fixture(150.0 if args.scene_count>2 else 4.0))["state"]=="SUCCEEDED"
+        voice_result=voice.process_one(lambda *_:wav_fixture(150.0 if args.scene_count>2 else 4.0))
+        assert voice_result and voice_result["state"]=="SUCCEEDED",voice_result
     approve("G2")
     workflow=FinalVoiceWorkflow(store,gate,JobQueue(store))
     assert workflow.process_one()["state"]=="SUCCEEDED"

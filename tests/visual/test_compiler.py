@@ -1257,3 +1257,29 @@ def test_b1_g4_real_sqlite_positive_invalid_staging_selective_revision_and_stale
     assert canonical(refreshed["timeline"])==canonical(recompiled)
     assert store.revision(pid)==refreshed["revision"]
     assert all(x["state"]!="APPROVED" for x in gates.board(pid)[3:])
+
+
+def test_g4_authorized_focus_move_changes_bounded_camera_without_rebinding_source():
+    from backend.app.director.camera import build_camera
+    layers=[
+        {"layer_id":"layer_a","rect_px":{"x":100,"y":100,"w":400,"h":400}},
+        {"layer_id":"layer_b","rect_px":{"x":1200,"y":500,"w":400,"h":300}},
+    ]
+    refs={"subject_a":"layer_a","subject_b":"layer_b"}
+    plan={"setup_id":"setup_focus","editorial_direction":{"camera_intent":"static"}}
+    limits={"min_scale":0.9,"max_scale":1.2,"max_translation_px":180}
+    static=build_camera(plan,layers,[
+        {"beat_id":"beat_a","focus_ref":"subject_a","start_frame":0,"focus_move":"static"},
+        {"beat_id":"beat_b","focus_ref":"subject_b","start_frame":30,"focus_move":"static"},
+    ],refs,duration_frames=60,limits=limits)
+    pushed=build_camera(plan,layers,[
+        {"beat_id":"beat_a","focus_ref":"subject_a","start_frame":0,"focus_move":"static"},
+        {"beat_id":"beat_b","focus_ref":"subject_b","start_frame":30,
+         "focus_move":"overview_to_detail"},
+    ],refs,duration_frames=60,limits=limits)
+    assert static["mode"]=="static" and pushed["mode"]=="push_in"
+    assert static["focus_path"]==pushed["focus_path"]
+    assert static["keyframes"][-1]["scale"]==1
+    assert 1 < pushed["keyframes"][-1]["scale"] <= limits["max_scale"]
+    assert abs(pushed["keyframes"][-1]["x_px"]) <= limits["max_translation_px"]
+    assert abs(pushed["keyframes"][-1]["y_px"]) <= limits["max_translation_px"]

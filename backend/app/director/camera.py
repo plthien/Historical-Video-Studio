@@ -18,7 +18,11 @@ def build_camera(plan: dict, layers: list[dict], beat_rows: list[dict], refs: di
                       "focus_geo_feature_id": None, "framing": "subject_center"})
     if not focus:
         raise ContractViolation("CAMERA_FOCUS_UNKNOWN", plan["setup_id"], "At least one authored focus beat is required.")
-    intent = plan["editorial_direction"]["camera_intent"]
+    moves = [b.get("focus_move", "none") for b in beat_rows
+             if b.get("focus_move", "none") not in ("none", "static")]
+    move_mode = {"subject_to_subject": "pan", "detail_to_overview": "pull_out",
+                 "overview_to_detail": "push_in", "follow_path": "track_route"}
+    intent = move_mode.get(moves[-1], plan["editorial_direction"]["camera_intent"]) if moves else plan["editorial_direction"]["camera_intent"]
     mode = {"push_in": "push_in", "pan": "pan", "static": "static",
             "pull_out": "pull_out", "track_route": "track_route",
             "compare_locked": "compare_locked"}.get(intent)

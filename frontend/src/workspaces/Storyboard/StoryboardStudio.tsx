@@ -1,4 +1,4 @@
-import {useCallback,useEffect,useMemo,useState} from 'react';
+import {useCallback,useEffect,useMemo,useRef,useState} from 'react';
 import {ApiError} from '../../api/client';
 import {storyboardApi,type ScenePage,type BrowserPreview,type StoryboardScene} from '../../api/storyboard';
 import {RemotionPreview} from '../../components/RemotionPreview';
@@ -24,14 +24,19 @@ export function StoryboardStudio({projectId,onRefresh}:{projectId:string;onRefre
  const [motionEventId,setMotionEventId]=useState('');
  const [motionKey,setMotionKey]=useState('');
  const [motionValue,setMotionValue]=useState<string|number|boolean>('');
+ const [beatId,setBeatId]=useState('');
+ const [focusMove,setFocusMove]=useState('none');
  const [stageOp,setStageOp]=useState('');
  const [snapshot,setSnapshot]=useState<BrowserPreview|null>(null);
  const [pending,setPending]=useState<string|null>(null);
  const [error,setError]=useState('');
  const [success,setSuccess]=useState('');
+ const previewRequest=useRef<{id:number;controller:AbortController}|null>(null);
+ const previewSequence=useRef(0);
  const scene=useMemo(()=>page?.scenes.find(s=>s.scene_id===selected)??null,[page,selected]);
  const selectedLayer=useMemo(()=>scene?.layers.find(l=>l.layer_id===layerId)??null,[scene,layerId]);
  const motionEvent=useMemo(()=>scene?.events.find(event=>event.event_id===motionEventId)??null,[scene,motionEventId]);
+ const selectedBeat=useMemo(()=>scene?.direction_beats.find(beat=>beat.beat_id===beatId)??null,[scene,beatId]);
  const editableMotionKeys=useMemo(()=>motionEvent&&!['camera-push','camera-pan'].includes(motionEvent.preset_id)?Object.entries(motionEvent.params).filter(([key])=>
    !key.endsWith('_id')&&!key.endsWith('_ids')&&!key.includes('sha')&&!key.includes('claim')&&!key.includes('word')&&
    !key.includes('geometry')&&!key.includes('map')&&!key.includes('era')):[],[motionEvent]);
@@ -62,8 +67,10 @@ export function StoryboardStudio({projectId,onRefresh}:{projectId:string;onRefre
     selectedLayer?.rect_px.w,selectedLayer?.rect_px.h,
     selectedLayer?.crop_normalized.x,selectedLayer?.crop_normalized.y,
     selectedLayer?.crop_normalized.w,selectedLayer?.crop_normalized.h]);
- useEffect(()=>{setStageOp(scene?.direction_beats[0]?.staging[0]?.operation??'');},
-   [scene?.scene_id,scene?.direction_beats[0]?.staging[0]?.operation]);
+ useEffect(()=>{setBeatId(scene?.direction_beats[0]?.beat_id??'');},[scene?.scene_id]);
+ useEffect(()=>{setStageOp(selectedBeat?.staging[0]?.operation??'');
+   setFocusMove(selectedBeat?.focus_move??'none');},
+   [selectedBeat?.beat_id,selectedBeat?.staging[0]?.operation,selectedBeat?.focus_move]);
  useEffect(()=>{const event=scene?.events.find(item=>Object.entries(item.params).some(([key])=>
    !key.endsWith('_id')&&!key.endsWith('_ids')&&!key.includes('sha')&&!key.includes('claim')&&!key.includes('word')&&!key.includes('geometry')&&!key.includes('map')&&!key.includes('era')));
    setMotionEventId(event&&!['camera-push','camera-pan'].includes(event.preset_id)?event.event_id:scene?.events.find(e=>!['camera-push','camera-pan'].includes(e.preset_id)&&Object.keys(e.params).some(k=>!k.endsWith('_id')&&!k.endsWith('_ids')&&!k.includes('claim')&&!k.includes('word')&&!k.includes('geometry')&&!k.includes('map')&&!k.includes('era')))?.event_id??'');
@@ -80,6 +87,13 @@ export function StoryboardStudio({projectId,onRefresh}:{projectId:string;onRefre
      }
    }finally{setPending(null);}
  }
+ const invalidatePreview=useCallback(()=>{
+   previewRequest.current?.controller.abort();
+   previewRequest.current=null;
+   previewSequence.current+=1;
+   setSnapshot(null);
+ },[]);
+ useEffect(()=>()=>previewRequest.current?.controller.abort(),[]);
  const currentSource=page?.draft_manifest_sha256;
  return <div className="stack" aria-label="storyboard-editor">
   <p>Real G4 storyboard draft · source and voice locked. G4/G5 revisions require explicit operator edits; preview does not approve or export a video.</p>
@@ -93,7 +107,7 @@ export function StoryboardStudio({projectId,onRefresh}:{projectId:string;onRefre
     <div className="buttonrow">
      <button disabled={offset===0||!!pending} onClick={()=>void operation('Previous scenes',()=>load(Math.max(0,offset-24)))}>Previous 24</button>
      <button disabled={offset+24>=page.total||!!pending} onClick={()=>void operation('Next scenes',()=>load(offset+24))}>Next 24</button>
-     <button disabled={!!pending} onClick={()=>void operation('Reload',async()=>{await load(offset,selected??undefined);setSnapshot(null);await onRefresh();})}>Reload persisted draft</button>
+     <button disabled={!!pending} onClick={()=>void operation('Reload',async()=>{invalidatePreview();await load(offset,selected??undefined);await onRefresh();})}>Reload persisted draft</button>
     </div>
     <div role="listbox" aria-label="Storyboard scenes" style={{maxHeight:300,overflowY:'auto',display:'grid',gap:6}}>
      {page.scenes.map((s:StoryboardScene)=><button type="button" key={s.scene_id} role="option"
@@ -113,7 +127,7 @@ export function StoryboardStudio({projectId,onRefresh}:{projectId:string;onRefre
     <button type="button" disabled={!!pending||variant===scene.variant_id}
       onClick={()=>void operation('Save storyboard variant',async()=>{
         await storyboardApi.variant(projectId,scene.scene_id,variant,page.project_revision,crypto.randomUUID());
-        await load(offset,scene.scene_id);setSnapshot(null);await onRefresh();
+        invalidatePreview();await load(offset,scene.scene_id);await onRefresh();
       })}>{pending==='Save storyboard variant'?'Saving…':'Save G4 revision (G4/G5 stale)'}</button>
     <h4>Presentation geometry — frozen layer source</h4>
     <label htmlFor="sb-layer">Layer to reposition</label>
@@ -134,7 +148,7 @@ export function StoryboardStudio({projectId,onRefresh}:{projectId:string;onRefre
         if(!selectedLayer)return;
         await storyboardApi.geometry(projectId,scene.scene_id,selectedLayer.layer_id,
           {x_px:layerX,y_px:layerY},page.project_revision,crypto.randomUUID());
-        await load(offset,scene.scene_id);setSnapshot(null);await onRefresh();
+        invalidatePreview();await load(offset,scene.scene_id);await onRefresh();
       })}>Save position (G4/G5 stale)</button>
     <h4>Media layer dimensions — unchanged approved source</h4>
     <label htmlFor="sb-layer-w">Width (pixels)</label>
@@ -154,7 +168,7 @@ export function StoryboardStudio({projectId,onRefresh}:{projectId:string;onRefre
         if(!selectedLayer)return;
         await storyboardApi.geometry(projectId,scene.scene_id,selectedLayer.layer_id,
           {w_px:layerW,h_px:layerH},page.project_revision,crypto.randomUUID());
-        await load(offset,scene.scene_id);setSnapshot(null);await onRefresh();
+        invalidatePreview();await load(offset,scene.scene_id);await onRefresh();
       })}>Save size (G4/G5 stale)</button>
     <h4>Normalized crop — same approved original</h4>
     <div className="buttonrow">
@@ -164,11 +178,13 @@ export function StoryboardStudio({projectId,onRefresh}:{projectId:string;onRefre
       <label>H <input aria-label="Crop height" type="number" min={0.01} max={1} step={0.01} value={cropH} onChange={e=>setCropH(Number(e.target.value))}/></label>
     </div>
     <button disabled={!!pending||!selectedLayer||
+      ![cropX,cropY,cropW,cropH].every(Number.isFinite)||
+      cropX<0||cropY<0||cropW<=0||cropH<=0||cropX+cropW>1||cropY+cropH>1||
       (selectedLayer.crop_normalized.x===cropX&&selectedLayer.crop_normalized.y===cropY&&selectedLayer.crop_normalized.w===cropW&&selectedLayer.crop_normalized.h===cropH)}
       onClick={()=>void operation('Save normalized crop',async()=>{
         if(!selectedLayer)return;
         await storyboardApi.crop(projectId,scene.scene_id,selectedLayer.layer_id,{x:cropX,y:cropY,w:cropW,h:cropH},page.project_revision,crypto.randomUUID());
-        await load(offset,scene.scene_id);setSnapshot(null);await onRefresh();
+        invalidatePreview();await load(offset,scene.scene_id);await onRefresh();
       })}>Save crop (G4/G5 stale)</button>
     <h4>Frozen layers / approved sources</h4>
     <div style={{maxHeight:220,overflowY:'auto'}}>
@@ -177,24 +193,33 @@ export function StoryboardStudio({projectId,onRefresh}:{projectId:string;onRefre
        {l.asset_id&&<small> · approved source {l.asset_id}</small>}</p>)}
     </div>
     <h4>Frozen-cue beat staging (G4 presentation only)</h4>
-    {scene.direction_beats[0]&&<>
-      <p><strong>{scene.direction_beats[0].beat_id}</strong> · {scene.direction_beats[0].shot_goal}</p>
+    {selectedBeat&&<>
+      <label htmlFor="sb-beat">Authored beat</label>
+      <select id="sb-beat" value={beatId} onChange={e=>setBeatId(e.target.value)}>
+       {scene.direction_beats.map(beat=><option key={beat.beat_id} value={beat.beat_id}>{beat.beat_id}</option>)}
+      </select>
+      <label htmlFor="sb-focus-move">Authorized focus movement</label>
+      <select id="sb-focus-move" value={focusMove} onChange={e=>setFocusMove(e.target.value)}>
+       {['none','subject_to_subject','detail_to_overview','overview_to_detail','follow_path','static']
+        .map(move=><option value={move} key={move}>{move}</option>)}
+      </select>
+      <p><strong>{selectedBeat.beat_id}</strong> · {selectedBeat.shot_goal}</p>
       <label htmlFor="sb-stage-op">First authored staging operation</label>
       <select id="sb-stage-op" value={stageOp} onChange={e=>setStageOp(e.target.value)}>
         {['enter','hold','highlight','exit','reposition','focus','draw_path','reveal_mask'].map(op=>
           <option value={op} key={op}>{op}</option>)}
       </select>
-      <button disabled={!!pending||stageOp===scene.direction_beats[0].staging[0]?.operation}
+      <button disabled={!!pending||(stageOp===selectedBeat.staging[0]?.operation&&
+        focusMove===selectedBeat.focus_move)}
        onClick={()=>void operation('Save authored G4 beat staging',async()=>{
-        const first=scene.direction_beats[0];
-        const staging=first.staging.map((step,i)=>i===0?{...step,operation:stageOp}:step);
+        const staging=selectedBeat.staging.map((step,i)=>i===0?{...step,operation:stageOp}:step);
         await storyboardApi.direction(projectId,{
           expected_revision:page.project_revision,
           story_revision_sha256:page.story_revision_sha256,setup_id:scene.setup_id,
-          edit_reason:'Operator staging adjustment for '+first.beat_id,
-          edits:[{beat_id:first.beat_id,shot_goal:first.shot_goal,focus_move:'none',staging}]
+          edit_reason:'Operator staging/focus adjustment for '+selectedBeat.beat_id,
+          edits:[{beat_id:selectedBeat.beat_id,shot_goal:selectedBeat.shot_goal,focus_move:focusMove,staging}]
         },crypto.randomUUID());
-        await load(offset,scene.scene_id);setSnapshot(null);await onRefresh();
+        invalidatePreview();await load(offset,scene.scene_id);await onRefresh();
        })}>Save staging (G4/G5 stale)</button>
     </>}
     <h4>Authored motion events</h4>
@@ -208,20 +233,36 @@ export function StoryboardStudio({projectId,onRefresh}:{projectId:string;onRefre
       <select id="sb-motion-param" value={motionKey} onChange={e=>{setMotionKey(e.target.value);setMotionValue(motionEvent.params[e.target.value]??'');}}>
        {editableMotionKeys.map(([key])=><option key={key} value={key}>{key}</option>)}
       </select>
-      <input aria-label="Motion parameter value" value={String(motionValue)} onChange={e=>setMotionValue(typeof motionEvent.params[motionKey]==='number'?Number(e.target.value):e.target.value)}/>
-      <button disabled={!!pending||!motionKey||motionValue===motionEvent.params[motionKey]} onClick={()=>void operation('Save motion parameter',async()=>{
+      {typeof motionEvent.params[motionKey]==='boolean'?<select aria-label="Motion parameter value" value={String(motionValue)}
+        onChange={e=>setMotionValue(e.target.value==='true')}><option value="true">true</option><option value="false">false</option></select>:
+       <input aria-label="Motion parameter value" value={String(motionValue)}
+        type={typeof motionEvent.params[motionKey]==='number'?'number':'text'}
+        onChange={e=>setMotionValue(typeof motionEvent.params[motionKey]==='number'?Number(e.target.value):e.target.value)}/>}
+      <button disabled={!!pending||!motionKey||
+        (typeof motionValue==='number'&&!Number.isFinite(motionValue))||motionValue===motionEvent.params[motionKey]} onClick={()=>void operation('Save motion parameter',async()=>{
         await storyboardApi.motion(projectId,scene.scene_id,motionEvent.event_id,motionEvent.preset_id,{[motionKey]:motionValue},page.project_revision,crypto.randomUUID());
-        await load(offset,scene.scene_id);setSnapshot(null);await onRefresh();
+        invalidatePreview();await load(offset,scene.scene_id);await onRefresh();
       })}>Save motion (G4/G5 stale)</button>
     </div>}
     <ul>{scene.events.map(e=><li key={e.event_id}>{e.preset_id} · {e.event_id} · frames {e.start_frame}–{e.start_frame+e.duration_frames}</li>)}</ul>
     <p><small>Source claim/cue identities and G3 asset IDs cannot be overwritten by direct browser props. Unsupported direct layout/motion replacement is rejected by the API.</small></p>
    </section>}
    <button type="button" disabled={!!pending} onClick={()=>void operation('Load verified browser preview',async()=>{
-     const result=await storyboardApi.preview(projectId);
-     if(result.draft_manifest_sha256!==page.draft_manifest_sha256)
+     previewRequest.current?.controller.abort();
+     const request={id:++previewSequence.current,controller:new AbortController()};
+     previewRequest.current=request;
+     const expectedManifest=page.draft_manifest_sha256;
+     const expectedRevision=page.project_revision;
+     const result=await storyboardApi.preview(projectId,request.controller.signal);
+     if(previewRequest.current?.id!==request.id)return;
+     const latest=await storyboardApi.scenes(projectId,offset,1);
+     if(previewRequest.current?.id!==request.id)return;
+     if(result.draft_manifest_sha256!==expectedManifest||result.project_revision!==expectedRevision||
+        latest.draft_manifest_sha256!==result.draft_manifest_sha256||
+        latest.project_revision!==result.project_revision)
        throw new Error('G4_DRAFT_STALE: reload current G4 after another edit.');
      setSnapshot(result);
+     previewRequest.current=null;
    })}>{pending==='Load verified browser preview'?'Verifying host…':'Load real read-only Remotion Player'}</button>
    {snapshot&&<RemotionPreview props={snapshot.props} frame={scene?.start_frame??0}/>}
   </>}
