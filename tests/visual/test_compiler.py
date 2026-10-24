@@ -1351,3 +1351,31 @@ def test_b2_camera_event_params_compile_into_real_causal_track():
         compose_camera_events(baseline, [pan, {**pan, "event_id": "event_overlap",
                                                "start_frame": 8}], layers,
             duration_frames=20, limits=limits)
+
+
+def test_b2_word_spans_bind_only_unambiguous_frozen_g2_tokens():
+    from backend.app.director.compiler import _attach_verified_word_spans
+    from backend.app.contracts import ContractViolation
+    import pytest
+
+    event = {"event_id": "event_word", "preset_id": "kinetic-type",
+             "params": {"word_ids": ["word_000002"], "max_offset_px": 24,
+                        "line_preservation": True}}
+    word_map = {"words": [{"word_id": "word_000002", "text": "keeper"}]}
+    layer = {"layer_id": "layer_words", "text": "The keeper, returned."}
+    _attach_verified_word_spans(layer, event, word_map)
+    assert layer["word_spans"] == [
+        {"word_id": "word_000002", "word_text": "keeper",
+         "start": 4, "end": 11}]
+    with pytest.raises(ContractViolation):
+        _attach_verified_word_spans(
+            {"layer_id": "layer_repeat", "text": "keeper and keeper"},
+            event, word_map)
+    with pytest.raises(ContractViolation):
+        _attach_verified_word_spans(
+            {"layer_id": "layer_unrelated", "text": "An unrelated claim"},
+            event, word_map)
+    with pytest.raises(ContractViolation):
+        _attach_verified_word_spans(
+            {"layer_id": "layer_forged", "text": "keeper"},
+            {**event, "params": {"word_ids": ["word_forged"]}}, word_map)
