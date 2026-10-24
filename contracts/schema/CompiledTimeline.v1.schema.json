@@ -553,6 +553,38 @@
                       "type": "null"
                     }
                   ]
+                },
+                "word_spans": {
+                  "type": "array",
+                  "minItems": 1,
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "word_id": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+                      },
+                      "word_text": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "start": {
+                        "type": "integer",
+                        "minimum": 0
+                      },
+                      "end": {
+                        "type": "integer",
+                        "minimum": 1
+                      }
+                    },
+                    "required": [
+                      "word_id",
+                      "word_text",
+                      "start",
+                      "end"
+                    ]
+                  }
                 }
               },
               "required": [
