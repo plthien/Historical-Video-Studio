@@ -9,7 +9,7 @@ export type MediaItem={assetId:string; originalSha256:string; mime:'image/png'|'
 export type Geometry = {geometryRef:string; coordinates:[number,number][]; coordinateSpace:'WGS84'|'ANNOTATION_CANVAS'; sourceOriginalSha256:string; historicalMapId:string|null; reviewedYear:number|null; bbox:[number,number,number,number]|null};
 export type ReviewedMap={historicalMapId:string;projection:string;viewport:[number,number,number,number];reviewedYear:number;sourceOriginalSha256:string;coordinateKind:'geo_wgs84'|'raster_uv'};
 export type ResolvedMedia={assets:Record<string,MediaItem>; geometries:Record<string,Geometry>; maps:Record<string,ReviewedMap>; fontFamily:string; fontSha256:string; fontDataUri:string; sourceKind:MediaKind; authorizingG4ManifestSha256:string};
-export type Layer={layer_id:string; layer_kind:string; asset_id:string|null; text:string|null; source_claim_id:string|null; z_index:number;depth_order:number;rect_px:Rect; crop_normalized:Rect;object_fit:'contain'|'cover'|'fill';mask:{kind:string;asset_id:string|null;feather_px:number};map_binding:{historical_map_id:string;feature_id:string|null;coordinate_kind:string;anchor_latlon:[number,number]|null}|null; parent_layer_id:string|null;group_id:string; text_layout:{font_size_px:number;line_height:number;max_lines:number;horizontal_align:string;vertical_align:string}|null; template_slot_id:string;source_asset_slot_id:string|null; path_geometry_ref:string|null; treatment:{kind:string;source_preserving:boolean;evidence_badge:string}};
+export type Layer={word_spans?:{word_id:string;word_text:string;start:number;end:number}[];layer_id:string; layer_kind:string; asset_id:string|null; text:string|null; source_claim_id:string|null; z_index:number;depth_order:number;rect_px:Rect; crop_normalized:Rect;object_fit:'contain'|'cover'|'fill';mask:{kind:string;asset_id:string|null;feather_px:number};map_binding:{historical_map_id:string;feature_id:string|null;coordinate_kind:string;anchor_latlon:[number,number]|null}|null; parent_layer_id:string|null;group_id:string; text_layout:{font_size_px:number;line_height:number;max_lines:number;horizontal_align:string;vertical_align:string}|null; template_slot_id:string;source_asset_slot_id:string|null; path_geometry_ref:string|null; treatment:{kind:string;source_preserving:boolean;evidence_badge:string}};
 export type Key={frame:number;value:number;easing:string};
 export type Motion={event_id:string; layer_id:string; preset_id:string;start_frame:number; duration_frames:number;params:Record<string,unknown>;keyframes:Key[];motion_space:string;affected_layer_ids:string[];animated_property:string;stagger:{order:string[];offset_frames:number}|null};
 export type Beat={local_start_frame:number;local_end_frame:number;focus_layer_id:string;activated_layer_ids:string[];hidden_layer_ids:string[]};
@@ -45,6 +45,19 @@ export function assertTimeline(input:unknown):asserts input is Timeline {
   const ids=new Set(s.layers.map(l=>l.layer_id));
   if(ids.size!==s.layers.length)fail('RENDER_LAYER_DUPLICATE',s.setup_id,'Layer identities must be unique');
   for(const l of s.layers){
+   if(l.word_spans){
+    if(l.text===null)fail('RENDER_WORD_SPAN_UNTRUSTED',l.layer_id,'Only source text can bind spoken words');
+    let previous=0;
+    const ids=new Set<string>();
+    const norm=(text:string)=>text.toLocaleLowerCase('en').replace(/[^\\p{L}\\p{N}_]+/gu,'');
+    for(const span of l.word_spans){
+     if(ids.has(span.word_id)||!Number.isInteger(span.start)||!Number.isInteger(span.end)||
+        span.start<previous||span.end<=span.start||span.end>l.text!.length||
+        !norm(span.word_text)||norm(l.text!.slice(span.start,span.end))!==norm(span.word_text))
+      fail('RENDER_WORD_SPAN_UNTRUSTED',l.layer_id,'Word offsets must map exact G2 token text to frozen G1 glyphs');
+     ids.add(span.word_id);previous=span.end;
+    }
+   }
    const r=l.rect_px,c=l.crop_normalized;
    if(r.w<=0||r.h<=0||r.x<0||r.y<0||r.x+r.w>1920||r.y+r.h>1080)fail('RENDER_RECT_INVALID',l.layer_id,'Compiled rect exceeds canvas');
    if(c.x<0||c.y<0||c.w<=0||c.h<=0||c.x+c.w>1.0000001||c.y+c.h>1.0000001)fail('RENDER_CROP_INVALID',l.layer_id,'UV outside original');
