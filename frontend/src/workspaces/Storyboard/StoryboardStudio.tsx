@@ -39,7 +39,7 @@ export function StoryboardStudio({projectId,onRefresh}:{projectId:string;onRefre
  const motionEvent=useMemo(()=>scene?.events.find(event=>event.event_id===motionEventId)??null,[scene,motionEventId]);
  const selectedBeat=useMemo(()=>scene?.direction_beats.find(beat=>beat.beat_id===beatId)??null,[scene,beatId]);
  const selectedStage=selectedBeat?.staging[stageIndex]??null;
- const editableMotionKeys=useMemo(()=>motionEvent&&!['camera-push','camera-pan'].includes(motionEvent.preset_id)?Object.entries(motionEvent.params).filter(([key])=>
+ const editableMotionKeys=useMemo(()=>motionEvent?Object.entries(motionEvent.params).filter(([key])=>
    !key.endsWith('_id')&&!key.endsWith('_ids')&&!key.includes('sha')&&!key.includes('claim')&&!key.includes('word')&&
    !key.includes('geometry')&&!key.includes('map')&&!key.includes('era')):[],[motionEvent]);
  const load=useCallback(async (nextOffset:number,preferred?:string)=>{
@@ -77,9 +77,9 @@ export function StoryboardStudio({projectId,onRefresh}:{projectId:string;onRefre
    [selectedBeat?.beat_id,selectedBeat?.focus_move]);
  useEffect(()=>{const event=scene?.events.find(item=>Object.entries(item.params).some(([key])=>
    !key.endsWith('_id')&&!key.endsWith('_ids')&&!key.includes('sha')&&!key.includes('claim')&&!key.includes('word')&&!key.includes('geometry')&&!key.includes('map')&&!key.includes('era')));
-   setMotionEventId(event&&!['camera-push','camera-pan'].includes(event.preset_id)?event.event_id:scene?.events.find(e=>!['camera-push','camera-pan'].includes(e.preset_id)&&Object.keys(e.params).some(k=>!k.endsWith('_id')&&!k.endsWith('_ids')&&!k.includes('claim')&&!k.includes('word')&&!k.includes('geometry')&&!k.includes('map')&&!k.includes('era')))?.event_id??'');
+   setMotionEventId(event?.event_id??'');
  },[scene?.scene_id]);
- useEffect(()=>{const first=editableMotionKeys[0];setMotionKey(first?.[0]??'');setMotionValue(first?.[1]??'');},[motionEventId,scene?.scene_id]);
+ useEffect(()=>{const first=editableMotionKeys[0];setMotionKey(first?.[0]??'');setMotionValue(first?.[1]??'');},[motionEventId,scene?.scene_id,page?.project_revision]);
  async function operation(label:string,run:()=>Promise<void>){
    if(pending)return;
    setPending(label);setError('');setSuccess('');
@@ -231,11 +231,11 @@ export function StoryboardStudio({projectId,onRefresh}:{projectId:string;onRefre
        })}>Save staging (G4/G5 stale)</button>
     </>}
     <h4>Authored motion events</h4>
-     {scene.events.some(e=>e.preset_id==='camera-push'||e.preset_id==='camera-pan')&&<p>Camera motion parameters are view-only until they drive validated compiled camera keyframes.</p>}
+     <p>Camera scalars compile into one bounded camera track; frozen source and focus IDs remain locked.</p>
     {motionEvent&&editableMotionKeys.length>0&&<div className="stack">
       <label htmlFor="sb-motion-event">Authored motion event</label>
       <select id="sb-motion-event" value={motionEventId} onChange={e=>setMotionEventId(e.target.value)}>
-       {scene.events.filter(event=>!['camera-push','camera-pan'].includes(event.preset_id)&&Object.entries(event.params).some(([key])=>!key.endsWith('_id')&&!key.endsWith('_ids')&&!key.includes('sha')&&!key.includes('claim')&&!key.includes('word')&&!key.includes('geometry')&&!key.includes('map')&&!key.includes('era'))).map(event=><option key={event.event_id} value={event.event_id}>{event.preset_id} / {event.event_id}</option>)}
+       {scene.events.filter(event=>Object.entries(event.params).some(([key])=>!key.endsWith('_id')&&!key.endsWith('_ids')&&!key.includes('sha')&&!key.includes('claim')&&!key.includes('word')&&!key.includes('geometry')&&!key.includes('map')&&!key.includes('era'))).map(event=><option key={event.event_id} value={event.event_id}>{event.preset_id} / {event.event_id}</option>)}
       </select>
       <label htmlFor="sb-motion-param">Authorized scalar presentation parameter</label>
       <select id="sb-motion-param" value={motionKey} onChange={e=>{setMotionKey(e.target.value);setMotionValue(motionEvent.params[e.target.value]??'');}}>
