@@ -372,7 +372,8 @@ const semanticRows=presets.presets.map(p=>{
   'No authorized two-scene surface identities and overlap window':null;
  const authority=proof.some(e=>e.source==='OPERATOR_APPROVED');
  const status=dependency?'BLOCKED_DEPENDENCY':!phases.length?'NOT_RUN':
-  mechanics&&authority?'PASS':mechanics?'PARTIAL':'FAIL_CONFIRMED';
+  !verified||!distinct||!negative?'FAIL_CONFIRMED':
+  mechanics&&authority?'PASS':'PARTIAL';
  return {preset_id:p.preset_id,primitive:p.render_recipe.primitive,
   motion_space:p.render_recipe.transform_space,status,
   mechanism_assertions:{validChromiumFrames:verified,distinctActualPixels:distinct,
