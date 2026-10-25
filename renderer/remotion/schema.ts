@@ -150,7 +150,7 @@ export function verifiedApprovedCount(e:Motion,layer:Layer,media:ResolvedMedia):
     rows[rows.length-1]?.frameOffset!==e.duration_frames||
     rows[0]?.value!==series.startValue||rows[rows.length-1]?.value!==series.endValue)
   return fail('RENDER_NUMBER_SERIES_INVALID',e.event_id,'Missing reviewed intermediate or authored endpoints');
- const decimal=/^(?:0|[1-9][0-9]*)(?:\\.[0-9]+)?$|^-(?:[1-9][0-9]*)(?:\\.[0-9]+)?$/;
+ const decimal=/^(?:0|[1-9][0-9]*)(?:\.[0-9]+)?$|^-(?:[1-9][0-9]*)(?:\.[0-9]+)?$/;
  if(!Number.isInteger(series.precision)||series.precision<0||series.precision>3||
     rows.some((row,i)=>!Number.isInteger(row.frameOffset)||row.frameOffset<0||
       (i>0&&row.frameOffset<=rows[i-1]!.frameOffset)||
