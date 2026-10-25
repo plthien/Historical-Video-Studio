@@ -115,4 +115,5 @@ def test_reviewed_t02_mask_real_http_and_negative(tmp_path):
     assert current.status_code==200,current.text
     assert current.json()["derivative_sha256"]==reviewed.json()["derivative_sha256"]
     assert rgba_alpha_extent(store.get_artifact(reviewed.json()["derivative_sha256"]))==(8,8)
-    assert request(png(transparent=True),before,"stale-mask-review").status_code==409
+    stale=request(png(transparent=True),before,"stale-mask-review")
+    assert stale.status_code==409,stale.text
