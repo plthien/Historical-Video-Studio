@@ -8,7 +8,8 @@ export type MediaKind = 'SYNTHETIC'|'APPROVED_LOCAL';
 export type MediaItem={assetId:string; originalSha256:string; mime:'image/png'|'image/jpeg'|'image/webp'; dataUri:string; sourceKind:MediaKind; approvalRecordId:string};
 export type Geometry = {geometryRef:string; coordinates:[number,number][]; coordinateSpace:'WGS84'|'ANNOTATION_CANVAS'; sourceOriginalSha256:string; historicalMapId:string|null; reviewedYear:number|null; bbox:[number,number,number,number]|null};
 export type ReviewedMap={historicalMapId:string;projection:string;viewport:[number,number,number,number];reviewedYear:number;sourceOriginalSha256:string;coordinateKind:'geo_wgs84'|'raster_uv'};
-export type ResolvedMedia={assets:Record<string,MediaItem>; geometries:Record<string,Geometry>; maps:Record<string,ReviewedMap>; fontFamily:string; fontSha256:string; fontDataUri:string; sourceKind:MediaKind; syntheticNumericSeries?:Record<string,{fixtureId:string;values:number[]}>; authorizingG4ManifestSha256:string};
+export type ApprovedNumericSeries={seriesId:string;claimId:string;storySha256:string;g1ApprovalId:string;approvalId:string;seriesSha256:string;durationFrames:number;precision:number;unit:string;startValue:string;endValue:string;observations:{frameOffset:number;value:string;evidenceSha256:string}[]};
+export type ResolvedMedia={approvedNumericSeries?:Record<string,ApprovedNumericSeries>;assets:Record<string,MediaItem>; geometries:Record<string,Geometry>; maps:Record<string,ReviewedMap>; fontFamily:string; fontSha256:string; fontDataUri:string; sourceKind:MediaKind; syntheticNumericSeries?:Record<string,{fixtureId:string;values:number[]}>; authorizingG4ManifestSha256:string};
 export type Layer={word_spans?:{word_id:string;word_text:string;start:number;end:number}[];layer_id:string; layer_kind:string; asset_id:string|null; text:string|null; source_claim_id:string|null; z_index:number;depth_order:number;rect_px:Rect; crop_normalized:Rect;object_fit:'contain'|'cover'|'fill';mask:{kind:string;asset_id:string|null;feather_px:number};map_binding:{historical_map_id:string;feature_id:string|null;coordinate_kind:string;anchor_latlon:[number,number]|null}|null; parent_layer_id:string|null;group_id:string; text_layout:{font_size_px:number;line_height:number;max_lines:number;horizontal_align:string;vertical_align:string}|null; template_slot_id:string;source_asset_slot_id:string|null; path_geometry_ref:string|null; treatment:{kind:string;source_preserving:boolean;evidence_badge:string}};
 export type Key={frame:number;value:number;easing:string};
 export type Motion={event_id:string; layer_id:string; preset_id:string;start_frame:number; duration_frames:number;params:Record<string,unknown>;keyframes:Key[];motion_space:string;affected_layer_ids:string[];animated_property:string;stagger:{order:string[];offset_frames:number}|null};
@@ -127,6 +128,41 @@ export function verifiedSyntheticCount(e:Motion, layer:Layer, media:ResolvedMedi
    'Nonmonotonic or unsupported-precision synthetic observations');
  return values;
 }
+/** Production numeric strings are never interpolated. Every displayed number is an operator-reviewed observation. */
+export function verifiedApprovedCount(e:Motion,layer:Layer,media:ResolvedMedia):ApprovedNumericSeries{
+ if(media.sourceKind!=='APPROVED_LOCAL'||typeof e.params.approved_numeric_series_id!=='string')
+  return fail('RENDER_NUMBER_SERIES_UNVERIFIED',e.event_id,'Current host-issued G1 numeric-series identity required');
+ const series=media.approvedNumericSeries?.[e.params.approved_numeric_series_id];
+ if(!series||series.seriesId!==e.params.approved_numeric_series_id||
+    !series.approvalId.startsWith('numeric_')||
+    !/^[a-f0-9]{64}$/.test(series.seriesSha256)||
+    !/^[a-f0-9]{64}$/.test(series.storySha256)||
+    !series.g1ApprovalId||series.claimId!==layer.source_claim_id||
+    e.params.source_claim_id!==layer.source_claim_id||
+    series.durationFrames!==e.duration_frames||series.precision!==e.params.precision||
+    series.startValue!==String(e.params.start_value)||
+    series.endValue!==String(e.params.end_value)||
+    layer.text===null||Number(layer.text.replace(/,/g,''))!==Number(series.endValue)||
+    e.params.intermediate_truthful!==true)
+  return fail('RENDER_NUMBER_SERIES_UNVERIFIED',e.event_id,'Current reviewed series does not match frozen claim, motion or G1 source');
+ const rows=series.observations;
+ if(!Array.isArray(rows)||rows.length<3||rows[0]?.frameOffset!==0||
+    rows[rows.length-1]?.frameOffset!==e.duration_frames||
+    rows[0]?.value!==series.startValue||rows[rows.length-1]?.value!==series.endValue)
+  return fail('RENDER_NUMBER_SERIES_INVALID',e.event_id,'Missing reviewed intermediate or authored endpoints');
+ const decimal=/^(?:0|[1-9][0-9]*)(?:\\.[0-9]+)?$|^-(?:[1-9][0-9]*)(?:\\.[0-9]+)?$/;
+ if(!Number.isInteger(series.precision)||series.precision<0||series.precision>3||
+    rows.some((row,i)=>!Number.isInteger(row.frameOffset)||row.frameOffset<0||
+      (i>0&&row.frameOffset<=rows[i-1]!.frameOffset)||
+      !decimal.test(row.value)||row.value.split('.')[1]?.length>series.precision||
+      !Number.isFinite(Number(row.value))||Math.abs(Number(row.value))>1e9||
+      !/^[a-f0-9]{64}$/.test(row.evidenceSha256)))
+  return fail('RENDER_NUMBER_SERIES_INVALID',e.event_id,'Unreviewed frame, precision or evidence');
+ const step=Math.sign(Number(series.endValue)-Number(series.startValue));
+ if(rows.some((row,i)=>i>0&&step*(Number(row.value)-Number(rows[i-1]!.value))<0))
+  return fail('RENDER_NUMBER_SERIES_INVALID',e.event_id,'Reviewed series must be monotone');
+ return series;
+}
 export function assertMedia(t:Timeline,m:ResolvedMedia){
  // Check source/number provenance independent of whether the motion layer
  // happens to be visible at the sampled frame.
@@ -134,7 +170,8 @@ export function assertMedia(t:Timeline,m:ResolvedMedia){
   if(event.preset_id!=='number-count')continue;
   const layer=scene.layers.find(item=>item.layer_id===event.layer_id);
   if(!layer)return fail('RENDER_COUNT_TARGET_UNRESOLVED',event.event_id,'Numeric display layer missing');
-  verifiedSyntheticCount(event,layer,m);
+  if(m.sourceKind==="APPROVED_LOCAL")verifiedApprovedCount(event,layer,m);
+  else verifiedSyntheticCount(event,layer,m);
  }
  if(!m|| !/^[a-f0-9]{64}$/.test(m.authorizingG4ManifestSha256))fail('RENDER_DRAFT_UNTRUSTED',t.project_id,'Node must attach verified G4 draft manifest');
  if(!/^[a-f0-9]{64}$/.test(m.fontSha256)||!m.fontDataUri.startsWith('data:font/'))fail('RENDER_FONT_UNTRUSTED',t.project_id,'Pinned local font required');
