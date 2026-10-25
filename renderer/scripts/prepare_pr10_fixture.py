@@ -58,7 +58,7 @@ def prepare(mode:str):
     out.mkdir(parents=True)
     all_story=load("contracts/examples/visual_cases/StoryPackage.visual_cases.synthetic.json")
     all_bp=load("contracts/examples/visual_cases/VisualBlueprint.visual_cases.synthetic.json")
-    template="T08" if mode=="numeric" else "T02"
+    template={"numeric":"T08","mask":"T02","typography":"T06"}[mode]
     setup=copy.deepcopy(next(s for s in all_story["visual_setups"] if s["preferred_template"]==template))
     payload=copy.deepcopy(next(s["template_payload"] for s in all_bp["setup_plans"] if s["template_id"]==template))
     story=copy.deepcopy(all_story)
@@ -79,13 +79,19 @@ def prepare(mode:str):
         payload["display_value"]="1914"
         for text in setup["direction"]["on_screen_text"]:
             if text["text_id"]==payload["fact_text_id"]:text["text"]="1914"
-    else:
+    elif mode=="mask":
         payload["cutout_policy"]="use_reviewed_mask"
         for text in setup["direction"]["on_screen_text"]:
             if text["text_id"]==payload["role_text_id"]:
                 text["text"]="SYNTHETIC PORTRAIT. ORIGINAL PHOTO RIGHTS AND TRANSPARENT CUTOUT ARE REVIEWED SEPARATELY."
             elif text["text_id"]==payload["name_text_id"]:
                 text["text"]="SYNTHETIC PERSON: SOURCE REVIEWED"
+    elif mode=="typography":
+        for text in setup["direction"]["on_screen_text"]:
+            if text["text_id"]==payload["excerpt_text_id"]:
+                text["text"]="SYNTHETIC DOCUMENT EXCERPT.\\nThis second sourced line must remain fully visible."
+            elif text["text_id"]==payload["attribution_text_id"]:
+                text["text"]="SYNTHETIC SOURCE ONLY — NO HISTORICAL RIGHTS OR CLAIMS."
     pid=story["project"]["project_id"]
     client=TestClient(create_app(out/"g4.sqlite",out/"artifacts"))
     store=ProjectStore(out/"g4.sqlite",out/"artifacts")
@@ -159,6 +165,18 @@ def prepare(mode:str):
         g3=approve("G3")
         sources={"requirement_id":req,"slot_id":slot,
                  "a":a,"b":b,"g3_approval":g3}
+    elif mode=="typography":
+        req=story["asset_requirements"][0]["requirement_id"]
+        resolver.choose(pid,req,"MANUAL_UPLOAD","Synthetic document original",store.revision(pid))
+        document=AssetCandidates(store).manual(pid,req,png((210,170,120)),
+                    "SYNTHETIC T06 document","No real historical document",
+                    "Synthetic fixture owned for tests")
+        resolver.approve_batch(pid,[{
+            "requirement_id":req,"candidate_id":document["candidate_id"],
+            "original_sha256":document["original_sha256"],
+            "rights_status":"ELIGIBLE","rights_evidence_note":"Synthetic owned fixture",
+            "historical_context_note":"Test only; no real history"}],store.revision(pid))
+        sources={"requirement_id":req,"document":document,"g3_approval":approve("G3")}
     else:
         approve("G3")
     blueprint=normalize_story(story,{setup["setup_id"]:payload})
@@ -202,9 +220,12 @@ def prepare(mode:str):
     if mode=="numeric":
         events=[x for s in timeline["scenes"] for x in s["events"] if x["preset_id"]=="number-count"]
         assert len(events)==1 and events[0]["params"]["approved_numeric_series_id"]=="synthetic_count_1914"
-    else:
+    elif mode=="mask":
         layers=[x for s in timeline["scenes"] for x in s["layers"] if x["mask"]["kind"]=="polygon_asset"]
         assert len(layers)==1
+    else:
+        texts=[x for s in timeline["scenes"] for x in s["layers"] if x["text"] is not None]
+        assert any("SYNTHETIC DOCUMENT EXCERPT" in x["text"] for x in texts)
     config={"mode":mode,"project":pid,"db":str(store.database),
             "artifactRoot":str(store.artifacts.root),
             "source":"SYNTHETIC_G1_G2_G3_OPERATOR_TRANSACTIONS_NOT_REAL_HISTORY",
@@ -219,5 +240,5 @@ def prepare(mode:str):
 
 if __name__=="__main__":
     parser=argparse.ArgumentParser()
-    parser.add_argument("--case",choices=["numeric","mask"],required=True)
+    parser.add_argument("--case",choices=["numeric","mask","typography"],required=True)
     prepare(parser.parse_args().case)
