@@ -32,7 +32,7 @@ test('storyboard-editor uses real persisted G4 scenes and native read-only Playe
  const candidate=Object.values(approvedAssets)[0];
  expect(candidate,'preview fixture must have an approved synthetic original').toBeDefined();
  const originalSha=candidate!.originalSha256;
- const root=resolve(import.meta.dirname,'../../..');
+ const root=resolve(process.cwd(),'..'); // npm --prefix frontend executes Playwright with frontend cwd
  const originalFile=resolve(root,'renderer','.artifacts','approved-player-test',
    'artifacts','sha256',originalSha.slice(0,2),originalSha.slice(2));
  const withheldFile=originalFile+'.temporarily-withheld-b2-e2e';
