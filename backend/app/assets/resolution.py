@@ -337,6 +337,9 @@ class AssetResolution:
             primary=self._head(db,project,requirement,source["requirement_sha256"])
             if not primary:
                 raise ContractViolation("G3_ASSET_UNAPPROVED",requirement,"Current approved primary is missing.")
+            story=self.store.get_story(project).data()
+            requirement_class=next(r["asset_class"] for r in story["asset_requirements"]
+                                   if r["requirement_id"]==requirement)
             options=[]
             for item in pool["items"]:
                 cand=self.assets._owned_tx(db,project,requirement,item["candidate_id"])
@@ -359,7 +362,8 @@ class AssetResolution:
                 options.append({"candidate_id":cand["candidate_id"],
                                 "original_sha256":sha,
                                 "review_approval_id":rid[0],
-                                "asset_class":cand["asset_class"],
+                                "asset_class":requirement_class,
+                                "source_candidate_class":cand["asset_class"],
                                 "title":cand.get("title","Reviewed original"),
                                 "source_provider":cand["provider"]})
             return {"requirement_id":requirement,"slot_id":slot,
@@ -411,9 +415,12 @@ class AssetResolution:
             if not eligible:
                 eligible=any(x["candidate_id"]==parent_id and x["original_sha256"]==parent_sha
                              for p in pools.values() for x in p["items"])
+            requirement_class=next(r["asset_class"] for r in story["asset_requirements"]
+                                   if r["requirement_id"]==requirement)
             if (not eligible or candidate["original_sha256"]!=parent_sha or
                 candidate["source_requirement_sha256"]!=source["requirement_sha256"] or
-                candidate["asset_class"] not in ("ARCHIVAL_PHOTO","HISTORICAL_ARTWORK")):
+                requirement_class not in ("ARCHIVAL_PHOTO","HISTORICAL_ARTWORK") or
+                candidate["provider"]=="glabs_webhook"):
                 raise ContractViolation("MASK_DERIVATIVE_PARENT_UNAPPROVED",slot,
                                         "Choose current reviewed G3 original from exact portrait requirement.")
             sha,new=self.store.artifacts.put(png)
