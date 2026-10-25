@@ -307,7 +307,11 @@ export const CompiledLayer:React.FC<{scene:Scene;layer:Layer;frame:number;media:
  const localFrame=frozen?frozen.start_frame:frame;
  const effect=motionForLayer(scene,layer,localFrame,media);
  const r=layer.rect_px,c=layer.crop_normalized;
- const shown=frame>=first;
+ // Registered hard-cut reveals its incoming frozen layer at the exact cue,
+ // never before it. Existing authored staging still remains source authority.
+ const cutIncoming=scene.events.some(e=>e.preset_id==='hard-cut'&&
+  e.layer_id===layer.layer_id&&frame>=e.start_frame);
+ const shown=frame>=first||cutIncoming;
  const style:React.CSSProperties={position:'absolute',left:r.x,top:r.y,width:r.w,height:r.h,zIndex:layer.z_index,overflow:'hidden',
    opacity:shown?effect.opacity:0,transform:`translate(${effect.translateX}px,${effect.translateY}px) rotate(${effect.rotation}deg) scale(${effect.scale})`,
    transformOrigin:'center',borderRadius:layer.layer_kind==='archival_photo'?4:0, boxSizing:'border-box'};
