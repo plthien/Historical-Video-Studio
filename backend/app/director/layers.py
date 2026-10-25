@@ -1,6 +1,8 @@
 """B1-04: registered source-bound layers; originals remain immutable."""
 from __future__ import annotations
 
+import re
+
 from backend.app.contracts import ContractViolation
 from backend.app.director.layout import pixel_geometry, role_bounds, selected_layout
 
@@ -17,7 +19,31 @@ def _blocked(code, path, what):
     raise ContractViolation(code, path, what)
 
 
-def _text_layout(source, rect, font_measure):
+def _wrapped_lines(text, size, available_width, font_measure):
+    """Count browser-style soft wraps without discarding authored newlines."""
+    lines = []
+    for logical in text.split("\n"):
+        if logical == "":
+            lines.append("")
+            continue
+        tokens = re.findall(r"\S+|[^\S\n]+", logical)
+        if any(not token.isspace() and font_measure(token, size)[0] > available_width
+               for token in tokens):
+            return None
+        current = ""
+        for token in tokens:
+            proposed = current + token
+            if font_measure(proposed, size)[0] <= available_width:
+                current = proposed
+                continue
+            if current:
+                lines.append(current)
+            current = token.lstrip() if token.isspace() else token
+        lines.append(current)
+    return lines
+
+
+def _text_layout(source, rect, font_measure, *, padding_px=6):
     """Measure actual glyphs through a supplied pinned glyph-width provider.
 
     No character-count fitting and no quiet font replacement. B2 controls final
@@ -28,24 +54,16 @@ def _text_layout(source, rect, font_measure):
                  "Supply measured pinned-font glyph bounds before compiling text.")
     max_lines = min(source["max_lines"], 8)
     text = source["text"]
+    available_width = rect["w"] - 2 * padding_px
+    available_height = rect["h"] - 2 * padding_px
+    if available_width <= 0 or available_height <= 0:
+        _blocked("TYPOGRAPHY_OVERFLOW", source["text_id"],
+                 "Text padding leaves no visible content box in this approved layout.")
     options = (64, 56, 48, 40, 32, 28, 24, 20)
     for size in options:
-        words = text.split()
-        lines = []
-        current = ""
-        for word in words:
-            proposed = (current + " " + word).strip()
-            if font_measure(proposed, size)[0] <= rect["w"]:
-                current = proposed
-            else:
-                if current:
-                    lines.append(current)
-                current = word
-        if current:
-            lines.append(current)
-        if (len(lines) <= max_lines and
-                all(font_measure(line, size)[0] <= rect["w"] for line in lines) and
-                len(lines) * font_measure("Hg", size)[1] * 1.16 <= rect["h"]):
+        lines = _wrapped_lines(text, size, available_width, font_measure)
+        if (lines is not None and len(lines) <= max_lines and
+                len(lines) * size * 1.16 <= available_height):
             return {"font_token": "headline_sans", "font_size_px": size,
                     "line_height": 1.16, "letter_spacing_px": 0,
                     "horizontal_align": "left", "vertical_align": "center",
@@ -184,7 +202,9 @@ def build_layers(plan: dict, approved: dict, requirements: dict, *,
                           "evidence_badge": "archival" if candidate else "none"},
             "path_geometry_ref": (maps[plan["setup_id"]]["route_feature_id"] if is_route else
                                   "connector_" + plan["setup_id"] if is_editorial_connector else None),
-            "text_layout": _text_layout(txt, rect, font_measure) if txt else None,
+            "text_layout": _text_layout(
+                txt, rect, font_measure, padding_px=10 if role == "headline" else 6
+            ) if txt else None,
             "template_slot_id": sid,
             "source_asset_slot_id": source["slot_id"] if source else None,
         }

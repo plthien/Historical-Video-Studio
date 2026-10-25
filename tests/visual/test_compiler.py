@@ -464,6 +464,42 @@ def test_layers_registered_variants_and_g3_source_binding():
         build_layers(first,bad,classes,font_measure=measure)
 
 
+def test_text_layout_preserves_hard_lines_and_renderer_content_box():
+    from backend.app.director.layers import _text_layout
+
+    # Deterministic glyph metrics make the exact hard+soft wrapping boundary
+    # visible without substituting character-count fitting in production.
+    measure=lambda text,size:(len(text)*size//2,size)
+    source={"text_id":"text_multiline","text":"ALPHA BETA\nGAMMA DELTA","max_lines":2}
+    original=copy.deepcopy(source)
+    layout=_text_layout(source,{"w":240,"h":120},measure,padding_px=6)
+    assert layout["font_size_px"]==40
+    assert source==original
+
+    impossible=[
+        ({"text_id":"three_hard","text":"A\nB\nC","max_lines":2},{"w":500,"h":200}),
+        ({"text_id":"hard_soft","text":"ALPHA BETA\nGAMMA DELTA","max_lines":2},{"w":100,"h":200}),
+        ({"text_id":"blank_line","text":"A\n\nB","max_lines":2},{"w":500,"h":200}),
+        ({"text_id":"unbreakable","text":"W"*30,"max_lines":3},{"w":200,"h":200}),
+        ({"text_id":"height","text":"VISIBLE","max_lines":1},{"w":500,"h":30}),
+        ({"text_id":"padding","text":"VISIBLE","max_lines":1},{"w":10,"h":100}),
+    ]
+    for candidate,rect in impossible:
+        frozen=copy.deepcopy(candidate)
+        with pytest.raises(ContractViolation,match="TYPOGRAPHY_OVERFLOW"):
+            _text_layout(candidate,rect,measure,padding_px=6)
+        assert candidate==frozen
+
+
+def test_windows_font_measure_rejects_wrong_pinned_hash():
+    import os
+    from backend.app.director.layout import windows_font_measure
+
+    font=Path(os.environ["WINDIR"])/"Fonts"/"arial.ttf"
+    with pytest.raises(ContractViolation,match="FONT_IDENTITY_STALE"):
+        windows_font_measure(str(font),"0"*64)
+
+
 def test_motion_nineteen_distinct_registered_grammars_and_blockers():
     from backend.app.director.motion import presets,compile_event
     entries=presets()

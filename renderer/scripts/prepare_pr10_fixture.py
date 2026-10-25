@@ -95,7 +95,7 @@ def prepare(mode:str):
     elif mode=="typography":
         for text in setup["direction"]["on_screen_text"]:
             if text["text_id"]==payload["excerpt_text_id"]:
-                text["text"]="SYNTHETIC DOCUMENT\nEXCERPT WORDS VERIFIED\nFULL SOURCE PRESERVED"
+                text["text"]="SYNTHETIC DOCUMENT EXCERPT.\nSource words remain fully visible."
             elif text["text_id"]==payload["attribution_text_id"]:
                 text["text"]="SYNTHETIC SOURCE ONLY — NO HISTORICAL RIGHTS OR CLAIMS."
     pid=story["project"]["project_id"]
@@ -240,7 +240,7 @@ def prepare(mode:str):
         assert len(layers)==1
     else:
         texts=[x for s in timeline["scenes"] for x in s["layers"] if x["text"] is not None]
-        assert any("SYNTHETIC DOCUMENT\\nEXCERPT WORDS VERIFIED\\nFULL SOURCE PRESERVED" in x["text"] for x in texts)
+        assert any("SYNTHETIC DOCUMENT EXCERPT.\nSource words remain fully visible." == x["text"] for x in texts)
     config={"mode":mode,"project":pid,"db":str(store.database),
             "artifactRoot":str(store.artifacts.root),
             "source":"SYNTHETIC_G1_G2_G3_OPERATOR_TRANSACTIONS_NOT_REAL_HISTORY",

@@ -49,7 +49,17 @@ test('pr10 source-authorized T06 multiline document and adversarial critical cli
      }
      return {id:outer.dataset.layer??'',text:el.textContent??'',
        font:getComputedStyle(el).fontFamily,visible:getComputedStyle(outer).opacity!=='0',
+       fontSize:getComputedStyle(el).fontSize,lineHeight:getComputedStyle(el).lineHeight,
+       whiteSpace:getComputedStyle(el).whiteSpace,overflow:getComputedStyle(el).overflow,
+       lineClamp:getComputedStyle(el).webkitLineClamp,
+       padding:getComputedStyle(outer).padding,
+       authoredRect:{x:outer.offsetLeft,y:outer.offsetTop,w:outer.offsetWidth,h:outer.offsetHeight},
+       displayRect:{left:bounds.left,right:bounds.right,top:bounds.top,bottom:bounds.bottom},
+       stageRect:frame?{left:frame.left,right:frame.right,top:frame.top,bottom:frame.bottom}:null,
+       displayScale:frame?frame.width/1920:null,
+       newlinePositions:Array.from((el.textContent??'').matchAll(/\n/g),match=>match.index),
        glyphCount:rects.length,lines:new Set(rects.map(r=>Math.round(r.top*2)/2)).size,
+       glyphRects:rects,
        clipped:rects.some(r=>r.left<bounds.left-1||r.right>bounds.right+1||
                            r.top<bounds.top-1||r.bottom>bounds.bottom+1||
                            !frame||r.left<frame.left-1||r.right>frame.right+1||
@@ -60,10 +70,13 @@ test('pr10 source-authorized T06 multiline document and adversarial critical cli
  expect(target,'T06 source-backed excerpt must be displayed').toBeDefined();
  expect(target!.text).toBe(excerpt.text);
  expect(target!.font.toLowerCase()).toContain(String(authorized.props.media.fontFamily).toLowerCase());
- expect(target!.glyphCount).toBeGreaterThan(50);
+ expect(target!.glyphCount).toBe(Array.from(String(excerpt.text)).filter(x=>x.trim()).length);
  expect(target!.lines).toBeGreaterThanOrEqual(2);
  expect(target!.lines).toBeLessThanOrEqual(excerpt.text_layout.max_lines);
  expect(target!.clipped).toBe(false);
+ expect(target!.whiteSpace).toBe('pre-wrap');
+ expect(target!.overflow).toBe('visible');
+ expect(target!.lineClamp).toBe('none');
  const span=stage.locator(`[data-layer="${excerpt.layer_id}"] > span`).first();
  const initialStyle=await span.getAttribute('style');
  await span.evaluate(el=>{
@@ -89,6 +102,7 @@ test('pr10 source-authorized T06 multiline document and adversarial critical cli
  expect(attacked,'intentional overflow must be discovered by actual Chromium glyph rectangles').toBe(true);
  await span.evaluate((el,style)=>(el as HTMLElement).setAttribute('style',style??''),initialStyle);
  const shot=await stage.screenshot();
+ expect(shot.byteLength).toBeGreaterThan(1000);
  const dir=resolve(process.cwd(),'.artifacts','pr10');
  mkdirSync(dir,{recursive:true});
  const filename=resolve(dir,'t06-source-multiline-chromium.png');
@@ -99,6 +113,7 @@ test('pr10 source-authorized T06 multiline document and adversarial critical cli
    g4Head:authorized.draft_manifest_sha256,
    fontSha256:authorized.props.media.fontSha256,
    sourceClaimId:excerpt.source_claim_id,originalSourceText:excerpt.text,
+   sourceTextSha256:createHash('sha256').update(excerpt.text).digest('hex'),
    frame:final,excerpt:target,adversarialClippingDetected:attacked,
    screenshotSha256:createHash('sha256').update(shot).digest('hex')},null,2));
 });
