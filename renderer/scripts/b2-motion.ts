@@ -360,6 +360,10 @@ for(const presetId of ['route-line-draw','map-region-wipe','editorial-connector-
   const eventPixels=PNG.sync.read(readFileSync(resolve(output,`b2-${presetId}-compiled-${frames[0]}.png`))).data;
   const baselinePixels=PNG.sync.read(readFileSync(baselinePath)).data;
   if(!eventPixels.equals(baselinePixels))throw Error('B2_'+presetId.toUpperCase().replace(/-/g,'_')+'_RETROACTIVE_MOTION');
+  result.push({preset:presetId,preStartPixelMatch:true,frame:frames[0],
+    preStartApplicability:'RENDERED_EVENT_ON_EQUALS_RECOMPILED_OFF',
+    baselinePath,positivePath:resolve(output,`b2-${presetId}-compiled-${frames[0]}.png`),
+    source:'SYNTHETIC_B1_COMPILER_NOT_OPERATOR_APPROVED'});
  }
  const wrongSpace=structuredClone(t);
  wrongSpace.scenes[0].events.find(item=>item.event_id===event.event_id)!.motion_space='invalid_space';
