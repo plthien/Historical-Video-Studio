@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import base64
 import os
 from contextlib import asynccontextmanager
 from pathlib import Path
@@ -49,15 +50,30 @@ class NumericObservation(BaseModel):
     source_evidence_sha256: str
 
 
+class NumericEvidenceUpload(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    expected_revision: int = Field(ge=0)
+    content_base64: str = Field(min_length=1, max_length=7_000_000)
+    source_url: str = Field(pattern=r"^https?://", max_length=2048)
+    review_note: str = Field(min_length=8, max_length=2000)
+
+
+class NumericSeriesRevocation(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    expected_revision: int = Field(ge=0)
+    operator_reason: str = Field(min_length=8, max_length=2000)
+
+
 class NumericSeriesApproval(BaseModel):
     model_config = ConfigDict(extra="forbid")
     expected_revision: int = Field(ge=0)
-    series_id: str = Field(min_length=3, max_length=100)
+    series_id: str = Field(pattern=r"^[A-Za-z][A-Za-z0-9_-]{2,63}$")
     frozen_story_sha256: str
     g1_approval_id: str
     unit: str = Field(min_length=1, max_length=32)
     precision: int = Field(ge=0, le=6)
     authored_duration_frames: int = Field(gt=0, le=100000)
+    start_value: str
     end_value: str
     observations: list[NumericObservation] = Field(min_length=3, max_length=500)
     operator_reason: str = Field(min_length=8, max_length=2000)
@@ -124,7 +140,8 @@ def create_app(database: str | Path | None = None, media_root: str | Path | None
             status = 409
         elif exc.code in ("STORY_NOT_FOUND", "CANDIDATE_NOT_READY", "WORD_MAP_STALE", "G4_SOURCE_STALE", "G4_DRAFT_UNREGISTERED", "G3_ASSET_UNAPPROVED", "PLAYER_PREVIEW_UNAVAILABLE",
                                "G1_APPROVAL_REQUIRED", "VOICE_STORY_STALE", "VOICE_SOURCE_STALE",
-                                "FINAL_AUDIO_SOURCE_STALE", "FINAL_AUDIO_SELECTION_INCOMPLETE"):
+                                "FINAL_AUDIO_SOURCE_STALE", "FINAL_AUDIO_SELECTION_INCOMPLETE",
+                                "NUMERIC_SERIES_UNVERIFIED", "NUMERIC_SERIES_SOURCE_STALE"):
             status = 424
         elif exc.code in ("PROJECT_NOT_FOUND", "JOB_NOT_FOUND", "CLAIM_NOT_FOUND",
                                "VOICE_SECTION_NOT_FOUND", "VOICE_ATTEMPT_NOT_FOUND"):
@@ -223,6 +240,21 @@ def create_app(database: str | Path | None = None, media_root: str | Path | None
         if record is None:
             raise ContractViolation("NUMERIC_SERIES_NOT_FOUND", series_id, "No reviewed series exists for this claim.")
         return record
+
+    @app.post("/api/v1/projects/{project_id}/story/claims/{claim_id}/numeric-series/evidence")
+    def upload_numeric_evidence(project_id: str, claim_id: str, body: NumericEvidenceUpload,
+                                idempotency_key: str = Header(alias="Idempotency-Key")):
+        payload = body.model_dump()
+        return idempotent(project_id, f"numeric-evidence:{claim_id}", idempotency_key, payload,
+                          lambda: numeric_series.attach_evidence(project_id, claim_id, payload))
+
+    @app.post("/api/v1/projects/{project_id}/story/claims/{claim_id}/numeric-series/{series_id}/revoke")
+    def revoke_numeric_series(project_id: str, claim_id: str, series_id: str, body: NumericSeriesRevocation,
+                              idempotency_key: str = Header(alias="Idempotency-Key")):
+        payload = body.model_dump()
+        return idempotent(project_id, f"numeric-revoke:{claim_id}:{series_id}", idempotency_key, payload,
+                          lambda: numeric_series.revoke(project_id, claim_id, series_id,
+                                                        body.expected_revision, body.operator_reason))
 
     @app.post("/api/v1/projects/{project_id}/story/claims/{claim_id}/numeric-series/approve")
     def approve_numeric_series(project_id: str, claim_id: str, body: NumericSeriesApproval,
