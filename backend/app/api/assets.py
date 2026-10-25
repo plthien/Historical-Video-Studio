@@ -47,6 +47,12 @@ class Batch(Input):
     expected_revision: int = Field(ge=0)
     reviews: list[Review] = Field(min_length=1, max_length=100)
 
+class ChoiceSetReview(Input):
+    expected_revision: int = Field(ge=0)
+    slot_id: str = Field(pattern=r"^[A-Za-z][A-Za-z0-9_-]{2,63}$")
+    reviews: list[Review] = Field(min_length=2, max_length=25)
+    operator_reason: str = Field(min_length=8, max_length=2000)
+
 class Search(Input):
     expected_revision: int = Field(ge=0)
     requirement_id: str
@@ -289,6 +295,19 @@ def mount(app, store, gates, queue, idempotent):
             raise ContractViolation("ASSET_REQUIREMENT_MISMATCH",requirement_id,"Review requirement differs from route.")
         return idempotent(project_id,"asset-approve:"+requirement_id,key,body.model_dump(),
              lambda:resolver.approve_batch(project_id,[body.review.model_dump()],body.expected_revision))
+
+    @app.get("/api/v1/projects/{project_id}/assets/{requirement_id}/choice-sets/{slot_id}")
+    def current_choice_set(project_id:str,requirement_id:str,slot_id:str):
+        return resolver.current_choice_set(project_id,requirement_id,slot_id)
+
+    @app.post("/api/v1/projects/{project_id}/assets/{requirement_id}/choice-sets/review")
+    def review_choice_set(project_id:str,requirement_id:str,body:ChoiceSetReview,
+                          key:str=Header(alias="Idempotency-Key")):
+        return idempotent(project_id,"g3-choice-set:"+requirement_id+":"+body.slot_id,
+                          key,body.model_dump(),
+                          lambda:resolver.review_choice_set(project_id,requirement_id,body.slot_id,
+                              [r.model_dump() for r in body.reviews],
+                              body.operator_reason,body.expected_revision))
 
     @app.post("/api/v1/projects/{project_id}/assets/batch-approve")
     def batch_approve(project_id:str,body:Batch,key:str=Header(alias="Idempotency-Key")):
