@@ -148,7 +148,7 @@ function motionForLayer(scene:Scene,layer:Layer,frame:number,media:ResolvedMedia
     // The frozen G1 final scalar does not authorize intermediate historical values.
     // Synthetic test media can separately prove the rendering mechanism; an
     // APPPROVED_LOCAL manifest can never supply or mint this fixture.
-    const series=media.sourceKind==='SYNTHETIC'&&media.syntheticNumericSeries?.[String(source)];
+    const series=media.sourceKind==='SYNTHETIC' ? media.syntheticNumericSeries?.[String(source)] : undefined;
     if(!series||!series.fixtureId.startsWith('synthetic_')||
        !Array.isArray(series.values)||series.values.length<2||
        series.values.some(v=>typeof v!=='number'||!Number.isFinite(v))||
