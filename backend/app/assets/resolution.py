@@ -453,9 +453,18 @@ class AssetResolution:
             if not item or gate._status(db,project,"G3")[0]!="APPROVED":
                 return None
             candidate=self.assets._owned_tx(db,project,requirement,parent_id)
-            if (candidate["original_sha256"]!=item["parent_original_sha256"] or
+            primary=self._head(db,project,requirement,source["requirement_sha256"])
+            pools=self._active_choice_sets(db,project,requirement,source["requirement_sha256"])
+            eligible=(primary is not None and primary["candidate_id"]==parent_id and
+                      primary["original_sha256"]==item["parent_original_sha256"])
+            eligible=eligible or any(
+                reviewed["candidate_id"]==parent_id and
+                reviewed["original_sha256"]==item["parent_original_sha256"]
+                for pool in pools.values() for reviewed in pool["items"] if pool["set_id"])
+            if (not eligible or candidate["original_sha256"]!=item["parent_original_sha256"] or
                 candidate["source_requirement_sha256"]!=source["requirement_sha256"]):
-                raise ContractViolation("MASK_DERIVATIVE_PARENT_UNAPPROVED",slot,"Parent G3 original is stale.")
+                raise ContractViolation("MASK_DERIVATIVE_PARENT_UNAPPROVED",slot,
+                                        "Parent no longer belongs to the current G3-approved source pool.")
             self.store.get_artifact(item["parent_original_sha256"])
             original=self.store.get_artifact(item["derivative_sha256"])
             from backend.app.assets.alpha_mask import rgba_alpha_extent
