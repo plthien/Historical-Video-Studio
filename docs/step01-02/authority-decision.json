@@ -1,0 +1,46 @@
+{
+  "schema_version": "PR10AuthorityDecision.v1",
+  "evaluated_head_at_start": "e97fe0d1f2e6bc9c5f51f2adefa23edf8720f977",
+  "scope": "B2-04/B2-05/B2-06 only",
+  "live_operator_approval_created": false,
+  "decisions": [
+    {
+      "id": "D01",
+      "feature": "Production numeric observation series bound to G1",
+      "verdict": "REQUIRES_HUMAN_APPROVAL",
+      "authority": [
+        "docs/step01-02/PR10_TWO_AUTHORITY_APPROVAL_REQUESTS.md",
+        "docs/step01-02/FULL_FLOW_VISUAL_COMPILER_CONTRACT.md",
+        "contracts/registries/motion-presets.v1.json"
+      ],
+      "inspection": "Existing G1 frozen text and number-count endpoint are not an immutable, current, independently evidenced per-frame historical series. No current G1 series-approval transaction found.",
+      "minimal_patch": "Optional G1 approved_numeric_series.v1: project_id, source_claim_id, frozen_source_sha256, series_id, ordered frame_offset+decimal+evidence_sha256 observations, unit, precision, step_verified_values_only, explicit owner approval ID, approval head SHA/revocation/CAS; B2 read-only verified binding. No migrations or implicit historical interpolation.",
+      "positive_evidence_required": "Real G1 operator transaction in isolated synthetic test project -> current approved head -> host resolver -> compiled number-count -> Chromium/Node parity -> cold reopen; source HEAD and G2 untouched.",
+      "negative_evidence_required": "Forged/currently unapproved values, wrong claim/source/project, stale head, order/precision mismatch, endpoint and approval forgery typed rejection.",
+      "original_gate_impact": [
+        "G03"
+      ],
+      "approval_status": "NOT_APPROVED"
+    },
+    {
+      "id": "D02",
+      "feature": "Concurrent approved G3 source choices and polygon derivatives",
+      "verdict": "REQUIRES_HUMAN_APPROVAL",
+      "authority": [
+        "backend/app/assets/resolution.py",
+        "backend/app/api/storyboard.py",
+        "docs/step01-02/PR10_TWO_AUTHORITY_APPROVAL_REQUESTS.md"
+      ],
+      "inspection": "asset_approval_heads records one current candidate per project+requirement; historical events are not an active choice set. G4 rejects approved_asset_id changes, and renderer fails closed for polygon_asset derivatives.",
+      "minimal_patch": "Versioned G3 current same-slot choice set approved by explicit operator: project_id, requirement_id, slot_id, candidate_id, immutable source original SHA, rights evidence SHA, requirement SHA, approval_record_id, snapshot head; optional reviewed derivative SHA, parent SHA, coordinate transform and reviewed polygon metadata. G4 CAS picker reads ONLY current approved set; no auto-migration of old events.",
+      "positive_evidence_required": "Real controlled G3 approval transaction with two synthetic eligible alternatives and approved derivative -> G4 asset A/B + polygon clip -> SQLite selective recompile -> Player/Node PNG delta -> cold reload.",
+      "negative_evidence_required": "Old/historical, cross-project, wrong-slot/rights, wrong parent/derivative/geometry, stale/revoked, forged client approval and mismatched bytes fail closed.",
+      "original_gate_impact": [
+        "G05",
+        "G06"
+      ],
+      "approval_status": "NOT_APPROVED"
+    }
+  ],
+  "note": "This decision record is not authorization. Only source-owning human review can approve extending frozen G1/G3. CI fixtures cannot be upgraded to actual historical source approvals."
+}
