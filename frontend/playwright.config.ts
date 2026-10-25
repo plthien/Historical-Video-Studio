@@ -4,6 +4,8 @@ const here = path.dirname(fileURLToPath(import.meta.url));
 import {defineConfig} from "@playwright/test";
 const b2Fixture=process.env.HVS_B2_FIXTURE==="1";
 const b2Root=path.resolve(here,"..","renderer",".artifacts",
+  process.env.HVS_PR10_FIXTURE==="mask"?"pr10-mask":
+  process.env.HVS_PR10_FIXTURE==="numeric"?"pr10-numeric":
   process.env.HVS_B2_LONGFORM==="1"?"approved-player-test-longform":"approved-player-test");
 
 export default defineConfig({
