@@ -12,6 +12,8 @@ _DOWNSTREAM = {
     "story_text": ("G1", "G2", "G4", "G5"),
     "claim_review": ("G1", "G4", "G5"),
     "story_assets": ("G3", "G4", "G5"),
+    "numeric_series": ("G4", "G5"),
+    "g3_choice_set": ("G3", "G4", "G5"),
 }
 
 
