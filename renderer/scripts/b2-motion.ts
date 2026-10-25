@@ -134,6 +134,30 @@ for(const row of cases){
   result.push({preset:row.name,frame,path:file,sha256:hashing(bytes),pixelHash:hashes.at(-1),source:'SYNTHETIC_RENDER_FIXTURE'});
  }
  if(new Set(hashes).size<2)throw Error('B2_MOTION_PHASES_INERT_'+row.name);
+ if(row.name==='number-count'){
+  const expected=[0,50,100]; // explicit checked synthetic observations
+  for(let index=0;index<sampleFrames.length;index++){
+   const frame=sampleFrames[index],value=expected[index];
+   const exact=structuredClone(t);
+   exact.scenes[0].events=exact.scenes[0].events.filter(e=>e.event_id!==row.event.event_id);
+   exact.scenes[0].layers.find(l=>l.layer_id===caption.layer_id)!.text=String(value);
+   assertTimeline(exact);
+   const exactMedia=loadApprovedMedia(exact,makeSyntheticManifest(exact,sourceDir,font));
+   const exactComp=await selectComposition({serveUrl,id:'HistoricalTimelineV1',
+    inputProps:{timeline:exact,media:exactMedia}});
+   const exactPath=resolve(output,`b2-number-count-expected-${value}-${frame}.png`);
+   await renderStill({serveUrl,composition:exactComp,
+    inputProps:{timeline:exact,media:exactMedia},frame,output:exactPath,imageFormat:'png'});
+   const displayed=PNG.sync.read(readFileSync(resolve(output,'b2-number-count-'+frame+'.png'))).data;
+   const expectedPixels=PNG.sync.read(readFileSync(exactPath)).data;
+   if(!displayed.equals(expectedPixels))
+    throw Error(`B2_NUMBER_COUNT_INCORRECT_VISIBLE_GLYPHS_FRAME_${frame}`);
+   result.push({preset:'number-count',semanticAssertion:'exact_visible_synthetic_observation',
+    expectedValue:value,frame,expectedPath:exactPath,
+    expectedSha256:hashing(readFileSync(exactPath)),matchedPixels:true,
+    source:'SYNTHETIC_RENDER_FIXTURE'});
+  }
+ }
  // Same exact frame/input/media/font, removing ONLY the target event.
  // This is an event-specific compositor oracle, not a hash-of-two-times test.
  const control=structuredClone(t);
@@ -579,6 +603,7 @@ const semanticRows=presets.presets.map(p=>{
  // Every mechanics verdict is tied to executed evidence. For production
  // source rights we track a second, independent authorization dimension.
  const semanticSpecific=p.preset_id==='number-count'?
+    proof.filter(e=>e.semanticAssertion==='exact_visible_synthetic_observation'&&e.matchedPixels===true).length===3&&
     proof.some(e=>e.negativeAssertion==='forged_intermediate_series'&&e.typedRejection===true):
     p.preset_id==='mask-transition'?
     proof.some(e=>e.twoSurfacesObserved===true&&e.postWindowEqual===true):
