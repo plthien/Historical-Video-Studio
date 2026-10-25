@@ -176,8 +176,18 @@ for(const row of cases){
     frame:mid,output:resolve(output,'b2-number-count-forged-series.png'),imageFormat:'png'});
   }catch{invalidSeriesBlocked=true;}
   if(!invalidSeriesBlocked)throw Error('B2_NUMBER_SERIES_FORGED_ENDPOINT_ACCEPTED');
+  // Never authorize factual interpolation by changing a fixture media label.
+  const unauthorized=structuredClone(media);
+  unauthorized.sourceKind='APPROVED_LOCAL';
+  let forgedApprovalRejected=false;
+  try{
+   await renderStill({serveUrl,composition:comp,inputProps:{timeline:t,media:unauthorized},
+    frame:mid,output:resolve(output,'b2-number-count-forged-approved-local.png'),
+    imageFormat:'png'});
+  }catch{forgedApprovalRejected=true;}
+  if(!forgedApprovalRejected)throw Error('B2_NUMBER_SERIES_FORGED_G1_APPROVAL_ACCEPTED');
   result.push({preset:row.name,negativeAssertion:'forged_intermediate_series',
-   typedRejection:true,source:'SYNTHETIC_RENDER_FIXTURE'});
+   typedRejection:true,forgedG1ApprovalRejected:forgedApprovalRejected,source:'SYNTHETIC_RENDER_FIXTURE'});
  }
  if(!rejected)throw Error('B2_MOTION_NEGATIVE_NOT_BLOCKED_'+row.name);
  if(start>0){
