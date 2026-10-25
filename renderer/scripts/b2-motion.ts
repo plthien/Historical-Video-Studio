@@ -84,6 +84,17 @@ const result:unknown[]=[];
 for(const row of cases){
  const t=structuredClone(timeline);
  t.scenes[0].events.push(row.event);
+ if(row.name==='hard-cut'){
+  // Synthetic prior focus is deliberately visible before the hard cut. The
+  // cut replaces it with the registered incoming card at the exact cue.
+  const earlier=t.scenes[0].staging.beat_sequence
+   .filter(beat=>beat.local_start_frame<start)
+   .sort((x,y)=>x.local_start_frame-y.local_start_frame);
+  if(!earlier.length)throw Error('B2_HARD_CUT_PRIOR_FOCUS_MISSING');
+  earlier[earlier.length-1].focus_layer_id=cards[0].layer_id;
+  if(!earlier[0].activated_layer_ids.includes(cards[0].layer_id))
+   earlier[0].activated_layer_ids.push(cards[0].layer_id);
+ }
  if(['number-count','kinetic-type','text-highlight'].includes(row.name)){
   // Force the exact unchanged (synthetic) text layer to exist before the cue.
   // Otherwise identical blank pre-start frames could hide word leakage.
