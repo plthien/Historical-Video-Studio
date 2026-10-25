@@ -53,6 +53,16 @@ class ChoiceSetReview(Input):
     reviews: list[Review] = Field(min_length=2, max_length=25)
     operator_reason: str = Field(min_length=8, max_length=2000)
 
+class MaskDerivativeReview(Input):
+    expected_revision: int = Field(ge=0)
+    slot_id: str = Field(min_length=3, max_length=100)
+    parent_candidate_id: str = Field(min_length=3)
+    parent_original_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+    png_base64: str = Field(min_length=16, max_length=28_000_000)
+    source_crop: dict[str, float | int] = Field(default_factory=lambda:
+        {"x":0,"y":0,"w":1,"h":1})
+    operator_reason: str = Field(min_length=8,max_length=2000)
+
 class Search(Input):
     expected_revision: int = Field(ge=0)
     requirement_id: str
@@ -287,6 +297,32 @@ def mount(app, store, gates, queue, idempotent):
         return Response(raw,media_type=media,headers={
             "Cache-Control":"no-store","X-Content-Type-Options":"nosniff",
             "Content-Security-Policy":"default-src 'none'"})
+
+    @app.get("/api/v1/projects/{project_id}/assets/{requirement_id}/masks/{slot_id}/{parent_id}")
+    def approved_mask(project_id:str,requirement_id:str,slot_id:str,parent_id:str):
+        review=resolver.reviewed_mask(project_id,requirement_id,slot_id,parent_id)
+        if not review:
+            raise ContractViolation("MASK_DERIVATIVE_UNAPPROVED",slot_id,
+                                    "Current G3 reviewed parent and derivative required.")
+        return review
+
+    @app.post("/api/v1/projects/{project_id}/assets/{requirement_id}/masks/review")
+    def review_mask(project_id:str,requirement_id:str,body:MaskDerivativeReview,
+                    key:str=Header(alias="Idempotency-Key")):
+        payload=body.model_dump()
+        def action():
+            try:
+                data=base64.b64decode(body.png_base64,validate=True)
+            except (ValueError,binascii.Error) as exc:
+                raise ContractViolation("MASK_DERIVATIVE_INVALID",body.slot_id,
+                                        "Decode a real reviewed RGBA PNG, not browser CSS.") from exc
+            return resolver.review_mask_derivative(
+                project_id,requirement_id,body.slot_id,body.parent_candidate_id,
+                body.parent_original_sha256,data,body.source_crop,
+                body.operator_reason,body.expected_revision)
+        # Never journal large decoded source bytes; idempotency hashes the original request.
+        return idempotent(project_id,"g3-mask:"+requirement_id+":"+body.slot_id+
+                          ":"+body.parent_candidate_id,key,payload,action)
 
     @app.post("/api/v1/projects/{project_id}/assets/{requirement_id}/approve")
     def approve(project_id:str,requirement_id:str,body:Approval,
