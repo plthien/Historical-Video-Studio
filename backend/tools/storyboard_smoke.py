@@ -167,10 +167,37 @@ def main():
         assert reopened["timeline"]["scenes"][0]["layers"][0]["crop_normalized"]==crop2
         assert reopened["timeline"]["scenes"][0]["layers"][0]["rect_px"]["x"]==rect["x"]
         assert canonical(reopened["timeline"]["scenes"][1])==canonical(second)
+        # Real Windows-local 424: temporarily remove a genuinely used immutable
+        # approved source from this disposable synthetic fixture's artifact store.
+        # Preview must refuse missing bytes; restoring bytes must recover without
+        # creating a G4 revision. Never alter the real operator project.
+        used_asset=next(l["asset_id"] for l in reopened["timeline"]["scenes"][0]["layers"]
+                        if l["asset_id"] is not None)
+        with store._connection() as db:
+            row=db.execute("SELECT original_sha256 FROM asset_approval_events "
+                           "WHERE project_id=? AND candidate_id=? ORDER BY rowid DESC LIMIT 1",
+                           (project,used_asset)).fetchone()
+        assert row is not None, "Test source must come from an actual G3 approval event"
+        original_path=store.artifacts.path(row[0])
+        original_bytes=original_path.read_bytes()
+        revision_before_missing=store.revision(project)
+        with TestClient(create_app(dest/"g4.sqlite",dest/"artifacts")) as client:
+            healthy=client.get(f"/api/v1/projects/{project}/storyboard/preview")
+            assert healthy.status_code==200,healthy.text
+            try:
+                original_path.unlink()
+                blocked_preview=client.get(f"/api/v1/projects/{project}/storyboard/preview")
+                assert blocked_preview.status_code==424,blocked_preview.text
+                assert blocked_preview.json()["code"]=="PLAYER_PREVIEW_UNAVAILABLE"
+            finally:
+                original_path.write_bytes(original_bytes)
+            recovered=client.get(f"/api/v1/projects/{project}/storyboard/preview")
+            assert recovered.status_code==200,recovered.text
+        assert store.revision(project)==revision_before_missing
         print(json.dumps({"status":"LOCAL_PASS","source":"SYNTHETIC_SQLITE_APPROVAL_FIXTURE_NOT_REAL_RIGHTS",
                           "cases":["paged_read","current_manifest","variant_CAS","position_CAS","selective_recompile",
                                    "upstream_heads","idempotent_replay","crop_cold_reload","stale_409","forged_asset_422",
-                                   "template_rewrite_422","camera_motion_keys_changed_and_idempotent","repeat_crop_and_position","cold_reload"],
+                                   "template_rewrite_422","camera_motion_keys_changed_and_idempotent","repeat_crop_and_position","cold_reload","real_missing_approved_source_424_and_recovery"],
                           "changed_setup_ids": output["recomputed_setup_ids"],
                           "retained_setup_ids": output["retained_setup_ids"],
                           "stale_gates": output["stale_gates"]}))
