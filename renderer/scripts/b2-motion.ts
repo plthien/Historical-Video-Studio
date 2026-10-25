@@ -72,6 +72,9 @@ const cases=[
  {name:'number-count',event:sampleEvent('number-count',
   {source_claim_id:caption.source_claim_id!,start_value:0,end_value:100,
    precision:0,intermediate_truthful:true},'layer_local',[caption.layer_id])},
+ {name:'title-mask-reveal',event:sampleEvent('title-mask-reveal',
+  {direction:'left',distance_px:18,feather_px:12},
+  'layer_local',[cards[0].layer_id])},
 
 ];
 const serveUrl=await bundle({entryPoint:resolve(root,'remotion/entry.tsx')});
