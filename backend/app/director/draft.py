@@ -109,6 +109,9 @@ def load(store, project, *, allow_auxiliary_stale=False):
             manifest.get("numeric_series_heads",{}) != current_numeric_heads(store,project)):
         _fail("G4_SOURCE_STALE", project, "Auxiliary G1 numeric series changed; fresh compile required.")
     timeline = _read_canonical(store, manifest["timeline_sha256"], project)
+    if manifest.get("effective_asset_snapshot_sha256") != digest([
+        {"scene_id":s["scene_id"],"assets":s["asset_ids"]} for s in timeline["scenes"]]):
+        _fail("G4_DRAFT_CORRUPT",project,"G4 selected assets disagree with immutable timeline.")
     blueprint = _read_canonical(store, manifest["blueprint_sha256"], project)
     if (timeline.get("project_id") != project or blueprint.get("project_id") != project
             or timeline.get("dependency_fingerprint") != manifest.get("dependency_fingerprint")
@@ -123,7 +126,8 @@ def load(store, project, *, allow_auxiliary_stale=False):
 
 def publish(store, project, timeline, blueprint, maps, map_requests, font_identity,
             *, expected_revision, previous=None, edit_kind=None, layer_overrides=None,
-            crop_overrides=None, motion_overrides=None):
+            crop_overrides=None, motion_overrides=None,
+            asset_selection_overrides=None):
     """Immutable artifact publication first; atomic pointer/CAS/revision second.
 
     Failed CAS may leave unreachable content-addressed artifacts, never an
@@ -174,6 +178,8 @@ def publish(store, project, timeline, blueprint, maps, map_requests, font_identi
         "audio_sha256":timeline["audio_sha256"],
         "word_map_sha256":timeline["word_map_sha256"],
         "asset_snapshot_sha256":timeline["asset_snapshot_sha256"],
+        "effective_asset_snapshot_sha256":digest([
+            {"scene_id":s["scene_id"],"assets":s["asset_ids"]} for s in timeline["scenes"]]),
         "dependency_fingerprint":timeline["dependency_fingerprint"],
         "layer_overrides":layer_overrides or {},
         # These overlays are presentation-only and stay tied to the immutable
@@ -181,6 +187,7 @@ def publish(store, project, timeline, blueprint, maps, map_requests, font_identi
         # compiled layer/event identities have been verified by revise_g4.
         "crop_overrides":crop_overrides or {},
         "motion_overrides":motion_overrides or {},
+        "asset_selection_overrides":asset_selection_overrides or {},
     }
     manifest_sha = store.put_artifact(canonical(manifest), "g4_compiled_manifest")
     with store._transaction() as db:
