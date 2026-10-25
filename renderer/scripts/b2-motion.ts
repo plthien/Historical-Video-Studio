@@ -652,14 +652,24 @@ const semanticRows=presets.presets.map(p=>{
   negative_case:negative?'RENDER_SCHEMA_INVALID_OR_MOTION_SPACE':'NOT_PROVED',
   evidence:proof,failure_reasons:reasons};
 });
-writeFileSync(resolve(output,'b2-motion-19-presets.json'),JSON.stringify({
- status:semanticRows.every(row=>row.mechanics_verified)?'PASS':'FAIL',
- registryCount:19,semanticPassCount:semanticRows.filter(row=>row.status==='PASS').length,
+// One verdict derived from actual 19-row causal proofs. Both artifacts must
+// agree about SYNTHETIC MECHANICS; neither confers production source authority.
+const mechanicsStatus=semanticRows.length===presets.presets.length&&
+ semanticRows.every(row=>row.status==='PASS'&&row.mechanics_verified===true)?'PASS':'FAIL';
+const semanticLedger={
+ status:mechanicsStatus,scope:'SYNTHETIC_CHROMIUM_MECHANICS_ONLY',
+ registryCount:presets.presets.length,semanticPassCount:semanticRows.filter(row=>row.status==='PASS').length,
  note:'Synthetic Chromium mechanics PASS never grants operator historical-source or G3 rights approval; release gates separately verify real source authority.',
  rows:semanticRows
-},null,2));
-writeFileSync(resolve(output,'b2-motion-phases.json'),JSON.stringify({status:'FAIL',
- registryCount:19,cases:result,source:'SYNTHETIC_B1_COMPILED_NOT_LIVE_APPROVED'},null,2));
+};
+const phaseLedger={
+ status:mechanicsStatus,scope:'SYNTHETIC_CHROMIUM_MECHANICS_ONLY',
+ registryCount:presets.presets.length,cases:result,
+ source:'SYNTHETIC_B1_COMPILED_NOT_LIVE_APPROVED',
+ source_authorization_verified:false
+};
+writeFileSync(resolve(output,'b2-motion-19-presets.json'),JSON.stringify(semanticLedger,null,2));
+writeFileSync(resolve(output,'b2-motion-phases.json'),JSON.stringify(phaseLedger,null,2));
 const incomplete=semanticRows.filter(row=>row.status!=='PASS');
 const strictSemanticOwner=process.argv[2]!=='render';
 if(incomplete.length&&strictSemanticOwner){
