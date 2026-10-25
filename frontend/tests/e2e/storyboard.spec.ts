@@ -140,5 +140,26 @@ test('storyboard-editor uses real persisted G4 scenes and native read-only Playe
  await oldPreview;
  await expect(page.getByRole('alert')).toContainText('G4_DRAFT_STALE');
  await expect(page.getByLabel('Read-only local Remotion Player')).toHaveCount(0);
+ // Browser UI 409 must be caused by an actual already committed SQLite
+ // revision, not a mocked conflict response. A stale G4 edit cannot commit.
+ const afterConcurrent=await request.get('http://127.0.0.1:8000/api/v1/projects/proj_001/storyboard/scenes?offset=0&limit=1');
+ expect(afterConcurrent.ok()).toBeTruthy();
+ const afterConcurrentRevision=(await afterConcurrent.json()).project_revision as number;
+ const staleX=Number(await layerX.inputValue());
+ await layerX.fill(String(staleX>2?staleX-1:staleX+1));
+ await page.getByRole('button',{name:/Save position/}).click();
+ await expect(page.getByRole('alert')).toContainText('409 REVISION_CONFLICT');
+ const afterStale=await request.get('http://127.0.0.1:8000/api/v1/projects/proj_001/storyboard/scenes?offset=0&limit=1');
+ expect((await afterStale.json()).project_revision).toBe(afterConcurrentRevision);
+ // The refreshed editor must expose a real unsupported G4 operation as 422
+ // without creating a new immutable draft revision.
+ const currentOperation=await page.getByLabel('Selected authored staging operation').inputValue();
+ const rejectedOperation=currentOperation==='exit'?'reposition':'exit';
+ await page.getByLabel('Selected authored staging operation').selectOption(rejectedOperation);
+ await page.getByRole('button',{name:/Save staging/}).click();
+ await expect(page.getByRole('alert')).toContainText('422 STAGING_OPERATION_UNSUPPORTED');
+ const afterInvalid=await request.get('http://127.0.0.1:8000/api/v1/projects/proj_001/storyboard/scenes?offset=0&limit=1');
+ expect((await afterInvalid.json()).project_revision).toBe(afterConcurrentRevision);
+ await page.getByLabel('Selected authored staging operation').selectOption(currentOperation);
  expect(fatalErrors,'no fatal browser errors during edit/reload').toEqual([]);
 });
