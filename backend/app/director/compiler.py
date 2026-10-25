@@ -215,7 +215,9 @@ def _scene(plan, staging, beats, assets, requirements, maps, font_measure, motio
                           end_value=float(series_end),
                           precision=reviewed["precision"],
                           intermediate_truthful=True,
-                          approved_numeric_series_id=reviewed["series_id"])
+                          approved_numeric_series_id=reviewed["series_id"],
+                          approved_numeric_start_text=reviewed["start_value"],
+                          approved_numeric_end_text=reviewed["end_value"])
             evidence["number_value"]=float(series_end)
         # Distinct T07 period maps carry independent reviewed geographic truth.
         if target.get("map_binding") is not None:
