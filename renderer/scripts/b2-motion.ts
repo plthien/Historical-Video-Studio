@@ -365,8 +365,10 @@ for(const presetId of ['route-line-draw','map-region-wipe','editorial-connector-
   if(!eventPixels.equals(baselinePixels))throw Error('B2_'+presetId.toUpperCase().replace(/-/g,'_')+'_RETROACTIVE_MOTION');
   result.push({preset:presetId,preStartPixelMatch:true,frame:frames[0],
     preStartApplicability:'RENDERED_EVENT_ON_EQUALS_RECOMPILED_OFF',
-    baselinePath,positivePath:resolve(output,`b2-${presetId}-compiled-${frames[0]}.png`),
-    source:'SYNTHETIC_B1_COMPILER_NOT_OPERATOR_APPROVED'});
+    baselinePath,baselineSha256:hashing(readFileSync(baselinePath)),
+     positivePath:resolve(output,`b2-${presetId}-compiled-${frames[0]}.png`),
+     positiveSha256:hashing(readFileSync(resolve(output,`b2-${presetId}-compiled-${frames[0]}.png`))),
+     source:'SYNTHETIC_B1_COMPILER_NOT_OPERATOR_APPROVED'});
  }
  const wrongSpace=structuredClone(t);
  wrongSpace.scenes[0].events.find(item=>item.event_id===event.event_id)!.motion_space='invalid_space';
