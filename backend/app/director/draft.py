@@ -36,6 +36,19 @@ def current_gate_heads(store, project):
             for gate,candidate,fingerprint,approval in rows}
 
 
+def current_numeric_heads(store, project):
+    """Current auxiliary G1 series identity; old events never authorize G4."""
+    from backend.app.projects.numeric_series import NumericSeries
+    NumericSeries(store)
+    with store._connection() as db:
+        rows = db.execute("""SELECT e.claim_id,e.series_id,e.approval_id,e.series_sha256
+            FROM numeric_series_heads h JOIN numeric_series_events e
+              ON e.approval_id=h.approval_id
+            WHERE h.project_id=? ORDER BY e.claim_id,e.series_id""", (project,)).fetchall()
+    return {claim + ":" + series: {"approval_id": approval, "series_sha256": sha}
+            for claim, series, approval, sha in rows}
+
+
 def ensure(store):
     # This table is deliberately separate from operator gate_heads: a draft is
     # never approval evidence for G4 or G5.
@@ -84,6 +97,8 @@ def load(store, project):
             or manifest.get("map_context_sha256") != digest(manifest.get("maps"))
             or manifest.get("map_requests_sha256") != digest(manifest.get("map_requests"))):
         _fail("G4_DRAFT_CORRUPT", project, "Stored draft manifest is inconsistent with SQLite head.")
+    if manifest.get("numeric_series_heads",{}) != current_numeric_heads(store,project):
+        _fail("G4_SOURCE_STALE", project, "Auxiliary G1 numeric series changed; fresh compile required.")
     timeline = _read_canonical(store, manifest["timeline_sha256"], project)
     blueprint = _read_canonical(store, manifest["blueprint_sha256"], project)
     if (timeline.get("project_id") != project or blueprint.get("project_id") != project
@@ -109,6 +124,7 @@ def publish(store, project, timeline, blueprint, maps, map_requests, font_identi
     from backend.app.projects.revisions import mark_stale
     ensure(store)
     approved_heads = current_gate_heads(store,project)
+    numeric_heads = current_numeric_heads(store,project)
     refresh = None
     if previous is None:
         with store._connection() as db:
@@ -119,7 +135,8 @@ def publish(store, project, timeline, blueprint, maps, map_requests, font_identi
             previous_head=load(store,project)
             old_heads=previous_head["manifest"]["gate_heads"]
             if (expected_revision > previous_head["revision"]
-                    and approved_heads != old_heads):
+                    and (approved_heads != old_heads or
+                         numeric_heads != previous_head["manifest"].get("numeric_series_heads",{}))):
                 # G1/G2/G3 were independently re-approved after prior draft.
                 # Fresh production compile establishes a NEW trustworthy
                 # baseline; same upstream head must never reset G4 edits.
@@ -143,6 +160,7 @@ def publish(store, project, timeline, blueprint, maps, map_requests, font_identi
         "maps":maps, "map_requests":map_requests, "font_identity":font_identity,
         "runtime_identity":_runtime_identity(),
         "gate_heads":approved_heads,
+        "numeric_series_heads":numeric_heads,
         "story_sha256":timeline["story_sha256"],
         "audio_sha256":timeline["audio_sha256"],
         "word_map_sha256":timeline["word_map_sha256"],
