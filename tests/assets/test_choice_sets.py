@@ -106,3 +106,42 @@ def test_choice_set_is_new_current_G3_authority_and_history_not_eligible(tmp_pat
     with pytest.raises(ContractViolation,match="G3_CHOICE_SET_INVALID"):
         resolver.review_choice_set(pid,rid,slot,[reviews[0],reviews[0]],
                                    "Duplicate original cannot be option",store.revision(pid))
+
+def test_same_slot_operator_http_review_and_g3_reapproval(tmp_path):
+    from fastapi.testclient import TestClient
+    from backend.app.api.server import create_app
+    store,pid,resolver,assets,candidates,reviews,gates=fixture(tmp_path)
+    rid=reviews[0]["requirement_id"]
+    story=store.get_story(pid).data()
+    slot=next(x["slot_id"] for setup in story["visual_setups"]
+              for x in setup["direction"]["asset_slots"] if x["requirement_id"]==rid)
+    other=assets.manual(pid,rid,png((222,11,33)),
+                        "Synthetic B original","Synthetic period note","Test rights")
+    review_b={**reviews[0],"candidate_id":other["candidate_id"],
+              "original_sha256":other["original_sha256"]}
+    client=TestClient(create_app(store.database,store.artifacts.root))
+    url=f"/api/v1/projects/{pid}/assets/{rid}/choice-sets/review"
+    body={"expected_revision":store.revision(pid),"slot_id":slot,
+          "reviews":[reviews[0],review_b],
+          "operator_reason":"Synthetic two-original software test only"}
+    selected=client.post(url,json=body,headers={"Idempotency-Key":"G3-test-review-current-pool"})
+    assert selected.status_code==200,selected.text
+    assert selected.json()["g3_reapproval_required"]
+    options_url=f"/api/v1/projects/{pid}/assets/{rid}/choice-sets/{slot}"
+    assert client.get(options_url).json()["g3_current"] is False
+    gate_url=f"/api/v1/projects/{pid}/gates"
+    g3=next(x for x in client.get(gate_url).json() if x["gate_id"]=="G3")
+    assert g3["state"]=="READY_FOR_REVIEW"
+    approval=client.post(gate_url+"/G3/decision",headers={"Idempotency-Key":"G3-test-reapprove-current-pool"},
+        json={"decision":"APPROVED","candidate_sha256":g3["candidate_sha256"],
+              "dependency_fingerprint":g3["dependency_fingerprint"],
+              "expected_revision":selected.json()["project_revision"],
+              "comment":"Approve synthetic current choice set"})
+    assert approval.status_code==200,approval.text
+    current=AssetResolution(ProjectStore(store.database,store.artifacts.root))
+    eligible=current.approved_slot_options(pid,rid,slot)
+    assert {x["candidate_id"] for x in eligible["options"]}=={reviews[0]["candidate_id"],review_b["candidate_id"]}
+    assert eligible["choice_set_sha256"]==selected.json()["set_sha256"]
+    assert client.post(url,json=body,headers={"Idempotency-Key":"G3-test-review-current-pool"}).json()==selected.json()
+    assert client.post(url,json={**body,"operator_reason":"Changed body after first approval"},
+                       headers={"Idempotency-Key":"G3-test-review-current-pool"}).status_code==409
