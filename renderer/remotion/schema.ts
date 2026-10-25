@@ -60,6 +60,14 @@ export function assertTimeline(input:unknown):asserts input is Timeline {
    }
    const r=l.rect_px,c=l.crop_normalized;
    if(r.w<=0||r.h<=0||r.x<0||r.y<0||r.x+r.w>1920||r.y+r.h>1080)fail('RENDER_RECT_INVALID',l.layer_id,'Compiled rect exceeds canvas');
+   // Even a single authored line must physically fit inside the immutable
+   // presentation rect. Chromium glyph bounding tests verify the tighter
+   // multi-line/width constraint; this preflight blocks impossible layouts
+   // before a draft can be presented as renderable.
+   if(l.text!==null&&l.text_layout&&
+      l.text_layout.font_size_px*l.text_layout.line_height>r.h+0.01)
+    fail('TYPOGRAPHY_OVERFLOW',l.layer_id,
+      'A full source-text line exceeds its authored layer height');
    if(c.x<0||c.y<0||c.w<=0||c.h<=0||c.x+c.w>1.0000001||c.y+c.h>1.0000001)fail('RENDER_CROP_INVALID',l.layer_id,'UV outside original');
    if(l.mask.kind==='polygon_asset')
     fail('RENDER_MASK_DERIVATIVE_UNAPPROVED',l.layer_id,'Polygon mask needs a separately reviewed G3 derivative source, unavailable in this contract');
