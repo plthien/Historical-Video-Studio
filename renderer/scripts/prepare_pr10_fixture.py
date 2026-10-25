@@ -122,7 +122,16 @@ def prepare(mode:str):
                       "Synthetic local audio",store.revision(pid),"pr10-voice-"+mode)
         result=voice.process_one(lambda *_:wav_fixture(12.0))
         assert result and result["state"]=="SUCCEEDED",result
-    approve("G2")
+    # G2's HTTP handler runs the entire queue as a TestClient background task.
+    # For deterministic synthetic forced-alignment evidence, use the same real
+    # GateService approval transaction without auto-consuming the queued job.
+    g2_head=next(g for g in gate.board(pid) if g["gate_id"]=="G2")
+    g2=gate.decide(pid,"G2",{"decision":"APPROVED",
+        "candidate_sha256":g2_head["candidate_sha256"],
+        "dependency_fingerprint":g2_head["dependency_fingerprint"],
+        "expected_revision":store.revision(pid),
+        "comment":"SYNTHETIC source mechanics only"})
+    assert g2["state"]=="APPROVED"
     workflow=FinalVoiceWorkflow(store,gate,JobQueue(store))
     assert workflow.process_one()["state"]=="SUCCEEDED"
     frozen=workflow.status(pid)["final_audio"]
