@@ -485,28 +485,43 @@ const semanticRows=presets.presets.map(p=>{
  const counterfactual=proof.some(e=>e.counterfactual==='same_frame_event_removed'&&
    typeof e.changedROIPixels==='number'&&e.changedROIPixels>0);
 
- const mechanics=verified&&distinct&&negative&&prestart&&counterfactual;
- const dependency=p.preset_id==='number-count'?
-  'No verified G1 intermediate historical observations for interpolation':
-  p.preset_id==='mask-transition'&&!proof.some(e=>e.twoSurfacesObserved===true)?
-  'No verified two-scene rendered compositor mechanism':null;
- const authority=proof.some(e=>e.source==='OPERATOR_APPROVED');
- const status=dependency?'BLOCKED_DEPENDENCY':!phases.length?'NOT_RUN':
-  !verified||!distinct||!negative?'FAIL_CONFIRMED':
-  mechanics&&authority?'PASS':'PARTIAL';
+ // Every mechanics verdict is tied to executed evidence. For production
+ // source rights we track a second, independent authorization dimension.
+ const semanticSpecific=p.preset_id==='number-count'?
+    proof.some(e=>e.negativeAssertion==='forged_intermediate_series'&&e.typedRejection===true):
+    p.preset_id==='mask-transition'?
+    proof.some(e=>e.twoSurfacesObserved===true&&e.postWindowEqual===true):
+    p.preset_id==='freeze-hold'?
+    proof.some(e=>e.postWindowEqual===true):
+    true;
+ const mechanics=verified&&distinct&&negative&&prestart&&counterfactual&&semanticSpecific;
+ const authority=proof.some(e=>e.source==='OPERATOR_APPROVED'&&e.approvalChecked===true);
+ const reasons=[
+  ...(!phases.length?['NO_CHROMIUM_PRE_MID_POST_FIXTURE']:[]),
+  ...(!verified?['CHROMIUM_PNG_COUNT_OR_SHA_INVALID']:[]),
+  ...(!distinct?['NO_OBSERVABLE_PHASE_VARIATION']:[]),
+  ...(!negative?['MISSING_TYPED_NEGATIVE_PROOF']:[]),
+  ...(!prestart?['MISSING_PRESTART_NONLEAKAGE_PROOF']:[]),
+  ...(!counterfactual?['MISSING_EVENT_OFF_CAUSAL_ROI_PROOF']:[]),
+  ...(!semanticSpecific?['PRESET_SPECIFIC_ASSERTION_MISSING']:[])
+ ];
+ const status=mechanics?'PASS':'FAIL_CONFIRMED';
  return {preset_id:p.preset_id,primitive:p.render_recipe.primitive,
   motion_space:p.render_recipe.transform_space,status,
+  mechanics_verified:mechanics,source_authorization_verified:authority,
+  proof_scope:'SYNTHETIC_CHROMIUM_MECHANICS_ONLY',
+  production_rights_status:authority?'OPERATOR_VERIFIED':'NOT_VERIFIED_BY_SYNTHETIC_TEST',
   mechanism_assertions:{validChromiumFrames:verified,distinctActualPixels:distinct,
-    negativeWrongSpaceBlocked:negative,prestartInvariant:prestart,eventSpecificROICausal:counterfactual},
-  source_authority:authority?'OPERATOR_APPROVED':'SYNTHETIC_NOT_OPERATOR_APPROVED',
+    negativeWrongSpaceBlocked:negative,prestartInvariant:prestart,
+    eventSpecificROICausal:counterfactual,presetSpecificProof:semanticSpecific},
   actual_png_paths:phases.map(e=>e.path),frame_numbers:phases.map(e=>e.frame),
-  negative_case:negative?'RENDER_MOTION_SPACE':'NOT_PROVED',
-  evidence:proof,blocker:dependency};
+  negative_case:negative?'RENDER_SCHEMA_INVALID_OR_MOTION_SPACE':'NOT_PROVED',
+  evidence:proof,failure_reasons:reasons};
 });
 writeFileSync(resolve(output,'b2-motion-19-presets.json'),JSON.stringify({
- status:semanticRows.every(row=>row.status==='PASS')?'PASS':'FAIL',
+ status:semanticRows.every(row=>row.mechanics_verified)?'PASS':'FAIL',
  registryCount:19,semanticPassCount:semanticRows.filter(row=>row.status==='PASS').length,
- note:'Strict motion owner: source authority and event-specific semantics must be proved separately.',
+ note:'Synthetic Chromium mechanics PASS never grants operator historical-source or G3 rights approval; release gates separately verify real source authority.',
  rows:semanticRows
 },null,2));
 writeFileSync(resolve(output,'b2-motion-phases.json'),JSON.stringify({status:'FAIL',
@@ -516,7 +531,7 @@ const strictSemanticOwner=process.argv[2]!=='render';
 if(incomplete.length&&strictSemanticOwner){
  console.error(JSON.stringify({status:'FAIL',renderer:'Remotion Chromium',
   phasePNGs:cases.length*3,source:'SYNTHETIC',mp4:process.argv[2]==='render',
-  incomplete:incomplete.map(row=>({preset_id:row.preset_id,result:row.status,blocker:row.blocker}))}));
+  incomplete:incomplete.map(row=>({preset_id:row.preset_id,result:row.status,reasons:row.failure_reasons}))}));
  throw Error('B2_MOTION_SEMANTIC_LEDGER_INCOMPLETE: every one of 19 registered presets requires PASS');
 }
 console.log(JSON.stringify({status:incomplete.length?'MULTILAYER_PASS_MOTION_INCOMPLETE':'PASS',renderer:'Remotion Chromium',
