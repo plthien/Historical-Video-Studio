@@ -425,7 +425,7 @@ class AssetResolution:
                 if row!=(len(png),"mask_derivative",rel):
                     raise ContractViolation("MASK_DERIVATIVE_INVALID",slot,"Derivative cannot reuse an unrelated artifact.")
                 rid="mask_review_"+uuid4().hex
-                asset_id="mask_"+sha[:40]
+                asset_id="mask_"+rid.split("_")[-1]
                 db.execute("INSERT INTO asset_mask_derivative_events VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
                            (rid,project,requirement,slot,source["requirement_sha256"],
                             parent_id,parent_sha,asset_id,sha,width,height,
