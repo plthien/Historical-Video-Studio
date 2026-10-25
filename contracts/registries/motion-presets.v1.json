@@ -607,6 +607,14 @@
           "approved_numeric_series_id": {
             "type": "string",
             "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,63}$"
+          },
+          "approved_numeric_start_text": {
+            "type": "string",
+            "pattern": "^-?(?:0|[1-9][0-9]*)(?:\\.[0-9]+)?$"
+          },
+          "approved_numeric_end_text": {
+            "type": "string",
+            "pattern": "^-?(?:0|[1-9][0-9]*)(?:\\.[0-9]+)?$"
           }
         },
         "required": [
