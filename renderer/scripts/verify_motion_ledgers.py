@@ -51,7 +51,8 @@ def validate(registry,sem,phase):
         for e in evidence:
             need(e.get("source") in ("SYNTHETIC_RENDER_FIXTURE",
                  "SYNTHETIC_B1_COMPILER_NOT_OPERATOR_APPROVED","SYNTHETIC",
-                 "SYNTHETIC_B1_COMPILED_NOT_REAL_RIGHTS"),
+                 "SYNTHETIC_B1_COMPILED_NOT_REAL_RIGHTS",
+                 "SYNTHETIC_B1_COMPILED_NOT_LIVE_APPROVED"),
                  name+": unexpected or operator-impersonating evidence source")
         for e in frames:
             png(e["path"],e.get("sha256"))
