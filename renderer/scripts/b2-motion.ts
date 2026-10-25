@@ -15,6 +15,7 @@ const root=resolve(import.meta.dirname,'..');
 const output=resolve(root,'.artifacts/renders');
 mkdirSync(output,{recursive:true});
 const compiled=JSON.parse(readFileSync(resolve(root,'.artifacts/compiled-30.json'),'utf8')) as Record<string,Timeline>;
+const compiledCameraOff=JSON.parse(readFileSync(resolve(root,'.artifacts/compiled-camera-off.json'),'utf8')) as Record<string,Timeline>;
 const scene=compiled.A.scenes.find(s=>s.template_id==='T03');
 if(!scene)throw Error('B2_MOTION_T03_MISSING');
 const timeline=structuredClone(compiled.A);
@@ -234,12 +235,59 @@ for(const presetId of ['route-line-draw','map-region-wipe','editorial-connector-
    camera:presetId.startsWith('camera-')?isolatedScene.camera:null});
  }
  if(new Set(phaseHashes).size<2)throw Error('B2_MOTION_PHASES_INERT_'+presetId);
+ // Preserve exact B1 media, G2 and source identities. The camera control is
+ // rebuilt by the ACTUAL Python B1 compiler, not by removing a JSON event
+ // while leaving an already moved camera track in place.
+ const off=structuredClone(t);
+ const offScene=off.scenes[0];
+ if(presetId.startsWith('camera-')){
+  const source=compiledCameraOff[found.variant]?.scenes.find(x=>x.setup_id===isolatedScene.setup_id);
+  if(!source)throw Error('B2_CAMERA_RECOMPILE_CONTROL_MISSING_'+presetId);
+  offScene.camera=structuredClone(source.camera);
+  offScene.events=structuredClone(source.events);
+ }else if(presetId==='route-line-draw'||presetId==='editorial-connector-draw'){
+  // A path's source geometry remains approved and bound; a zero-progress event
+  // supplies the necessary identity while disabling only its drawn length.
+  const disabled=offScene.events.find(e=>e.event_id===event.event_id)!;
+  disabled.keyframes=[{frame:0,value:0,easing:'linear'},
+   {frame:disabled.duration_frames,value:0,easing:'linear'}];
+ }else{
+  offScene.events=offScene.events.filter(e=>e.event_id!==event.event_id);
+ }
+ assertTimeline(off);
+ const offMedia=loadApprovedMedia(off,makeSyntheticManifest(off,mediaDir,font));
+ const offComp=await selectComposition({serveUrl,id:'HistoricalTimelineV1',
+   inputProps:{timeline:off,media:offMedia}});
+ const mid=frames[2],controlPath=resolve(output,`b2-${presetId}-compiler-off-${mid}.png`);
+ await renderStill({serveUrl,composition:offComp,inputProps:{timeline:off,media:offMedia},
+  frame:mid,output:controlPath,imageFormat:'png'});
+ const onPath=resolve(output,`b2-${presetId}-compiled-${mid}.png`);
+ const activePixels=PNG.sync.read(readFileSync(onPath)).data;
+ const inactivePixels=PNG.sync.read(readFileSync(controlPath)).data;
+ let changedROIPixels=0,changedOutsidePixels=0;
+ const targetRects=event.affected_layer_ids.map(id=>isolatedScene.layers.find(l=>l.layer_id===id)?.rect_px)
+   .filter((rect):rect is NonNullable<typeof rect>=>Boolean(rect));
+ for(let y=0;y<1080;y+=2)for(let x=0;x<1920;x+=2){
+  const k=(y*1920+x)*4;
+  const delta=Math.abs(activePixels[k]-inactivePixels[k])+
+    Math.abs(activePixels[k+1]-inactivePixels[k+1])+
+    Math.abs(activePixels[k+2]-inactivePixels[k+2]);
+  if(delta<12)continue;
+  if(event.motion_space==='screen'||targetRects.some(r=>x>=r.x&&y>=r.y&&x<r.x+r.w&&y<r.y+r.h))
+   changedROIPixels++;
+  else changedOutsidePixels++;
+ }
+ const keyframeDiff=presetId.startsWith('camera-')?
+   JSON.stringify(offScene.camera.keyframes)!==JSON.stringify(isolatedScene.camera.keyframes):null;
+ if(keyframeDiff===false)throw Error('B2_CAMERA_EVENT_INERT_B1_COMPILER_'+presetId);
+ result.push({preset:presetId,counterfactual:'same_frame_event_removed',frame:mid,
+  positivePath:onPath,controlPath,positiveSha256:hashing(readFileSync(onPath)),
+  controlSha256:hashing(readFileSync(controlPath)),changedROIPixels,changedOutsidePixels,
+  cameraTrackRecompiled:presetId.startsWith('camera-')?true:null,
+  cameraKeyframesDifferent:keyframeDiff,source:'SYNTHETIC_B1_COMPILER_NOT_OPERATOR_APPROVED'});
  if(event.start_frame>0){
-  const baselineTimeline=structuredClone(t);
-  baselineTimeline.scenes[0].events=baselineTimeline.scenes[0].events.map(item=>
-    item.event_id===event.event_id&&item.start_frame+item.duration_frames<isolatedScene.duration_frames
-      ?{...item,start_frame:item.start_frame+1}:item);
-  const baselineMedia=loadApprovedMedia(baselineTimeline,makeSyntheticManifest(baselineTimeline,mediaDir,font));
+  const baselineTimeline=off;
+  const baselineMedia=offMedia;
   const baselineComp=await selectComposition({serveUrl,id:'HistoricalTimelineV1',
     inputProps:{timeline:baselineTimeline,media:baselineMedia}});
   const baselinePath=resolve(output,`b2-${presetId}-compiled-pre-baseline.png`);
