@@ -95,7 +95,7 @@ test('pr10 source-authorized T06 multiline document and adversarial critical cli
  writeFileSync(filename,shot);
  writeFileSync(resolve(dir,'g05-t06-typography.json'),JSON.stringify({
    scope:'SYNTHETIC_OPERATOR_APPROVED_G1_G3_NOT_REAL_ARCHIVAL_RIGHTS',
-   sourceSha256:authorized.props.media.assets[excerpt.asset_id??'']?.originalSha256??null,
+   sourceOriginalSha256s:Object.values(authorized.props.media.assets).map((x:any)=>x.originalSha256),
    g4Head:authorized.draft_manifest_sha256,
    fontSha256:authorized.props.media.fontSha256,
    sourceClaimId:excerpt.source_claim_id,originalSourceText:excerpt.text,
