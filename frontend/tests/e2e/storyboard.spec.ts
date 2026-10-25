@@ -81,6 +81,8 @@ test('storyboard-editor uses real persisted G4 scenes and native read-only Playe
  for(const item of critical){
    const source=authoredText.get(item.layerId)!;
    expect(item.text,'frozen critical source text must not be truncated/changed').toBe(source.text);
+   expect(item.font.toLowerCase(),'GDI-backed pinned font family must reach Chromium').toContain(
+    String(initialPreview.props.media.fontFamily).toLowerCase());
    expect(item.clipped,'critical glyph extends outside its authored viewport').toBeFalsy();
    expect(item.lines,'critical glyph line count exceeds authorial max_lines')
     .toBeLessThanOrEqual(source.text_layout!.max_lines);
@@ -93,7 +95,9 @@ test('storyboard-editor uses real persisted G4 scenes and native read-only Playe
    projectId:initialPreview.props.timeline.project_id,frame:typographyFrame,
    fontSha256:initialPreview.props.media.fontSha256,
    screenshotSha256:createHash('sha256').update(typographyShot).digest('hex'),
-   rows:critical.map(row=>({...row,expectedMaxLines:authoredText.get(row.layerId)!.text_layout!.max_lines}))
+   rows:critical.map(row=>({...row,
+     sourceTextSha256:createHash('sha256').update(authoredText.get(row.layerId)!.text!).digest('hex'),
+     expectedMaxLines:authoredText.get(row.layerId)!.text_layout!.max_lines}))
  },null,2));
  // Adversarial browser layout: an impossible width must be detected by the
  // exact glyph-rect discriminator, NOT made to pass by WebKit line-clamp.
