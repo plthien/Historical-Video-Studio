@@ -1,8 +1,9 @@
 import {test,expect} from '@playwright/test';
 import {PNG} from 'pngjs';
-import {existsSync,renameSync} from 'node:fs';
+import {existsSync,renameSync,mkdirSync,writeFileSync} from 'node:fs';
+import {createHash} from 'node:crypto';
 import {resolve} from 'node:path';
-import type {Motion,ResolvedMedia} from '../../../renderer/remotion/schema';
+import type {Motion,ResolvedMedia,Scene} from '../../../renderer/remotion/schema';
 
 test('storyboard-editor uses real persisted G4 scenes and native read-only Player',async({page,request})=>{
  test.skip(process.env.HVS_B2_FIXTURE!=='1','Requires native Windows controlled SQLite G4, never mocked HTTP fixtures');
@@ -33,6 +34,84 @@ test('storyboard-editor uses real persisted G4 scenes and native read-only Playe
  expect(candidate,'preview fixture must have an approved synthetic original').toBeDefined();
  const originalSha=candidate!.originalSha256;
  const root=resolve(process.cwd(),'..'); // npm --prefix frontend executes Playwright with frontend cwd
+ // Actual Chromium GDI-font glyph measurement at a fully authored scene
+ // frame. A screenshot or DOM node existing is not a no-clipping proof.
+ const finalScene=initialPreview.props.timeline.scenes[0] as Scene;
+ const typographyFrame=finalScene.start_frame+finalScene.duration_frames-1;
+ await page.getByLabel('Seek exact frame').fill(String(typographyFrame));
+ await expect(stage.locator(`[data-global-frame="${typographyFrame}"][data-scene-id]`)).toBeVisible();
+ await page.evaluate(()=>document.fonts.ready);
+ const measureCritical=async()=>stage.locator('[data-layer][data-claim] > span').evaluateAll(elements=>
+   elements.map(element=>{
+     const span=element as HTMLElement;
+     const layer=span.parentElement as HTMLElement;
+     const bounds=layer.getBoundingClientRect();
+     const glyphs:{left:number;right:number;top:number;bottom:number}[]=[];
+     const walker=document.createTreeWalker(span,NodeFilter.SHOW_TEXT);
+     let node=walker.nextNode() as Text|null;
+     while(node){
+       const raw=node.textContent??'';
+       let offset=0;
+       for(const char of Array.from(raw)){
+         const width=char.length;
+         if(char.trim()){
+           const range=document.createRange();
+           range.setStart(node,offset);range.setEnd(node,offset+width);
+           for(const rect of Array.from(range.getClientRects()))
+             if(rect.width>0&&rect.height>0)glyphs.push({left:rect.left,right:rect.right,top:rect.top,bottom:rect.bottom});
+         }
+         offset+=width;
+       }
+       node=walker.nextNode() as Text|null;
+     }
+     const visible=getComputedStyle(layer).opacity!=='0'&&glyphs.length>0;
+     const clipped=visible&&glyphs.some(rect=>rect.left<bounds.left-1||
+       rect.right>bounds.right+1||rect.top<bounds.top-1||rect.bottom>bounds.bottom+1);
+     const lines=[...new Set(glyphs.map(rect=>Math.round(rect.top*2)/2))].length;
+     return {layerId:layer.dataset.layer??'',claimId:layer.dataset.claim??'',
+       text:span.textContent??'',font:getComputedStyle(span).fontFamily,
+       fontSize:getComputedStyle(span).fontSize,visible,clipped,lines,glyphCount:glyphs.length,
+       bounds:{x:bounds.x,y:bounds.y,width:bounds.width,height:bounds.height}};
+   }));
+ const measured=await measureCritical();
+ const authoredText=new Map(finalScene.layers.filter(layer=>layer.text!==null&&layer.source_claim_id)
+  .map(layer=>[layer.layer_id,layer]));
+ const critical=measured.filter(item=>item.visible&&authoredText.has(item.layerId));
+ expect(critical.length,'at least one visible source-backed text layer must be glyph-measured').toBeGreaterThan(0);
+ for(const item of critical){
+   const source=authoredText.get(item.layerId)!;
+   expect(item.text,'frozen critical source text must not be truncated/changed').toBe(source.text);
+   expect(item.clipped,'critical glyph extends outside its authored viewport').toBeFalsy();
+   expect(item.lines,'critical glyph line count exceeds authorial max_lines')
+    .toBeLessThanOrEqual(source.text_layout!.max_lines);
+ }
+ const typographyDir=resolve(process.cwd(),'.artifacts','typography');
+ mkdirSync(typographyDir,{recursive:true});
+ const typographyShot=await stage.screenshot();
+ writeFileSync(resolve(typographyDir,'critical-source-chromium.png'),typographyShot);
+ writeFileSync(resolve(typographyDir,'critical-typography.json'),JSON.stringify({
+   projectId:initialPreview.props.timeline.project_id,frame:typographyFrame,
+   fontSha256:initialPreview.props.media.fontSha256,
+   screenshotSha256:createHash('sha256').update(typographyShot).digest('hex'),
+   rows:critical.map(row=>({...row,expectedMaxLines:authoredText.get(row.layerId)!.text_layout!.max_lines}))
+ },null,2));
+ // Adversarial browser layout: an impossible width must be detected by the
+ // exact glyph-rect discriminator, NOT made to pass by WebKit line-clamp.
+ const targetLayer=stage.locator(`[data-layer="${critical[0].layerId}"] > span`).first();
+ const previousStyle=await targetLayer.getAttribute('style');
+ await targetLayer.evaluate(element=>{
+   const node=element as HTMLElement;
+   node.style.width='2px';node.style.minWidth='2px';node.style.maxWidth='2px';
+   node.style.whiteSpace='nowrap';node.style.overflow='hidden';
+ });
+ const distorted=await measureCritical();
+ const violated=distorted.find(item=>item.layerId===critical[0].layerId);
+ expect(violated?.clipped,'intentional critical clipping must be discovered').toBeTruthy();
+ await targetLayer.evaluate((element,css)=>{
+   (element as HTMLElement).setAttribute('style',css??'');
+ },previousStyle);
+ await page.getByLabel('Seek exact frame').fill('0');
+ await expect(stage.locator('[data-global-frame="0"][data-scene-id]')).toBeVisible();
  const originalFile=resolve(root,'renderer','.artifacts','approved-player-test',
    'artifacts','sha256',originalSha.slice(0,2),originalSha.slice(2));
  const withheldFile=originalFile+'.temporarily-withheld-b2-e2e';
