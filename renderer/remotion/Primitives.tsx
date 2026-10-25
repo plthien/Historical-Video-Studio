@@ -374,7 +374,7 @@ export const CompiledLayer:React.FC<{scene:Scene;layer:Layer;frame:number;media:
     }}
     data-layer={layer.layer_id} data-claim={layer.source_claim_id??undefined}>
    <span style={{fontFamily:media.fontFamily,color:effect.highlight>0.2?'#a65d20':ink,
-     fontSize:measured.font_size_px,fontWeight:isHeading?700:500,lineHeight:measured.line_height,whiteSpace:'pre-wrap',overflow:'hidden',
+     fontSize:measured.font_size_px,fontWeight:isHeading?700:400,lineHeight:measured.line_height,whiteSpace:'pre-wrap',overflow:'hidden',
      display:'-webkit-box',WebkitBoxOrient:'vertical',WebkitLineClamp:measured.max_lines}}>{spans.length?fragments:txt}</span></div>;
  }
  return null;
