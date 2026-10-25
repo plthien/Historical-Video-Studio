@@ -58,6 +58,13 @@ class NumericEvidenceUpload(BaseModel):
     review_note: str = Field(min_length=8, max_length=2000)
 
 
+class NumericSeriesBinding(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    expected_revision: int = Field(ge=0)
+    series_id: str = Field(pattern=r"^[A-Za-z][A-Za-z0-9_-]{2,63}$")
+    operator_reason: str = Field(min_length=8, max_length=2000)
+
+
 class NumericSeriesRevocation(BaseModel):
     model_config = ConfigDict(extra="forbid")
     expected_revision: int = Field(ge=0)
@@ -240,6 +247,14 @@ def create_app(database: str | Path | None = None, media_root: str | Path | None
         if record is None:
             raise ContractViolation("NUMERIC_SERIES_NOT_FOUND", series_id, "No reviewed series exists for this claim.")
         return record
+
+    @app.post("/api/v1/projects/{project_id}/story/claims/{claim_id}/numeric-series/bind")
+    def bind_numeric_series(project_id: str, claim_id: str, body: NumericSeriesBinding,
+                            idempotency_key: str = Header(alias="Idempotency-Key")):
+        payload = body.model_dump()
+        return idempotent(project_id, f"numeric-bind:{claim_id}", idempotency_key, payload,
+                          lambda: numeric_series.bind(project_id, claim_id, body.series_id,
+                                                      body.expected_revision, body.operator_reason))
 
     @app.post("/api/v1/projects/{project_id}/story/claims/{claim_id}/numeric-series/evidence")
     def upload_numeric_evidence(project_id: str, claim_id: str, body: NumericEvidenceUpload,
