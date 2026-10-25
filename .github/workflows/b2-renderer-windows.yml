@@ -74,6 +74,22 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           npm --prefix renderer run test:repair
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: PR10 complete G1 numeric, G3 T02, G4 A/B real Chromium source-authority proof
+        id: pr10_real
+        shell: pwsh
+        run: |
+          & .venv/Scripts/python.exe -m renderer.scripts.prepare_pr10_fixture --case numeric
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          & .venv/Scripts/python.exe -m renderer.scripts.prepare_pr10_fixture --case mask
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          npm --prefix renderer run test:pr10
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          $ledger = "renderer/.artifacts/pr10-evidence/g03-g05-g06-real-chromium.json"
+          if (-not (Test-Path $ledger)) { throw "Missing real Chromium PR10 authority ledger" }
+          $proof = Get-Content $ledger -Raw | ConvertFrom-Json
+          if (@($proof.g03.frames).Count -lt 3 -or -not $proof.g05.derivativeReview -or -not $proof.g06.pixelsChanged) {
+            throw "PR10 incomplete real source-authorized frame proof"
+          }
       - name: Verify shared composition with real pixel hashes
         shell: pwsh
         run: |
@@ -196,6 +212,7 @@ jobs:
         if: always()
         shell: pwsh
         env:
+          B2_PR10_REAL: ${{ steps.pr10_real.outcome }}
           B2_SOURCE_AUTH: ${{ steps.source_auth.outcome }}
           B2_MOTION: ${{ steps.motion.outcome }}
           B2_MULTILAYER: ${{ steps.multilayer.outcome }}
@@ -208,7 +225,7 @@ jobs:
           B2_LONGRENDER: ${{ steps.longrender.outcome }}
         run: |
           $results = @{
-            source_auth=$env:B2_SOURCE_AUTH; motion=$env:B2_MOTION; multilayer=$env:B2_MULTILAYER; sqlite=$env:B2_SQLITE;
+            pr10_real=$env:B2_PR10_REAL; source_auth=$env:B2_SOURCE_AUTH; motion=$env:B2_MOTION; multilayer=$env:B2_MULTILAYER; sqlite=$env:B2_SQLITE;
             browser_setup=$env:B2_SETUP; editor=$env:B2_EDITOR; parity=$env:B2_PARITY;
             fixture61=$env:B2_FIXTURE61; longui=$env:B2_LONGUI; longrender=$env:B2_LONGRENDER
           }
@@ -230,6 +247,7 @@ jobs:
           name: b2-real-render-native-windows
           path: |
             renderer/.artifacts/renders/
+            renderer/.artifacts/pr10-evidence/
             renderer/.artifacts/compiled-30.json
             frontend/.artifacts/parity/
             frontend/.artifacts/longform/
