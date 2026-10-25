@@ -36,6 +36,22 @@ class AssetResolution:
                     candidate_id TEXT NOT NULL, candidate_sha256 TEXT NOT NULL,
                     original_sha256 TEXT NOT NULL, evidence_json TEXT NOT NULL,
                     approved_at TEXT NOT NULL);
+                CREATE TABLE IF NOT EXISTS asset_choice_set_events (
+                    set_id TEXT PRIMARY KEY, project_id TEXT NOT NULL,
+                    requirement_id TEXT NOT NULL, slot_id TEXT NOT NULL,
+                    requirement_sha256 TEXT NOT NULL, set_sha256 TEXT NOT NULL,
+                    review_json TEXT NOT NULL, operator_reason TEXT NOT NULL,
+                    committed_revision INTEGER NOT NULL);
+                CREATE TABLE IF NOT EXISTS asset_choice_set_heads (
+                    project_id TEXT NOT NULL, requirement_id TEXT NOT NULL,
+                    slot_id TEXT NOT NULL, set_id TEXT NOT NULL REFERENCES asset_choice_set_events(set_id),
+                    PRIMARY KEY(project_id, requirement_id, slot_id));
+                CREATE TABLE IF NOT EXISTS asset_choice_set_items (
+                    review_approval_id TEXT PRIMARY KEY,
+                    set_id TEXT NOT NULL REFERENCES asset_choice_set_events(set_id),
+                    candidate_id TEXT NOT NULL, original_sha256 TEXT NOT NULL,
+                    evidence_sha256 TEXT NOT NULL,
+                    UNIQUE(set_id,candidate_id));
                 CREATE TABLE IF NOT EXISTS asset_approval_heads (
                     project_id TEXT NOT NULL, requirement_id TEXT NOT NULL,
                     approval_id TEXT NOT NULL REFERENCES asset_approval_events(approval_id),
@@ -212,6 +228,90 @@ class AssetResolution:
             return {"project_revision": revision+int(changed), "approved":created}
 
     @staticmethod
+    def _active_choice_sets(db, project, requirement, requirement_sha):
+        """Immutable current pool, not historic asset_approval_events or old set history."""
+        rows=db.execute("""SELECT e.set_id,e.slot_id,e.set_sha256,e.review_json,e.requirement_sha256
+            FROM asset_choice_set_heads h JOIN asset_choice_set_events e ON e.set_id=h.set_id
+            WHERE h.project_id=? AND h.requirement_id=? ORDER BY e.slot_id""",
+            (project,requirement)).fetchall()
+        results={}
+        for set_id,slot,sha,raw,requirement_hash in rows:
+            if requirement_hash!=requirement_sha:
+                continue
+            items=json.loads(raw)
+            if _digest(items)!=sha:
+                raise ContractViolation("G3_CHOICE_SET_CORRUPT",set_id,"Restore the immutable reviewed pool.")
+            results[slot]={"set_id":set_id,"set_sha256":sha,"items":items}
+        return results
+
+    def review_choice_set(self, project, requirement, slot, reviews, reason, expected_revision):
+        """Operator's choice-set review NEVER reapproves the separate G3 gate."""
+        if len(reason.strip())<8 or not 2<=len(reviews)<=25 or len({x.get("candidate_id") for x in reviews})!=len(reviews):
+            raise ContractViolation("G3_CHOICE_SET_INVALID",requirement,"Review at least two distinct candidates.")
+        story=self.store.get_story(project).data()
+        slots=[s for setup in story["visual_setups"]
+               for s in setup["direction"]["asset_slots"]
+               if s["slot_id"]==slot and s["requirement_id"]==requirement]
+        if not slots:
+            raise ContractViolation("G3_CHOICE_SLOT_INVALID",slot,"Select an authored G1 asset slot and its exact requirement.")
+        for item in reviews:
+            if item.get("requirement_id")!=requirement:
+                raise ContractViolation("G3_CHOICE_SLOT_INVALID",requirement,"Choices must share one source requirement.")
+            self.store.get_artifact(item["original_sha256"])
+        with self.store._transaction() as db:
+            rev=self._revision(db,project,expected_revision)
+            source=self.assets._source_tx(db,project,requirement)
+            head=self._head(db,project,requirement,source["requirement_sha256"])
+            if not head:
+                raise ContractViolation("G3_ASSET_UNAPPROVED",requirement,"Approve an eligible primary original first.")
+            planned=[]
+            for item in reviews:
+                sha,evidence=self._review_tx(db,project,item)
+                if sha!=source["requirement_sha256"]:
+                    raise ContractViolation("G3_CHOICE_SOURCE_STALE",requirement,"Source requirement changed.")
+                original=self.store.get_artifact(evidence["original_sha256"])
+                if hashlib.sha256(original).hexdigest()!=evidence["original_sha256"]:
+                    raise ContractViolation("G3_SOURCE_CORRUPT",item["candidate_id"],"Immutable bytes have changed.")
+                planned.append({"candidate_id":item["candidate_id"],
+                                "requirement_sha256":sha,
+                                "source_story_sha256":source["story_sha256"],
+                                "evidence":evidence,"original_sha256":evidence["original_sha256"],
+                                "review_approval_id":"choice_review_"+uuid4().hex})
+            if len({v["original_sha256"] for v in planned})!=len(planned) or head["candidate_id"] not in {v["candidate_id"] for v in planned}:
+                raise ContractViolation("G3_CHOICE_SET_INVALID",requirement,"Include distinct originals and the current primary source.")
+            payload=[{k:v for k,v in entry.items() if k!="review_approval_id"} for entry in planned]
+            sha=_digest(payload)
+            set_id="choice_"+uuid4().hex
+            db.execute("INSERT INTO asset_choice_set_events VALUES(?,?,?,?,?,?,?,?,?)",
+                       (set_id,project,requirement,slot,source["requirement_sha256"],sha,
+                        json.dumps(payload,sort_keys=True),reason.strip(),rev+1))
+            for item in planned:
+                db.execute("INSERT INTO asset_choice_set_items VALUES(?,?,?,?,?)",
+                           (item["review_approval_id"],set_id,item["candidate_id"],
+                            item["original_sha256"],_digest(item["evidence"])))
+            db.execute("""INSERT INTO asset_choice_set_heads VALUES(?,?,?,?)
+                ON CONFLICT(project_id,requirement_id,slot_id) DO UPDATE SET set_id=excluded.set_id""",
+                (project,requirement,slot,set_id))
+            mark_stale(db,project,"g3_choice_set")
+            db.execute("UPDATE projects SET revision=? WHERE project_id=?",(rev+1,project))
+            return {"set_id":set_id,"set_sha256":sha,"project_revision":rev+1,
+                    "g3_reapproval_required":True,
+                    "items":[{"candidate_id":x["candidate_id"],
+                              "review_approval_id":x["review_approval_id"],
+                              "original_sha256":x["original_sha256"]} for x in planned]}
+
+    def current_choice_set(self, project, requirement, slot):
+        with self.store._connection() as db:
+            source=self.assets._source_tx(db,project,requirement)
+            selected=self._active_choice_sets(db,project,requirement,source["requirement_sha256"]).get(slot)
+            if selected is None:
+                return {"set_id":None,"items":[],"g3_current":False}
+            g3=GateService.__new__(GateService)
+            g3.store=self.store
+            current=g3._status(db,project,"G3")[0]=="APPROVED"
+            return {**selected,"g3_current":current}
+
+    @staticmethod
     def gate_candidate(db, project, store):
         row=db.execute("SELECT sha256,story_json FROM story_candidates WHERE project_id=? ORDER BY revision DESC LIMIT 1",
                        (project,)).fetchone()
@@ -228,6 +328,7 @@ class AssetResolution:
         if not db.execute("SELECT 1 FROM sqlite_master WHERE name='asset_approval_heads'").fetchone():
             return None
         pinned=[]
+        choices=[]
         for r in requirements:
             rid=r["requirement_id"]
             current=AssetCandidates._source_tx(db,project,rid)
@@ -236,15 +337,30 @@ class AssetResolution:
                 return None
             # A replaced/corrupt immutable original cannot be approved as render input.
             store.get_artifact(head["original_sha256"])
+            pools=AssetResolution._active_choice_sets(db,project,rid,current["requirement_sha256"])
+            for slot, pool in pools.items():
+                for item in pool["items"]:
+                    registered=AssetCandidates._owned_tx(db,project,rid,item["candidate_id"])
+                    if (registered["original_sha256"]!=item["original_sha256"] or
+                        registered["source_requirement_sha256"]!=current["requirement_sha256"]):
+                        raise ContractViolation("G3_CHOICE_SOURCE_STALE",rid,"Choice set's reviewed source changed.")
+                    store.get_artifact(item["original_sha256"])
+                choices.append({"requirement_id":rid,"slot_id":slot,
+                                "set_id":pool["set_id"],"set_sha256":pool["set_sha256"]})
             pinned.append({"requirement_id":rid,"requirement_sha256":current["requirement_sha256"],
                            "candidate_sha256":head["approved_candidate_sha256"],
                            "original_sha256":head["original_sha256"],
                            "review_approval_id":head["approval_record_id"]})
         manifest={"assets":sorted(pinned,key=lambda x:x["requirement_id"])}
+        if choices:
+            manifest["choice_sets"]=sorted(choices,key=lambda x:(x["requirement_id"],x["slot_id"]))
         # A new human review event is a new G3 candidate even when the exact
         # original image and review text match an earlier approved version.
         # This makes STALE -> new review -> READY_FOR_REVIEW possible without
         # silently resurrecting a historical G3 approval (A -> B -> A).
-        fingerprint=_digest({"review_lineage": [(x["requirement_id"],x["requirement_sha256"],
-                                                x["review_approval_id"]) for x in manifest["assets"]]})
+        lineage={"review_lineage": [(x["requirement_id"],x["requirement_sha256"],
+                                                x["review_approval_id"]) for x in manifest["assets"]]}
+        if choices:
+            lineage["choice_sets"]=manifest["choice_sets"]
+        fingerprint=_digest(lineage)
         return _digest(manifest),fingerprint
