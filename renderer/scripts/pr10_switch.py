@@ -58,7 +58,9 @@ def choose(label):
     after={x["gate_id"]:x["approval_id"] for x in _gate_heads(store,project)}
     assert before==after,"G4 selection must not mint G1/G2/G3 approvals"
     print(json.dumps({"state":"LOCAL_PASS","selection":label,"candidate":candidate,
-                      "gate_heads_unchanged":True,"revision":store.revision(project)}))
+                      "gate_heads_unchanged":True,
+                      "presentation_edit_retains_selection":label=="b",
+                      "revision":store.revision(project)}))
 
 
 def _gate_heads(store,project):
