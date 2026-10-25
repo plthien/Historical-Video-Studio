@@ -1,13 +1,13 @@
 import {readFileSync,realpathSync,statSync,writeFileSync,mkdirSync} from 'node:fs';
 import {resolve,relative,isAbsolute} from 'node:path';
 import {createHash} from 'node:crypto';
-import type {Timeline,ResolvedMedia,MediaItem,Geometry,ReviewedMap,ApprovedNumericSeries} from '../remotion/schema';
+import type {Timeline,ResolvedMedia,MediaItem,Geometry,ReviewedMap,ApprovedNumericSeries,MaskDerivative} from '../remotion/schema';
 import {assertTimeline,assertMedia,fail} from '../remotion/schema';
 import {PNG} from 'pngjs';
 
 const sha=(data:Buffer)=>createHash('sha256').update(data).digest('hex');
 export type MediaEntry={assetId:string;path:string;originalSha256:string;approvalRecordId:string;sourceKind:'APPROVED_LOCAL'|'SYNTHETIC';mime:MediaItem['mime']};
-export type ResolveManifest={approvedNumericSeries?:Record<string,ApprovedNumericSeries>;projectId:string;g4ManifestSha256:string;mediaRoot:string;assets:MediaEntry[];geometries:Geometry[];maps:ReviewedMap[];fontFile:string;fontSha256:string;fontFamily:string;sourceKind:'APPROVED_LOCAL'|'SYNTHETIC';syntheticNumericSeries?:Record<string,{fixtureId:string;values:number[]}>};
+export type ResolveManifest={maskDerivatives?:MaskDerivative[];approvedNumericSeries?:Record<string,ApprovedNumericSeries>;projectId:string;g4ManifestSha256:string;mediaRoot:string;assets:MediaEntry[];geometries:Geometry[];maps:ReviewedMap[];fontFile:string;fontSha256:string;fontFamily:string;sourceKind:'APPROVED_LOCAL'|'SYNTHETIC';syntheticNumericSeries?:Record<string,{fixtureId:string;values:number[]}>};
 export function loadApprovedMedia(t:Timeline, manifest:ResolveManifest):ResolvedMedia{
  assertTimeline(t);
  if(manifest.projectId!==t.project_id||!/^[a-f0-9]{64}$/.test(manifest.g4ManifestSha256))fail('RENDER_G4_DRAFT_MISMATCH',t.project_id,'Trusted project G4 manifest SHA required');
@@ -35,6 +35,7 @@ export function loadApprovedMedia(t:Timeline, manifest:ResolveManifest):Resolved
  const media:ResolvedMedia={assets,geometries:Object.fromEntries(manifest.geometries.map(x=>[x.geometryRef,x])),maps:Object.fromEntries(manifest.maps.map(x=>[x.historicalMapId,x])),
    fontSha256:manifest.fontSha256,fontFamily:manifest.fontFamily,fontDataUri:'data:font/ttf;base64,'+fontBytes.toString('base64'),
    sourceKind:manifest.sourceKind,authorizingG4ManifestSha256:manifest.g4ManifestSha256,
+   ...(manifest.sourceKind==="APPROVED_LOCAL"&&manifest.maskDerivatives?{maskDerivatives:Object.fromEntries(manifest.maskDerivatives.map(x=>[x.derivativeAssetId,x]))}:{}),
    ...(manifest.sourceKind==="APPROVED_LOCAL"&&manifest.approvedNumericSeries?{approvedNumericSeries:manifest.approvedNumericSeries}:{}),
     ...(manifest.sourceKind==='SYNTHETIC'&&manifest.syntheticNumericSeries?{syntheticNumericSeries:manifest.syntheticNumericSeries}:{})};
  assertMedia(t,media);
