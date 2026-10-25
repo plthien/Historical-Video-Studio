@@ -95,7 +95,7 @@ def prepare(mode:str):
     elif mode=="typography":
         for text in setup["direction"]["on_screen_text"]:
             if text["text_id"]==payload["excerpt_text_id"]:
-                text["text"]="SYNTHETIC DOCUMENT EXCERPT.\\nThis second sourced line must remain fully visible."
+                text["text"]="SYNTHETIC DOCUMENT EXCERPT.\nThis second sourced line must remain fully visible."
             elif text["text_id"]==payload["attribution_text_id"]:
                 text["text"]="SYNTHETIC SOURCE ONLY — NO HISTORICAL RIGHTS OR CLAIMS."
     pid=story["project"]["project_id"]
@@ -119,7 +119,7 @@ def prepare(mode:str):
             "candidate_sha256":head["candidate_sha256"],
             "dependency_fingerprint":head["dependency_fingerprint"],
             "expected_revision":store.revision(pid),
-            "comment":"SYNTHETIC source mechanics only"},mode+"-approve-"+which)
+            "comment":"SYNTHETIC source mechanics only"},mode+"-approve-"+which+"-rev-"+str(store.revision(pid)))
     g1=approve("G1")
     voice=VoiceService(store,gate,JobQueue(store))
     sec=story["sections"][0]["section_id"]
