@@ -10,7 +10,7 @@ def png(path,sha):
     f=Path(path)
     need(f.is_file(),"missing PNG bytes: "+str(f))
     with f.open("rb") as stream: head=stream.read(24)
-    need(head[:16]==b"\\x89PNG\\r\\n\\x1a\\n\\x00\\x00\\x00\\rIHDR","invalid PNG signature")
+    need(head[:16]==b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR","invalid PNG signature")
     need(struct.unpack(">II",head[16:24])==(1920,1080),"not a native 1920x1080 frame")
     need(isinstance(sha,str) and hashlib.sha256(f.read_bytes()).hexdigest()==sha,
          "PNG SHA256 mismatch: "+str(f))
