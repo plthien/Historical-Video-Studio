@@ -339,6 +339,13 @@ for(const presetId of ['route-line-draw','map-region-wipe','editorial-connector-
   controlSha256:hashing(readFileSync(controlPath)),changedROIPixels,changedOutsidePixels,
   cameraTrackRecompiled:presetId.startsWith('camera-')?true:null,
   cameraKeyframesDifferent:keyframeDiff,source:'SYNTHETIC_B1_COMPILER_NOT_OPERATOR_APPROVED'});
+ if(event.start_frame===0){
+  // No scene-local frame precedes an event starting at frame 0; the
+  // pre-start invariant is vacuous and explicitly recorded, not invented.
+  result.push({preset:presetId,preStartPixelMatch:true,
+    preStartApplicability:'NO_PRIOR_SCENE_LOCAL_FRAME',
+    source:'SYNTHETIC_B1_COMPILER_NOT_OPERATOR_APPROVED'});
+ }
  if(event.start_frame>0){
   const baselineTimeline=off;
   const baselineMedia=offMedia;
