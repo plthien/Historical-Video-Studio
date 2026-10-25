@@ -26,6 +26,19 @@ const cards=timeline.scenes[0].layers.filter(l=>l.layer_kind==='archival_photo')
 if(cards.length!==3)throw Error('B2_MOTION_CARD_ASSETS_MISSING');
 const caption=timeline.scenes[0].layers.find(l=>l.layer_kind==='text'&&l.text&&l.source_claim_id);
 if(!caption)throw Error('B2_MOTION_CLAIM_TEXT_MISSING');
+ // G05: guaranteed critical text overflow must fail at the renderer contract
+ // boundary, not be silently cropped by CSS overflow:hidden.
+ {
+  const invalid=structuredClone(timeline);
+  const damaged=invalid.scenes[0].layers.find(layer=>layer.layer_id===caption.layer_id)!;
+  if(!damaged.text_layout)throw Error('B2_CRITICAL_TEXT_LAYOUT_MISSING');
+  damaged.rect_px.h=1;
+  let typed=false;
+  try{assertTimeline(invalid);}catch(error){
+   typed=error instanceof RenderBlocked&&error.code==='TYPOGRAPHY_OVERFLOW';
+  }
+  if(!typed)throw Error('B2_CRITICAL_TYPOGRAPHY_OVERFLOW_NOT_REJECTED');
+ }
 const font=resolve(process.env.WINDIR??'C:\\Windows','Fonts','arial.ttf');
 const sourceDir=resolve(root,'.artifacts/media/b2-motion');
 const hashing=(bytes:Buffer)=>createHash('sha256').update(bytes).digest('hex');
