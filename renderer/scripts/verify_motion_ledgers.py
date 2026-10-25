@@ -57,7 +57,34 @@ def validate(registry,sem,phase):
                 png(e.get("positivePath"),e.get("positiveSha256"))
                 png(e.get("controlPath"),e.get("controlSha256"))
                 need(e["positiveSha256"]!=e["controlSha256"],name+": on/off frame identical")
-    need(set(e["preset"] for e in cases)==set(names),"orphan/unknown preset evidence")
+    # Two intentional non-preset records belong to this executed owner: the
+    # source-preserving crop comparator and genuine FFprobe-checked H264 media.
+    # Validate their bytes and reject arbitrary orphan diagnostics.
+    auxiliary=[e for e in cases if "preset" not in e]
+    crops=[e for e in auxiliary if e.get("kind")=="source_preserving_crop_pixels"]
+    movies=[e for e in auxiliary if "mp4" in e]
+    need(len(auxiliary)==2 and len(crops)==1 and len(movies)==1,
+         "unknown/missing non-preset crop/H264 diagnostic")
+    crop=crops[0]
+    need(crop.get("source")=="SYNTHETIC_B1_COMPILED_NOT_REAL_RIGHTS" and
+         isinstance(crop.get("originalSha256"),str) and len(crop["originalSha256"])==64,
+         "crop provenance or original SHA missing")
+    png(crop["before"]["path"],crop["before"]["sha256"])
+    png(crop["after"]["path"],crop["after"]["sha256"])
+    need(crop["before"]["sha256"]!=crop["after"]["sha256"] and
+         crop.get("roi",{}).get("changedPixels",0)>0,
+         "source-preserving crop does not change actual pixels")
+    movie=movies[0]
+    video=Path(movie["mp4"])
+    need(movie.get("source")=="SYNTHETIC" and video.is_file() and
+         hashlib.sha256(video.read_bytes()).hexdigest()==movie.get("sha256"),
+         "H264 original bytes/SHA invalid")
+    ffprobe=movie.get("ffprobe") or {}
+    need(ffprobe.get("codec_name")=="h264" and
+         (ffprobe.get("width"),ffprobe.get("height"))==(1920,1080) and
+         ffprobe.get("r_frame_rate")=="30/1","native H264/FFprobe evidence invalid")
+    need(set(e["preset"] for e in cases if "preset" in e)==set(names),
+         "orphan/unknown preset evidence")
 
 def mutations(reg,sem,phase):
     def reject(label,modify):
