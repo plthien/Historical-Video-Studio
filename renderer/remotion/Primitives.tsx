@@ -154,7 +154,7 @@ function motionForLayer(scene:Scene,layer:Layer,frame:number,media:ResolvedMedia
     // manufacture historical intermediates from a final scalar or boolean.
     if(media.sourceKind==='APPROVED_LOCAL'){
       const series=verifiedApprovedCount(e,layer,media);
-      const offset=Math.max(0,Math.min(e.duration_frames,frame-e.start_frame));
+      const offset=Math.max(0,Math.min(e.duration_frames,frame-e.start_frame>=e.duration_frames-1 ? e.duration_frames : frame-e.start_frame));
       // Hold the most recently reviewed exact decimal string. No interpolation.
       const row=series.observations.filter(o=>o.frameOffset<=offset).at(-1)??series.observations[0];
       visibleText=row.value;
