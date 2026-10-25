@@ -13,6 +13,7 @@
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "test:frames": "tsx scripts/evidence.ts frames",
     "test:repair": "tsx scripts/repair-g03-g06.ts && tsx scripts/visual-repair.ts",
+    "test:pr10": "tsx scripts/pr10-evidence.ts",
     "render:smoke": "tsx scripts/evidence.ts render"
   },
   "dependencies": {
