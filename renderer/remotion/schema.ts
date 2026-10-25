@@ -185,7 +185,8 @@ export function assertMedia(t:Timeline,m:ResolvedMedia){
       meta.derivativeSha256!==raster.originalSha256||meta.parentCandidateId!==l.asset_id||
       meta.parentOriginalSha256!==parent.originalSha256||!meta.reviewId.startsWith('mask_review_')||
       raster.mime!=='image/png'||meta.width<4||meta.height<4||meta.width>4096||meta.height>4096||
-      JSON.stringify(meta.sourceCrop)!==JSON.stringify({x:0,y:0,w:1,h:1})||
+      Object.keys(meta.sourceCrop).length!==4||
+      meta.sourceCrop.x!==0||meta.sourceCrop.y!==0||meta.sourceCrop.w!==1||meta.sourceCrop.h!==1||
       l.layer_kind!=='portrait'&&l.layer_kind!=='archival_photo')
     fail('RENDER_MASK_DERIVATIVE_UNAPPROVED',l.layer_id,
          'G3-reviewed alpha derivative, exact parent, dimensions and full source transform required');
