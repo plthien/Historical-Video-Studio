@@ -61,7 +61,16 @@ function motionForLayer(scene:Scene,layer:Layer,frame:number,media:ResolvedMedia
   const stagger=e.preset_id==='stagger-reveal'&&ordered?.includes(layer.layer_id);
   const dissolve=e.preset_id==='cross-dissolve'&&
    (e.params.out_layer_id===layer.layer_id||e.params.in_layer_id===layer.layer_id);
-  if(e.layer_id!==layer.layer_id&&!e.affected_layer_ids.includes(layer.layer_id)&&!stagger&&!dissolve)continue;
+  // A discrete hard cut removes the preceding authored focus surface exactly
+  // at the cue boundary, not a fictitious opacity tween before the cue.
+  const earlier=e.preset_id==='hard-cut'?
+   scene.staging.beat_sequence.filter(beat=>beat.local_start_frame<e.start_frame)
+     .sort((x,y)=>x.local_start_frame-y.local_start_frame):[];
+  const outgoingCut=earlier.length?earlier[earlier.length-1].focus_layer_id:null;
+  const cutOutgoing=e.preset_id==='hard-cut'&&outgoingCut===layer.layer_id&&
+   outgoingCut!==e.layer_id;
+  if(e.layer_id!==layer.layer_id&&!e.affected_layer_ids.includes(layer.layer_id)&&
+      !stagger&&!dissolve&&!cutOutgoing)continue;
   const delay=stagger?ordered!.indexOf(layer.layer_id)*Number(e.params.gap_frames??6):0;
   const starts=e.start_frame+delay;
   // A transition cannot retrospectively hide a layer that was already staged
@@ -191,7 +200,12 @@ function motionForLayer(scene:Scene,layer:Layer,frame:number,media:ResolvedMedia
    case 'whip-pan':break; // Screen-space transition is applied once outside the camera subtree.
    case 'camera-push':case 'camera-pan':break; // camera is sampled separately
    case 'freeze-hold':break;
-   case 'hard-cut':opacity*=p>0?1:0;break;
+   case 'hard-cut':
+    if(outgoingCut===e.layer_id&&e.start_frame>0)
+     fail('RENDER_CUT_SURFACE_AMBIGUOUS',e.event_id,
+       'Hard cut needs a distinct preceding focus and incoming frozen layer');
+    if(cutOutgoing)opacity=0;
+    break; // incoming immediately uses its unmodified frozen image; zero fade
    case 'editorial-connector-draw':case 'route-line-draw':break; // exact reviewed geometry below
    default:fail('RENDER_MOTION_UNIMPLEMENTED',e.event_id,'Compiled motion not implemented in B2-01..03; cannot silently ignore');
   }
