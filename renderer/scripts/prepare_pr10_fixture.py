@@ -71,6 +71,12 @@ def prepare(mode:str):
     story["sections"]=[x for x in story["sections"] if x["section_id"] in secids]
     story["claims"]=[x for x in story["claims"] if x["claim_id"] in claimids]
     story["asset_requirements"]=[x for x in story["asset_requirements"] if x["requirement_id"] in reqids]
+    # Standalone synthetic fixtures need strictly ordered, distinct source-word cues.
+    # The canonical multi-template example reuses occurrence=0 for a visual
+    # demonstration; it is not a valid successive beat boundary in G2 timing.
+    beats=setup["direction"]["visual_beats"]
+    if len(beats)>=3 and beats[1]["cue"]["phrase"]==beats[2]["cue"]["phrase"]:
+        beats[2]["cue"]["occurrence"]=1
     claim=story["claims"][0]["claim_id"]
     story["claims"][0]["source_leads"]=[{"url":"https://example.org/synthetic-test-only","title":"Synthetic fixture—not historical evidence"}]
     story["claims"][0]["text"]="SYNTHETIC TEST SOURCE — numeric/mask renderer mechanics only"
