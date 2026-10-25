@@ -2,7 +2,7 @@ import {test,expect} from '@playwright/test';
 import {PNG} from 'pngjs';
 import {existsSync,renameSync} from 'node:fs';
 import {resolve} from 'node:path';
-import type {Motion} from '../../../renderer/remotion/schema';
+import type {Motion,ResolvedMedia} from '../../../renderer/remotion/schema';
 
 test('storyboard-editor uses real persisted G4 scenes and native read-only Player',async({page,request})=>{
  test.skip(process.env.HVS_B2_FIXTURE!=='1','Requires native Windows controlled SQLite G4, never mocked HTTP fixtures');
@@ -28,7 +28,8 @@ test('storyboard-editor uses real persisted G4 scenes and native read-only Playe
  // Native fixture contains real copied G3-authorized synthetic source bytes.
  // Temporarily hide exactly one original to exercise HTTP 424 through actual
  // browser UI and Windows SQLite host, then always restore before other edits.
- const candidate=Object.values(initialPreview.props.media.assets)[0];
+ const approvedAssets:ResolvedMedia['assets']=initialPreview.props.media.assets;
+ const candidate=Object.values(approvedAssets)[0];
  expect(candidate,'preview fixture must have an approved synthetic original').toBeDefined();
  const originalSha=candidate!.originalSha256;
  const root=resolve(import.meta.dirname,'../../..');
