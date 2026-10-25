@@ -14,6 +14,10 @@ from backend.app.director.compiler import compile_timeline
 from backend.app.director.blueprint import normalize_story
 from backend.app.director.layout import windows_font_measure
 from backend.app.director.fingerprint import canonical
+from backend.app.director.timing import bind_beats
+from backend.app.director.camera import build_camera
+from backend.app.director.layers import build_layers
+from backend.app.director.layout import selected_layout
 
 ROOT = Path(__file__).resolve().parents[2]
 outdir=ROOT / "renderer" / ".artifacts"
@@ -24,6 +28,7 @@ story, bp, words, final, assets, maps=synthetic_ten_template_inputs()
 registry=json.loads((ROOT/"contracts/registries/layouts.v1.json").read_text())["layouts"]
 payloads={p["setup_id"]:p["template_payload"] for p in bp["setup_plans"]}
 compiled={}
+camera_controls={}
 for variant in ("A","B","C"):
     authored=copy.deepcopy(story)
     for setup in authored["visual_setups"]:
@@ -75,7 +80,34 @@ for variant in ("A","B","C"):
     if len(timeline["scenes"])!=10:
         raise RuntimeError("Expected one real compiled scene for each T01..T10")
     compiled[variant]=timeline
+    # True camera-off counterfactual: re-run the owning B1 camera compiler
+    # on the SAME unmodified plan/layers/G2 timing and suppress ONLY the
+    # compiled camera preset event, never hand-edit sampled keyframes.
+    control=copy.deepcopy(timeline)
+    beat_rows=bind_beats(current, words,
+                         audio_sha256=variant_audio["audio_sha256"],
+                         transcript_sha256=variant_audio["transcript_sha256"],
+                         audio_total_samples=variant_audio["duration_samples"])
+    requirements={req["requirement_id"]:req for req in authored["asset_requirements"]}
+    for compiled_scene in control["scenes"]:
+        authored_plan=next(p for p in current["setup_plans"]
+                           if p["setup_id"]==compiled_scene["setup_id"])
+        camera_events=[event for event in compiled_scene["events"]
+                       if event["preset_id"] in ("camera-pan","camera-push")]
+        if not camera_events:
+            continue
+        source_layers, refs=build_layers(authored_plan,assets,requirements,
+                                        maps=maps,font_measure=measure)
+        rows=[beat for beat in beat_rows if beat["setup_id"]==compiled_scene["setup_id"]]
+        compiled_scene["camera"]=build_camera(
+            authored_plan,source_layers,rows,refs,
+            duration_frames=compiled_scene["duration_frames"],
+            limits=selected_layout(authored_plan)["camera_limits"])
+        compiled_scene["events"]=[event for event in compiled_scene["events"]
+                                   if event["preset_id"] not in ("camera-pan","camera-push")]
+    camera_controls[variant]=control
 (outdir/"compiled-30.json").write_bytes(canonical(compiled))
+(outdir/"compiled-camera-off.json").write_bytes(canonical(camera_controls))
 print(json.dumps({"source":"SYNTHETIC B1 compiler, NOT G4 approval",
                   "templates":len(compiled["A"]["scenes"]),
                   "variants":len(compiled),"font_sha256":identity["font_sha256"],
