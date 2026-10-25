@@ -226,6 +226,15 @@ class NumericSeries:
             obs = data["observations"]
             if len(obs) < 3 or obs[0]["frame_offset"] != 0 or obs[-1]["frame_offset"] != data["authored_duration_frames"]:
                 _fail("NUMERIC_SERIES_INVALID", claim_id, "Include start, intermediate and exact end frames.")
+            if data["precision"]>3 or not re.fullmatch(r"[A-Za-z][A-Za-z0-9_ /%-]{0,31}",data["unit"]):
+                _fail("NUMERIC_SERIES_INVALID",claim_id,"Display precision or unit cannot be rendered faithfully.")
+            if not _DECIMAL.fullmatch(data["start_value"]) or not _DECIMAL.fullmatch(data["end_value"]):
+                _fail("NUMERIC_SERIES_INVALID",claim_id,"Endpoints must be canonical reviewed decimals.")
+            values=[Decimal(v["value"]) for v in obs if _DECIMAL.fullmatch(v["value"])]
+            if len(values)==len(obs):
+                direction=1 if values[-1]>=values[0] else -1
+                if any(direction*(n-p)<0 for p,n in zip(values,values[1:])):
+                    _fail("NUMERIC_SERIES_INVALID",claim_id,"Reviewed values must not backtrack between authorized frames.")
             last = -1
             for entry in obs:
                 offset, value, evidence = entry["frame_offset"], entry["value"], entry["source_evidence_sha256"]
@@ -236,7 +245,7 @@ class NumericSeries:
                     d = Decimal(value)
                 except InvalidOperation:
                     _fail("NUMERIC_SERIES_INVALID", claim_id, "Value must be finite decimal.")
-                if not d.is_finite() or -d.as_tuple().exponent > data["precision"]:
+                if not d.is_finite() or abs(d)>1_000_000_000 or -d.as_tuple().exponent > data["precision"]:
                     _fail("NUMERIC_SERIES_INVALID", claim_id, "Value exceeds reviewed decimal precision.")
                 if not _SHA.fullmatch(evidence):
                     _fail("NUMERIC_SERIES_UNVERIFIED", claim_id, "Evidence SHA invalid.")
