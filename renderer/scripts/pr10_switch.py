@@ -38,6 +38,23 @@ def choose(label):
         new_page=client.get(root+"/scenes").json()
         new_layer=next(x for x in new_page["scenes"][0]["layers"] if x["layer_id"]==layer["layer_id"])
         assert new_layer["asset_id"]==candidate
+    if label=="b":
+        # G07: a subsequent real operator placement edit must not reset B to A.
+        baseline_x=layer["rect_px"]["x"]
+        delta=1 if baseline_x+layer["rect_px"]["w"]<1920 else -1
+        for step,new_x in (("move",baseline_x+delta),("restore",baseline_x)):
+            persisted=client.get(root+"/scenes").json()
+            updated=client.patch(root+f"/scenes/{scene['scene_id']}",
+                json={"expected_revision":persisted["project_revision"],
+                      "scene_id":scene["scene_id"],
+                      "changes":{"layer_edits":[{"layer_id":layer["layer_id"],"x_px":new_x}]}},
+                headers={"Idempotency-Key":f"PR10-A-B-persist-{step}-{persisted['project_revision']}"})
+            assert updated.status_code==200,updated.text
+            reread=client.get(root+"/scenes").json()
+            reread_layer=next(x for x in reread["scenes"][0]["layers"]
+                              if x["layer_id"]==layer["layer_id"])
+            assert reread_layer["asset_id"]==candidate,("G4_SELECTED_SOURCE_REVERTED",step)
+            assert reread_layer["rect_px"]["x"]==new_x
     after={x["gate_id"]:x["approval_id"] for x in _gate_heads(store,project)}
     assert before==after,"G4 selection must not mint G1/G2/G3 approvals"
     print(json.dumps({"state":"LOCAL_PASS","selection":label,"candidate":candidate,
