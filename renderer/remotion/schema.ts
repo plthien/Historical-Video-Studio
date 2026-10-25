@@ -8,8 +8,9 @@ export type MediaKind = 'SYNTHETIC'|'APPROVED_LOCAL';
 export type MediaItem={assetId:string; originalSha256:string; mime:'image/png'|'image/jpeg'|'image/webp'; dataUri:string; sourceKind:MediaKind; approvalRecordId:string};
 export type Geometry = {geometryRef:string; coordinates:[number,number][]; coordinateSpace:'WGS84'|'ANNOTATION_CANVAS'; sourceOriginalSha256:string; historicalMapId:string|null; reviewedYear:number|null; bbox:[number,number,number,number]|null};
 export type ReviewedMap={historicalMapId:string;projection:string;viewport:[number,number,number,number];reviewedYear:number;sourceOriginalSha256:string;coordinateKind:'geo_wgs84'|'raster_uv'};
+export type MaskDerivative={derivativeAssetId:string;derivativeSha256:string;parentCandidateId:string;parentOriginalSha256:string;reviewId:string;width:number;height:number;sourceCrop:{x:number;y:number;w:number;h:number}};
 export type ApprovedNumericSeries={seriesId:string;claimId:string;storySha256:string;g1ApprovalId:string;approvalId:string;seriesSha256:string;durationFrames:number;precision:number;unit:string;startValue:string;endValue:string;observations:{frameOffset:number;value:string;evidenceSha256:string}[]};
-export type ResolvedMedia={approvedNumericSeries?:Record<string,ApprovedNumericSeries>;assets:Record<string,MediaItem>; geometries:Record<string,Geometry>; maps:Record<string,ReviewedMap>; fontFamily:string; fontSha256:string; fontDataUri:string; sourceKind:MediaKind; syntheticNumericSeries?:Record<string,{fixtureId:string;values:number[]}>; authorizingG4ManifestSha256:string};
+export type ResolvedMedia={maskDerivatives?:Record<string,MaskDerivative>;approvedNumericSeries?:Record<string,ApprovedNumericSeries>;assets:Record<string,MediaItem>; geometries:Record<string,Geometry>; maps:Record<string,ReviewedMap>; fontFamily:string; fontSha256:string; fontDataUri:string; sourceKind:MediaKind; syntheticNumericSeries?:Record<string,{fixtureId:string;values:number[]}>; authorizingG4ManifestSha256:string};
 export type Layer={word_spans?:{word_id:string;word_text:string;start:number;end:number}[];layer_id:string; layer_kind:string; asset_id:string|null; text:string|null; source_claim_id:string|null; z_index:number;depth_order:number;rect_px:Rect; crop_normalized:Rect;object_fit:'contain'|'cover'|'fill';mask:{kind:string;asset_id:string|null;feather_px:number};map_binding:{historical_map_id:string;feature_id:string|null;coordinate_kind:string;anchor_latlon:[number,number]|null}|null; parent_layer_id:string|null;group_id:string; text_layout:{font_size_px:number;line_height:number;max_lines:number;horizontal_align:string;vertical_align:string}|null; template_slot_id:string;source_asset_slot_id:string|null; path_geometry_ref:string|null; treatment:{kind:string;source_preserving:boolean;evidence_badge:string}};
 export type Key={frame:number;value:number;easing:string};
 export type Motion={event_id:string; layer_id:string; preset_id:string;start_frame:number; duration_frames:number;params:Record<string,unknown>;keyframes:Key[];motion_space:string;affected_layer_ids:string[];animated_property:string;stagger:{order:string[];offset_frames:number}|null};
@@ -70,12 +71,13 @@ export function assertTimeline(input:unknown):asserts input is Timeline {
     fail('TYPOGRAPHY_OVERFLOW',l.layer_id,
       'A full source-text line exceeds its authored layer height');
    if(c.x<0||c.y<0||c.w<=0||c.h<=0||c.x+c.w>1.0000001||c.y+c.h>1.0000001)fail('RENDER_CROP_INVALID',l.layer_id,'UV outside original');
-   if(l.mask.kind==='polygon_asset')
-    fail('RENDER_MASK_DERIVATIVE_UNAPPROVED',l.layer_id,'Polygon mask needs a separately reviewed G3 derivative source, unavailable in this contract');
-   if(!['none','rectangle','ellipse'].includes(l.mask.kind)||
+   if(!['none','rectangle','ellipse','polygon_asset'].includes(l.mask.kind)||
       (l.mask.kind==='none'&&l.mask.feather_px!==0)||
-      (l.mask.kind!=='none'&&l.mask.asset_id!==null))
-    fail('RENDER_MASK_UNTRUSTED',l.layer_id,'Only geometry-native masks can omit a G3 mask asset');
+      (l.mask.kind==='polygon_asset'?!l.mask.asset_id:
+       l.mask.asset_id!==null))
+    fail('RENDER_MASK_UNTRUSTED',l.layer_id,'Native shapes never carry assets; polygon requires reviewed derivative.');
+   if(l.mask.kind==='polygon_asset'&&!s.asset_ids.includes(l.mask.asset_id!))
+    fail('RENDER_MASK_UNTRUSTED',l.layer_id,'Reviewed derivative must be pinned in scene asset manifest');
    if(l.mask.feather_px>40)fail('RENDER_MASK_FEATHER',l.layer_id,'Limit native feather to 40 pixels');
    if(l.parent_layer_id&&!ids.has(l.parent_layer_id))fail('RENDER_PARENT_UNKNOWN',l.layer_id,'Unknown hierarchy parent');
    if(l.asset_id&&!s.asset_ids.includes(l.asset_id))fail('RENDER_ASSET_UNLISTED',l.layer_id,'Asset absent from frozen scene manifest');
@@ -176,6 +178,20 @@ export function assertMedia(t:Timeline,m:ResolvedMedia){
  if(!m|| !/^[a-f0-9]{64}$/.test(m.authorizingG4ManifestSha256))fail('RENDER_DRAFT_UNTRUSTED',t.project_id,'Node must attach verified G4 draft manifest');
  if(!/^[a-f0-9]{64}$/.test(m.fontSha256)||!m.fontDataUri.startsWith('data:font/'))fail('RENDER_FONT_UNTRUSTED',t.project_id,'Pinned local font required');
  for(const s of t.scenes)for(const l of s.layers){
+  if(l.mask.kind==='polygon_asset'){
+   const id=l.mask.asset_id ?? fail('RENDER_MASK_DERIVATIVE_UNAPPROVED',l.layer_id,'No G3 derivative ID');
+   const meta=m.maskDerivatives?.[id], raster=m.assets[id], parent=l.asset_id&&m.assets[l.asset_id];
+   if(!meta||!raster||!parent||meta.derivativeAssetId!==id||
+      meta.derivativeSha256!==raster.originalSha256||meta.parentCandidateId!==l.asset_id||
+      meta.parentOriginalSha256!==parent.originalSha256||!meta.reviewId.startsWith('mask_review_')||
+      raster.mime!=='image/png'||meta.width<4||meta.height<4||meta.width>4096||meta.height>4096||
+      JSON.stringify(meta.sourceCrop)!==JSON.stringify({x:0,y:0,w:1,h:1})||
+      l.layer_kind!=='portrait'&&l.layer_kind!=='archival_photo')
+    fail('RENDER_MASK_DERIVATIVE_UNAPPROVED',l.layer_id,
+         'G3-reviewed alpha derivative, exact parent, dimensions and full source transform required');
+   if(l.crop_normalized.x!==0||l.crop_normalized.y!==0||l.crop_normalized.w!==1||l.crop_normalized.h!==1)
+    fail('RENDER_MASK_CROP_UNSUPPORTED',l.layer_id,'Re-review a mask for non-full source crops');
+  }
   if(l.asset_id){let a=m.assets[l.asset_id];if(!a||a.assetId!==l.asset_id||!a.originalSha256||!a.approvalRecordId||!a.dataUri.startsWith('data:image/'))fail('RENDER_MEDIA_UNTRUSTED',l.layer_id,'Asset bytes/rights need local verified resolver');}
   if(l.map_binding){
    const map=m.maps[l.map_binding.historical_map_id];
