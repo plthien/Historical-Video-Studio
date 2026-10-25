@@ -48,6 +48,17 @@ class NumericSeries:
                     revoked_approval_id TEXT NOT NULL, reason TEXT NOT NULL,
                     committed_revision INTEGER NOT NULL
                 );
+                CREATE TABLE IF NOT EXISTS numeric_series_binding_events(
+                    binding_id TEXT PRIMARY KEY, project_id TEXT NOT NULL,
+                    claim_id TEXT NOT NULL, series_id TEXT NOT NULL,
+                    approval_id TEXT NOT NULL, series_sha256 TEXT NOT NULL,
+                    reason TEXT NOT NULL, committed_revision INTEGER NOT NULL
+                );
+                CREATE TABLE IF NOT EXISTS numeric_series_binding_heads(
+                    project_id TEXT NOT NULL, claim_id TEXT NOT NULL,
+                    binding_id TEXT NOT NULL REFERENCES numeric_series_binding_events(binding_id),
+                    PRIMARY KEY(project_id,claim_id)
+                );
                 CREATE TABLE IF NOT EXISTS numeric_series_heads(
                     project_id TEXT NOT NULL, claim_id TEXT NOT NULL,
                     series_id TEXT NOT NULL, approval_id TEXT NOT NULL,
@@ -74,6 +85,57 @@ class NumericSeries:
                        and self._gate_status(db, project_id)[0] == "APPROVED")
             return {"approval_id": row[0], "series_sha256": row[1],
                     "current": current, "series": snapshot}
+
+    def bind(self, project_id: str, claim_id: str, series_id: str, expected_revision: int, reason: str):
+        """Explicit operator disambiguation; does not alter G1's factual gate head."""
+        if len(reason.strip()) < 8:
+            _fail("NUMERIC_BINDING_INVALID", claim_id, "Record an operator selection reason.")
+        selected = self.get(project_id, claim_id, series_id)
+        if not selected or not selected["current"]:
+            _fail("NUMERIC_SERIES_UNVERIFIED", claim_id, "Only a current G1-reviewed series is selectable.")
+        with self.store._transaction() as db:
+            rev = GateService._check_revision(db, project_id, expected_revision)
+            current = db.execute("""SELECT e.approval_id,e.series_sha256 FROM numeric_series_heads h
+                JOIN numeric_series_events e ON h.approval_id=e.approval_id
+                WHERE h.project_id=? AND h.claim_id=? AND h.series_id=?""",
+                (project_id, claim_id, series_id)).fetchone()
+            if current != (selected["approval_id"], selected["series_sha256"]) or self._gate_status(db,project_id)[0]!="APPROVED":
+                _fail("NUMERIC_SERIES_SOURCE_STALE", claim_id, "Series changed during operator binding.")
+            binding_id = "numeric_bind_" + uuid4().hex
+            db.execute("INSERT INTO numeric_series_binding_events VALUES(?,?,?,?,?,?,?,?)",
+                       (binding_id,project_id,claim_id,series_id,current[0],current[1],reason.strip(),rev+1))
+            db.execute("""INSERT INTO numeric_series_binding_heads VALUES(?,?,?)
+                ON CONFLICT(project_id,claim_id) DO UPDATE SET binding_id=excluded.binding_id""",
+                (project_id,claim_id,binding_id))
+            mark_stale(db,project_id,"numeric_series")
+            db.execute("UPDATE projects SET revision=? WHERE project_id=?",(rev+1,project_id))
+            return {"binding_id":binding_id,"series_id":series_id,"series_sha256":current[1],"project_revision":rev+1}
+
+    def resolved_for(self, project_id: str, claim_id: str):
+        """Read only the current immutable head; multiple candidates need human selection."""
+        with self.store._connection() as db:
+            rows = db.execute("""SELECT e.series_id,e.approval_id,e.series_sha256
+                FROM numeric_series_heads h JOIN numeric_series_events e ON h.approval_id=e.approval_id
+                WHERE h.project_id=? AND h.claim_id=? ORDER BY e.series_id""",
+                (project_id,claim_id)).fetchall()
+            bound = db.execute("""SELECT e.series_id,e.approval_id,e.series_sha256
+                FROM numeric_series_binding_heads h JOIN numeric_series_binding_events e ON e.binding_id=h.binding_id
+                WHERE h.project_id=? AND h.claim_id=?""",(project_id,claim_id)).fetchone()
+        if bound:
+            if bound not in rows:
+                _fail("NUMERIC_SERIES_SOURCE_STALE",claim_id,"Selected numeric series is revoked or superseded.")
+            selected = bound
+        elif len(rows)==1:
+            selected = rows[0]
+        elif len(rows)>1:
+            _fail("NUMERIC_SERIES_AMBIGUOUS",claim_id,"Operator must bind one eligible series before compilation.")
+        else:
+            return None
+        record=self.get(project_id,claim_id,selected[0])
+        if not record or not record["current"] or record["approval_id"]!=selected[1] or record["series_sha256"]!=selected[2]:
+            _fail("NUMERIC_SERIES_SOURCE_STALE",claim_id,"G1/current reviewed numeric head is stale.")
+        return {**record["series"],"approval_id":record["approval_id"],
+                "series_sha256":record["series_sha256"]}
 
     def _gate_status(self, db, project_id):
         service = GateService.__new__(GateService)
