@@ -778,7 +778,8 @@ def revise_g4(store, project_id: str, previous: dict, original_blueprint: dict,
                 if not isinstance(patch, dict) or not patch or set(patch)-{"x", "y", "w", "h"}:
                     _block("G4_LAYOUT_INVALID", layer["layer_id"], "Pixel edit must contain only position or dimensions.")
                 original = previous_layers.get(layer["layer_id"])
-                if not original or original["asset_id"] != layer["asset_id"] or original["source_claim_id"] != layer["source_claim_id"]:
+                if (not original or original["source_asset_slot_id"] != layer["source_asset_slot_id"] or
+                    original["source_claim_id"] != layer["source_claim_id"]):
                     _block("G4_LAYOUT_INVALID", layer["layer_id"], "Only the same frozen factual layer can be repositioned.")
                 rectangle = {**layer["rect_px"], **patch}
                 if any(type(v) is not int for v in rectangle.values()) or rectangle["x"] < 0 or rectangle["y"] < 0 or rectangle["w"] < 1 or rectangle["h"] < 1 or rectangle["x"]+rectangle["w"] > 1920 or rectangle["y"]+rectangle["h"] > 1080:
@@ -847,14 +848,16 @@ def revise_g4(store, project_id: str, previous: dict, original_blueprint: dict,
                                              "new_direction": edited_blueprint,
                                              "crop_overrides": persisted_crops,
                                              "layer_overrides": persisted_layers,
-                                             "motion_overrides": persisted_motion})
+                                             "motion_overrides": persisted_motion,
+                                             "asset_selection_overrides": persisted_selections})
     validate_document("CompiledTimeline.v1", out)
     draft.publish(store, project_id, out, edited_blueprint, current_maps,
                   manifest["map_requests"], manifest["font_identity"],
                   expected_revision=expected_revision, previous=trusted,
-                  edit_kind="scene_layout" if edited_blueprint != original_blueprint or layer_overrides or motion_overrides else "scene_crop",
+                  edit_kind="scene_layout" if edited_blueprint != original_blueprint or layer_overrides or motion_overrides or asset_selection_overrides else "scene_crop",
                   layer_overrides=persisted_layers, crop_overrides=persisted_crops,
-                  motion_overrides=persisted_motion)
+                  motion_overrides=persisted_motion,
+                  asset_selection_overrides=persisted_selections)
     return {"timeline": out, "recomputed_setup_ids": sorted(changed),
             "retained_setup_ids": sorted(set(index) - changed),
             "project_revision": expected_revision+1, "stale_gates": ["G4","G5"]}
