@@ -45,8 +45,16 @@ def current_numeric_heads(store, project):
             FROM numeric_series_heads h JOIN numeric_series_events e
               ON e.approval_id=h.approval_id
             WHERE h.project_id=? ORDER BY e.claim_id,e.series_id""", (project,)).fetchall()
-    return {claim + ":" + series: {"approval_id": approval, "series_sha256": sha}
-            for claim, series, approval, sha in rows}
+        bindings=db.execute("""SELECT e.claim_id,e.binding_id,e.series_id,e.approval_id,e.series_sha256
+            FROM numeric_series_binding_heads h JOIN numeric_series_binding_events e
+              ON e.binding_id=h.binding_id WHERE h.project_id=? ORDER BY e.claim_id""",
+            (project,)).fetchall()
+    heads={claim + ":" + series: {"approval_id":approval,"series_sha256":sha}
+           for claim,series,approval,sha in rows}
+    heads.update({"binding:"+claim:{"binding_id":binding,"series_id":series,
+                                     "approval_id":approval,"series_sha256":sha}
+                  for claim,binding,series,approval,sha in bindings})
+    return heads
 
 
 def ensure(store):
