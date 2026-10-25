@@ -1,7 +1,7 @@
 import React from 'react';
 import {Img} from 'remotion';
 import type {Scene,Layer,Motion,ResolvedMedia} from './schema';
-import {fail} from './schema';
+import {fail,verifiedSyntheticCount} from './schema';
 
 const clamp=(v:number)=>Math.min(1,Math.max(0,v));
 const mix=(a:number,b:number,t:number)=>a+(b-a)*t;
@@ -150,28 +150,10 @@ function motionForLayer(scene:Scene,layer:Layer,frame:number,media:ResolvedMedia
     break;
    }
    case 'number-count':{
-    const source=e.params.source_claim_id, end=Number(e.params.end_value);
-    if(source!==layer.source_claim_id||!layer.text||Number(layer.text.replace(/,/g,''))!==end||
-       e.params.intermediate_truthful!==true)
-      fail('RENDER_COUNT_FACT_UNVERIFIED',e.event_id,'Number progression must be explicitly truth-safe and equal frozen exact factual text');
-    // The frozen G1 final scalar does not authorize intermediate historical values.
-    // Synthetic test media can separately prove the rendering mechanism; an
-    // APPPROVED_LOCAL manifest can never supply or mint this fixture.
-    const series=media.sourceKind==='SYNTHETIC' ? media.syntheticNumericSeries?.[String(source)] : undefined;
-    if(!series) return fail('RENDER_NUMBER_SERIES_UNVERIFIED',e.event_id,
-      'A production claim needs source-authorized G1 intermediates; no synthetic mechanism fixture can approve a claim');
-    const values=series.values;
-    if(!series.fixtureId.startsWith('synthetic_')||!Array.isArray(values)||
-       values.length<2||values.some(v=>typeof v!=='number'||!Number.isFinite(v))||
-       values[0]!==Number(e.params.start_value)||values.at(-1)!==end)
-      return fail('RENDER_NUMBER_SERIES_UNVERIFIED',e.event_id,
-       'Synthetic numeric fixture must have explicit identity and exact registered endpoints');
-    const precision=Number(e.params.precision),direction=Math.sign(end-values[0]);
-    if(!Number.isInteger(precision)||precision<0||precision>3||
-       values.some((v,i)=>Number(v.toFixed(precision))!==v||
-          (i>0&&direction*(v-values[i-1])<0)))
-      return fail('RENDER_NUMBER_SERIES_INVALID',e.event_id,
-       'Synthetic intermediate values must preserve precision and chronological ordering');
+    // Same provenance validator is used pre-render by assertMedia. Never
+    // manufacture historical intermediates from a final scalar or boolean.
+    const values=verifiedSyntheticCount(e,layer,media);
+    const precision=Number(e.params.precision);
     const index=Math.min(values.length-1,Math.floor(p*(values.length-1)));
     visibleText=values[index].toFixed(precision);
     break;
