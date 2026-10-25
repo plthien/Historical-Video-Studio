@@ -303,7 +303,8 @@ def compile_timeline(story: dict, blueprint: dict, word_map: dict, final_audio: 
             final_audio["story_revision_sha256"] != story_id):
         _block("ALIGNMENT_SOURCE_STALE", blueprint["project_id"],
                "Word map and final approved WAV must share project/story/audio/transcript identities.")
-    if not approved_assets or font_measure is None or not font_identity:
+    if (font_measure is None or not font_identity or
+        (not approved_assets and any(r["required"] for r in story["asset_requirements"]))):
         _block("COMPILER_DEPENDENCY_MISSING", blueprint["project_id"],
                "Bind current approved G3 sources and measured pinned font identity.")
     required = {r["requirement_id"]: r for r in story["asset_requirements"]}
