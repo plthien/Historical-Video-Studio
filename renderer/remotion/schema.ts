@@ -103,7 +103,7 @@ export function verifiedSyntheticCount(e:Motion, layer:Layer, media:ResolvedMedi
   fail('RENDER_COUNT_FACT_UNVERIFIED',e.event_id,'Frozen factual endpoint/claim mismatch');
  const series=media.sourceKind==='SYNTHETIC'?
     media.syntheticNumericSeries?.[String(claim)]:undefined;
- if(!series)fail('RENDER_NUMBER_SERIES_UNVERIFIED',e.event_id,
+ if(!series)return fail('RENDER_NUMBER_SERIES_UNVERIFIED',e.event_id,
    'Only a synthetic sequence can prove mechanics without G1 reviewed intermediates');
  const values=series.values;
  if(typeof series.fixtureId!=='string'||!series.fixtureId.startsWith('synthetic_')||
@@ -125,7 +125,7 @@ export function assertMedia(t:Timeline,m:ResolvedMedia){
  for(const scene of t.scenes)for(const event of scene.events){
   if(event.preset_id!=='number-count')continue;
   const layer=scene.layers.find(item=>item.layer_id===event.layer_id);
-  if(!layer)fail('RENDER_COUNT_TARGET_UNRESOLVED',event.event_id,'Numeric display layer missing');
+  if(!layer)return fail('RENDER_COUNT_TARGET_UNRESOLVED',event.event_id,'Numeric display layer missing');
   verifiedSyntheticCount(event,layer,m);
  }
  if(!m|| !/^[a-f0-9]{64}$/.test(m.authorizingG4ManifestSha256))fail('RENDER_DRAFT_UNTRUSTED',t.project_id,'Node must attach verified G4 draft manifest');
