@@ -144,7 +144,7 @@ def create_app(database: str | Path | None = None, media_root: str | Path | None
                                 "NUMERIC_SERIES_UNVERIFIED", "NUMERIC_SERIES_SOURCE_STALE"):
             status = 424
         elif exc.code in ("PROJECT_NOT_FOUND", "JOB_NOT_FOUND", "CLAIM_NOT_FOUND",
-                               "VOICE_SECTION_NOT_FOUND", "VOICE_ATTEMPT_NOT_FOUND"):
+                               "VOICE_SECTION_NOT_FOUND", "VOICE_ATTEMPT_NOT_FOUND", "NUMERIC_SERIES_NOT_FOUND"):
             status = 404
         else:
             status = 422
