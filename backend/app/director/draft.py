@@ -128,7 +128,7 @@ def load(store, project, *, allow_auxiliary_stale=False):
 def publish(store, project, timeline, blueprint, maps, map_requests, font_identity,
             *, expected_revision, previous=None, edit_kind=None, layer_overrides=None,
             crop_overrides=None, motion_overrides=None,
-            asset_selection_overrides=None):
+            asset_selection_overrides=None, reviewed_masks=None):
     """Immutable artifact publication first; atomic pointer/CAS/revision second.
 
     Failed CAS may leave unreachable content-addressed artifacts, never an
@@ -172,6 +172,7 @@ def publish(store, project, timeline, blueprint, maps, map_requests, font_identi
         "timeline_sha256":timeline_sha, "blueprint_sha256":blueprint_sha,
         "map_context_sha256":digest(maps), "map_requests_sha256":digest(map_requests),
         "maps":maps, "map_requests":map_requests, "font_identity":font_identity,
+        "reviewed_masks":reviewed_masks or {},
         "runtime_identity":_runtime_identity(),
         "gate_heads":approved_heads,
         "numeric_series_heads":numeric_heads,
