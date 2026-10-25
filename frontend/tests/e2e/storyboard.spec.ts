@@ -46,6 +46,7 @@ test('storyboard-editor uses real persisted G4 scenes and native read-only Playe
      const span=element as HTMLElement;
      const layer=span.parentElement as HTMLElement;
      const bounds=layer.getBoundingClientRect();
+     const stageBounds=layer.closest('[data-testid="player-stage"]')?.getBoundingClientRect();
      const glyphs:{left:number;right:number;top:number;bottom:number}[]=[];
      const walker=document.createTreeWalker(span,NodeFilter.SHOW_TEXT);
      let node=walker.nextNode() as Text|null;
@@ -67,10 +68,13 @@ test('storyboard-editor uses real persisted G4 scenes and native read-only Playe
      const visible=getComputedStyle(layer).opacity!=='0'&&glyphs.length>0;
      const clipped=visible&&glyphs.some(rect=>rect.left<bounds.left-1||
        rect.right>bounds.right+1||rect.top<bounds.top-1||rect.bottom>bounds.bottom+1);
+     const frameClipped=visible&&(!stageBounds||glyphs.some(rect=>
+       rect.left<stageBounds.left-1||rect.right>stageBounds.right+1||
+       rect.top<stageBounds.top-1||rect.bottom>stageBounds.bottom+1));
      const lines=[...new Set(glyphs.map(rect=>Math.round(rect.top*2)/2))].length;
      return {layerId:layer.dataset.layer??'',claimId:layer.dataset.claim??'',
        text:span.textContent??'',font:getComputedStyle(span).fontFamily,
-       fontSize:getComputedStyle(span).fontSize,visible,clipped,lines,glyphCount:glyphs.length,
+       fontSize:getComputedStyle(span).fontSize,visible,clipped,frameClipped,lines,glyphCount:glyphs.length,
        bounds:{x:bounds.x,y:bounds.y,width:bounds.width,height:bounds.height}};
    }));
  const measured=await measureCritical();
@@ -84,6 +88,7 @@ test('storyboard-editor uses real persisted G4 scenes and native read-only Playe
    expect(item.font.toLowerCase(),'GDI-backed pinned font family must reach Chromium').toContain(
     String(initialPreview.props.media.fontFamily).toLowerCase());
    expect(item.clipped,'critical glyph extends outside its authored viewport').toBeFalsy();
+   expect(item.frameClipped,'critical glyph extends outside the actual Player frame').toBeFalsy();
    expect(item.lines,'critical glyph line count exceeds authorial max_lines')
     .toBeLessThanOrEqual(source.text_layout!.max_lines);
  }
