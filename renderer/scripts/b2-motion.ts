@@ -82,6 +82,7 @@ const cases=[
 const serveUrl=await bundle({entryPoint:resolve(root,'remotion/entry.tsx')});
 const result:unknown[]=[];
 for(const row of cases){
+ try{
  const t=structuredClone(timeline);
  t.scenes[0].events.push(row.event);
  if(row.name==='hard-cut'){
@@ -221,6 +222,9 @@ for(const row of cases){
     throw Error(`B2_${row.name.toUpperCase().replace(/-/g,'_')}_RETROACTIVE_MOTION: transition changed pre-start frame`);
   result.push({preset:row.name,frame:before,preStartPixelMatch:true,source:'SYNTHETIC'});
  }
+ }catch(error){
+  result.push({preset:row.name,failure_reason:String(error),source:'SYNTHETIC_RENDER_FIXTURE'});
+ }
 }
 // Presets that require compiler-owned reviewed map/connector geometry or a
 // compiled camera track use their real B1 scenes rather than fabricated T03
@@ -228,11 +232,16 @@ for(const row of cases){
 const compiledPresetNames=new Set<string>();
 for(const presetId of ['route-line-draw','map-region-wipe','editorial-connector-draw',
                        'camera-pan','camera-push']){
+ try{
  const found=Object.entries({...compiled,camera_pan:cameraPanFixture.on}).flatMap(([variant,value])=>
    value.scenes.map(candidate=>({variant,value,candidate,
      event:candidate.events.find(item=>item.preset_id===presetId)})))
    .find(item=>item.event);
- if(!found||!found.event)continue;
+ if(!found||!found.event){
+  result.push({preset:presetId,failure_reason:'B1_COMPILED_PRESET_FIXTURE_MISSING',
+   source:'SYNTHETIC_B1_COMPILER_NOT_OPERATOR_APPROVED'});
+  continue;
+ }
  const t=structuredClone(found.value);
  const isolatedScene={...structuredClone(found.candidate),start_frame:0};
  t.scenes=[isolatedScene];t.total_frames=isolatedScene.duration_frames;
@@ -329,6 +338,10 @@ for(const presetId of ['route-line-draw','map-region-wipe','editorial-connector-
   typedRejection:rejected,source:'SYNTHETIC_B1_COMPILER_NOT_OPERATOR_APPROVED'});
  if(!rejected)throw Error('B2_MOTION_NEGATIVE_NOT_BLOCKED_'+presetId);
  compiledPresetNames.add(presetId);
+ }catch(error){
+  result.push({preset:presetId,failure_reason:String(error),
+   source:'SYNTHETIC_B1_COMPILER_NOT_OPERATOR_APPROVED'});
+ }
 }
 // Pixel discriminators for native shape + timed directional reveal.
 // A source-preserving change of native mask may not replace the G3 original.
@@ -577,6 +590,7 @@ const semanticRows=presets.presets.map(p=>{
  const authority=proof.some(e=>e.source==='OPERATOR_APPROVED'&&e.approvalChecked===true);
  const reasons=[
   ...(!phases.length?['NO_CHROMIUM_PRE_MID_POST_FIXTURE']:[]),
+  ...proof.filter(e=>typeof e.failure_reason==='string').map(e=>String(e.failure_reason)),
   ...(!verified?['CHROMIUM_PNG_COUNT_OR_SHA_INVALID']:[]),
   ...(!distinct?['NO_OBSERVABLE_PHASE_VARIATION']:[]),
   ...(!negative?['MISSING_TYPED_NEGATIVE_PROOF']:[]),
