@@ -282,7 +282,16 @@ def mount(app, store, idempotent):
     @app.get("/api/v1/projects/{project_id}/storyboard/preview")
     def preview(project_id: str):
         """Host is sole preview-input issuer; browser carries no transferable Node capability."""
-        baseline = current(store, project_id)
+        def verified_preview_head():
+            try:
+                return current(store, project_id)
+            except ContractViolation as exc:
+                if exc.code in ("ARTIFACT_MISSING", "ARTIFACT_CORRUPT",
+                                "ARTIFACT_SIZE_MISMATCH"):
+                    blocked("PLAYER_PREVIEW_UNAVAILABLE", project_id,
+                            "Current approved original bytes are missing or corrupt; restore immutable media before preview.")
+                raise
+        baseline = verified_preview_head()
         exe = ROOT / "renderer" / "node_modules" / ".bin" / "tsx.cmd"
         if os.name != "nt" or not exe.is_file():
             blocked("PLAYER_HOST_REQUIRED", project_id, "Install the pinned renderer on native Windows.")
@@ -301,7 +310,7 @@ def mount(app, store, idempotent):
             data = json.loads(proc.stdout)
         except (ValueError, TypeError):
             blocked("PLAYER_PREVIEW_INVALID", project_id, "Verified host did not return canonical JSON.")
-        verified = current(store, project_id)
+        verified = verified_preview_head()
         if (verified["revision"] != baseline["revision"] or
                 verified["manifest_sha256"] != baseline["manifest_sha256"] or
                 data.get("media", {}).get("authorizingG4ManifestSha256") != baseline["manifest_sha256"]):
