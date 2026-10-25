@@ -262,9 +262,10 @@ function pathProgress(scene:Scene,layer:Layer,frame:number){
  return value;
 }
 const ink='#303b39';
-function reviewedClip(layer:Layer,reveal:number,direction:'left'|'right'|'up'|'down'|'center_out',transitionFeather:number):React.CSSProperties{
+function reviewedClip(layer:Layer,media:ResolvedMedia,reveal:number,direction:'left'|'right'|'up'|'down'|'center_out',transitionFeather:number):React.CSSProperties{
  const p=clamp(reveal),kind=layer.mask.kind;
- if(kind==='polygon_asset')fail('RENDER_MASK_DERIVATIVE_UNAPPROVED',layer.layer_id,'No G3-reviewed derivative mask resolver exists');
+ if(kind==='polygon_asset'&&!media.maskDerivatives?.[layer.mask.asset_id??''])
+  fail('RENDER_MASK_DERIVATIVE_UNAPPROVED',layer.layer_id,'No current reviewed G3 alpha derivative');
  const nativeFeather=layer.mask.feather_px;
  if(!Number.isFinite(nativeFeather)||nativeFeather<0||nativeFeather>40||
     !Number.isFinite(transitionFeather)||transitionFeather<0||transitionFeather>60)
@@ -272,6 +273,12 @@ function reviewedClip(layer:Layer,reveal:number,direction:'left'|'right'|'up'|'d
  // Reviewed native shape stays clipped while the authored reveal progresses.
  // Independent CSS masks intersect; neither may replace the other.
  const masks:string[]=[];
+ if(kind==='polygon_asset'){
+   const derivative=media.assets[layer.mask.asset_id??''];
+   if(!derivative||derivative.mime!=='image/png')
+     fail('RENDER_MASK_DERIVATIVE_UNAPPROVED',layer.layer_id,'Trusted PNG mask source is unavailable');
+   masks.push('url("'+derivative.dataUri+'")');
+ }
  if(kind==='ellipse'&&nativeFeather>0)
    masks.push(`radial-gradient(ellipse 50% 50% at center,#000 calc(100% - ${nativeFeather}px),transparent 100%)`);
  if(kind==='rectangle'&&nativeFeather>0){
@@ -291,7 +298,7 @@ function reviewedClip(layer:Layer,reveal:number,direction:'left'|'right'|'up'|'d
  }
  return {
    ...(kind==='ellipse'?{clipPath:'ellipse(50% 50% at 50% 50%)'}:{}),
-   ...(masks.length?{maskImage:masks.join(','),maskComposite:masks.slice(1).map(()=>'intersect').join(',')}:{}),
+   ...(masks.length?{maskImage:masks.join(','),maskComposite:masks.slice(1).map(()=>'intersect').join(','),maskRepeat:'no-repeat',maskSize:'100% 100%',maskPosition:'center'}:{}),
  };
 }
 export const CompiledLayer:React.FC<{scene:Scene;layer:Layer;frame:number;media:ResolvedMedia}>=({scene,layer,frame,media})=>{
@@ -336,7 +343,7 @@ export const CompiledLayer:React.FC<{scene:Scene;layer:Layer;frame:number;media:
   if(cardSource&&media.sourceKind==='APPROVED_LOCAL'&&cardSource.params.source_original_sha256!==asset.originalSha256)
     fail('RENDER_CARD_SOURCE_STALE',layer.layer_id,'Card motion must retain the actual G3 approved original SHA');
   const imageStyle:React.CSSProperties={position:'absolute',width:`${100/c.w}%`,height:`${100/c.h}%`,left:`${-100*c.x/c.w}%`,top:`${-100*c.y/c.h}%`,objectFit:layer.object_fit};
-  return <div style={{...style,...reviewedClip(layer,effect.reveal,effect.revealDirection,effect.revealFeather),
+  return <div style={{...style,...reviewedClip(layer,media,effect.reveal,effect.revealDirection,effect.revealFeather),
        border:layer.layer_kind==='archival_photo'?`${effect.cardBorder??5}px solid #f0e7d6`:undefined,
        boxShadow:layer.layer_kind==='archival_photo'?`0 9px ${effect.cardShadow??20}px #0004`:undefined}} data-layer={layer.layer_id} data-asset={layer.asset_id} data-claim={layer.source_claim_id??undefined}>
     <Img src={asset.dataUri} style={imageStyle}/>
