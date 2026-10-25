@@ -82,9 +82,18 @@ const result:unknown[]=[];
 for(const row of cases){
  const t=structuredClone(timeline);
  t.scenes[0].events.push(row.event);
+ if(['number-count','kinetic-type','text-highlight'].includes(row.name)){
+  // Force the exact unchanged (synthetic) text layer to exist before the cue.
+  // Otherwise identical blank pre-start frames could hide word leakage.
+  const firstBeat=t.scenes[0].staging.beat_sequence
+   .find(beat=>beat.local_start_frame===0)??t.scenes[0].staging.beat_sequence[0];
+  if(!firstBeat)throw Error('B2_MOTION_PREVISIBLE_BEAT_MISSING');
+  if(!firstBeat.activated_layer_ids.includes(caption.layer_id))
+   firstBeat.activated_layer_ids.push(caption.layer_id);
+ }
  if(row.name==='number-count'){
   const target=t.scenes[0].layers.find(layer=>layer.layer_id===caption.layer_id)!;
-  target.text='100'; // synthetic display endpoint, NEVER a historical G1 fact
+  target.text='100'; // synthetic endpoint; never a production historical fact
  }
  if(row.name==='kinetic-type'||row.name==='text-highlight'){
   // Synthetic renderer mechanics only. This is not an approved G2 word mapping.
