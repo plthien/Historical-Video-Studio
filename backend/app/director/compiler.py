@@ -64,10 +64,11 @@ def _attach_verified_word_spans(layer: dict, event: dict, word_map: dict | None)
     layer["word_spans"] = sorted(spans, key=lambda span: span["start"])
 
 
-def _scene(plan, staging, beats, assets, requirements, maps, font_measure, motion_patches=None, word_map=None, numeric_series=None):
+def _scene(plan, staging, beats, assets, requirements, maps, font_measure, motion_patches=None, word_map=None, numeric_series=None, reviewed_masks=None):
     layout = selected_layout(plan)
     sid = plan["setup_id"]
-    layers, refs = build_layers(plan, assets, requirements, maps=maps, font_measure=font_measure)
+    layers, refs = build_layers(plan, assets, requirements, maps=maps,
+                                font_measure=font_measure, reviewed_masks=reviewed_masks)
     scene_start, scene_end = staging["start_frame"], staging["end_frame"]
     duration = scene_end - scene_start
     if not layers:
@@ -265,7 +266,8 @@ def _scene(plan, staging, beats, assets, requirements, maps, font_measure, motio
         "scene_id": "scene_" + sid, "setup_id": sid,
         "template_id": plan["template_id"], "variant_id": plan["variant_id"],
         "start_frame": scene_start, "duration_frames": duration,
-        "asset_ids": list(dict.fromkeys(layer["asset_id"] for layer in layers if layer["asset_id"])),
+        "asset_ids": list(dict.fromkeys(
+            aid for layer in layers for aid in (layer["asset_id"],layer["mask"]["asset_id"]) if aid)),
         "layers": layers, "events": events, "camera": camera,
         "transition_out": {"type": transition, "duration_frames": 0},
         "story_cue_span": {"first_word_id": beats[0]["word_ids"][0],
@@ -283,7 +285,8 @@ def compile_timeline(story: dict, blueprint: dict, word_map: dict, final_audio: 
                      maps: dict | None = None, font_measure=None,
                      font_identity: dict | None = None,
                      expected_story_sha256: str | None = None,
-                     numeric_series: dict | None = None) -> dict:
+                     numeric_series: dict | None = None,
+                     reviewed_masks: dict | None = None) -> dict:
     """Compile explicitly frozen inputs, supplied only from current approved store
     or a clearly marked synthetic integration harness. No implicit G3 approval."""
     story_id = StoryCandidate.parse(story).sha256
@@ -337,7 +340,8 @@ def compile_timeline(story: dict, blueprint: dict, word_map: dict, final_audio: 
             _block("CUE_MISSING", plan["setup_id"], "Every setup needs bound spoken words.")
         scenes.append(_scene(plan, by_setup[plan["setup_id"]], beats,
                              approved_assets, required, maps, font_measure,
-                             word_map=word_map, numeric_series=numeric_series))
+                             word_map=word_map, numeric_series=numeric_series,
+                             reviewed_masks=(reviewed_masks or {}).get(plan["setup_id"])))
     # A two-surface wipe is authorized only by the outgoing G1-authored
     # transition intent AND an incoming boundary event at frame zero. Other
     # single-layer wipes are not silently promoted to a cross-scene transition.
@@ -371,6 +375,32 @@ def compile_timeline(story: dict, blueprint: dict, word_map: dict, final_audio: 
               "dependency_fingerprint": digest({**identity, "blueprint": blueprint}),
               "scenes": scenes}
     validate_document("CompiledTimeline.v1", result)
+    return result
+
+
+def _derive_current_masks(store,project_id,blueprint,approved_assets):
+    """Real G3-reviewed derivative resolver, never a caller-supplied raster/CSS."""
+    from backend.app.assets.resolution import AssetResolution
+    owner=AssetResolution(store)
+    result={}
+    for plan in blueprint["setup_plans"]:
+        if plan["template_id"]!="T02" or plan["template_payload"]["cutout_policy"]!="use_reviewed_mask":
+            continue
+        slot=plan["template_payload"]["portrait_slot_id"]
+        authored=next((x for x in plan["editorial_direction"]["asset_slots"]
+                       if x["slot_id"]==slot),None)
+        if not authored:
+            _block("PORTRAIT_MASK_UNREVIEWED",slot,"No frozen authored T02 portrait source.")
+        rid=authored["requirement_id"]
+        primary=approved_assets.get(rid)
+        if not primary:
+            _block("PORTRAIT_MASK_UNREVIEWED",slot,"Approved original missing for reviewed derivative.")
+        review=owner.reviewed_mask(project_id,rid,slot,primary["candidate_id"])
+        if review is None:
+            _block("PORTRAIT_MASK_UNREVIEWED",slot,"Current G3 approval must include this mask derivative.")
+        if review["parent_original_sha256"]!=primary["original_sha256"]:
+            _block("PORTRAIT_MASK_UNREVIEWED",slot,"Derivative parent G3 original bytes changed.")
+        result[plan["setup_id"]]={slot:review}
     return result
 
 
@@ -454,13 +484,15 @@ def compile_from_store(store, project_id: str, blueprint: dict, word_map: dict,
                "Production map contexts must be re-ingested from current G3 source bytes.")
     trusted_maps = _derive_trusted_maps(store, project_id, story_obj.data(),
                                         blueprint, map_requests or {})
+    trusted_masks = _derive_current_masks(store,project_id,blueprint,approved)
     result = compile_timeline(story_obj.data(), blueprint, word_map, final_audio, approved,
                               maps=trusted_maps, font_measure=font_measure,
                               font_identity=font_identity, expected_story_sha256=story_obj.sha256,
-                              numeric_series=numeric)
+                              numeric_series=numeric,reviewed_masks=trusted_masks)
     from backend.app.director import draft
     draft.publish(store, project_id, result, blueprint, trusted_maps, map_requests or {},
-                  font_identity, expected_revision=start_revision)
+                  font_identity, expected_revision=start_revision,
+                  reviewed_masks=trusted_masks)
     return result
 
 
@@ -718,6 +750,9 @@ def revise_g4(store, project_id: str, previous: dict, original_blueprint: dict,
             if result is None:
                 _block("MOTION_NUMBER_SERIES_UNVERIFIED",claim,"Current G1 auxiliary review is required.")
             numeric[claim]=result
+    trusted_masks=_derive_current_masks(store,project_id,edited_blueprint,approved_assets)
+    if trusted_masks != manifest.get("reviewed_masks",{}):
+        _block("G4_MASK_SOURCE_STALE",project_id,"Current G3 mask review changed since frozen G4 baseline.")
     out = copy.deepcopy(trusted["timeline"])
     index = {s["setup_id"]: i for i,s in enumerate(out["scenes"])}
     for plan in revised:
@@ -727,7 +762,8 @@ def revise_g4(store, project_id: str, previous: dict, original_blueprint: dict,
         rows = [x for x in windows if x["setup_id"] == sid]
         scene = _scene(plan, staging[sid], rows, approved_assets, requirements,
                        current_maps, font_measure, persisted_motion.get(sid, {}), word_map,
-                       numeric_series=numeric)
+                       numeric_series=numeric,
+                       reviewed_masks=trusted_masks.get(sid))
         # G4 selects from an existing explicitly reapproved G3 same-slot pool.
         # It cannot alter G1 requirement/claim, G2 cues or G3 approval head.
         from backend.app.assets.resolution import AssetResolution
@@ -755,7 +791,12 @@ def revise_g4(store, project_id: str, previous: dict, original_blueprint: dict,
                 pool["choice_set_sha256"]!=choice.get("choice_set_sha256") or
                 eligible["asset_class"]!=requirements[choice["requirement_id"]]["asset_class"]):
                 _block("G4_ASSET_SELECTION_FORBIDDEN",layer_id,"Source is not in current approved G3 same-slot set.")
-            prior_source_id=layer["asset_id"]
+            if layer["mask"]["kind"]=="polygon_asset":
+                new_mask=resolver.reviewed_mask(project_id,choice["requirement_id"],choice["slot_id"],
+                                                choice["candidate_id"])
+                if not new_mask or new_mask["parent_original_sha256"]!=choice["original_sha256"]:
+                    _block("G4_MASK_SOURCE_STALE",layer_id,"New original requires its own reviewed G3 cutout.")
+                layer["mask"]["asset_id"]=new_mask["derivative_asset_id"]
             layer["asset_id"]=choice["candidate_id"]
             for i,event in enumerate(scene["events"]):
                 if event["layer_id"]==layer_id and event["preset_id"]=="photo-card-enter":
@@ -767,7 +808,8 @@ def revise_g4(store, project_id: str, previous: dict, original_blueprint: dict,
                         duration_frames=event["duration_frames"],cue_word_id=event["cue_word_id"],
                         params=params,evidence={"source_sha":choice["original_sha256"],
                                                 "claim_ids":plan["claim_refs"]})
-        scene["asset_ids"]=list(dict.fromkeys(layer["asset_id"] for layer in scene["layers"] if layer["asset_id"]))
+        scene["asset_ids"]=list(dict.fromkeys(
+            aid for layer in scene["layers"] for aid in (layer["asset_id"],layer["mask"]["asset_id"]) if aid))
         previous_layers = {item["layer_id"]: item for item in previous["scenes"][index[sid]]["layers"]}
         chosen_layers = persisted_layers.get(sid, {})
         if set(chosen_layers) - {x["layer_id"] for x in scene["layers"]}:
@@ -857,7 +899,8 @@ def revise_g4(store, project_id: str, previous: dict, original_blueprint: dict,
                   edit_kind="scene_layout" if edited_blueprint != original_blueprint or layer_overrides or motion_overrides or asset_selection_overrides else "scene_crop",
                   layer_overrides=persisted_layers, crop_overrides=persisted_crops,
                   motion_overrides=persisted_motion,
-                  asset_selection_overrides=persisted_selections)
+                  asset_selection_overrides=persisted_selections,
+                  reviewed_masks=trusted_masks)
     return {"timeline": out, "recomputed_setup_ids": sorted(changed),
             "retained_setup_ids": sorted(set(index) - changed),
             "project_revision": expected_revision+1, "stale_gates": ["G4","G5"]}
