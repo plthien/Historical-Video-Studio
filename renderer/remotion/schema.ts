@@ -142,8 +142,10 @@ export function verifiedApprovedCount(e:Motion,layer:Layer,media:ResolvedMedia):
     !series.g1ApprovalId||series.claimId!==layer.source_claim_id||
     e.params.source_claim_id!==layer.source_claim_id||
     series.durationFrames!==e.duration_frames||series.precision!==e.params.precision||
-    series.startValue!==String(e.params.start_value)||
-    series.endValue!==String(e.params.end_value)||
+    series.startValue!==e.params.approved_numeric_start_text||
+    series.endValue!==e.params.approved_numeric_end_text||
+    Number(series.startValue)!==Number(e.params.start_value)||
+    Number(series.endValue)!==Number(e.params.end_value)||
     layer.text===null||Number(layer.text.replace(/,/g,''))!==Number(series.endValue)||
     e.params.intermediate_truthful!==true)
   return fail('RENDER_NUMBER_SERIES_UNVERIFIED',e.event_id,'Current reviewed series does not match frozen claim, motion or G1 source');
