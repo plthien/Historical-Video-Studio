@@ -14,6 +14,7 @@ _DOWNSTREAM = {
     "story_assets": ("G3", "G4", "G5"),
     "numeric_series": ("G4", "G5"),
     "g3_choice_set": ("G3", "G4", "G5"),
+    "g3_derivative": ("G3", "G4", "G5"),
 }
 
 
