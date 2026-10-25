@@ -55,7 +55,8 @@ def _text_layout(source, rect, font_measure):
 
 
 def build_layers(plan: dict, approved: dict, requirements: dict, *,
-                 maps: dict | None = None, font_measure=None) -> tuple[list[dict], dict[str,str]]:
+                 maps: dict | None = None, font_measure=None,
+                 reviewed_masks: dict | None = None) -> tuple[list[dict], dict[str,str]]:
     layout = selected_layout(plan)
     rects = pixel_geometry(plan)
     authored = plan["editorial_direction"]
@@ -188,11 +189,21 @@ def build_layers(plan: dict, approved: dict, requirements: dict, *,
             "source_asset_slot_id": source["slot_id"] if source else None,
         }
         layers.append(layer)
-    # The authored strict cutout contract cannot silently become a framed portrait.
-    # G3 currently authorizes originals, not a reviewed derivative mask identity.
+    # Only a current, separately G3-reviewed derivative may implement strict T02.
+    # Other native masks and framed portraits retain their prior behavior.
     if plan["template_id"] == "T02" and plan["template_payload"]["cutout_policy"] == "use_reviewed_mask":
-        _blocked("PORTRAIT_MASK_UNREVIEWED", plan["setup_id"],
-                 "Strict T02 cutout requires a G3-reviewed mask identity; frame the original until approved.")
+        portrait_slot=plan["template_payload"]["portrait_slot_id"]
+        portrait=next((layer for layer in layers
+                       if layer["source_asset_slot_id"]==portrait_slot and
+                       layer["layer_kind"] in ("portrait","archival_photo")),None)
+        reviewed=(reviewed_masks or {}).get(portrait_slot)
+        if (not portrait or not reviewed or
+            reviewed["parent_candidate_id"]!=portrait["asset_id"] or
+            reviewed["source_crop"]!={"x":0,"y":0,"w":1,"h":1}):
+            _blocked("PORTRAIT_MASK_UNREVIEWED",plan["setup_id"],
+                     "Current G3 mask must exactly match the authored portrait and full source coordinate frame.")
+        portrait["mask"]={"kind":"polygon_asset",
+                          "asset_id":reviewed["derivative_asset_id"],"feather_px":0}
     # T06 excerpt UV is an explicit non-destructive crop on the approved original.
     if plan["template_id"] == "T06":
         payload = plan["template_payload"]
