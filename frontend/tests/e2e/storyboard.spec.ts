@@ -1,5 +1,6 @@
 import {test,expect} from '@playwright/test';
 import {PNG} from 'pngjs';
+import type {Motion} from '../../../renderer/remotion/schema';
 
 test('storyboard-editor uses real persisted G4 scenes and native read-only Player',async({page,request})=>{
  test.skip(process.env.HVS_B2_FIXTURE!=='1','Requires native Windows controlled SQLite G4, never mocked HTTP fixtures');
@@ -44,7 +45,7 @@ test('storyboard-editor uses real persisted G4 scenes and native read-only Playe
  expect(focused.data.equals(beforeFocus.data),'authorized focus edit must change actual Player pixels').toBeFalsy();
  // G4 camera scalar PATCH must recompile camera keys, change actual pixels,
  // and survive SQLite-backed host preview/reload; no DOM-only success is enough.
- const cameraEvent=initialPreview.props.timeline.scenes[0].events.find(event=>event.preset_id==='camera-push');
+ const cameraEvent=initialPreview.props.timeline.scenes[0].events.find((event:Motion)=>event.preset_id==='camera-push');
  expect(cameraEvent,'native fixture requires an authored camera-push event').toBeDefined();
  const cameraFrame=initialPreview.props.timeline.scenes[0].start_frame+
   cameraEvent!.start_frame+Math.min(cameraEvent!.duration_frames-1,
@@ -67,7 +68,7 @@ test('storyboard-editor uses real persisted G4 scenes and native read-only Playe
  const persistedCamera=await request.get('http://127.0.0.1:8000/api/v1/projects/proj_001/storyboard/timeline');
  expect(persistedCamera.ok()).toBeTruthy();
  const cameraRevision=(await persistedCamera.json() as {timeline:typeof initialPreview.props.timeline}).timeline.scenes[0];
- expect(cameraRevision.events.find(e=>e.event_id===cameraEvent!.event_id)?.params.to_scale).toBeCloseTo(newScalar);
+ expect(cameraRevision.events.find((e:Motion)=>e.event_id===cameraEvent!.event_id)?.params.to_scale).toBeCloseTo(newScalar);
  expect(cameraRevision.camera.keyframes).not.toEqual(currentCameraTrack);
  await page.getByRole('button',{name:'Load real read-only Remotion Player'}).click();
  await page.getByLabel('Seek exact frame').fill(String(cameraFrame));
