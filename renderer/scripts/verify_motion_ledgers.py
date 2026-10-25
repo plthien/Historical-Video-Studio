@@ -1,5 +1,5 @@
 """Windows-native independent verifier for actual Chromium motion output."""
-import argparse,copy,hashlib,json,struct
+import argparse,copy,hashlib,json,struct,tempfile
 from pathlib import Path
 
 def need(ok,msg):
@@ -76,6 +76,19 @@ def mutations(reg,sem,phase):
     reject("tampered SHA",lambda a,b:a["rows"][0]["evidence"][0].update(sha256="0"*64))
     reject("missing PNG",lambda a,b:a["rows"][0]["evidence"][0].update(path="__missing_motion_fixture__.png"))
     reject("synthetic spoofed approval",lambda a,b:a["rows"][0].update(source_authorization_verified=True))
+    # Prove altered PNG bytes are rejected even if both ledgers continue to
+    # agree on the same original digest and same tampered file location.
+    with tempfile.TemporaryDirectory() as directory:
+        source=Path(sem["rows"][0]["evidence"][0]["path"])
+        corrupt=Path(directory)/"tampered-motion.png"
+        pixels=bytearray(source.read_bytes())
+        pixels[-8] ^= 1
+        corrupt.write_bytes(pixels)
+        def tamper_bytes(a,b):
+            a["rows"][0]["evidence"][0]["path"]=str(corrupt)
+            a["rows"][0]["actual_png_paths"][0]=str(corrupt)
+            b["cases"][0]["path"]=str(corrupt)
+        reject("actual changed PNG bytes",tamper_bytes)
 
 def main():
     parser=argparse.ArgumentParser()
