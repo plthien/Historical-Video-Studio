@@ -69,6 +69,9 @@ const cases=[
  {name:'text-highlight',event:sampleEvent('text-highlight',
   {source_word_ids:[cueWord],highlight_color_token:'gold',hold_after_frames:15},
   'layer_local',[caption.layer_id])},
+ {name:'number-count',event:sampleEvent('number-count',
+  {source_claim_id:caption.source_claim_id!,start_value:0,end_value:100,
+   precision:0,intermediate_truthful:true},'layer_local',[caption.layer_id])},
 
 ];
 const serveUrl=await bundle({entryPoint:resolve(root,'remotion/entry.tsx')});
@@ -76,6 +79,10 @@ const result:unknown[]=[];
 for(const row of cases){
  const t=structuredClone(timeline);
  t.scenes[0].events.push(row.event);
+ if(row.name==='number-count'){
+  const target=t.scenes[0].layers.find(layer=>layer.layer_id===caption.layer_id)!;
+  target.text='100'; // synthetic display endpoint, NEVER a historical G1 fact
+ }
  if(row.name==='kinetic-type'||row.name==='text-highlight'){
   // Synthetic renderer mechanics only. This is not an approved G2 word mapping.
   const target=t.scenes[0].layers.find(layer=>layer.layer_id===caption.layer_id)!;
@@ -86,6 +93,9 @@ for(const row of cases){
  }
  assertTimeline(t);
  const media=loadApprovedMedia(t,makeSyntheticManifest(t,sourceDir,font));
+ if(row.name==='number-count')
+  media.syntheticNumericSeries={[caption.source_claim_id!]:
+   {fixtureId:'synthetic_number_count_mechanic',values:[0,25,50,75,100]}};
  const comp=await selectComposition({serveUrl,id:'HistoricalTimelineV1',inputProps:{timeline:t,media}});
  const sampleFrames=[start,start+Math.floor(duration/2),start+duration];
  const hashes:string[]=[];
@@ -104,6 +114,7 @@ for(const row of cases){
  control.scenes[0].events=control.scenes[0].events.filter(e=>e.event_id!==row.event.event_id);
  assertTimeline(control);
  const controlMedia=loadApprovedMedia(control,makeSyntheticManifest(control,sourceDir,font));
+ if(row.name==='number-count')controlMedia.syntheticNumericSeries=media.syntheticNumericSeries;
  const controlComp=await selectComposition({serveUrl,id:'HistoricalTimelineV1',
   inputProps:{timeline:control,media:controlMedia}});
  const mid=start+Math.floor(duration/2);
@@ -141,12 +152,26 @@ for(const row of cases){
  }
  result.push({preset:row.name,negativeAssertion:'wrong_transform_space',
   typedRejection:rejected,source:'SYNTHETIC_RENDER_FIXTURE'});
+ if(row.name==='number-count'){
+  const forged=structuredClone(media);
+  forged.syntheticNumericSeries={[caption.source_claim_id!]:
+   {fixtureId:'synthetic_invalid_endpoint',values:[0,25,50,75,101]}};
+  let invalidSeriesBlocked=false;
+  try{
+   await renderStill({serveUrl,composition:comp,inputProps:{timeline:t,media:forged},
+    frame:mid,output:resolve(output,'b2-number-count-forged-series.png'),imageFormat:'png'});
+  }catch{invalidSeriesBlocked=true;}
+  if(!invalidSeriesBlocked)throw Error('B2_NUMBER_SERIES_FORGED_ENDPOINT_ACCEPTED');
+  result.push({preset:row.name,negativeAssertion:'forged_intermediate_series',
+   typedRejection:true,source:'SYNTHETIC_RENDER_FIXTURE'});
+ }
  if(!rejected)throw Error('B2_MOTION_NEGATIVE_NOT_BLOCKED_'+row.name);
  if(start>0){
   const before=start-1;
   const baseTimeline=structuredClone(t);
   baseTimeline.scenes[0].events=baseTimeline.scenes[0].events.filter(event=>event.event_id!==row.event.event_id);
   const baseMedia=loadApprovedMedia(baseTimeline,makeSyntheticManifest(baseTimeline,sourceDir,font));
+  if(row.name==='number-count')baseMedia.syntheticNumericSeries=media.syntheticNumericSeries;
   const baseComp=await selectComposition({serveUrl,id:'HistoricalTimelineV1',
     inputProps:{timeline:baseTimeline,media:baseMedia}});
   const basePath=resolve(output,`b2-${row.name}-before-baseline.png`);
