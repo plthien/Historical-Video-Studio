@@ -346,8 +346,35 @@ if(!preHold.png.data.equals(withPreHold.png.data))throw Error('B2_FREEZE_RETROAC
 const holdLedger={preset:'freeze-hold',source:'SYNTHETIC',frame:holdFrame,
  unchangedPreStart:true,roi:frozenROI,
  PNGs:[baselineHold,activeHold].map(x=>({path:x.path,sha256:x.sha256}))};
+const postFrame=start+10;
+const basePostHold=await maskStill(popTimeline,postFrame,'freeze-post-baseline');
+const withPostHold=await maskStill(heldTimeline,postFrame,'freeze-post-candidate');
+if(!basePostHold.png.data.equals(withPostHold.png.data))
+ throw Error('B2_FREEZE_PERSISTS_OUTSIDE_HOLD_WINDOW');
+const wrongHold=structuredClone(heldTimeline);
+wrongHold.scenes[0].events.find(e=>e.event_id===frozenEvent.event_id)!.motion_space='screen';
+let rejectedHold=false;
+try{assertTimeline(wrongHold);}catch(error){
+ rejectedHold=error instanceof RenderBlocked&&
+  ['RENDER_SCHEMA_INVALID','RENDER_MOTION_SPACE'].includes(error.code);
+}
+if(!rejectedHold)throw Error('B2_FREEZE_WRONG_SPACE_ACCEPTED');
+const freezeFrames=[
+ {frame:start+2,file:withPreHold},
+ {frame:holdFrame,file:activeHold},
+ {frame:postFrame,file:withPostHold}
+];
+for(const entry of freezeFrames){
+ result.push({preset:'freeze-hold',frame:entry.frame,path:entry.file.path,
+  sha256:entry.file.sha256,pixelHash:hashing(entry.file.png.data),
+  source:'SYNTHETIC_RENDER_FIXTURE'});
+}
+result.push({preset:'freeze-hold',preStartPixelMatch:true,
+  counterfactual:'same_frame_event_removed',frame:holdFrame,
+  changedROIPixels:frozenROI.changedPixels,
+  negativeAssertion:'wrong_transform_space',typedRejection:rejectedHold,
+  postWindowEqual:true,source:'SYNTHETIC_RENDER_FIXTURE'});
 writeFileSync(resolve(output,'b2-freeze-hold.json'),JSON.stringify(holdLedger,null,2));
-result.push(holdLedger);
 
 
 
