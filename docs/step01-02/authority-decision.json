@@ -1,13 +1,13 @@
 {
   "schema_version": "PR10AuthorityDecision.v1",
-  "evaluated_head_at_start": "e97fe0d1f2e6bc9c5f51f2adefa23edf8720f977",
-  "scope": "B2-04/B2-05/B2-06 only",
+  "evaluated_head_at_start": "ed38d5bd8bce5cc2bb5cedff8831df8ba9daf8d5",
+  "scope": "PR #10 B2-04/B2-05/B2-06 D01+D02 optional technical implementation",
   "live_operator_approval_created": false,
   "decisions": [
     {
       "id": "D01",
       "feature": "Production numeric observation series bound to G1",
-      "verdict": "REQUIRES_HUMAN_APPROVAL",
+      "verdict": "APPROVED_FOR_OPTIONAL_TECHNICAL_IMPLEMENTATION",
       "authority": [
         "docs/step01-02/PR10_TWO_AUTHORITY_APPROVAL_REQUESTS.md",
         "docs/step01-02/FULL_FLOW_VISUAL_COMPILER_CONTRACT.md",
@@ -20,12 +20,14 @@
       "original_gate_impact": [
         "G03"
       ],
-      "approval_status": "NOT_APPROVED"
+      "approval_status": "TECHNICAL_IMPLEMENTATION_ONLY",
+      "live_operator_approval_created": false,
+      "real_source_data_approved": false
     },
     {
       "id": "D02",
       "feature": "Concurrent approved G3 source choices and polygon derivatives",
-      "verdict": "REQUIRES_HUMAN_APPROVAL",
+      "verdict": "APPROVED_FOR_OPTIONAL_TECHNICAL_IMPLEMENTATION",
       "authority": [
         "backend/app/assets/resolution.py",
         "backend/app/api/storyboard.py",
@@ -39,8 +41,12 @@
         "G05",
         "G06"
       ],
-      "approval_status": "NOT_APPROVED"
+      "approval_status": "TECHNICAL_IMPLEMENTATION_ONLY",
+      "live_operator_approval_created": false,
+      "real_source_data_approved": false
     }
   ],
-  "note": "This decision record is not authorization. Only source-owning human review can approve extending frozen G1/G3. CI fixtures cannot be upgraded to actual historical source approvals."
+  "note": "Owner authorized software implementation of D01/D02 on existing PR #10 only. This is not an ApprovalRecord, G1/G3 gate approval, numeric historical observation review, or rights grant. Each production source and derivative requires a separate current operator transaction and relevant gate approval.",
+  "real_source_data_approved": false,
+  "authorization_reference": "CODEX_PR10_D01_D02_G03_G05_G06_FINAL_IMPLEMENTATION_PLAN.md — owner authorization 2026-10-25"
 }
