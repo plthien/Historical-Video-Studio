@@ -522,7 +522,8 @@ def revise_g4(store, project_id: str, previous: dict, original_blueprint: dict,
               edited_blueprint: dict, word_map: dict, final_audio: dict,
               approved_assets: dict, *, expected_revision: int, operator_reason: str,
               maps: dict | None = None, font_measure=None, crop_overrides: dict | None = None,
-              layer_overrides: dict | None = None, motion_overrides: dict | None = None) -> dict:
+              layer_overrides: dict | None = None, motion_overrides: dict | None = None,
+              asset_selection_overrides: dict | None = None) -> dict:
     """CAS-guarded presentation-only local edit; never auto-approve G4/G5.
 
     Only changed scenes are compiled anew. The unchanged scene dictionaries
@@ -585,6 +586,8 @@ def revise_g4(store, project_id: str, previous: dict, original_blueprint: dict,
     crop_overrides = crop_overrides or {}
     layer_overrides = layer_overrides or {}
     motion_overrides = motion_overrides or {}
+    asset_selection_overrides = asset_selection_overrides or {}
+    changed.update(asset_selection_overrides.keys())
     changed.update(crop_overrides.keys())
     changed.update(layer_overrides.keys())
     changed.update(motion_overrides.keys())
@@ -615,6 +618,7 @@ def revise_g4(store, project_id: str, previous: dict, original_blueprint: dict,
     persisted_layers = copy.deepcopy(manifest.get("layer_overrides", {}))
     persisted_crops = copy.deepcopy(manifest.get("crop_overrides", {}))
     persisted_motion = copy.deepcopy(manifest.get("motion_overrides", {}))
+    persisted_selections = copy.deepcopy(manifest.get("asset_selection_overrides", {}))
     # A new registered variant owns a new geometry family; old operator pixel
     # offsets must not silently carry into a different frozen slot layout.
     for prior_plan, next_plan in zip(old, revised):
@@ -628,6 +632,10 @@ def revise_g4(store, project_id: str, previous: dict, original_blueprint: dict,
         if not isinstance(rows, dict):
             _block("G4_CROP_INVALID", sid, "Crop edits must identify reviewed scene layer IDs.")
         persisted_crops.setdefault(sid, {}).update(copy.deepcopy(rows))
+    for sid, rows in asset_selection_overrides.items():
+        if not isinstance(rows, dict):
+            _block("G4_ASSET_SELECTION_FORBIDDEN",sid,"Expected G3-authorized per-layer selection map.")
+        persisted_selections.setdefault(sid, {}).update(copy.deepcopy(rows))
     for sid, rows in motion_overrides.items():
         if not isinstance(rows, dict):
             _block("G4_MOTION_INVALID", sid, "Motion edits must identify authored event IDs.")
@@ -720,6 +728,46 @@ def revise_g4(store, project_id: str, previous: dict, original_blueprint: dict,
         scene = _scene(plan, staging[sid], rows, approved_assets, requirements,
                        current_maps, font_measure, persisted_motion.get(sid, {}), word_map,
                        numeric_series=numeric)
+        # G4 selects from an existing explicitly reapproved G3 same-slot pool.
+        # It cannot alter G1 requirement/claim, G2 cues or G3 approval head.
+        from backend.app.assets.resolution import AssetResolution
+        resolver=AssetResolution(store)
+        planned_selections=persisted_selections.get(sid,{})
+        layers_by_id={layer["layer_id"]:layer for layer in scene["layers"]}
+        if set(planned_selections)-set(layers_by_id):
+            _block("G4_ASSET_SELECTION_FORBIDDEN",sid,"Only frozen existing scene layers are selectable.")
+        for layer_id,choice in planned_selections.items():
+            layer=layers_by_id[layer_id]
+            if (layer["layer_kind"] in ("map","territory") or
+                not layer["source_asset_slot_id"] or layer["source_asset_slot_id"]!=choice.get("slot_id") or
+                layer["asset_id"] is None):
+                _block("G4_ASSET_SELECTION_FORBIDDEN",layer_id,"No same-slot rights-backed source or map re-review.")
+            authored=next((slot for slot in plan["editorial_direction"]["asset_slots"]
+                           if slot["slot_id"]==layer["source_asset_slot_id"]),None)
+            if not authored or authored["requirement_id"]!=choice.get("requirement_id"):
+                _block("G4_ASSET_SELECTION_FORBIDDEN",layer_id,"Frozen G1 source requirement changed.")
+            pool=resolver.approved_slot_options(project_id,choice["requirement_id"],choice["slot_id"])
+            eligible=next((x for x in pool["options"] if
+                           x["candidate_id"]==choice.get("candidate_id") and
+                           x["review_approval_id"]==choice.get("review_approval_id") and
+                           x["original_sha256"]==choice.get("original_sha256")),None)
+            if (not eligible or pool["choice_set_id"]!=choice.get("choice_set_id") or
+                pool["choice_set_sha256"]!=choice.get("choice_set_sha256") or
+                eligible["asset_class"]!=requirements[choice["requirement_id"]]["asset_class"]):
+                _block("G4_ASSET_SELECTION_FORBIDDEN",layer_id,"Source is not in current approved G3 same-slot set.")
+            prior_source_id=layer["asset_id"]
+            layer["asset_id"]=choice["candidate_id"]
+            for i,event in enumerate(scene["events"]):
+                if event["layer_id"]==layer_id and event["preset_id"]=="photo-card-enter":
+                    params={**event["params"],"source_original_sha256":choice["original_sha256"]}
+                    # Recompile against verified G3 original; preserve registered keys/phases.
+                    scene["events"][i]=compile_event(
+                        "photo-card-enter",layer,scene["layers"],
+                        event_id=event["event_id"],start_frame=event["start_frame"],
+                        duration_frames=event["duration_frames"],cue_word_id=event["cue_word_id"],
+                        params=params,evidence={"source_sha":choice["original_sha256"],
+                                                "claim_ids":plan["claim_refs"]})
+        scene["asset_ids"]=list(dict.fromkeys(layer["asset_id"] for layer in scene["layers"] if layer["asset_id"]))
         previous_layers = {item["layer_id"]: item for item in previous["scenes"][index[sid]]["layers"]}
         chosen_layers = persisted_layers.get(sid, {})
         if set(chosen_layers) - {x["layer_id"] for x in scene["layers"]}:
