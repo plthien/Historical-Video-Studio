@@ -1,5 +1,7 @@
 import {test,expect} from '@playwright/test';
 import {PNG} from 'pngjs';
+import {existsSync,renameSync} from 'node:fs';
+import {resolve} from 'node:path';
 import type {Motion} from '../../../renderer/remotion/schema';
 
 test('storyboard-editor uses real persisted G4 scenes and native read-only Player',async({page,request})=>{
@@ -23,6 +25,28 @@ test('storyboard-editor uses real persisted G4 scenes and native read-only Playe
  const stage=page.getByTestId('player-stage');
  await expect(stage.locator('[data-global-frame="0"][data-scene-id]')).toBeVisible({timeout:30000});
  const first=PNG.sync.read(await stage.screenshot());
+ // Native fixture contains real copied G3-authorized synthetic source bytes.
+ // Temporarily hide exactly one original to exercise HTTP 424 through actual
+ // browser UI and Windows SQLite host, then always restore before other edits.
+ const candidate=Object.values(initialPreview.props.media.assets)[0];
+ expect(candidate,'preview fixture must have an approved synthetic original').toBeDefined();
+ const originalSha=candidate!.originalSha256;
+ const root=resolve(import.meta.dirname,'../../..');
+ const originalFile=resolve(root,'renderer','.artifacts','approved-player-test',
+   'artifacts','sha256',originalSha.slice(0,2),originalSha.slice(2));
+ const withheldFile=originalFile+'.temporarily-withheld-b2-e2e';
+ expect(existsSync(originalFile),'fixture must resolve the exact immutable original').toBeTruthy();
+ await page.getByRole('button',{name:'Reload persisted draft'}).click();
+ try{
+  renameSync(originalFile,withheldFile);
+  await page.getByRole('button',{name:'Load real read-only Remotion Player'}).click();
+  await expect(page.getByRole('alert')).toContainText('424 PLAYER_PREVIEW_UNAVAILABLE',{timeout:30000});
+  await expect(page.getByLabel('Read-only local Remotion Player')).toHaveCount(0);
+ }finally{
+  renameSync(withheldFile,originalFile);
+ }
+ await page.getByRole('button',{name:'Load real read-only Remotion Player'}).click();
+ await expect(page.getByLabel('Read-only local Remotion Player')).toBeVisible({timeout:30000});
  const samples=new Set<number>();
  for(let i=0;i<first.data.length;i+=128)samples.add(first.data[i]);
  expect(samples.size,'the actual Player frame is not blank').toBeGreaterThan(3);
