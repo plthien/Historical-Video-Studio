@@ -240,7 +240,7 @@ def prepare(mode:str):
         assert len(layers)==1
     else:
         texts=[x for s in timeline["scenes"] for x in s["layers"] if x["text"] is not None]
-        assert any("SYNTHETIC DOCUMENT EXCERPT" in x["text"] for x in texts)
+        assert any("SYNTHETIC DOCUMENT\\nEXCERPT WORDS VERIFIED\\nFULL SOURCE PRESERVED" in x["text"] for x in texts)
     config={"mode":mode,"project":pid,"db":str(store.database),
             "artifactRoot":str(store.artifacts.root),
             "source":"SYNTHETIC_G1_G2_G3_OPERATOR_TRANSACTIONS_NOT_REAL_HISTORY",
