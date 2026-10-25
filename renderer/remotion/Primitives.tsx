@@ -149,20 +149,22 @@ function motionForLayer(scene:Scene,layer:Layer,frame:number,media:ResolvedMedia
     // Synthetic test media can separately prove the rendering mechanism; an
     // APPPROVED_LOCAL manifest can never supply or mint this fixture.
     const series=media.sourceKind==='SYNTHETIC' ? media.syntheticNumericSeries?.[String(source)] : undefined;
-    if(!series||!series.fixtureId.startsWith('synthetic_')||
-       !Array.isArray(series.values)||series.values.length<2||
-       series.values.some(v=>typeof v!=='number'||!Number.isFinite(v))||
-       series.values[0]!==Number(e.params.start_value)||series.values.at(-1)!==end)
-      fail('RENDER_NUMBER_SERIES_UNVERIFIED',e.event_id,
-       'No source-authorized G1 intermediate series; synthetic counting requires an explicit test fixture');
-    const precision=Number(e.params.precision),direction=Math.sign(end-series.values[0]);
+    if(!series) return fail('RENDER_NUMBER_SERIES_UNVERIFIED',e.event_id,
+      'A production claim needs source-authorized G1 intermediates; no synthetic mechanism fixture can approve a claim');
+    const values=series.values;
+    if(!series.fixtureId.startsWith('synthetic_')||!Array.isArray(values)||
+       values.length<2||values.some(v=>typeof v!=='number'||!Number.isFinite(v))||
+       values[0]!==Number(e.params.start_value)||values.at(-1)!==end)
+      return fail('RENDER_NUMBER_SERIES_UNVERIFIED',e.event_id,
+       'Synthetic numeric fixture must have explicit identity and exact registered endpoints');
+    const precision=Number(e.params.precision),direction=Math.sign(end-values[0]);
     if(!Number.isInteger(precision)||precision<0||precision>3||
-       series.values.some((v,i)=>Number(v.toFixed(precision))!==v||
-          (i>0&&direction*(v-series.values[i-1])<0)))
-      fail('RENDER_NUMBER_SERIES_INVALID',e.event_id,
+       values.some((v,i)=>Number(v.toFixed(precision))!==v||
+          (i>0&&direction*(v-values[i-1])<0)))
+      return fail('RENDER_NUMBER_SERIES_INVALID',e.event_id,
        'Synthetic intermediate values must preserve precision and chronological ordering');
-    const index=Math.min(series.values.length-1,Math.floor(p*(series.values.length-1)));
-    visibleText=series.values[index].toFixed(precision);
+    const index=Math.min(values.length-1,Math.floor(p*(values.length-1)));
+    visibleText=values[index].toFixed(precision);
     break;
    }
    case 'parallax-layers':{
