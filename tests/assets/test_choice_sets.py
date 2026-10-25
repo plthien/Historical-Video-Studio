@@ -20,7 +20,7 @@ ROOT=Path(__file__).resolve().parents[2]
 def png(rgb):
     def chunk(name,body):
         return struct.pack(">I",len(body))+name+body+struct.pack(">I",zlib.crc32(name+body))
-    return (b"\\x89PNG\\r\\n\\x1a\\n"+
+    return (b"\x89PNG\r\n\x1a\n"+
             chunk(b"IHDR",struct.pack(">IIBBBBB",1,1,8,2,0,0,0))+
             chunk(b"IDAT",zlib.compress(bytes([0,*rgb])))+chunk(b"IEND",b""))
 
