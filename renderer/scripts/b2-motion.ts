@@ -118,10 +118,11 @@ for(const row of cases){
     start:token.index,end:token.index+token[0].length}];
  }
  assertTimeline(t);
- const media=loadApprovedMedia(t,makeSyntheticManifest(t,sourceDir,font));
+ const manifest=makeSyntheticManifest(t,sourceDir,font);
  if(row.name==='number-count')
-  media.syntheticNumericSeries={[caption.source_claim_id!]:
+  manifest.syntheticNumericSeries={[caption.source_claim_id!]:
    {fixtureId:'synthetic_number_count_mechanic',values:[0,25,50,75,100]}};
+ const media=loadApprovedMedia(t,manifest);
  const comp=await selectComposition({serveUrl,id:'HistoricalTimelineV1',inputProps:{timeline:t,media}});
  const sampleFrames=[start,start+Math.floor(duration/2),start+duration];
  const hashes:string[]=[];
@@ -163,8 +164,9 @@ for(const row of cases){
  const control=structuredClone(t);
  control.scenes[0].events=control.scenes[0].events.filter(e=>e.event_id!==row.event.event_id);
  assertTimeline(control);
- const controlMedia=loadApprovedMedia(control,makeSyntheticManifest(control,sourceDir,font));
- if(row.name==='number-count')controlMedia.syntheticNumericSeries=media.syntheticNumericSeries;
+ const controlManifest=makeSyntheticManifest(control,sourceDir,font);
+ if(row.name==='number-count')controlManifest.syntheticNumericSeries=media.syntheticNumericSeries;
+ const controlMedia=loadApprovedMedia(control,controlManifest);
  const controlComp=await selectComposition({serveUrl,id:'HistoricalTimelineV1',
   inputProps:{timeline:control,media:controlMedia}});
  const mid=start+Math.floor(duration/2);
@@ -229,8 +231,9 @@ for(const row of cases){
   const before=start-1;
   const baseTimeline=structuredClone(t);
   baseTimeline.scenes[0].events=baseTimeline.scenes[0].events.filter(event=>event.event_id!==row.event.event_id);
-  const baseMedia=loadApprovedMedia(baseTimeline,makeSyntheticManifest(baseTimeline,sourceDir,font));
-  if(row.name==='number-count')baseMedia.syntheticNumericSeries=media.syntheticNumericSeries;
+  const baseManifest=makeSyntheticManifest(baseTimeline,sourceDir,font);
+   if(row.name==='number-count')baseManifest.syntheticNumericSeries=media.syntheticNumericSeries;
+   const baseMedia=loadApprovedMedia(baseTimeline,baseManifest);
   const baseComp=await selectComposition({serveUrl,id:'HistoricalTimelineV1',
     inputProps:{timeline:baseTimeline,media:baseMedia}});
   const basePath=resolve(output,`b2-${row.name}-before-baseline.png`);
