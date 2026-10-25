@@ -34,7 +34,7 @@ test('pr10 reviewed-asset-picker changes real Chromium T02 A/B and preserves lon
  const candidateB=choices.find(x=>x.value!==current)!.value;
  const scenePage=await (await request.get(uri+'/storyboard/scenes')).json();
  const scene=scenePage.scenes[0];
- const frame=scene.start_frame+Math.min(scene.duration_frames-1,Math.max(1,Math.floor(scene.duration_frames/3)));
+ const frame=scene.start_frame+scene.duration_frames-1;
  const seek=async()=>{
   const stage=page.getByTestId('player-stage');
   await page.getByLabel('Seek exact frame').fill(String(frame));
@@ -90,12 +90,17 @@ test('pr10 reviewed-asset-picker changes real Chromium T02 A/B and preserves lon
        node=walker.nextNode() as Text|null;
      }
      return {layerId:parent.dataset.layer??'',text:el.textContent??'',
-             font:getComputedStyle(el).fontFamily,glyphCount:glyphs.length,
+             font:getComputedStyle(el).fontFamily,
+             visible:getComputedStyle(parent).opacity!=='0',glyphCount:glyphs.length,
              clipped:glyphs.some(g=>g.left<rect.left-1||g.right>rect.right+1||
                                     g.top<rect.top-1||g.bottom>rect.bottom+1),
              lines:new Set(glyphs.map(g=>Math.round(g.top*2)/2)).size};
    }));
- const long=critical.filter(x=>x.text.length>=65);
+ const long=critical.filter(x=>x.visible&&x.text.length>=65);
+ for(const row of long){
+   const authored=scene.layers.find((x:any)=>x.layer_id===row.layerId);
+   expect(row.text).toBe(authored?.text);
+ }
  expect(long.length,'Chromium must measure real source-backed long T02 captions').toBeGreaterThan(0);
  expect(long.every(x=>x.glyphCount>50&&!x.clipped&&x.lines<=3)).toBeTruthy();
  // Direct attacker attempt to select arbitrary original cannot pass the G4 source gate.
