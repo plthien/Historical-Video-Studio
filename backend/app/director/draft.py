@@ -74,7 +74,7 @@ def _read_canonical(store, content_sha, project):
     return obj
 
 
-def load(store, project):
+def load(store, project, *, allow_auxiliary_stale=False):
     ensure(store)
     with store._connection() as db:
         head = db.execute(
@@ -97,7 +97,8 @@ def load(store, project):
             or manifest.get("map_context_sha256") != digest(manifest.get("maps"))
             or manifest.get("map_requests_sha256") != digest(manifest.get("map_requests"))):
         _fail("G4_DRAFT_CORRUPT", project, "Stored draft manifest is inconsistent with SQLite head.")
-    if manifest.get("numeric_series_heads",{}) != current_numeric_heads(store,project):
+    if (not allow_auxiliary_stale and
+            manifest.get("numeric_series_heads",{}) != current_numeric_heads(store,project)):
         _fail("G4_SOURCE_STALE", project, "Auxiliary G1 numeric series changed; fresh compile required.")
     timeline = _read_canonical(store, manifest["timeline_sha256"], project)
     blueprint = _read_canonical(store, manifest["blueprint_sha256"], project)
@@ -132,7 +133,7 @@ def publish(store, project, timeline, blueprint, maps, map_requests, font_identi
                 "SELECT generation,project_revision,manifest_sha256 "
                 "FROM g4_compiled_drafts WHERE project_id=?",(project,)).fetchone()
         if prior:
-            previous_head=load(store,project)
+            previous_head=load(store,project,allow_auxiliary_stale=True)
             old_heads=previous_head["manifest"]["gate_heads"]
             if (expected_revision > previous_head["revision"]
                     and (approved_heads != old_heads or
