@@ -368,7 +368,7 @@ export const CompiledLayer:React.FC<{scene:Scene;layer:Layer;frame:number;media:
    cursor=span.end;
   }
   if(spans.length)fragments.push(txt.slice(cursor));
-  return <div style={{...style,...reviewedClip(layer,effect.reveal,effect.revealDirection,effect.revealFeather),padding:isHeading?10:6,display:'flex',alignItems:measured.vertical_align==='center'?'center':'flex-start',
+  return <div style={{...style,...reviewedClip(layer,media,effect.reveal,effect.revealDirection,effect.revealFeather),padding:isHeading?10:6,display:'flex',alignItems:measured.vertical_align==='center'?'center':'flex-start',
     justifyContent:measured.horizontal_align==='center'?'center':'flex-start',background:layer.layer_kind==='date'?'#e6d6b9c9':undefined,
     }}
     data-layer={layer.layer_id} data-claim={layer.source_claim_id??undefined}>
