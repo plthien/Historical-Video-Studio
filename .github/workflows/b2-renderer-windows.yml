@@ -226,6 +226,7 @@ jobs:
             renderer/.artifacts/compiled-30.json
             frontend/.artifacts/parity/
             frontend/.artifacts/longform/
+            frontend/.artifacts/typography/
             frontend/test-results/
             b2-owners.json
           if-no-files-found: warn
