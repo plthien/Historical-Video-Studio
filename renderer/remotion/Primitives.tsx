@@ -1,7 +1,7 @@
 import React from 'react';
 import {Img} from 'remotion';
 import type {Scene,Layer,Motion,ResolvedMedia} from './schema';
-import {fail,verifiedSyntheticCount} from './schema';
+import {fail,verifiedSyntheticCount,verifiedApprovedCount} from './schema';
 
 const clamp=(v:number)=>Math.min(1,Math.max(0,v));
 const mix=(a:number,b:number,t:number)=>a+(b-a)*t;
@@ -152,10 +152,18 @@ function motionForLayer(scene:Scene,layer:Layer,frame:number,media:ResolvedMedia
    case 'number-count':{
     // Same provenance validator is used pre-render by assertMedia. Never
     // manufacture historical intermediates from a final scalar or boolean.
-    const values=verifiedSyntheticCount(e,layer,media);
-    const precision=Number(e.params.precision);
-    const index=Math.min(values.length-1,Math.floor(p*(values.length-1)));
-    visibleText=values[index].toFixed(precision);
+    if(media.sourceKind==='APPROVED_LOCAL'){
+      const series=verifiedApprovedCount(e,layer,media);
+      const offset=Math.max(0,Math.min(e.duration_frames,frame-e.start_frame));
+      // Hold the most recently reviewed exact decimal string. No interpolation.
+      const row=series.observations.filter(o=>o.frameOffset<=offset).at(-1)??series.observations[0];
+      visibleText=row.value;
+    }else{
+      const values=verifiedSyntheticCount(e,layer,media);
+      const precision=Number(e.params.precision);
+      const index=Math.min(values.length-1,Math.floor(p*(values.length-1)));
+      visibleText=values[index].toFixed(precision);
+    }
     break;
    }
    case 'parallax-layers':{
