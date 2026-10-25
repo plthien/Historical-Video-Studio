@@ -81,6 +81,11 @@ def prepare(mode:str):
             if text["text_id"]==payload["fact_text_id"]:text["text"]="1914"
     else:
         payload["cutout_policy"]="use_reviewed_mask"
+        for text in setup["direction"]["on_screen_text"]:
+            if text["text_id"]==payload["role_text_id"]:
+                text["text"]="SYNTHETIC PORTRAIT. ORIGINAL PHOTO RIGHTS AND TRANSPARENT CUTOUT ARE REVIEWED SEPARATELY."
+            elif text["text_id"]==payload["name_text_id"]:
+                text["text"]="SYNTHETIC PERSON: SOURCE REVIEWED"
     pid=story["project"]["project_id"]
     client=TestClient(create_app(out/"g4.sqlite",out/"artifacts"))
     store=ProjectStore(out/"g4.sqlite",out/"artifacts")
