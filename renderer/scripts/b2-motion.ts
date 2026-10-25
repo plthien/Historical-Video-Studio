@@ -16,6 +16,7 @@ const output=resolve(root,'.artifacts/renders');
 mkdirSync(output,{recursive:true});
 const compiled=JSON.parse(readFileSync(resolve(root,'.artifacts/compiled-30.json'),'utf8')) as Record<string,Timeline>;
 const compiledCameraOff=JSON.parse(readFileSync(resolve(root,'.artifacts/compiled-camera-off.json'),'utf8')) as Record<string,Timeline>;
+const cameraPanFixture=JSON.parse(readFileSync(resolve(root,'.artifacts/compiled-camera-pan.json'),'utf8')) as {on:Timeline;off:Timeline;source_provenance:string};
 const scene=compiled.A.scenes.find(s=>s.template_id==='T03');
 if(!scene)throw Error('B2_MOTION_T03_MISSING');
 const timeline=structuredClone(compiled.A);
@@ -206,7 +207,7 @@ for(const row of cases){
 const compiledPresetNames=new Set<string>();
 for(const presetId of ['route-line-draw','map-region-wipe','editorial-connector-draw',
                        'camera-pan','camera-push']){
- const found=Object.entries(compiled).flatMap(([variant,value])=>
+ const found=Object.entries({...compiled,camera_pan:cameraPanFixture.on}).flatMap(([variant,value])=>
    value.scenes.map(candidate=>({variant,value,candidate,
      event:candidate.events.find(item=>item.preset_id===presetId)})))
    .find(item=>item.event);
@@ -241,7 +242,7 @@ for(const presetId of ['route-line-draw','map-region-wipe','editorial-connector-
  const off=structuredClone(t);
  const offScene=off.scenes[0];
  if(presetId.startsWith('camera-')){
-  const source=compiledCameraOff[found.variant]?.scenes.find(x=>x.setup_id===isolatedScene.setup_id);
+  const source=(found.variant==='camera_pan'?cameraPanFixture.off:compiledCameraOff[found.variant])?.scenes.find(x=>x.setup_id===isolatedScene.setup_id);
   if(!source)throw Error('B2_CAMERA_RECOMPILE_CONTROL_MISSING_'+presetId);
   offScene.camera=structuredClone(source.camera);
   offScene.events=structuredClone(source.events);
