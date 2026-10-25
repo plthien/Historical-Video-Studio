@@ -157,7 +157,8 @@ function motionForLayer(scene:Scene,layer:Layer,frame:number,media:ResolvedMedia
       const offset=Math.max(0,Math.min(e.duration_frames,frame-e.start_frame>=e.duration_frames-1 ? e.duration_frames : frame-e.start_frame));
       // Hold the most recently reviewed exact decimal string. No interpolation.
       const row=series.observations.filter(o=>o.frameOffset<=offset).at(-1)??series.observations[0];
-      visibleText=row.value;
+      visibleText=(row.value===series.endValue && layer.text?.replace(/,/g,'')===row.value)
+        ?layer.text:row.value;
     }else{
       const values=verifiedSyntheticCount(e,layer,media);
       const precision=Number(e.params.precision);
