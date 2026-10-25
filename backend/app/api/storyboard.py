@@ -123,7 +123,7 @@ def sources(store, project: str):
 
 def revise(store, project: str, expected: int, original: dict, edited: dict,
            reason: str, crop: dict | None = None, layers: dict | None = None,
-           motion: dict | None = None):
+           motion: dict | None = None, selections: dict | None = None):
     head = current(store, project)
     if expected != head["revision"]:
         blocked("REVISION_CONFLICT", project, "Reload storyboard; project revision changed.")
@@ -131,7 +131,8 @@ def revise(store, project: str, expected: int, original: dict, edited: dict,
     return revise_g4(store, project, head["timeline"], original, edited,
                      word_map, final_audio, approved, expected_revision=expected,
                      operator_reason=reason, crop_overrides=crop,
-                     layer_overrides=layers, motion_overrides=motion)
+                     layer_overrides=layers, motion_overrides=motion,
+                     asset_selection_overrides=selections)
 
 
 def mark(plan: dict, story_sha: str, reason: str, source_direction: dict):
@@ -175,6 +176,25 @@ def mount(app, store, idempotent):
         return {"project_revision": head["revision"], "draft_manifest_sha256": head["manifest_sha256"],
                 "status": "G4_DRAFT_NOT_OPERATOR_APPROVED", "timeline": head["timeline"]}
 
+    @app.get("/api/v1/projects/{project_id}/storyboard/scenes/{scene_id}/asset-options/{layer_id}")
+    def asset_options(project_id: str, scene_id: str, layer_id: str):
+        head=current(store,project_id)
+        scene=next((s for s in head["timeline"]["scenes"] if s["scene_id"]==scene_id),None)
+        layer=next((l for l in scene["layers"] if l["layer_id"]==layer_id),None) if scene else None
+        if not layer or not layer["source_asset_slot_id"] or not layer["asset_id"]:
+            blocked("G4_ASSET_SELECTION_FORBIDDEN",layer_id,"Only frozen source asset layers have G3 options.")
+        plan=next(p for p in head["blueprint"]["setup_plans"] if p["setup_id"]==scene["setup_id"])
+        authored=next((s for s in plan["editorial_direction"]["asset_slots"]
+                       if s["slot_id"]==layer["source_asset_slot_id"]),None)
+        if not authored:
+            blocked("G4_ASSET_SELECTION_FORBIDDEN",layer_id,"Frozen authored slot is missing.")
+        resolver=AssetResolution(store)
+        eligible=resolver.approved_slot_options(project_id,authored["requirement_id"],
+                                                 layer["source_asset_slot_id"])
+        return {"project_revision":head["revision"],"draft_manifest_sha256":head["manifest_sha256"],
+                "scene_id":scene_id,"layer_id":layer_id,"selected_candidate_id":layer["asset_id"],
+                **eligible}
+
     @app.patch("/api/v1/projects/{project_id}/storyboard/scenes/{scene_id}")
     def patch_scene(project_id: str, scene_id: str, body: StoryboardEdit,
                     key: str = Header(alias="Idempotency-Key", min_length=12)):
@@ -194,13 +214,36 @@ def mount(app, store, idempotent):
                 blocked("G4_EDIT_UNSUPPORTED", scene_id, "G2 cue identities are frozen and cannot be edited at G4.")
             layer_patch = {}
             crop_patch = {}
+            selection_patch = {}
             known = {layer["layer_id"]: layer for layer in previous["layers"]}
             for item in edits.layer_edits:
                 actual = known.get(item.layer_id)
                 if actual is None or item.layer_id in layer_patch:
                     blocked("G4_LAYOUT_INVALID", item.layer_id, "Choose an existing, unique frozen layer.")
                 if item.approved_asset_id is not None and item.approved_asset_id != actual["asset_id"]:
-                    blocked("G4_ASSET_SELECTION_FORBIDDEN", item.layer_id, "G4 cannot rebind to a different G3 original.")
+                    if not actual["source_asset_slot_id"] or not actual["asset_id"] or actual["layer_kind"] in ("map","territory"):
+                        blocked("G4_ASSET_SELECTION_FORBIDDEN",item.layer_id,
+                                "Historical maps require separate source geometry re-review; no blind asset replacement.")
+                    plan=next(p for p in head["blueprint"]["setup_plans"] if p["setup_id"]==previous["setup_id"])
+                    authored=next((s for s in plan["editorial_direction"]["asset_slots"]
+                                   if s["slot_id"]==actual["source_asset_slot_id"]),None)
+                    if not authored:
+                        blocked("G4_ASSET_SELECTION_FORBIDDEN",item.layer_id,"Frozen source slot absent.")
+                    eligible=AssetResolution(store).approved_slot_options(
+                        project_id,authored["requirement_id"],actual["source_asset_slot_id"])
+                    option=next((o for o in eligible["options"]
+                                 if o["candidate_id"]==item.approved_asset_id),None)
+                    if not option or not eligible["choice_set_sha256"]:
+                        blocked("G4_ASSET_SELECTION_FORBIDDEN",item.layer_id,
+                                "Choose only a currently G3-approved same-slot source.")
+                    selection_patch[item.layer_id]={
+                        "requirement_id":authored["requirement_id"],
+                        "slot_id":actual["source_asset_slot_id"],
+                        "candidate_id":option["candidate_id"],
+                        "choice_set_id":eligible["choice_set_id"],
+                        "choice_set_sha256":eligible["choice_set_sha256"],
+                        "review_approval_id":option["review_approval_id"],
+                        "original_sha256":option["original_sha256"]}
                 if item.crop_normalized is not None:
                     if item.layer_id in crop_patch:
                         blocked("G4_CROP_INVALID", item.layer_id, "Choose one crop per frozen layer.")
@@ -208,7 +251,7 @@ def mount(app, store, idempotent):
                 patch = {key: value for key, value in (
                     ("x", item.x_px), ("y", item.y_px), ("w", item.w_px), ("h", item.h_px))
                          if value is not None}
-                if not patch and item.crop_normalized is None:
+                if not patch and item.crop_normalized is None and item.layer_id not in selection_patch:
                     blocked("G4_EDIT_INVALID", item.layer_id, "Choose an actual presentation coordinate change.")
                 if patch:
                     layer_patch[item.layer_id] = patch
@@ -238,7 +281,8 @@ def mount(app, store, idempotent):
                           edited, f"Storyboard presentation edit: {scene_id}",
                           layers={previous["setup_id"]: layer_patch} if layer_patch else None,
                           crop={previous["setup_id"]: crop_patch} if crop_patch else None,
-                          motion={previous["setup_id"]: motion_patch} if motion_patch else None)
+                          motion={previous["setup_id"]: motion_patch} if motion_patch else None,
+                          selections={previous["setup_id"]:selection_patch} if selection_patch else None)
         return idempotent(project_id, "storyboard-scene:"+scene_id, key, body.model_dump(), action)
 
     @app.post("/api/v1/projects/{project_id}/storyboard/direction-revisions")
