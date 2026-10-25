@@ -107,7 +107,7 @@ class NumericSeries:
             digest, new_file = self.store.artifacts.put(raw)
             try:
                 from pathlib import Path
-                rel = str(self.store.artifacts.path(digest).relative_to(self.store.artifacts.root)).replace("\\\\", "/")
+                rel = str(self.store.artifacts.path(digest).relative_to(self.store.artifacts.root)).replace("\\", "/")
                 db.execute("INSERT OR IGNORE INTO artifacts VALUES(?,?,?,?)",
                            (digest, len(raw), "source_evidence", rel))
                 registered = db.execute("SELECT byte_count,kind,relative_path FROM artifacts WHERE sha256=?",
@@ -188,8 +188,6 @@ class NumericSeries:
                 self.store.get_artifact(evidence)
             if obs[0]["value"] != data["start_value"] or obs[-1]["value"] != data["end_value"]:
                 _fail("NUMERIC_SERIES_INVALID", claim_id, "Reviewed endpoints must exactly match authored scalars.")
-            if obs[-1]["value"] != data["end_value"]:
-                _fail("NUMERIC_SERIES_INVALID", claim_id, "Reviewed endpoint must equal authored endpoint.")
             snapshot = {"schema_version": "ApprovedNumericSeries.v1", "project_id": project_id,
                         "source_claim_id": claim_id, "series_id": data["series_id"],
                         "frozen_story_sha256": story_sha, "g1_approval_id": g1,
