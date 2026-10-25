@@ -184,6 +184,18 @@ jobs:
           $env:HVS_PR10_FIXTURE = 'mask'
           npm --prefix frontend run test:e2e -- tests/e2e/pr10-source.spec.ts
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: PR10 independently G1/G3-reviewed T06 multiline Chromium clipping
+        id: pr10_typography
+        if: ${{ always() && steps.browser_setup.outcome == 'success' }}
+        continue-on-error: true
+        shell: pwsh
+        run: |
+          & .venv/Scripts/python.exe -m renderer.scripts.prepare_pr10_fixture --case typography
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          $env:HVS_B2_FIXTURE = '1'
+          $env:HVS_PR10_FIXTURE = 'typography'
+          npm --prefix frontend run test:e2e -- tests/e2e/pr10-typography.spec.ts
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: B2 real Browser Node paired frame parity
         id: parity
         if: ${{ always() && steps.host_fixture.outcome == 'success' && steps.browser_setup.outcome == 'success' }}
@@ -224,6 +236,7 @@ jobs:
         env:
           B2_PR10_REAL: ${{ steps.pr10_real.outcome }}
           B2_PR10_BROWSER: ${{ steps.pr10_browser.outcome }}
+          B2_PR10_TYPOGRAPHY: ${{ steps.pr10_typography.outcome }}
           B2_SOURCE_AUTH: ${{ steps.source_auth.outcome }}
           B2_MOTION: ${{ steps.motion.outcome }}
           B2_MULTILAYER: ${{ steps.multilayer.outcome }}
@@ -236,7 +249,7 @@ jobs:
           B2_LONGRENDER: ${{ steps.longrender.outcome }}
         run: |
           $results = @{
-            pr10_real=$env:B2_PR10_REAL; pr10_browser=$env:B2_PR10_BROWSER; source_auth=$env:B2_SOURCE_AUTH; motion=$env:B2_MOTION; multilayer=$env:B2_MULTILAYER; sqlite=$env:B2_SQLITE;
+            pr10_real=$env:B2_PR10_REAL; pr10_browser=$env:B2_PR10_BROWSER; pr10_typography=$env:B2_PR10_TYPOGRAPHY; source_auth=$env:B2_SOURCE_AUTH; motion=$env:B2_MOTION; multilayer=$env:B2_MULTILAYER; sqlite=$env:B2_SQLITE;
             browser_setup=$env:B2_SETUP; editor=$env:B2_EDITOR; parity=$env:B2_PARITY;
             fixture61=$env:B2_FIXTURE61; longui=$env:B2_LONGUI; longrender=$env:B2_LONGRENDER
           }
