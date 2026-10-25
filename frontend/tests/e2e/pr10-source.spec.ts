@@ -46,6 +46,13 @@ test('pr10 reviewed-asset-picker changes real Chromium T02 A/B and preserves lon
  };
  await page.getByRole('button',{name:'Load real read-only Remotion Player'}).click();
  const stage=await seek();
+ // Compare exactly the same fixed 1920x1080 Chromium composition viewport
+ // across cold reloads; editor panel CSS must not rescale a raster baseline.
+ const fixedViewport=async()=>{
+   await stage.evaluate(el=>{const node=el as HTMLElement;
+     node.style.width='1920px';node.style.height='1080px';});
+ };
+ await fixedViewport();
  await page.evaluate(()=>document.fonts.ready);
  const authoredCanvas=()=>stage.locator('[data-global-frame="'+frame+'"][data-scene-id="'+scene.scene_id+'"]');
  const a=await authoredCanvas().screenshot();
@@ -56,6 +63,7 @@ test('pr10 reviewed-asset-picker changes real Chromium T02 A/B and preserves lon
  expect(serverB.scenes[0].layers.find((l:any)=>l.layer_id===portrait)?.asset_id).toBe(candidateB);
  await page.getByRole('button',{name:'Load real read-only Remotion Player'}).click();
  await seek();
+ await fixedViewport();
  await page.evaluate(()=>document.fonts.ready);
  const b=await authoredCanvas().screenshot();
  expect(sha(a),'B must render different real Chromium pixels from A').not.toBe(sha(b));
@@ -119,6 +127,7 @@ test('pr10 reviewed-asset-picker changes real Chromium T02 A/B and preserves lon
  await page.getByRole('button',{name:'Save A/B source (G4/G5 stale)'}).click();
  await page.getByRole('button',{name:'Load real read-only Remotion Player'}).click();
  await seek();
+ await fixedViewport();
  await page.evaluate(()=>document.fonts.ready);
  const returned=await authoredCanvas().screenshot();
  expect(sha(returned),'Cold reopened A must restore exactly authored A pixels').toBe(sha(a));
