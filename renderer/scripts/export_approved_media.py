@@ -48,6 +48,49 @@ with store._connection() as db:
 referenced={x["asset_id"] for s in timeline["scenes"] for x in s["layers"] if x["asset_id"]}
 if referenced-set(assets):
     raise RuntimeError("G4_ASSET_NOT_APPROVED "+str(referenced-set(assets)))
+# Numeric evidence is a separate current G1-reviewed approval, never a render prop assertion.
+from backend.app.projects.numeric_series import NumericSeries
+owner=NumericSeries(store)
+numeric={}
+with store._connection() as db:
+    current=db.execute("""SELECT e.claim_id,e.series_id,e.approval_id,e.series_sha256,e.snapshot_json
+        FROM numeric_series_heads h JOIN numeric_series_events e
+          ON h.approval_id=e.approval_id
+        WHERE h.project_id=?""",(args.project,)).fetchall()
+for claim,sid,approval,series_sha,raw in current:
+    row=owner.get(args.project,claim,sid)
+    record=json.loads(raw)
+    if (row is None or not row["current"] or row["approval_id"]!=approval or
+        row["series_sha256"]!=series_sha or
+        hashlib.sha256(canonical(record)).hexdigest()!=series_sha):
+        raise RuntimeError("RENDER_NUMBER_SERIES_STALE "+sid)
+    for point in record["observations"]:
+        store.get_artifact(point["source_evidence_sha256"])
+    if sid in numeric:
+        raise RuntimeError("RENDER_NUMBER_SERIES_AMBIGUOUS "+sid)
+    numeric[sid]={
+        "seriesId":sid,"claimId":claim,"storySha256":record["frozen_story_sha256"],
+        "g1ApprovalId":record["g1_approval_id"],"approvalId":approval,
+        "seriesSha256":series_sha,"durationFrames":record["authored_duration_frames"],
+        "precision":record["precision"],"unit":record["unit"],
+        "startValue":record["start_value"],"endValue":record["end_value"],
+        "observations":[{"frameOffset":v["frame_offset"],"value":v["value"],
+                         "evidenceSha256":v["source_evidence_sha256"]}
+                        for v in record["observations"]]
+    }
+for scene in timeline["scenes"]:
+    for event in scene["events"]:
+        if event["preset_id"]!="number-count":
+            continue
+        sid=event["params"].get("approved_numeric_series_id")
+        source=numeric.get(sid)
+        layer=next((l for l in scene["layers"] if l["layer_id"]==event["layer_id"]),None)
+        if (not source or not layer or layer["source_claim_id"]!=source["claimId"] or
+            event["duration_frames"]!=source["durationFrames"] or
+            event["params"]["source_claim_id"]!=source["claimId"]):
+            raise RuntimeError("RENDER_NUMBER_SERIES_UNVERIFIED "+event["event_id"])
+if draft.current_numeric_heads(store,args.project)!=head["manifest"].get("numeric_series_heads",{}):
+    raise RuntimeError("G4_NUMERIC_SERIES_STALE")
 records=[]
 for aid in sorted(referenced):
     source=assets[aid]
@@ -143,9 +186,15 @@ manifest={
  "mediaRoot":str(store.artifacts.root.resolve()),
  "assets":records,"geometries":geometries,"maps":list(reviewed_maps.values()),
  "fontFile":str(font_path),"fontSha256":font["font_sha256"],
- "fontFamily":font["font_family"],"sourceKind":"APPROVED_LOCAL"
+ "fontFamily":font["font_family"],"sourceKind":"APPROVED_LOCAL",
+ "approvedNumericSeries":numeric
 }
 args.output.parent.mkdir(parents=True,exist_ok=True)
 args.output.write_bytes(canonical({"timeline":timeline,"manifest":manifest}))
+if (store.revision(args.project)!=head["revision"] or
+    draft.current_gate_heads(store,args.project)!=head["manifest"]["gate_heads"] or
+    draft.current_numeric_heads(store,args.project)!=head["manifest"].get("numeric_series_heads",{})):
+    args.output.unlink(missing_ok=True)
+    raise RuntimeError("G4_SOURCE_STALE: approval changed during media export")
 print(json.dumps({"state":"APPROVED_LOCAL","g4Head":head["manifest_sha256"],
                   "assetCount":len(records),"geometryCount":len(geometries)}))
