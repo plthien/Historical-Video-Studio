@@ -209,6 +209,10 @@ jobs:
           foreach ($entry in $results.GetEnumerator()) {
             Write-Host "$($entry.Key): $($entry.Value)"
           }
+          # Independently parse real artifacts, not only the motion process exit.
+          # Re-run the *same* production verifier with mutation negatives.
+          & .venv/Scripts/python.exe renderer/scripts/verify_motion_ledgers.py --self-test
+          if ($LASTEXITCODE -ne 0) { throw "B2 cross-ledger/PNG/ROI or mutation integrity failed" }
           if (@($results.Values | Where-Object { $_ -ne 'success' }).Count -gt 0) {
             throw "B2 required owner failure or skipped dependency (see b2-owners.json)"
           }
