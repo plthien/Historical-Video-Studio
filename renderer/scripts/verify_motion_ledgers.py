@@ -44,9 +44,21 @@ def validate(registry,sem,phase):
         frames=[e for e in evidence if isinstance(e.get("frame"),int) and "path" in e]
         need(len(frames)>=3 and row.get("actual_png_paths")==[f["path"] for f in frames],
              name+": missing frame series")
+        need(row.get("frame_numbers")==[f["frame"] for f in frames],
+             name+": frame-number ledger disagrees with rendered frames")
+        need(row.get("proof_scope")=="SYNTHETIC_CHROMIUM_MECHANICS_ONLY",
+             name+": per-row provenance scope changed")
+        for e in evidence:
+            need(e.get("source") in ("SYNTHETIC_RENDER_FIXTURE",
+                 "SYNTHETIC_B1_COMPILER_NOT_OPERATOR_APPROVED","SYNTHETIC",
+                 "SYNTHETIC_B1_COMPILED_NOT_REAL_RIGHTS"),
+                 name+": unexpected or operator-impersonating evidence source")
         for e in frames:
             png(e["path"],e.get("sha256"))
-            need(isinstance(e.get("pixelHash"),str) and len(e["pixelHash"])==64,name+": missing pixel digest")
+            digest=e.get("pixelHash")
+            need(isinstance(digest,str) and len(digest)==64 and
+                 all(char in "0123456789abcdef" for char in digest),
+                 name+": invalid pixel digest format")
         need(any(e.get("negativeAssertion")=="wrong_transform_space" and e.get("typedRejection") is True
                  for e in evidence),name+": no wrong-space typed rejection")
         counter=[e for e in evidence if e.get("counterfactual")=="same_frame_event_removed"
@@ -103,6 +115,10 @@ def mutations(reg,sem,phase):
     reject("contradictory status",lambda a,b:b.update(status="FAIL"))
     reject("forged PASS row",lambda a,b:a["rows"][0].update(status="FAIL_CONFIRMED"))
     reject("missing registered preset",lambda a,b:a["rows"].pop())
+    reject("forged row scope",lambda a,b:a["rows"][0].update(proof_scope="OPERATOR_APPROVED"))
+    reject("frame number drift",lambda a,b:a["rows"][0]["frame_numbers"].reverse())
+    reject("nonhex pixel hash",lambda a,b:a["rows"][0]["evidence"][0].update(pixelHash="z"*64))
+    reject("forged operator proof record",lambda a,b:a["rows"][0]["evidence"][0].update(source="OPERATOR_APPROVED"))
     reject("missing wrong-space negative",lambda a,b:a["rows"][0].update(evidence=[
         e for e in a["rows"][0]["evidence"] if e.get("negativeAssertion")!="wrong_transform_space"]))
     reject("missing event-off ROI",lambda a,b:a["rows"][0].update(evidence=[
