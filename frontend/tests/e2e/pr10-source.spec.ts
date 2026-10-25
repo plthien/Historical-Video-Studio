@@ -103,6 +103,36 @@ test('pr10 reviewed-asset-picker changes real Chromium T02 A/B and preserves lon
  }
  expect(long.length,'Chromium must measure real source-backed long T02 captions').toBeGreaterThan(0);
  expect(long.every(x=>x.glyphCount>50&&!x.clipped&&x.lines<=3)).toBeTruthy();
+ // Browser adversarial proof: an overlong caption in a 1-pixel line box must
+ // visibly extend beyond authored glyph bounds, even if CSS hides the ink.
+ const longLayerId=long[0]!.layerId;
+ const textNode=page.getByTestId('player-stage').locator(`[data-layer="${longLayerId}"] > span`).first();
+ const originalStyle=await textNode.getAttribute('style');
+ await textNode.evaluate(node=>{
+   const el=node as HTMLElement;
+   el.style.width='1px';el.style.minWidth='1px';el.style.maxWidth='1px';
+   el.style.whiteSpace='nowrap';el.style.overflow='hidden';
+ });
+ const actualOverflow=await textNode.evaluate(node=>{
+   const element=node as HTMLElement,parent=element.parentElement as HTMLElement;
+   const bounds=parent.getBoundingClientRect();
+   const walker=document.createTreeWalker(element,NodeFilter.SHOW_TEXT);
+   let text=walker.nextNode() as Text|null;
+   while(text){
+     for(let offset=0;offset<(text.textContent??'').length;offset++){
+       if(!(text.textContent??'')[offset]?.trim())continue;
+       const range=document.createRange();
+       range.setStart(text,offset);range.setEnd(text,offset+1);
+       for(const rect of Array.from(range.getClientRects())){
+         if(rect.right>bounds.right+1||rect.left<bounds.left-1)return true;
+       }
+     }
+     text=walker.nextNode() as Text|null;
+   }
+   return false;
+ });
+ expect(actualOverflow,'adversarial critical caption clipping must be detected').toBe(true);
+ await textNode.evaluate((node,style)=>{(node as HTMLElement).setAttribute('style',style??'');},originalStyle);
  // Direct attacker attempt to select arbitrary original cannot pass the G4 source gate.
  const state=await (await request.get(uri+'/storyboard/scenes')).json();
  const forbidden=await request.patch(uri+'/storyboard/scenes/'+scene.scene_id,{
@@ -119,5 +149,6 @@ test('pr10 reviewed-asset-picker changes real Chromium T02 A/B and preserves lon
    scene:scene.scene_id,frame,choiceA:current,choiceB:candidateB,
    sourceGatesPreserved:['G1','G2','G3'],
    screenshots:shots.map(x=>({name:x.name,sha256:sha(x.png)})),
-   typography:long,negativeStatus:forbidden.status()},null,2));
+   typography:long,typographyAdversarialClippingDetected:actualOverflow,
+   negativeStatus:forbidden.status()},null,2));
 });
