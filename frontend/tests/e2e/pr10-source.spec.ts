@@ -46,14 +46,18 @@ test('pr10 reviewed-asset-picker changes real Chromium T02 A/B and preserves lon
  };
  await page.getByRole('button',{name:'Load real read-only Remotion Player'}).click();
  const stage=await seek();
- const a=await stage.screenshot();
+ await page.evaluate(()=>document.fonts.ready);
+ const authoredCanvas=()=>stage.locator('[data-global-frame="'+frame+'"][data-scene-id="'+scene.scene_id+'"]');
+ const a=await authoredCanvas().screenshot();
  await picker.selectOption(candidateB);
  await page.getByRole('button',{name:'Save A/B source (G4/G5 stale)'}).click();
  await expect(page.getByRole('status').filter({hasText:'Save reviewed A/B original'})).toBeVisible();
  const serverB=await (await request.get(uri+'/storyboard/scenes')).json();
  expect(serverB.scenes[0].layers.find((l:any)=>l.layer_id===portrait)?.asset_id).toBe(candidateB);
  await page.getByRole('button',{name:'Load real read-only Remotion Player'}).click();
- const b=await (await seek()).screenshot();
+ await seek();
+ await page.evaluate(()=>document.fonts.ready);
+ const b=await authoredCanvas().screenshot();
  expect(sha(a),'B must render different real Chromium pixels from A').not.toBe(sha(b));
  // G09 for selected B/T02: exact same current host-issued props in both
  // real Browser Player and Node Remotion. No mock/PNG color-only shortcut.
@@ -114,7 +118,9 @@ test('pr10 reviewed-asset-picker changes real Chromium T02 A/B and preserves lon
  await afterReload.selectOption(current);
  await page.getByRole('button',{name:'Save A/B source (G4/G5 stale)'}).click();
  await page.getByRole('button',{name:'Load real read-only Remotion Player'}).click();
- const returned=await (await seek()).screenshot();
+ await seek();
+ await page.evaluate(()=>document.fonts.ready);
+ const returned=await authoredCanvas().screenshot();
  expect(sha(returned),'Cold reopened A must restore exactly authored A pixels').toBe(sha(a));
  const critical=await page.getByTestId('player-stage').locator('[data-layer][data-claim] > span').evaluateAll(elements=>
    elements.map(x=>{
