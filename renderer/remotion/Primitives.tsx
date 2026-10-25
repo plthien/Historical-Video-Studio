@@ -49,7 +49,7 @@ function eventProgress(e:Motion,f:number){
  if(curve==='spring_subtle')return clamp(t+0.04*Math.sin(Math.PI*2*t)*(1-t));
  return easing(t,curve);
 }
-function motionForLayer(scene:Scene,layer:Layer,frame:number){
+function motionForLayer(scene:Scene,layer:Layer,frame:number,media:ResolvedMedia){
  let opacity=1,scale=1,translateX=0,translateY=0,rotation=0,reveal=1,highlight=0;
  let visibleText:string|undefined;
  const wordOffsets:Record<string,number>={};
@@ -145,11 +145,25 @@ function motionForLayer(scene:Scene,layer:Layer,frame:number){
     if(source!==layer.source_claim_id||!layer.text||Number(layer.text.replace(/,/g,''))!==end||
        e.params.intermediate_truthful!==true)
       fail('RENDER_COUNT_FACT_UNVERIFIED',e.event_id,'Number progression must be explicitly truth-safe and equal frozen exact factual text');
-    // A final scalar plus a self-asserted boolean cannot authenticate each
-    // intermediate historical observation. Refuse to label a mask reveal as
-    // genuine registered number interpolation; G1 source authority is required.
-    fail('RENDER_NUMBER_SERIES_UNVERIFIED',e.event_id,
-      'Frozen G1 lacks a certified factual intermediate value series for number-count');
+    // The frozen G1 final scalar does not authorize intermediate historical values.
+    // Synthetic test media can separately prove the rendering mechanism; an
+    // APPPROVED_LOCAL manifest can never supply or mint this fixture.
+    const series=media.sourceKind==='SYNTHETIC'&&media.syntheticNumericSeries?.[String(source)];
+    if(!series||!series.fixtureId.startsWith('synthetic_')||
+       !Array.isArray(series.values)||series.values.length<2||
+       series.values.some(v=>typeof v!=='number'||!Number.isFinite(v))||
+       series.values[0]!==Number(e.params.start_value)||series.values.at(-1)!==end)
+      fail('RENDER_NUMBER_SERIES_UNVERIFIED',e.event_id,
+       'No source-authorized G1 intermediate series; synthetic counting requires an explicit test fixture');
+    const precision=Number(e.params.precision),direction=Math.sign(end-series.values[0]);
+    if(!Number.isInteger(precision)||precision<0||precision>3||
+       series.values.some((v,i)=>Number(v.toFixed(precision))!==v||
+          (i>0&&direction*(v-series.values[i-1])<0)))
+      fail('RENDER_NUMBER_SERIES_INVALID',e.event_id,
+       'Synthetic intermediate values must preserve precision and chronological ordering');
+    const index=Math.min(series.values.length-1,Math.floor(p*(series.values.length-1)));
+    visibleText=series.values[index].toFixed(precision);
+    break;
    }
    case 'parallax-layers':{
     const near=e.params.near_layer_ids as string[],far=e.params.far_layer_ids as string[];
@@ -275,7 +289,7 @@ export const CompiledLayer:React.FC<{scene:Scene;layer:Layer;frame:number;media:
    (e.layer_id===layer.layer_id||e.affected_layer_ids.includes(layer.layer_id))&&
    frame>=e.start_frame&&frame<e.start_frame+e.duration_frames);
  const localFrame=frozen?frozen.start_frame:frame;
- const effect=motionForLayer(scene,layer,localFrame);
+ const effect=motionForLayer(scene,layer,localFrame,media);
  const r=layer.rect_px,c=layer.crop_normalized;
  const shown=frame>=first;
  const style:React.CSSProperties={position:'absolute',left:r.x,top:r.y,width:r.w,height:r.h,zIndex:layer.z_index,overflow:'hidden',
