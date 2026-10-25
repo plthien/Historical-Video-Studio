@@ -1,6 +1,6 @@
 import {useCallback,useEffect,useMemo,useRef,useState} from 'react';
 import {ApiError} from '../../api/client';
-import {storyboardApi,type ScenePage,type BrowserPreview,type StoryboardScene} from '../../api/storyboard';
+import {storyboardApi,type ScenePage,type BrowserPreview,type StoryboardScene,type AssetOptions} from '../../api/storyboard';
 import {RemotionPreview} from '../../components/RemotionPreview';
 
 function describe(error:unknown){
@@ -29,6 +29,9 @@ export function StoryboardStudio({projectId,onRefresh}:{projectId:string;onRefre
  const [stageOp,setStageOp]=useState('');
  const [stageIndex,setStageIndex]=useState(0);
  const [snapshot,setSnapshot]=useState<BrowserPreview|null>(null);
+ const [assetOptions,setAssetOptions]=useState<AssetOptions|null>(null);
+ const [assetChoice,setAssetChoice]=useState('');
+ const [assetLoading,setAssetLoading]=useState(false);
  const [pending,setPending]=useState<string|null>(null);
  const [error,setError]=useState('');
  const [success,setSuccess]=useState('');
@@ -69,6 +72,21 @@ export function StoryboardStudio({projectId,onRefresh}:{projectId:string;onRefre
     selectedLayer?.rect_px.w,selectedLayer?.rect_px.h,
     selectedLayer?.crop_normalized.x,selectedLayer?.crop_normalized.y,
     selectedLayer?.crop_normalized.w,selectedLayer?.crop_normalized.h]);
+ useEffect(()=>{
+   let live=true;
+   setAssetOptions(null);setAssetChoice('');
+   if(!scene||!selectedLayer?.asset_id||!selectedLayer.source_asset_slot_id||!page)return;
+   setAssetLoading(true);
+   storyboardApi.assetOptions(projectId,scene.scene_id,selectedLayer.layer_id).then(result=>{
+     if(!live)return;
+     if(result.draft_manifest_sha256!==page.draft_manifest_sha256)return;
+     setAssetOptions(result);
+     setAssetChoice(result.selected_candidate_id);
+   }).catch(error=>{if(live)setError(describe(error));})
+     .finally(()=>{if(live)setAssetLoading(false);});
+   return ()=>{live=false;};
+ },[projectId,scene?.scene_id,selectedLayer?.layer_id,
+    selectedLayer?.asset_id,selectedLayer?.source_asset_slot_id,page?.draft_manifest_sha256]);
  useEffect(()=>{setBeatId(scene?.direction_beats[0]?.beat_id??'');setStageIndex(0);},[scene?.scene_id]);
  useEffect(()=>{setStageIndex(0);},[selectedBeat?.beat_id]);
  useEffect(()=>{setStageOp(selectedStage?.operation??'');},
@@ -190,6 +208,32 @@ export function StoryboardStudio({projectId,onRefresh}:{projectId:string;onRefre
         await storyboardApi.crop(projectId,scene.scene_id,selectedLayer.layer_id,{x:cropX,y:cropY,w:cropW,h:cropH},page.project_revision,crypto.randomUUID());
         invalidatePreview();await load(offset,scene.scene_id);await onRefresh();
       })}>Save crop (G4/G5 stale)</button>
+    <h4>Current G3-reviewed same-slot source alternatives</h4>
+    {selectedLayer?.source_asset_slot_id&&selectedLayer?.asset_id?
+      <div className="stack" aria-label="g4-approved-asset-picker">
+        <p>Frozen slot {selectedLayer.source_asset_slot_id}; current source {selectedLayer.asset_id}. G4 changes presentation only and cannot approve new G3 evidence.</p>
+        {assetLoading?<p role="status">Checking current G3 pool…</p>:
+         assetOptions?.options.length?
+          <>
+            <label htmlFor="sb-source-option">Eligible same-slot reviewed original</label>
+            <select id="sb-source-option" aria-label="Eligible approved source" value={assetChoice}
+              disabled={!!pending} onChange={e=>setAssetChoice(e.target.value)}>
+              {assetOptions.options.map(option=><option key={option.candidate_id} value={option.candidate_id}>
+                {option.title} · {option.candidate_id} · SHA {option.original_sha256.slice(0,12)}
+              </option>)}
+            </select>
+            <small>G3 choice set {assetOptions.choice_set_id} · review SHA {assetOptions.choice_set_sha256?.slice(0,16)}</small>
+            <button type="button" disabled={!!pending||!assetChoice||assetChoice===selectedLayer.asset_id||
+              assetOptions.project_revision!==page.project_revision}
+              onClick={()=>void operation('Save reviewed A/B original',async()=>{
+                await storyboardApi.assetChoice(projectId,scene.scene_id,selectedLayer.layer_id,
+                  assetChoice,page.project_revision,crypto.randomUUID());
+                invalidatePreview();await load(offset,scene.scene_id);await onRefresh();
+              })}>Save A/B source (G4/G5 stale)</button>
+          </>:
+          <p role="note">No current independently G3-approved alternatives for this source slot.</p>}
+      </div>:
+      <small>Choose a source-backed image layer to inspect eligible G3 alternatives.</small>}
     <h4>Frozen layers / approved sources</h4>
     <div style={{maxHeight:220,overflowY:'auto'}}>
      {scene.layers.map(l=><p key={l.layer_id}><strong>{l.layer_kind}</strong> · {l.layer_id}
