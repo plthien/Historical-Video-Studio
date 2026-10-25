@@ -243,7 +243,7 @@ export function arrowPolygon(points:[number,number][],progress:number):string|nu
 function pathProgress(scene:Scene,layer:Layer,frame:number){
  const event=scene.events.find(e=>e.layer_id===layer.layer_id&&
   (e.preset_id==='route-line-draw'||e.preset_id==='editorial-connector-draw'));
- if(!event)fail('RENDER_PATH_MOTION_MISSING',layer.layer_id,'Route/connector needs authored compiled drawing event');
+ if(!event)return fail('RENDER_PATH_MOTION_MISSING',layer.layer_id,'Route/connector needs authored compiled drawing event');
  if(frame<event.start_frame)return 0;
  // Unlike camera/rotation tracks, registered SVG path-length tracks are
  // themselves normalized [0,1]. Sample the authored drawing length, not a
