@@ -311,6 +311,48 @@ class AssetResolution:
             current=g3._status(db,project,"G3")[0]=="APPROVED"
             return {**selected,"g3_current":current}
 
+    def approved_slot_options(self, project: str, requirement: str, slot: str):
+        """Only fresh same-slot G3 pool items are usable by G4; source metadata is display-only."""
+        with self.store._connection() as db:
+            source=self.assets._source_tx(db,project,requirement)
+            pools=self._active_choice_sets(db,project,requirement,source["requirement_sha256"])
+            pool=pools.get(slot)
+            gate=GateService.__new__(GateService)
+            gate.store=self.store
+            if not pool or gate._status(db,project,"G3")[0]!="APPROVED":
+                return {"choice_set_id":None,"choice_set_sha256":None,"options":[]}
+            primary=self._head(db,project,requirement,source["requirement_sha256"])
+            if not primary:
+                raise ContractViolation("G3_ASSET_UNAPPROVED",requirement,"Current approved primary is missing.")
+            options=[]
+            for item in pool["items"]:
+                cand=self.assets._owned_tx(db,project,requirement,item["candidate_id"])
+                evidence=item["evidence"]
+                if (item["requirement_sha256"]!=source["requirement_sha256"] or
+                    item["source_story_sha256"]!=source["story_sha256"] or
+                    item["original_sha256"]!=cand["original_sha256"] or
+                    cand["asset_class"]!=primary["evidence"]["asset_class"] or
+                    evidence["rights_status"]!="ELIGIBLE" or
+                    evidence["candidate_id"]!=cand["candidate_id"] or
+                    not evidence["rights_evidence_note"] or not evidence["historical_context_note"]):
+                    raise ContractViolation("G3_CHOICE_SOURCE_STALE",slot,"Reviewed original no longer matches current rights/requirement.")
+                sha=item["original_sha256"]
+                self.store.get_artifact(sha)
+                rid=db.execute("""SELECT review_approval_id FROM asset_choice_set_items
+                    WHERE set_id=? AND candidate_id=? AND original_sha256=? AND evidence_sha256=?""",
+                    (pool["set_id"],cand["candidate_id"],sha,_digest(evidence))).fetchone()
+                if not rid:
+                    raise ContractViolation("G3_CHOICE_SET_CORRUPT",slot,"Missing immutable operator review record.")
+                options.append({"candidate_id":cand["candidate_id"],
+                                "original_sha256":sha,
+                                "review_approval_id":rid[0],
+                                "asset_class":cand["asset_class"],
+                                "title":cand.get("title","Reviewed original"),
+                                "source_provider":cand["provider"]})
+            return {"requirement_id":requirement,"slot_id":slot,
+                    "choice_set_id":pool["set_id"],"choice_set_sha256":pool["set_sha256"],
+                    "options":options}
+
     @staticmethod
     def gate_candidate(db, project, store):
         row=db.execute("SELECT sha256,story_json FROM story_candidates WHERE project_id=? ORDER BY revision DESC LIMIT 1",
