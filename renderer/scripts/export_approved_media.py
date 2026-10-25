@@ -45,6 +45,37 @@ with store._connection() as db:
         if hashlib.sha256(original).hexdigest()!=approval["original_sha256"]:
             raise RuntimeError("G3_SOURCE_CORRUPT "+rid)
         assets[approval["candidate_id"]]=approval
+# Exact G4 effective selection is independent of the frozen G3 primary map.
+from backend.app.director.fingerprint import digest
+if head["manifest"].get("effective_asset_snapshot_sha256") != digest([
+        {"scene_id":s["scene_id"],"assets":s["asset_ids"]} for s in timeline["scenes"]]):
+    raise RuntimeError("G4_EFFECTIVE_SOURCE_CORRUPT")
+seen_selection=set()
+for setup,patches in head["manifest"].get("asset_selection_overrides",{}).items():
+    scene=next((s for s in timeline["scenes"] if s["setup_id"]==setup),None)
+    if not scene:
+        raise RuntimeError("G4_SELECTED_SCENE_MISSING "+setup)
+    for layer_id,choice in patches.items():
+        layer=next((l for l in scene["layers"] if l["layer_id"]==layer_id),None)
+        if not layer or layer["asset_id"]!=choice["candidate_id"] or layer["source_asset_slot_id"]!=choice["slot_id"]:
+            raise RuntimeError("G4_SELECTED_LAYER_MISMATCH "+layer_id)
+        if layer["layer_kind"] in ("map","territory"):
+            raise RuntimeError("G4_MAP_SELECTION_UNREVIEWED "+layer_id)
+        plan=next(p for p in head["blueprint"]["setup_plans"] if p["setup_id"]==setup)
+        authored=next((v for v in plan["editorial_direction"]["asset_slots"]
+                       if v["slot_id"]==choice["slot_id"] and v["requirement_id"]==choice["requirement_id"]),None)
+        if not authored:
+            raise RuntimeError("G4_SOURCE_SLOT_MISMATCH "+layer_id)
+        options=AssetResolution(store).approved_slot_options(args.project,choice["requirement_id"],choice["slot_id"])
+        selected=next((v for v in options["options"] if
+                       v["candidate_id"]==choice["candidate_id"] and
+                       v["review_approval_id"]==choice["review_approval_id"] and
+                       v["original_sha256"]==choice["original_sha256"]),None)
+        if not selected or options["choice_set_id"]!=choice["choice_set_id"] or options["choice_set_sha256"]!=choice["choice_set_sha256"]:
+            raise RuntimeError("G4_SELECTED_SOURCE_STALE "+layer_id)
+        assets[choice["candidate_id"]]={"original_sha256":selected["original_sha256"],
+            "approval_record_id":selected["review_approval_id"],"candidate_id":selected["candidate_id"]}
+        seen_selection.add((setup,layer_id))
 referenced={x["asset_id"] for s in timeline["scenes"] for x in s["layers"] if x["asset_id"]}
 if referenced-set(assets):
     raise RuntimeError("G4_ASSET_NOT_APPROVED "+str(referenced-set(assets)))
