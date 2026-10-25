@@ -5,12 +5,19 @@ import type {HistoryProps} from '../../../renderer/remotion/HistoryComposition';
 export interface StoryboardScene {
   scene_id:string;setup_id:string;template_id:string;variant_id:string;
   start_frame:number;duration_frames:number;
-  layers:{layer_id:string;layer_kind:string;text:string|null;asset_id:string|null;
+  layers:{layer_id:string;layer_kind:string;text:string|null;asset_id:string|null;source_asset_slot_id:string|null;
     rect_px:{x:number;y:number;w:number;h:number};crop_normalized:{x:number;y:number;w:number;h:number}}[];
   events:{event_id:string;preset_id:string;start_frame:number;duration_frames:number;params:Record<string,string|number|boolean>}[];
   direction_beats:{beat_id:string;shot_goal:string;focus_move:string;staging:{
     ref:string;operation:string;after_ref:string|null;motion_hint:string;priority:number;}[]}[];
   diagnostics:string[];
+}
+export interface AssetOptions {
+ project_revision:number;draft_manifest_sha256:string;
+ scene_id:string;layer_id:string;selected_candidate_id:string;
+ requirement_id?:string;slot_id?:string;choice_set_id:string|null;choice_set_sha256:string|null;
+ options:{candidate_id:string;original_sha256:string;review_approval_id:string;
+          asset_class:string;title:string;source_provider:string}[];
 }
 export interface ScenePage {
  project_revision:number;draft_manifest_sha256:string;story_revision_sha256:string;status:'G4_DRAFT_NOT_OPERATOR_APPROVED';
@@ -39,6 +46,12 @@ export const storyboardApi={
  motion:(id:string,scene:string,event_id:string,preset_id:string,params:Record<string,string|number|boolean>,revision:number,key:string)=>
   request<EditResult>(path(id)+'/scenes/'+encodeURIComponent(scene),'PATCH',
     {expected_revision:revision,scene_id:scene,changes:{motion_edits:[{event_id,preset_id,params}]}},key),
+ assetOptions:(id:string,scene:string,layer:string)=>request<AssetOptions>(
+    path(id)+'/scenes/'+encodeURIComponent(scene)+'/asset-options/'+encodeURIComponent(layer)),
+ assetChoice:(id:string,scene:string,layer:string,candidate:string,revision:number,key:string)=>
+    request<EditResult>(path(id)+'/scenes/'+encodeURIComponent(scene),'PATCH',
+      {expected_revision:revision,scene_id:scene,changes:{
+        layer_edits:[{layer_id:layer,approved_asset_id:candidate}]}},key),
  direction:(id:string,body:unknown,key:string)=>
   request<EditResult>(path(id)+'/direction-revisions','POST',body,key)
 };
