@@ -96,7 +96,7 @@ for(const row of cases){
   if(!earlier[0].activated_layer_ids.includes(cards[0].layer_id))
    earlier[0].activated_layer_ids.push(cards[0].layer_id);
  }
- if(['number-count','kinetic-type','text-highlight'].includes(row.name)){
+ if(['number-count','kinetic-type','text-highlight','typewriter'].includes(row.name)){
   // Force the exact unchanged (synthetic) text layer to exist before the cue.
   // Otherwise identical blank pre-start frames could hide word leakage.
   const firstBeat=t.scenes[0].staging.beat_sequence
