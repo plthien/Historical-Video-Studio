@@ -92,9 +92,9 @@ def test_reviewed_t02_mask_real_http_and_negative(tmp_path):
             "source_crop":{"x":0,"y":0,"w":1,"h":1},
             "operator_reason":"Synthetic T02 cutout review, no historical claim"})
     before=store.revision(project)
-    assert request(png(),before,"opaque-mask").status_code==422
-    assert request(png(transparent=True,all_clear=True),before,"empty-mask").status_code==422
-    assert request(png(transparent=True)+b"tamper",before,"corrupt-mask").status_code==422
+    assert request(png(),before,"opaque-mask-review").status_code==422
+    assert request(png(transparent=True,all_clear=True),before,"empty-mask-review").status_code==422
+    assert request(png(transparent=True)+b"tamper",before,"corrupt-mask-review").status_code==422
     assert store.revision(project)==before
     reviewed=request(png(transparent=True),before)
     assert reviewed.status_code==200,reviewed.text
@@ -115,4 +115,4 @@ def test_reviewed_t02_mask_real_http_and_negative(tmp_path):
     assert current.status_code==200,current.text
     assert current.json()["derivative_sha256"]==reviewed.json()["derivative_sha256"]
     assert rgba_alpha_extent(store.get_artifact(reviewed.json()["derivative_sha256"]))==(8,8)
-    assert request(png(transparent=True),before,"stale-mask").status_code==409
+    assert request(png(transparent=True),before,"stale-mask-review").status_code==409
