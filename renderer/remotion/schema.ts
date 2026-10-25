@@ -93,7 +93,41 @@ export function assertTimeline(input:unknown):asserts input is Timeline {
  }
  if(end!==t.total_frames)fail('RENDER_FRAME_COVERAGE',t.project_id,'Total frame ceiling does not equal scene sum');
 }
+/** Validate before rendering *any* frame, including offstage synthetic text.
+ *  A synthetic value series is never a G1-approved historical observation. */
+export function verifiedSyntheticCount(e:Motion, layer:Layer, media:ResolvedMedia):number[]{
+ const claim=e.params.source_claim_id,ending=Number(e.params.end_value);
+ if(claim!==layer.source_claim_id||!layer.text||
+    Number(layer.text.replace(/,/g,''))!==ending||
+    e.params.intermediate_truthful!==true)
+  fail('RENDER_COUNT_FACT_UNVERIFIED',e.event_id,'Frozen factual endpoint/claim mismatch');
+ const series=media.sourceKind==='SYNTHETIC'?
+    media.syntheticNumericSeries?.[String(claim)]:undefined;
+ if(!series)fail('RENDER_NUMBER_SERIES_UNVERIFIED',e.event_id,
+   'Only a synthetic sequence can prove mechanics without G1 reviewed intermediates');
+ const values=series.values;
+ if(typeof series.fixtureId!=='string'||!series.fixtureId.startsWith('synthetic_')||
+    !Array.isArray(values)||values.length<2||values.some(v=>!Number.isFinite(v))||
+    values[0]!==Number(e.params.start_value)||values[values.length-1]!==ending)
+  fail('RENDER_NUMBER_SERIES_UNVERIFIED',e.event_id,
+   'Unverified synthetic numeric endpoints or test-only provenance');
+ const precision=Number(e.params.precision),direction=Math.sign(ending-values[0]);
+ if(!Number.isInteger(precision)||precision<0||precision>3||
+    values.some((v,i)=>Number(v.toFixed(precision))!==v||
+      (i>0&&direction*(v-values[i-1])<0)))
+  fail('RENDER_NUMBER_SERIES_INVALID',e.event_id,
+   'Nonmonotonic or unsupported-precision synthetic observations');
+ return values;
+}
 export function assertMedia(t:Timeline,m:ResolvedMedia){
+ // Check source/number provenance independent of whether the motion layer
+ // happens to be visible at the sampled frame.
+ for(const scene of t.scenes)for(const event of scene.events){
+  if(event.preset_id!=='number-count')continue;
+  const layer=scene.layers.find(item=>item.layer_id===event.layer_id);
+  if(!layer)fail('RENDER_COUNT_TARGET_UNRESOLVED',event.event_id,'Numeric display layer missing');
+  verifiedSyntheticCount(event,layer,m);
+ }
  if(!m|| !/^[a-f0-9]{64}$/.test(m.authorizingG4ManifestSha256))fail('RENDER_DRAFT_UNTRUSTED',t.project_id,'Node must attach verified G4 draft manifest');
  if(!/^[a-f0-9]{64}$/.test(m.fontSha256)||!m.fontDataUri.startsWith('data:font/'))fail('RENDER_FONT_UNTRUSTED',t.project_id,'Pinned local font required');
  for(const s of t.scenes)for(const l of s.layers){
