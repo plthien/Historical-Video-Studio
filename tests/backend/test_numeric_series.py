@@ -138,5 +138,5 @@ def test_numeric_series_rejects_bad_transactions_without_writes(ready, change, e
     result = client.post(root + "/story/claims/claim_001/numeric-series/approve",
                          json=series, headers={"Idempotency-Key": f"negative-{change}"})
     assert result.status_code == expected, result.text
-    assert client.get(root + "/").json()["project_revision"] == before
+    assert client.get(root).json()["project_revision"] == before
     assert client.get(root + "/story/claims/claim_001/numeric-series/numeric_001").status_code == 404
