@@ -7,7 +7,7 @@ import {bundle} from '@remotion/bundler';
 import {renderMedia,renderStill,selectComposition} from '@remotion/renderer';
 import {PNG} from 'pngjs';
 import type {Timeline,Motion,Scene} from '../remotion/schema';
-import {assertTimeline,RenderBlocked} from '../remotion/schema';
+import {assertTimeline,assertMedia,RenderBlocked} from '../remotion/schema';
 import {loadApprovedMedia,makeSyntheticManifest} from './media';
 import presets from '../../contracts/registries/motion-presets.v1.json';
 
@@ -183,20 +183,19 @@ for(const row of cases){
   forged.syntheticNumericSeries={[caption.source_claim_id!]:
    {fixtureId:'synthetic_invalid_endpoint',values:[0,25,50,75,101]}};
   let invalidSeriesBlocked=false;
-  try{
-   await renderStill({serveUrl,composition:comp,inputProps:{timeline:t,media:forged},
-    frame:mid,output:resolve(output,'b2-number-count-forged-series.png'),imageFormat:'png'});
-  }catch{invalidSeriesBlocked=true;}
+  try{assertMedia(t,forged);}catch(error){
+   invalidSeriesBlocked=error instanceof RenderBlocked&&
+    error.code==='RENDER_NUMBER_SERIES_UNVERIFIED';
+  }
   if(!invalidSeriesBlocked)throw Error('B2_NUMBER_SERIES_FORGED_ENDPOINT_ACCEPTED');
   // Never authorize factual interpolation by changing a fixture media label.
   const unauthorized=structuredClone(media);
   unauthorized.sourceKind='APPROVED_LOCAL';
   let forgedApprovalRejected=false;
-  try{
-   await renderStill({serveUrl,composition:comp,inputProps:{timeline:t,media:unauthorized},
-    frame:mid,output:resolve(output,'b2-number-count-forged-approved-local.png'),
-    imageFormat:'png'});
-  }catch{forgedApprovalRejected=true;}
+  try{assertMedia(t,unauthorized);}catch(error){
+   forgedApprovalRejected=error instanceof RenderBlocked&&
+    error.code==='RENDER_NUMBER_SERIES_UNVERIFIED';
+  }
   if(!forgedApprovalRejected)throw Error('B2_NUMBER_SERIES_FORGED_G1_APPROVAL_ACCEPTED');
   result.push({preset:row.name,negativeAssertion:'forged_intermediate_series',
    typedRejection:true,forgedG1ApprovalRejected:forgedApprovalRejected,source:'SYNTHETIC_RENDER_FIXTURE'});
