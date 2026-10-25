@@ -1,5 +1,8 @@
 import {test,expect} from '@playwright/test';
-import {mkdirSync,writeFileSync} from 'node:fs';
+import {mkdirSync,writeFileSync,readFileSync} from 'node:fs';
+import {bundle} from '../../../renderer/node_modules/@remotion/bundler/dist/index.js';
+import {renderStill,selectComposition} from '../../../renderer/node_modules/@remotion/renderer/dist/index.js';
+import {PNG} from 'pngjs';
 import {resolve} from 'node:path';
 import {createHash} from 'node:crypto';
 
@@ -52,6 +55,47 @@ test('pr10 reviewed-asset-picker changes real Chromium T02 A/B and preserves lon
  await page.getByRole('button',{name:'Load real read-only Remotion Player'}).click();
  const b=await (await seek()).screenshot();
  expect(sha(a),'B must render different real Chromium pixels from A').not.toBe(sha(b));
+ // G09 for selected B/T02: exact same current host-issued props in both
+ // real Browser Player and Node Remotion. No mock/PNG color-only shortcut.
+ const bAuthority=await (await request.get(uri+'/storyboard/preview')).json();
+ const propsB=bAuthority.props;
+ expect(propsB.media.sourceKind).toBe('APPROVED_LOCAL');
+ expect(propsB.media.assets[candidateB].originalSha256).toMatch(/^[a-f0-9]{64}$/);
+ const originalStageStyle=await stage.getAttribute('style');
+ await stage.evaluate(el=>{(el as HTMLElement).style.width='1920px';(el as HTMLElement).style.height='1080px';});
+ const rendered=stage.locator('[data-global-frame="'+frame+'"][data-scene-id="'+scene.scene_id+'"]');
+ await expect(rendered).toBeVisible();
+ const actualPNG=PNG.sync.read(await rendered.screenshot({scale:'css'}));
+ expect(actualPNG.width).toBeGreaterThanOrEqual(1920);
+ expect(actualPNG.height).toBeGreaterThanOrEqual(1080);
+ const browserPNG=new PNG({width:1920,height:1080});
+ PNG.bitblt(actualPNG,browserPNG,0,0,1920,1080,0,0);
+ const bundled=await bundle({entryPoint:resolve(process.cwd(),'..','renderer','remotion','entry.tsx')});
+ const composition=await selectComposition({serveUrl:bundled,id:'HistoricalTimelineV1',inputProps:propsB});
+ const parityDir=resolve(process.cwd(),'.artifacts','pr10');
+ mkdirSync(parityDir,{recursive:true});
+ const nodeFile=resolve(parityDir,'chromium-selected-B-node.png');
+ await renderStill({serveUrl:bundled,composition,inputProps:propsB,output:nodeFile,
+                    frame,imageFormat:'png'});
+ const nodePNG=PNG.sync.read(readFileSync(nodeFile));
+ expect(nodePNG.width).toBe(1920);expect(nodePNG.height).toBe(1080);
+ let totalDifference=0,significant=0,count=0;
+ for(let y=0;y<1080;y+=2)for(let x=0;x<1920;x+=2){
+   const offset=4*(y*1920+x);
+   const delta=Math.abs(browserPNG.data[offset]-nodePNG.data[offset])+
+     Math.abs(browserPNG.data[offset+1]-nodePNG.data[offset+1])+
+     Math.abs(browserPNG.data[offset+2]-nodePNG.data[offset+2]);
+   totalDifference+=delta/3;significant+=delta>90?1:0;count++;
+ }
+ const parity={meanDiff:totalDifference/count,pixelMismatch:significant/count,
+               sourceG4Head:bAuthority.draft_manifest_sha256,
+               sourceBOriginalSha256:propsB.media.assets[candidateB].originalSha256,
+               nodeSha256:sha(readFileSync(nodeFile)),
+               browserSha256:sha(PNG.sync.write(browserPNG))};
+ expect(parity.meanDiff,'Current G3 B/T02 Player vs Node RGB mismatch').toBeLessThan(20);
+ expect(parity.pixelMismatch,'Current G3 B/T02 Player vs Node large-pixel mismatch').toBeLessThan(0.14);
+ writeFileSync(resolve(parityDir,'chromium-selected-B-browser.png'),PNG.sync.write(browserPNG));
+ await stage.evaluate((el,style)=>(el as HTMLElement).setAttribute('style',style??''),originalStageStyle);
  const gatesAfter=(await (await request.get(uri+'/gates')).json()) as typeof gateBefore;
  for(const name of ['G1','G2','G3']){
    const before=gateBefore.find(x=>x.gate_id===name)!;
@@ -149,6 +193,6 @@ test('pr10 reviewed-asset-picker changes real Chromium T02 A/B and preserves lon
    scene:scene.scene_id,frame,choiceA:current,choiceB:candidateB,
    sourceGatesPreserved:['G1','G2','G3'],
    screenshots:shots.map(x=>({name:x.name,sha256:sha(x.png)})),
-   typography:long,typographyAdversarialClippingDetected:actualOverflow,
+   typography:long,parity,typographyAdversarialClippingDetected:actualOverflow,
    negativeStatus:forbidden.status()},null,2));
 });
