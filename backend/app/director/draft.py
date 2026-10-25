@@ -109,8 +109,9 @@ def load(store, project, *, allow_auxiliary_stale=False):
             manifest.get("numeric_series_heads",{}) != current_numeric_heads(store,project)):
         _fail("G4_SOURCE_STALE", project, "Auxiliary G1 numeric series changed; fresh compile required.")
     timeline = _read_canonical(store, manifest["timeline_sha256"], project)
-    if manifest.get("effective_asset_snapshot_sha256") != digest([
-        {"scene_id":s["scene_id"],"assets":s["asset_ids"]} for s in timeline["scenes"]]):
+    if (manifest.get("effective_asset_snapshot_sha256") is not None and
+        manifest["effective_asset_snapshot_sha256"] != digest([
+        {"scene_id":s["scene_id"],"assets":s["asset_ids"]} for s in timeline["scenes"]])):
         _fail("G4_DRAFT_CORRUPT",project,"G4 selected assets disagree with immutable timeline.")
     blueprint = _read_canonical(store, manifest["blueprint_sha256"], project)
     if (timeline.get("project_id") != project or blueprint.get("project_id") != project
