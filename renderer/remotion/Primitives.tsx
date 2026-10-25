@@ -244,7 +244,14 @@ function pathProgress(scene:Scene,layer:Layer,frame:number){
  const event=scene.events.find(e=>e.layer_id===layer.layer_id&&
   (e.preset_id==='route-line-draw'||e.preset_id==='editorial-connector-draw'));
  if(!event)fail('RENDER_PATH_MOTION_MISSING',layer.layer_id,'Route/connector needs authored compiled drawing event');
- return eventProgress(event!,frame);
+ if(frame<event.start_frame)return 0;
+ // Unlike camera/rotation tracks, registered SVG path-length tracks are
+ // themselves normalized [0,1]. Sample the authored drawing length, not a
+ // generic time-only phase, so a zero-length disabled control proves causality.
+ const value=interpolateKeys(event.keyframes,frame-event.start_frame);
+ if(!Number.isFinite(value)||value<0||value>1)
+  fail('RENDER_PATH_PROGRESS_INVALID',event.event_id,'Registered drawing progress must remain normalized');
+ return value;
 }
 const ink='#303b39';
 function reviewedClip(layer:Layer,reveal:number,direction:'left'|'right'|'up'|'down'|'center_out',transitionFeather:number):React.CSSProperties{
