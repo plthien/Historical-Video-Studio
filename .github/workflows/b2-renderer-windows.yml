@@ -60,6 +60,12 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           & .venv/Scripts/python.exe -m renderer.scripts.export_b1_fixture
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: PR10 authoritative numeric/G3 choice and reviewed mask owner tests
+        id: source_auth
+        shell: pwsh
+        run: |
+          & .venv/Scripts/python.exe -m pytest -q tests/backend/test_numeric_series.py tests/assets/test_choice_sets.py
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: B2 targeted visual-functional real-frame repair gates
         id: host_fixture
         shell: pwsh
@@ -190,6 +196,7 @@ jobs:
         if: always()
         shell: pwsh
         env:
+          B2_SOURCE_AUTH: ${{ steps.source_auth.outcome }}
           B2_MOTION: ${{ steps.motion.outcome }}
           B2_MULTILAYER: ${{ steps.multilayer.outcome }}
           B2_SQLITE: ${{ steps.sqlite.outcome }}
@@ -201,7 +208,7 @@ jobs:
           B2_LONGRENDER: ${{ steps.longrender.outcome }}
         run: |
           $results = @{
-            motion=$env:B2_MOTION; multilayer=$env:B2_MULTILAYER; sqlite=$env:B2_SQLITE;
+            source_auth=$env:B2_SOURCE_AUTH; motion=$env:B2_MOTION; multilayer=$env:B2_MULTILAYER; sqlite=$env:B2_SQLITE;
             browser_setup=$env:B2_SETUP; editor=$env:B2_EDITOR; parity=$env:B2_PARITY;
             fixture61=$env:B2_FIXTURE61; longui=$env:B2_LONGUI; longrender=$env:B2_LONGRENDER
           }
