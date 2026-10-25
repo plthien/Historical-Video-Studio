@@ -57,6 +57,13 @@ def validate(registry,sem,phase):
                 png(e.get("positivePath"),e.get("positiveSha256"))
                 png(e.get("controlPath"),e.get("controlSha256"))
                 need(e["positiveSha256"]!=e["controlSha256"],name+": on/off frame identical")
+        for e in evidence:
+            if e.get("preStartApplicability")=="RENDERED_EVENT_ON_EQUALS_RECOMPILED_OFF":
+                need(e.get("preStartPixelMatch") is True,name+": pre-event pixels not proven")
+                png(e.get("baselinePath"),e.get("baselineSha256"))
+                png(e.get("positivePath"),e.get("positiveSha256"))
+                need(e["baselineSha256"]==e["positiveSha256"],
+                     name+": pre-event compositor differs from recompiled control")
     # Two intentional non-preset records belong to this executed owner: the
     # source-preserving crop comparator and genuine FFprobe-checked H264 media.
     # Validate their bytes and reject arbitrary orphan diagnostics.
@@ -103,6 +110,19 @@ def mutations(reg,sem,phase):
     reject("tampered SHA",lambda a,b:a["rows"][0]["evidence"][0].update(sha256="0"*64))
     reject("missing PNG",lambda a,b:a["rows"][0]["evidence"][0].update(path="__missing_motion_fixture__.png"))
     reject("synthetic spoofed approval",lambda a,b:a["rows"][0].update(source_authorization_verified=True))
+    prestart=next((e for row in sem["rows"] for e in row["evidence"]
+                   if e.get("preStartApplicability")=="RENDERED_EVENT_ON_EQUALS_RECOMPILED_OFF"),None)
+    need(prestart is not None,"no compiled pre-event PNG pair available for mutation testing")
+    def corrupt_prestart(a,b):
+        preset=next(row["preset_id"] for row in sem["rows"] if prestart in row["evidence"])
+        for ledger in (a["rows"],):
+            record=next(e for row in ledger if row["preset_id"]==preset
+                        for e in row["evidence"] if e.get("preStartApplicability")=="RENDERED_EVENT_ON_EQUALS_RECOMPILED_OFF")
+            record["baselineSha256"]="0"*64
+        case=next(e for e in b["cases"] if e.get("preset")==preset and
+                  e.get("preStartApplicability")=="RENDERED_EVENT_ON_EQUALS_RECOMPILED_OFF")
+        case["baselineSha256"]="0"*64
+    reject("forged compiled pre-event positive/control SHA",corrupt_prestart)
     # Prove altered PNG bytes are rejected even if both ledgers continue to
     # agree on the same original digest and same tampered file location.
     with tempfile.TemporaryDirectory() as directory:
