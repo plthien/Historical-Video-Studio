@@ -64,7 +64,7 @@ def _attach_verified_word_spans(layer: dict, event: dict, word_map: dict | None)
     layer["word_spans"] = sorted(spans, key=lambda span: span["start"])
 
 
-def _scene(plan, staging, beats, assets, requirements, maps, font_measure, motion_patches=None, word_map=None):
+def _scene(plan, staging, beats, assets, requirements, maps, font_measure, motion_patches=None, word_map=None, numeric_series=None):
     layout = selected_layout(plan)
     sid = plan["setup_id"]
     layers, refs = build_layers(plan, assets, requirements, maps=maps, font_measure=font_measure)
@@ -154,7 +154,10 @@ def _scene(plan, staging, beats, assets, requirements, maps, font_measure, motio
                 _block("MOTION_HINT_UNSUPPORTED", beat["beat_id"],
                        "Line drawing needs a registered geographic route or editorial connector.")
         elif hint == "subtle_push":
-            if target["layer_kind"] in ("map", "archival_photo", "portrait", "document"):
+            if (plan["template_id"]=="T08" and target["layer_kind"]=="date" and
+                    plan["template_payload"]["animation_rule"]=="count_if_intermediates_truthful"):
+                kind="number-count"
+            elif target["layer_kind"] in ("map", "archival_photo", "portrait", "document"):
                 kind = "camera-push" if "camera-push" in allowed else None
             elif "title-mask-reveal" in allowed:
                 kind = "title-mask-reveal"
@@ -191,6 +194,28 @@ def _scene(plan, staging, beats, assets, requirements, maps, font_measure, motio
                                         if r["candidate_id"] == target["asset_id"]), ""),
                     "claim_ids": plan["claim_refs"],
                     **(maps or {}).get(sid, {}), "editorial_connector": plan["template_id"] == "T10"}
+        # D01: only an actual authored T08 count cue can consume G1 auxiliary
+        # numeric observations. The helper is resolved from SQLite, never from UI.
+        if kind == "number-count":
+            if target["source_claim_id"] != plan["template_payload"]["fact_claim_id"]:
+                _block("MOTION_CLAIM_UNVERIFIED", beat["beat_id"],
+                       "Numeric animation must target the frozen authored G1 value.")
+            reviewed=(numeric_series or {}).get(target["source_claim_id"])
+            if reviewed is None:
+                _block("MOTION_NUMBER_SERIES_UNVERIFIED", beat["beat_id"],
+                       "An authored count requires its current operator-reviewed G1 series.")
+            series_end=reviewed["end_value"]
+            if (target["text"].replace(",","") != series_end or
+                    reviewed["authored_duration_frames"] != length):
+                _block("MOTION_NUMBER_SERIES_INVALID", beat["beat_id"],
+                       "Reviewed values must match the displayed source text and exact cue duration.")
+            params.update(source_claim_id=target["source_claim_id"],
+                          start_value=float(reviewed["start_value"]),
+                          end_value=float(series_end),
+                          precision=reviewed["precision"],
+                          intermediate_truthful=True,
+                          approved_numeric_series_id=reviewed["series_id"])
+            evidence["number_value"]=float(series_end)
         # Distinct T07 period maps carry independent reviewed geographic truth.
         if target.get("map_binding") is not None:
             selected_map_id = target["map_binding"]["historical_map_id"]
@@ -257,7 +282,8 @@ def compile_timeline(story: dict, blueprint: dict, word_map: dict, final_audio: 
                      approved_assets: dict, *,
                      maps: dict | None = None, font_measure=None,
                      font_identity: dict | None = None,
-                     expected_story_sha256: str | None = None) -> dict:
+                     expected_story_sha256: str | None = None,
+                     numeric_series: dict | None = None) -> dict:
     """Compile explicitly frozen inputs, supplied only from current approved store
     or a clearly marked synthetic integration harness. No implicit G3 approval."""
     story_id = StoryCandidate.parse(story).sha256
@@ -311,7 +337,7 @@ def compile_timeline(story: dict, blueprint: dict, word_map: dict, final_audio: 
             _block("CUE_MISSING", plan["setup_id"], "Every setup needs bound spoken words.")
         scenes.append(_scene(plan, by_setup[plan["setup_id"]], beats,
                              approved_assets, required, maps, font_measure,
-                             word_map=word_map))
+                             word_map=word_map, numeric_series=numeric_series))
     # A two-surface wipe is authorized only by the outgoing G1-authored
     # transition intent AND an incoming boundary event at frame zero. Other
     # single-layer wipes are not silently promoted to a cross-scene transition.
@@ -409,6 +435,19 @@ def compile_from_store(store, project_id: str, blueprint: dict, word_map: dict,
                 _block("G3_ASSET_UNAPPROVED", rid, "Immutable approved original bytes failed SHA validation.")
             approved[rid] = {**head, "asset_class": requirement["asset_class"],
                              "source_kind": head.get("evidence", {}).get("source_kind", "")}
+    # Read G1 auxiliary heads AFTER G1/G2 approval and source verification.
+    # No external HTTP supplied series dictionary is allowed in production.
+    from backend.app.projects.numeric_series import NumericSeries
+    numeric_owner=NumericSeries(store)
+    numeric={}
+    for plan in blueprint["setup_plans"]:
+        if (plan["template_id"]=="T08" and
+                plan["template_payload"]["animation_rule"]=="count_if_intermediates_truthful"):
+            claim=plan["template_payload"]["fact_claim_id"]
+            result=numeric_owner.resolved_for(project_id,claim)
+            if result is None:
+                _block("MOTION_NUMBER_SERIES_UNVERIFIED",claim,"Review a G1 numeric series before compiling authored counting.")
+            numeric[claim]=result
     # Caller-supplied compiled map contexts cannot authorize historic geography.
     if maps:
         _block("MAP_GEOMETRY_INVALID", project_id,
@@ -417,7 +456,8 @@ def compile_from_store(store, project_id: str, blueprint: dict, word_map: dict,
                                         blueprint, map_requests or {})
     result = compile_timeline(story_obj.data(), blueprint, word_map, final_audio, approved,
                               maps=trusted_maps, font_measure=font_measure,
-                              font_identity=font_identity, expected_story_sha256=story_obj.sha256)
+                              font_identity=font_identity, expected_story_sha256=story_obj.sha256,
+                              numeric_series=numeric)
     from backend.app.director import draft
     draft.publish(store, project_id, result, blueprint, trusted_maps, map_requests or {},
                   font_identity, expected_revision=start_revision)
@@ -660,6 +700,16 @@ def revise_g4(store, project_id: str, previous: dict, original_blueprint: dict,
     staging = {x["setup_id"]: x for x in group_staging(
         windows, final_audio["duration_samples"], word_map["sample_rate"])}
     requirements = {r["requirement_id"]:r for r in story["asset_requirements"]}
+    from backend.app.projects.numeric_series import NumericSeries
+    numeric_owner=NumericSeries(store)
+    numeric={}
+    for plan in revised:
+        if plan["template_id"]=="T08" and plan["template_payload"]["animation_rule"]=="count_if_intermediates_truthful":
+            claim=plan["template_payload"]["fact_claim_id"]
+            result=numeric_owner.resolved_for(project_id,claim)
+            if result is None:
+                _block("MOTION_NUMBER_SERIES_UNVERIFIED",claim,"Current G1 auxiliary review is required.")
+            numeric[claim]=result
     out = copy.deepcopy(trusted["timeline"])
     index = {s["setup_id"]: i for i,s in enumerate(out["scenes"])}
     for plan in revised:
@@ -668,7 +718,8 @@ def revise_g4(store, project_id: str, previous: dict, original_blueprint: dict,
             continue
         rows = [x for x in windows if x["setup_id"] == sid]
         scene = _scene(plan, staging[sid], rows, approved_assets, requirements,
-                       current_maps, font_measure, persisted_motion.get(sid, {}), word_map)
+                       current_maps, font_measure, persisted_motion.get(sid, {}), word_map,
+                       numeric_series=numeric)
         previous_layers = {item["layer_id"]: item for item in previous["scenes"][index[sid]]["layers"]}
         chosen_layers = persisted_layers.get(sid, {})
         if set(chosen_layers) - {x["layer_id"] for x in scene["layers"]}:
