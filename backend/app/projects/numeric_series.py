@@ -58,11 +58,15 @@ class NumericSeries:
             return {"approval_id": row[0], "series_sha256": row[1],
                     "current": current, "series": snapshot}
 
+    def _gate_status(self, db, project_id):
+        service = GateService.__new__(GateService)
+        service.store = self.store
+        return service._status(db, project_id, "G1")
+
     def approve(self, project_id: str, claim_id: str, data: dict):
         with self.store._transaction() as db:
             rev = GateService._check_revision(db, project_id, data["expected_revision"])
-            gates = GateService(self.store)
-            if gates._status(db, project_id, "G1")[0] != "APPROVED":
+            if self._gate_status(db, project_id)[0] != "APPROVED":
                 _fail("NUMERIC_SERIES_UNVERIFIED", claim_id, "Current G1 gate approval required.")
             story_sha, story = _story(db, project_id)
             if not any(c["claim_id"] == claim_id for c in story["claims"]):
