@@ -17,7 +17,7 @@ export type Motion={event_id:string; layer_id:string; preset_id:string;start_fra
 export type Beat={local_start_frame:number;local_end_frame:number;focus_layer_id:string;activated_layer_ids:string[];hidden_layer_ids:string[]};
 export type CameraKey={at_frame:number;x_px:number;y_px:number;scale:number;rotation_deg:number;opacity:number;easing:string};
 export type Scene={scene_id:string;setup_id:string;template_id:string;variant_id:string;start_frame:number;duration_frames:number;asset_ids:string[];layers:Layer[];events:Motion[];camera:{keyframes:CameraKey[];transform_order:string;focus_path:unknown[]};staging:{beat_sequence:Beat[];composition_graph:{edges:unknown[]};};transition_out:{type:string;duration_frames:number}};
-export type Timeline={schema_version:'CompiledTimeline.v1';project_id:string;fps:30;width:1920;height:1080;total_frames:number;dependency_fingerprint:string;audio_sha256:string;word_map_sha256:string;asset_snapshot_sha256:string;scenes:Scene[]};
+export type Timeline={schema_version:'CompiledTimeline.v1';project_id:string;story_sha256:string;fps:30;width:1920;height:1080;total_frames:number;dependency_fingerprint:string;audio_sha256:string;word_map_sha256:string;asset_snapshot_sha256:string;scenes:Scene[]};
 const ajv=new Ajv2020({allErrors:true,strict:false});
 const validate=ajv.compile(timelineSchema);
 const validLayouts=new Set(layouts.layouts.map(l=>l.template_id+':'+l.variant_id));
