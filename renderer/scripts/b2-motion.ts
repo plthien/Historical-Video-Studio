@@ -124,7 +124,10 @@ for(const row of cases){
    {fixtureId:'synthetic_number_count_mechanic',values:[0,25,50,75,100]}};
  const media=loadApprovedMedia(t,manifest);
  const comp=await selectComposition({serveUrl,id:'HistoricalTimelineV1',inputProps:{timeline:t,media}});
- const sampleFrames=[start,start+Math.floor(duration/2),start+duration];
+ // The first partial typewriter glyph is a meaningful during-event phase;
+ // short captions can finish before a generic duration midpoint.
+ const during=row.name==='typewriter'?start+1:start+Math.floor(duration/2);
+ const sampleFrames=[start,during,start+duration];
  const hashes:string[]=[];
  for(const frame of sampleFrames){
   const file=resolve(output,'b2-'+row.name+'-'+frame+'.png');
@@ -169,7 +172,7 @@ for(const row of cases){
  const controlMedia=loadApprovedMedia(control,controlManifest);
  const controlComp=await selectComposition({serveUrl,id:'HistoricalTimelineV1',
   inputProps:{timeline:control,media:controlMedia}});
- const mid=start+Math.floor(duration/2);
+ const mid=during;
  const controlPath=resolve(output,`b2-${row.name}-same-frame-without-event.png`);
  await renderStill({serveUrl,composition:controlComp,
   inputProps:{timeline:control,media:controlMedia},frame:mid,output:controlPath,imageFormat:'png'});
