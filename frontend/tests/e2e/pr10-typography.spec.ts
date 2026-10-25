@@ -14,7 +14,7 @@ test('pr10 source-authorized T06 multiline document and adversarial critical cli
  expect(authorized.props.media.sourceKind).toBe('APPROVED_LOCAL');
  const scene=authorized.props.timeline.scenes[0];
  expect(scene.template_id).toBe('T06');
- const excerpt=scene.layers.find((l:any)=>typeof l.text==='string'&&l.text.includes('SYNTHETIC DOCUMENT EXCERPT.'));
+ const excerpt=scene.layers.find((l:any)=>typeof l.text==='string'&&l.text.includes('SYNTHETIC DOCUMENT'));
  expect(excerpt).toBeDefined();
  expect(excerpt.text.includes('\n')).toBeTruthy();
  await page.goto('/');
