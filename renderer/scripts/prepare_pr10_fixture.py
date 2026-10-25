@@ -197,7 +197,7 @@ def prepare(mode:str):
         evidence=post(f"/story/claims/{claim}/numeric-series/evidence",{
             "expected_revision":store.revision(pid),
             "content_base64":base64.b64encode(
-                b"SYNTHETIC TEST ONLY. Fictional 0,957,1914 observations—NOT historical evidence.").decode(),
+                b"SYNTHETIC TEST ONLY. Fictional 0,957,1914 observations - NOT historical evidence.").decode(),
             "source_url":"https://example.org/synthetic-test-only",
             "review_note":"SYNTHETIC source used only to prove visual counting mechanics"},
             mode+"-numeric-evidence")
