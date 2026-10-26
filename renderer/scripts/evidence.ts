@@ -1,4 +1,4 @@
-import {readFileSync,writeFileSync,mkdirSync} from 'node:fs';
+import {existsSync,readFileSync,writeFileSync,mkdirSync} from 'node:fs';
 import {resolve,dirname,join} from 'node:path';
 import {createHash} from 'node:crypto';
 import {spawnSync} from 'node:child_process';
@@ -113,8 +113,15 @@ if(mode==='frames'){
      row.glyphCount!==Array.from(row.text as string).filter(char=>char.trim()).length)
    throw Error('CHROMIUM_TYPOGRAPHY_SLOT_VIOLATION: '+JSON.stringify(row));
  }
- writeFileSync(resolve(output,'slot-max-lines-chromium.json'),JSON.stringify({
-  source:'SYNTHETIC B1 compiled fixture measured in real Remotion Chromium',rows:typographyRows
+ const typographyPath=resolve(output,'slot-max-lines-chromium.json');
+ const priorRows=existsSync(typographyPath)?JSON.parse(readFileSync(typographyPath,'utf8')).rows??[]:[];
+ const mergedRows=[...priorRows,...typographyRows].reduce((rows:any[],row:any)=>{
+  const key=`${row.template}:${row.variant}:${row.layerId}`;
+  return [...rows.filter(item=>`${item.template}:${item.variant}:${item.layerId}`!==key),row];
+ },[]).sort((a:any,b:any)=>`${a.template}:${a.variant}:${a.layerId}`.localeCompare(
+   `${b.template}:${b.variant}:${b.layerId}`));
+ writeFileSync(typographyPath,JSON.stringify({
+  source:'SYNTHETIC B1 compiled fixture measured in real Remotion Chromium',rows:mergedRows
  },null,2));
 }
 // Every registered A/B/C input must change real rendered geometry, not only a variant label.
