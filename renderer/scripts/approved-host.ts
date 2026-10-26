@@ -10,14 +10,16 @@ import {assertTimeline,fail,type Timeline} from '../remotion/schema';
 import {loadApprovedMedia,type ResolveManifest} from './media';
 import type {HistoryProps} from '../remotion/HistoryComposition';
 const repo=resolve(import.meta.dirname,'..','..');
-export function prepareApprovedLocalHistory(sqlite:string,artifactRoot:string,project:string):HistoryProps{
+export function prepareApprovedLocalHistory(sqlite:string,artifactRoot:string,project:string,
+ requireG4Approval=false):HistoryProps{
  if(!sqlite||!artifactRoot||!project)fail('RENDER_G4_NOT_AUTHORIZED',project||'project','Current local project required');
  const dir=mkdtempSync(join(tmpdir(),'hvs-trusted-preparation-'));
  try {
   const file=join(dir,'approved.json');
   const python=resolve(repo,'.venv','Scripts','python.exe');
   const result=spawnSync(python,['-m','renderer.scripts.export_approved_media',
-   '--sqlite',sqlite,'--media-root',artifactRoot,'--project',project,'--output',file],
+   '--sqlite',sqlite,'--media-root',artifactRoot,'--project',project,'--output',file,
+   ...(requireG4Approval?['--require-g4-approval']:[])],
    {cwd:repo,encoding:'utf8',windowsHide:true});
   if(result.status!==0)fail('RENDER_G4_NOT_AUTHORIZED',project,
     'Current approved SQLite draft/export refused: '+(result.stderr||'export failed').slice(0,1000));

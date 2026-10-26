@@ -11,6 +11,7 @@ import os
 from pathlib import Path
 from backend.app.projects.storage import ProjectStore
 from backend.app.director import draft
+from backend.app.projects.gates import GateService
 from backend.app.assets.provenance import AssetCandidates
 from backend.app.assets.resolution import AssetResolution
 from backend.app.director.fingerprint import canonical
@@ -20,11 +21,20 @@ parser.add_argument("--sqlite",type=Path,required=True)
 parser.add_argument("--media-root",type=Path,required=True)
 parser.add_argument("--project",required=True)
 parser.add_argument("--output",type=Path,required=True)
+parser.add_argument("--require-g4-approval",action="store_true")
 args=parser.parse_args()
 store=ProjectStore(args.sqlite,args.media_root)
 head=draft.load(store,args.project)
-if head["revision"]!=store.revision(args.project):
-    raise RuntimeError("G4_SOURCE_STALE: project revision is not current draft")
+if args.require_g4_approval:
+    g4=next(item for item in GateService(store).board(args.project) if item["gate_id"]=="G4")
+    if g4["state"]!="APPROVED":
+        raise RuntimeError("RENDER_G4_NOT_AUTHORIZED: explicit current G4 approval required")
+    with store._connection() as db:
+        g4_head=db.execute("SELECT candidate_sha256,dependency_fingerprint FROM gate_heads "
+                           "WHERE project_id=? AND gate_id='G4'",(args.project,)).fetchone()
+    if not g4_head:
+        raise RuntimeError("RENDER_G4_NOT_AUTHORIZED")
+    draft.verify_review_candidate(store,args.project,g4_head[0],g4_head[1])
 if draft.current_gate_heads(store,args.project)!=head["manifest"]["gate_heads"]:
     raise RuntimeError("G4_SOURCE_STALE: approved source head changed")
 timeline=head["timeline"]
@@ -258,7 +268,8 @@ manifest={
 }
 args.output.parent.mkdir(parents=True,exist_ok=True)
 args.output.write_bytes(canonical({"timeline":timeline,"manifest":manifest}))
-if (store.revision(args.project)!=head["revision"] or
+if ((args.require_g4_approval and
+     next(item for item in GateService(store).board(args.project) if item["gate_id"]=="G4")["state"]!="APPROVED") or
     draft.current_gate_heads(store,args.project)!=head["manifest"]["gate_heads"] or
     draft.current_numeric_heads(store,args.project)!=head["manifest"].get("numeric_series_heads",{})):
     args.output.unlink(missing_ok=True)

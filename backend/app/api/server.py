@@ -26,6 +26,8 @@ from backend.app.voice.workflow import FinalVoiceWorkflow
 from backend.app.api.voice import mount as mount_voice
 from backend.app.api.assets import mount as mount_assets
 from backend.app.api.storyboard import mount as mount_storyboard
+from backend.app.api.delivery import mount as mount_delivery
+from backend.app.render import DeliveryService
 
 
 class ProjectInput(BaseModel):
@@ -105,6 +107,7 @@ def create_app(database: str | Path | None = None, media_root: str | Path | None
     queue = JobQueue(store)
     voice_service = VoiceService(store, gates, queue)
     final_voice = FinalVoiceWorkflow(store, gates, queue)
+    delivery = DeliveryService(store, queue)
     with store._connection() as db:
         db.executescript("""
             CREATE TABLE IF NOT EXISTS api_requests (
@@ -134,12 +137,14 @@ def create_app(database: str | Path | None = None, media_root: str | Path | None
                 task.cancel()
 
     app = FastAPI(title="Historical Video Studio Local API", version="1.0.0", lifespan=lifespan)
-    app.add_middleware(CORSMiddleware, allow_origins=["http://127.0.0.1:5173", "http://localhost:5173"],
+    app.add_middleware(CORSMiddleware, allow_origins=["http://127.0.0.1:5173", "http://localhost:5173",
+                                                       "http://127.0.0.1:5174", "http://localhost:5174"],
                        allow_credentials=False, allow_methods=["GET", "POST", "PUT", "PATCH"],
                        allow_headers=["Content-Type", "Idempotency-Key"])
     app.state.store, app.state.gates, app.state.queue = store, gates, queue
     app.state.voice = voice_service
     app.state.final_voice = final_voice
+    app.state.delivery = delivery
 
     @app.exception_handler(ContractViolation)
     async def violation(_request: Request, exc: ContractViolation):
@@ -148,10 +153,12 @@ def create_app(database: str | Path | None = None, media_root: str | Path | None
         elif exc.code in ("STORY_NOT_FOUND", "CANDIDATE_NOT_READY", "WORD_MAP_STALE", "G4_SOURCE_STALE", "G4_DRAFT_UNREGISTERED", "G3_ASSET_UNAPPROVED", "PLAYER_PREVIEW_UNAVAILABLE",
                                "G1_APPROVAL_REQUIRED", "VOICE_STORY_STALE", "VOICE_SOURCE_STALE",
                                 "FINAL_AUDIO_SOURCE_STALE", "FINAL_AUDIO_SELECTION_INCOMPLETE",
-                                "NUMERIC_SERIES_UNVERIFIED", "NUMERIC_SERIES_SOURCE_STALE"):
+                                "NUMERIC_SERIES_UNVERIFIED", "NUMERIC_SERIES_SOURCE_STALE",
+                                "G4_APPROVAL_REQUIRED", "G5_APPROVAL_REQUIRED", "G5_REVIEW_REQUIRED"):
             status = 424
         elif exc.code in ("PROJECT_NOT_FOUND", "JOB_NOT_FOUND", "CLAIM_NOT_FOUND",
-                               "VOICE_SECTION_NOT_FOUND", "VOICE_ATTEMPT_NOT_FOUND", "NUMERIC_SERIES_NOT_FOUND"):
+                               "VOICE_SECTION_NOT_FOUND", "VOICE_ATTEMPT_NOT_FOUND", "NUMERIC_SERIES_NOT_FOUND",
+                               "RENDER_JOB_NOT_FOUND"):
             status = 404
         else:
             status = 422
@@ -313,6 +320,7 @@ def create_app(database: str | Path | None = None, media_root: str | Path | None
     mount_voice(app, voice_service, idempotent, final_voice)
     mount_assets(app, store, gates, queue, idempotent)
     mount_storyboard(app, store, idempotent)
+    mount_delivery(app, delivery, idempotent)
 
     @app.api_route("/api/v1/{remaining:path}", methods=["GET", "POST", "PUT", "PATCH", "DELETE"])
     def unavailable(remaining: str):

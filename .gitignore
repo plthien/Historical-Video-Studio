@@ -9,3 +9,9 @@ frontend/.e2e-data/
 frontend/playwright-report/
 frontend/test-results/
 frontend/dist/
+__pycache__/
+.pytest_cache/
+.remotion/
+data/
+renderer/.artifacts/
+frontend/.artifacts/
