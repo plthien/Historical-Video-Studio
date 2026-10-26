@@ -273,6 +273,7 @@ jobs:
             renderer/.artifacts/renders/
             renderer/.artifacts/pr10-evidence/
             renderer/.artifacts/compiled-30.json
+            renderer/.artifacts/slot-max-lines-evidence.json
             frontend/.artifacts/parity/
             frontend/.artifacts/longform/
             frontend/.artifacts/typography/

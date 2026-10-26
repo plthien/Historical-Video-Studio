@@ -472,22 +472,52 @@ def test_text_layout_preserves_hard_lines_and_renderer_content_box():
     measure=lambda text,size:(len(text)*size//2,size)
     source={"text_id":"text_multiline","text":"ALPHA BETA\nGAMMA DELTA","max_lines":2}
     original=copy.deepcopy(source)
-    layout=_text_layout(source,{"w":240,"h":120},measure,padding_px=6)
+    layout=_text_layout(source,{"w":240,"h":120},measure,slot_max_lines=2,padding_px=6)
     assert layout["font_size_px"]==40
+    assert layout["max_lines"]==2
     assert source==original
 
+    # The compiled ceiling is the strictest of the immutable G1 source and
+    # the registered presentation slot. Neither input may be rewritten.
+    for source_max,slot_max,expected in ((3,1,1),(1,3,1),(3,3,3)):
+        candidate={"text_id":f"ceiling_{source_max}_{slot_max}",
+                   "text":"VISIBLE","max_lines":source_max}
+        frozen=copy.deepcopy(candidate)
+        fitted=_text_layout(candidate,{"w":500,"h":200},measure,
+                            slot_max_lines=slot_max,padding_px=6)
+        assert fitted["max_lines"]==expected
+        assert fitted["font_size_px"] in (64,56,48,40,32,28,24,20)
+        assert candidate==frozen
+
+    regular=_text_layout({"text_id":"regular","text":"ALPHA BETA","max_lines":2},
+                         {"w":220,"h":100},measure,slot_max_lines=2,padding_px=6)
+    headline=_text_layout({"text_id":"headline","text":"ALPHA BETA","max_lines":2},
+                          {"w":220,"h":100},measure,slot_max_lines=2,padding_px=10)
+    assert headline["font_size_px"]<=regular["font_size_px"]
+
+    with pytest.raises(ContractViolation,match="TYPOGRAPHY_OVERFLOW"):
+        _text_layout({"text_id":"invalid_slot","text":"VISIBLE","max_lines":2},
+                     {"w":500,"h":200},measure,slot_max_lines=0,padding_px=6)
+
+    supported=(64,56,48,40,32,28,24,20)
+    for expected_size in supported:
+        fitted=_text_layout({"text_id":f"size_{expected_size}","text":"WW","max_lines":1},
+                            {"w":expected_size+12,"h":100},measure,
+                            slot_max_lines=1,padding_px=6)
+        assert fitted["font_size_px"]==expected_size
+
     impossible=[
-        ({"text_id":"three_hard","text":"A\nB\nC","max_lines":2},{"w":500,"h":200}),
-        ({"text_id":"hard_soft","text":"ALPHA BETA\nGAMMA DELTA","max_lines":2},{"w":100,"h":200}),
-        ({"text_id":"blank_line","text":"A\n\nB","max_lines":2},{"w":500,"h":200}),
-        ({"text_id":"unbreakable","text":"W"*30,"max_lines":3},{"w":200,"h":200}),
-        ({"text_id":"height","text":"VISIBLE","max_lines":1},{"w":500,"h":30}),
-        ({"text_id":"padding","text":"VISIBLE","max_lines":1},{"w":10,"h":100}),
+        ({"text_id":"three_hard","text":"A\nB\nC","max_lines":3},{"w":500,"h":200},1),
+        ({"text_id":"hard_soft","text":"ALPHA BETA\nGAMMA DELTA","max_lines":2},{"w":100,"h":200},2),
+        ({"text_id":"blank_line","text":"A\n\nB","max_lines":2},{"w":500,"h":200},2),
+        ({"text_id":"unbreakable","text":"W"*30,"max_lines":3},{"w":200,"h":200},2),
+        ({"text_id":"height","text":"VISIBLE","max_lines":1},{"w":500,"h":30},2),
+        ({"text_id":"padding","text":"VISIBLE","max_lines":1},{"w":10,"h":100},2),
     ]
-    for candidate,rect in impossible:
+    for candidate,rect,slot_max in impossible:
         frozen=copy.deepcopy(candidate)
         with pytest.raises(ContractViolation,match="TYPOGRAPHY_OVERFLOW"):
-            _text_layout(candidate,rect,measure,padding_px=6)
+            _text_layout(candidate,rect,measure,slot_max_lines=slot_max,padding_px=6)
         assert candidate==frozen
 
 

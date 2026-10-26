@@ -29,6 +29,7 @@ registry=json.loads((ROOT/"contracts/registries/layouts.v1.json").read_text())["
 payloads={p["setup_id"]:p["template_payload"] for p in bp["setup_plans"]}
 compiled={}
 camera_controls={}
+slot_ceiling_evidence=[]
 for variant in ("A","B","C"):
     authored=copy.deepcopy(story)
     for setup in authored["visual_setups"]:
@@ -79,6 +80,20 @@ for variant in ("A","B","C"):
                                expected_story_sha256=current["story_revision_sha256"])
     if len(timeline["scenes"])!=10:
         raise RuntimeError("Expected one real compiled scene for each T01..T10")
+    for scene in timeline["scenes"]:
+        for layer in scene["layers"]:
+            if layer["text_layout"] is None:
+                continue
+            if layer["text_layout"]["max_lines"] > layer["style"]["max_lines"]:
+                raise RuntimeError("COMPILED_TEXT_LAYOUT_EXCEEDS_REGISTERED_SLOT: " + layer["layer_id"])
+            slot_ceiling_evidence.append({
+                "template":scene["template_id"],"variant":variant,
+                "layer_id":layer["layer_id"],"template_slot_id":layer["template_slot_id"],
+                "source_text_sha256":hashlib.sha256(layer["text"].encode("utf-8")).hexdigest(),
+                "compiled_max_lines":layer["text_layout"]["max_lines"],
+                "registered_slot_max_lines":layer["style"]["max_lines"],
+                "font_size_px":layer["text_layout"]["font_size_px"],
+            })
     compiled[variant]=timeline
     # True camera-off counterfactual: re-run the owning B1 camera compiler
     # on the SAME unmodified plan/layers/G2 timing and suppress ONLY the
@@ -151,6 +166,11 @@ for variant in ("A","B","C"):
         }))
 (outdir/"compiled-30.json").write_bytes(canonical(compiled))
 (outdir/"compiled-camera-off.json").write_bytes(canonical(camera_controls))
+(outdir/"slot-max-lines-evidence.json").write_text(json.dumps({
+    "scope":"SYNTHETIC_B1_COMPILER_NOT_LIVE_G1_G3_APPROVAL",
+    "invariant":"text_layout.max_lines <= style.max_lines",
+    "layers":slot_ceiling_evidence,
+},indent=2),encoding="utf-8")
 print(json.dumps({"source":"SYNTHETIC B1 compiler, NOT G4 approval",
                   "templates":len(compiled["A"]["scenes"]),
                   "variants":len(compiled),"font_sha256":identity["font_sha256"],

@@ -43,7 +43,7 @@ def _wrapped_lines(text, size, available_width, font_measure):
     return lines
 
 
-def _text_layout(source, rect, font_measure, *, padding_px=6):
+def _text_layout(source, rect, font_measure, *, slot_max_lines, padding_px=6):
     """Measure actual glyphs through a supplied pinned glyph-width provider.
 
     No character-count fitting and no quiet font replacement. B2 controls final
@@ -52,7 +52,10 @@ def _text_layout(source, rect, font_measure, *, padding_px=6):
     if font_measure is None or not callable(font_measure):
         _blocked("FONT_METRICS_REQUIRED", source["text_id"],
                  "Supply measured pinned-font glyph bounds before compiling text.")
-    max_lines = min(source["max_lines"], 8)
+    if not isinstance(slot_max_lines, int) or isinstance(slot_max_lines, bool) or slot_max_lines < 1:
+        _blocked("TYPOGRAPHY_OVERFLOW", source["text_id"],
+                 "Registered text slots require a positive max_lines ceiling.")
+    max_lines = min(source["max_lines"], slot_max_lines, 8)
     text = source["text"]
     available_width = rect["w"] - 2 * padding_px
     available_height = rect["h"] - 2 * padding_px
@@ -203,7 +206,8 @@ def build_layers(plan: dict, approved: dict, requirements: dict, *,
             "path_geometry_ref": (maps[plan["setup_id"]]["route_feature_id"] if is_route else
                                   "connector_" + plan["setup_id"] if is_editorial_connector else None),
             "text_layout": _text_layout(
-                txt, rect, font_measure, padding_px=10 if role == "headline" else 6
+                txt, rect, font_measure, slot_max_lines=slot["max_lines"],
+                padding_px=10 if role == "headline" else 6
             ) if txt else None,
             "template_slot_id": sid,
             "source_asset_slot_id": source["slot_id"] if source else None,

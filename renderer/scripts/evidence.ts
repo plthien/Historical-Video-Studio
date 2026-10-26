@@ -48,19 +48,25 @@ const sourceCases=Array.from({length:3},(_,i)=>['A','B','C'][i]).flatMap(variant
 const entrypoint=resolve(root,'remotion','entry.tsx');
 const bundlePath=await bundle({entryPoint:entrypoint,webpackOverride:(config)=>config});
 const metrics:unknown[]=[];
-async function oneStill(timeline:Timeline,frame:number,label:string,mediaDir:string){
+async function oneStill(timeline:Timeline,frame:number,label:string,mediaDir:string,collectTypography=false){
  const manifest=makeSyntheticManifest(timeline,mediaDir,fontFile);
  const media=loadApprovedMedia(timeline,manifest);
- const props={timeline,media};
+ const props={timeline,media,typographyEvidenceLabel:collectTypography?label:undefined};
  const comp=await selectComposition({serveUrl:bundlePath,id:'HistoricalTimelineV1',inputProps:props});
  if(comp.width!==1920||comp.height!==1080||comp.fps!==30||comp.durationInFrames!==timeline.total_frames)throw new Error('RENDER_FROZEN_FORMAT_MISMATCH');
  const path=resolve(output,label+'.png');
- await renderStill({serveUrl:bundlePath,composition:comp,inputProps:props,output:path,imageFormat:'png',frame});
+ let typography:any=null;
+ await renderStill({serveUrl:bundlePath,composition:comp,inputProps:props,output:path,imageFormat:'png',frame,
+  onBrowserLog:collectTypography?log=>{
+   const marker='HVS_TYPOGRAPHY_EVIDENCE:';
+   if(log.text.includes(marker))typography=JSON.parse(log.text.slice(log.text.indexOf(marker)+marker.length));
+  }:undefined});
+ if(collectTypography&&!typography)throw new Error('CHROMIUM_TYPOGRAPHY_EVIDENCE_MISSING: '+label);
  const png=PNG.sync.read(readFileSync(path));
  if(png.width!==1920||png.height!==1080)throw new Error('RENDER_DIMENSIONS_INVALID');
  const pixelHash=sha(Buffer.from(png.data));
  if(new Set(png.data).size<3)throw new Error('RENDER_BLANK_OR_MONOCHROME');
- return {path,sha256:sha(readFileSync(path)),pixelSha256:pixelHash,width:png.width,height:png.height,frame,
+ return {path,sha256:sha(readFileSync(path)),pixelSha256:pixelHash,width:png.width,height:png.height,frame,typography,
          sourceKind:'SYNTHETIC',g4ManifestSha256:media.authorizingG4ManifestSha256};
 }
 function isolated(scene:Timeline['scenes'][number], variant:string):Timeline{
@@ -74,15 +80,42 @@ for(const {variant,scene} of sourceCases){
  const timeline=isolated(scene,variant);
  const caseDir=resolve(root,'.artifacts','media',variant,scene.template_id);
  const early=8, middle=Math.floor(scene.duration_frames/2),late=scene.duration_frames-3;
- const samples=mode==='render'||variant!=='A'?[middle]:[early,middle,late];
+ const typographyCase=(variant==='A'&&scene.template_id==='T02')||['T05','T07','T08'].includes(scene.template_id);
+ const samples=mode==='render'?[middle]:variant==='A'?[early,middle,late]:typographyCase?[middle,late]:[middle];
  const shots=[];
- for(const frame of samples)shots.push(await oneStill(timeline,frame,`${scene.template_id}-${variant}-f${frame}`,caseDir));
+ for(const frame of samples)shots.push(await oneStill(timeline,frame,`${scene.template_id}-${variant}-f${frame}`,caseDir,
+   mode==='frames'&&typographyCase&&frame===late));
  if(mode==='frames'&&variant==='A'){
   const same=await oneStill(timeline,middle,`${scene.template_id}-${variant}-repeat-f${middle}`,caseDir);
   if(same.pixelSha256!==shots.find(x=>x.frame===middle)!.pixelSha256)throw new Error('RENDER_COLD_PIXEL_NONDETERMINISTIC: '+scene.template_id+'-'+variant);
   if(shots[0].pixelSha256===shots[shots.length-1].pixelSha256&&scene.events.some(e=>e.preset_id!=='freeze-hold'))throw new Error('RENDER_MOTION_INERT: '+scene.template_id+'-'+variant);
  }
  metrics.push({template:scene.template_id,variant,shots});
+}
+const historicalSlots=new Set(['date_badge','date_early','date_late','date_before','date_after','fact_value']);
+const typographyRows=(metrics as any[]).flatMap(sample=>sample.shots.flatMap((shot:any)=>
+ shot.typography?.rows.filter((row:any)=>historicalSlots.has(row.slotId)).map((row:any)=>{
+  const compiledLayer=compiled[sample.variant].scenes.find(scene=>scene.template_id===sample.template)!
+   .layers.find(layer=>layer.layer_id===row.layerId)!;
+  return {template:sample.template,variant:sample.variant,pngSha256:shot.sha256,frame:shot.frame,
+   fontSha256:shot.typography.fontSha256,
+   sourceSha256:sha(Buffer.from(compiledLayer.text!,'utf8')),
+   renderedTextSha256:sha(Buffer.from(row.text,'utf8')),...row};
+ })??[]));
+if(mode==='frames'){
+ const expectedTypographyRows=sourceCases.filter(({variant,scene})=>(variant==='A'&&scene.template_id==='T02')||
+  ['T05','T07','T08'].includes(scene.template_id)).reduce((count,{scene})=>
+   count+scene.layers.filter(layer=>historicalSlots.has(layer.template_slot_id)).length,0);
+ if(typographyRows.length!==expectedTypographyRows)
+  throw Error('CHROMIUM_TYPOGRAPHY_EXPOSURES_INCOMPLETE: '+typographyRows.length+'/'+expectedTypographyRows);
+ for(const row of typographyRows){
+  if(row.lines<1||row.lines>row.slotMax||row.compiledMax>row.slotMax||row.clipped||
+     row.glyphCount!==Array.from(row.text as string).filter(char=>char.trim()).length)
+   throw Error('CHROMIUM_TYPOGRAPHY_SLOT_VIOLATION: '+JSON.stringify(row));
+ }
+ writeFileSync(resolve(output,'slot-max-lines-chromium.json'),JSON.stringify({
+  source:'SYNTHETIC B1 compiled fixture measured in real Remotion Chromium',rows:typographyRows
+ },null,2));
 }
 // Every registered A/B/C input must change real rendered geometry, not only a variant label.
 for(const template of templateList){
@@ -129,6 +162,15 @@ negatives.push(shouldFail('unregistered-motion',()=>{
 negatives.push(shouldFail('unapproved-mask',()=>{
  const t=structuredClone(sample);t.scenes[0].layers[0].mask={kind:'image',asset_id:'some_external',feather_px:0};assertTimeline(t);
 }));
+const forgedTextCeiling=shouldFail('text-layout-exceeds-slot',()=>{
+ const t=structuredClone(compiled.A);
+ const layer=t.scenes.flatMap(scene=>scene.layers).find(item=>item.text_layout!==null)!;
+ layer.text_layout!.max_lines=layer.style.max_lines+1;
+ assertTimeline(t);
+});
+if(forgedTextCeiling.code!=='TYPOGRAPHY_OVERFLOW')
+ throw Error('FORGED_TEXT_CEILING_WRONG_TYPED_FAILURE: '+forgedTextCeiling.code);
+negatives.push(forgedTextCeiling);
 const collage=isolated(compiled.A.scenes.find(s=>s.template_id==='T03')!,'A');
 const collageMedia=makeSyntheticManifest(collage,resolve(root,'.artifacts','negative-collage'),fontFile);
 negatives.push(shouldFail('duplicate-collage-original',()=>{
@@ -141,6 +183,6 @@ const causal=isolated(compiled.A.scenes.find(s=>s.template_id==='T10')!,'A');
 const causalMedia=makeSyntheticManifest(causal,resolve(root,'.artifacts','negative-editorial'),fontFile);
 negatives.push(shouldFail('editorial-as-map-route',()=>loadApprovedMedia(causal,{...causalMedia,
  geometries:causalMedia.geometries.map(g=>({...g,coordinateSpace:'WGS84' as const}))})));
-const evidence={command:mode,runner:{node:process.version,platform:process.platform},source:'SYNTHETIC B1 compiled fixtures, not live G1-G4 approvals',samples:metrics,negatives};
+const evidence={command:mode,runner:{node:process.version,platform:process.platform},source:'SYNTHETIC B1 compiled fixtures, not live G1-G4 approvals',samples:metrics,typographyRows,negatives};
 writeFileSync(resolve(output,'b2-'+mode+'-evidence.json'),JSON.stringify(evidence,null,2));
 console.log(JSON.stringify({status:'LOCAL_PASS',mode,cases:sourceCases.length,negative:negatives.length,renderer:'Remotion Chromium',evidenceDir:output}));
