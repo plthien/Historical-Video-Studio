@@ -36,6 +36,27 @@ def current_gate_heads(store, project):
             for gate,candidate,fingerprint,approval in rows}
 
 
+def current_numeric_heads(store, project):
+    """Current auxiliary G1 series identity; old events never authorize G4."""
+    from backend.app.projects.numeric_series import NumericSeries
+    NumericSeries(store)
+    with store._connection() as db:
+        rows = db.execute("""SELECT e.claim_id,e.series_id,e.approval_id,e.series_sha256
+            FROM numeric_series_heads h JOIN numeric_series_events e
+              ON e.approval_id=h.approval_id
+            WHERE h.project_id=? ORDER BY e.claim_id,e.series_id""", (project,)).fetchall()
+        bindings=db.execute("""SELECT e.claim_id,e.binding_id,e.series_id,e.approval_id,e.series_sha256
+            FROM numeric_series_binding_heads h JOIN numeric_series_binding_events e
+              ON e.binding_id=h.binding_id WHERE h.project_id=? ORDER BY e.claim_id""",
+            (project,)).fetchall()
+    heads={claim + ":" + series: {"approval_id":approval,"series_sha256":sha}
+           for claim,series,approval,sha in rows}
+    heads.update({"binding:"+claim:{"binding_id":binding,"series_id":series,
+                                     "approval_id":approval,"series_sha256":sha}
+                  for claim,binding,series,approval,sha in bindings})
+    return heads
+
+
 def ensure(store):
     # This table is deliberately separate from operator gate_heads: a draft is
     # never approval evidence for G4 or G5.
@@ -61,7 +82,7 @@ def _read_canonical(store, content_sha, project):
     return obj
 
 
-def load(store, project):
+def load(store, project, *, allow_auxiliary_stale=False):
     ensure(store)
     with store._connection() as db:
         head = db.execute(
@@ -84,7 +105,14 @@ def load(store, project):
             or manifest.get("map_context_sha256") != digest(manifest.get("maps"))
             or manifest.get("map_requests_sha256") != digest(manifest.get("map_requests"))):
         _fail("G4_DRAFT_CORRUPT", project, "Stored draft manifest is inconsistent with SQLite head.")
+    if (not allow_auxiliary_stale and
+            manifest.get("numeric_series_heads",{}) != current_numeric_heads(store,project)):
+        _fail("G4_SOURCE_STALE", project, "Auxiliary G1 numeric series changed; fresh compile required.")
     timeline = _read_canonical(store, manifest["timeline_sha256"], project)
+    if (manifest.get("effective_asset_snapshot_sha256") is not None and
+        manifest["effective_asset_snapshot_sha256"] != digest([
+        {"scene_id":s["scene_id"],"assets":s["asset_ids"]} for s in timeline["scenes"]])):
+        _fail("G4_DRAFT_CORRUPT",project,"G4 selected assets disagree with immutable timeline.")
     blueprint = _read_canonical(store, manifest["blueprint_sha256"], project)
     if (timeline.get("project_id") != project or blueprint.get("project_id") != project
             or timeline.get("dependency_fingerprint") != manifest.get("dependency_fingerprint")
@@ -98,7 +126,9 @@ def load(store, project):
 
 
 def publish(store, project, timeline, blueprint, maps, map_requests, font_identity,
-            *, expected_revision, previous=None, edit_kind=None):
+            *, expected_revision, previous=None, edit_kind=None, layer_overrides=None,
+            crop_overrides=None, motion_overrides=None,
+            asset_selection_overrides=None, reviewed_masks=None):
     """Immutable artifact publication first; atomic pointer/CAS/revision second.
 
     Failed CAS may leave unreachable content-addressed artifacts, never an
@@ -108,6 +138,7 @@ def publish(store, project, timeline, blueprint, maps, map_requests, font_identi
     from backend.app.projects.revisions import mark_stale
     ensure(store)
     approved_heads = current_gate_heads(store,project)
+    numeric_heads = current_numeric_heads(store,project)
     refresh = None
     if previous is None:
         with store._connection() as db:
@@ -115,10 +146,11 @@ def publish(store, project, timeline, blueprint, maps, map_requests, font_identi
                 "SELECT generation,project_revision,manifest_sha256 "
                 "FROM g4_compiled_drafts WHERE project_id=?",(project,)).fetchone()
         if prior:
-            previous_head=load(store,project)
+            previous_head=load(store,project,allow_auxiliary_stale=True)
             old_heads=previous_head["manifest"]["gate_heads"]
             if (expected_revision > previous_head["revision"]
-                    and approved_heads != old_heads):
+                    and (approved_heads != old_heads or
+                         numeric_heads != previous_head["manifest"].get("numeric_series_heads",{}))):
                 # G1/G2/G3 were independently re-approved after prior draft.
                 # Fresh production compile establishes a NEW trustworthy
                 # baseline; same upstream head must never reset G4 edits.
@@ -140,13 +172,24 @@ def publish(store, project, timeline, blueprint, maps, map_requests, font_identi
         "timeline_sha256":timeline_sha, "blueprint_sha256":blueprint_sha,
         "map_context_sha256":digest(maps), "map_requests_sha256":digest(map_requests),
         "maps":maps, "map_requests":map_requests, "font_identity":font_identity,
+        "reviewed_masks":reviewed_masks or {},
         "runtime_identity":_runtime_identity(),
         "gate_heads":approved_heads,
+        "numeric_series_heads":numeric_heads,
         "story_sha256":timeline["story_sha256"],
         "audio_sha256":timeline["audio_sha256"],
         "word_map_sha256":timeline["word_map_sha256"],
         "asset_snapshot_sha256":timeline["asset_snapshot_sha256"],
+        "effective_asset_snapshot_sha256":digest([
+            {"scene_id":s["scene_id"],"assets":s["asset_ids"]} for s in timeline["scenes"]]),
         "dependency_fingerprint":timeline["dependency_fingerprint"],
+        "layer_overrides":layer_overrides or {},
+        # These overlays are presentation-only and stay tied to the immutable
+        # G4 generation.  They are replayed only after the source heads and
+        # compiled layer/event identities have been verified by revise_g4.
+        "crop_overrides":crop_overrides or {},
+        "motion_overrides":motion_overrides or {},
+        "asset_selection_overrides":asset_selection_overrides or {},
     }
     manifest_sha = store.put_artifact(canonical(manifest), "g4_compiled_manifest")
     with store._transaction() as db:

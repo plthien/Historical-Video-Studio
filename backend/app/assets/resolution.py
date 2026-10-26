@@ -36,6 +36,35 @@ class AssetResolution:
                     candidate_id TEXT NOT NULL, candidate_sha256 TEXT NOT NULL,
                     original_sha256 TEXT NOT NULL, evidence_json TEXT NOT NULL,
                     approved_at TEXT NOT NULL);
+                CREATE TABLE IF NOT EXISTS asset_mask_derivative_events(
+                    review_id TEXT PRIMARY KEY, project_id TEXT NOT NULL, requirement_id TEXT NOT NULL,
+                    slot_id TEXT NOT NULL, requirement_sha256 TEXT NOT NULL,
+                    parent_candidate_id TEXT NOT NULL, parent_original_sha256 TEXT NOT NULL,
+                    derivative_asset_id TEXT NOT NULL, derivative_sha256 TEXT NOT NULL,
+                    width INTEGER NOT NULL, height INTEGER NOT NULL,
+                    source_crop_json TEXT NOT NULL, review_reason TEXT NOT NULL,
+                    committed_revision INTEGER NOT NULL);
+                CREATE TABLE IF NOT EXISTS asset_mask_derivative_heads(
+                    project_id TEXT NOT NULL, requirement_id TEXT NOT NULL,
+                    slot_id TEXT NOT NULL, parent_candidate_id TEXT NOT NULL,
+                    review_id TEXT NOT NULL REFERENCES asset_mask_derivative_events(review_id),
+                    PRIMARY KEY(project_id,requirement_id,slot_id,parent_candidate_id));
+                CREATE TABLE IF NOT EXISTS asset_choice_set_events (
+                    set_id TEXT PRIMARY KEY, project_id TEXT NOT NULL,
+                    requirement_id TEXT NOT NULL, slot_id TEXT NOT NULL,
+                    requirement_sha256 TEXT NOT NULL, set_sha256 TEXT NOT NULL,
+                    review_json TEXT NOT NULL, operator_reason TEXT NOT NULL,
+                    committed_revision INTEGER NOT NULL);
+                CREATE TABLE IF NOT EXISTS asset_choice_set_heads (
+                    project_id TEXT NOT NULL, requirement_id TEXT NOT NULL,
+                    slot_id TEXT NOT NULL, set_id TEXT NOT NULL REFERENCES asset_choice_set_events(set_id),
+                    PRIMARY KEY(project_id, requirement_id, slot_id));
+                CREATE TABLE IF NOT EXISTS asset_choice_set_items (
+                    review_approval_id TEXT PRIMARY KEY,
+                    set_id TEXT NOT NULL REFERENCES asset_choice_set_events(set_id),
+                    candidate_id TEXT NOT NULL, original_sha256 TEXT NOT NULL,
+                    evidence_sha256 TEXT NOT NULL,
+                    UNIQUE(set_id,candidate_id));
                 CREATE TABLE IF NOT EXISTS asset_approval_heads (
                     project_id TEXT NOT NULL, requirement_id TEXT NOT NULL,
                     approval_id TEXT NOT NULL REFERENCES asset_approval_events(approval_id),
@@ -212,6 +241,245 @@ class AssetResolution:
             return {"project_revision": revision+int(changed), "approved":created}
 
     @staticmethod
+    def _active_choice_sets(db, project, requirement, requirement_sha):
+        """Immutable current pool, not historic asset_approval_events or old set history."""
+        rows=db.execute("""SELECT e.set_id,e.slot_id,e.set_sha256,e.review_json,e.requirement_sha256
+            FROM asset_choice_set_heads h JOIN asset_choice_set_events e ON e.set_id=h.set_id
+            WHERE h.project_id=? AND h.requirement_id=? ORDER BY e.slot_id""",
+            (project,requirement)).fetchall()
+        results={}
+        for set_id,slot,sha,raw,requirement_hash in rows:
+            if requirement_hash!=requirement_sha:
+                continue
+            items=json.loads(raw)
+            if _digest(items)!=sha:
+                raise ContractViolation("G3_CHOICE_SET_CORRUPT",set_id,"Restore the immutable reviewed pool.")
+            results[slot]={"set_id":set_id,"set_sha256":sha,"items":items}
+        return results
+
+    def review_choice_set(self, project, requirement, slot, reviews, reason, expected_revision):
+        """Operator's choice-set review NEVER reapproves the separate G3 gate."""
+        if len(reason.strip())<8 or not 2<=len(reviews)<=25 or len({x.get("candidate_id") for x in reviews})!=len(reviews):
+            raise ContractViolation("G3_CHOICE_SET_INVALID",requirement,"Review at least two distinct candidates.")
+        story=self.store.get_story(project).data()
+        slots=[s for setup in story["visual_setups"]
+               for s in setup["direction"]["asset_slots"]
+               if s["slot_id"]==slot and s["requirement_id"]==requirement]
+        if not slots:
+            raise ContractViolation("G3_CHOICE_SLOT_INVALID",slot,"Select an authored G1 asset slot and its exact requirement.")
+        for item in reviews:
+            if item.get("requirement_id")!=requirement:
+                raise ContractViolation("G3_CHOICE_SLOT_INVALID",requirement,"Choices must share one source requirement.")
+            self.store.get_artifact(item["original_sha256"])
+        with self.store._transaction() as db:
+            rev=self._revision(db,project,expected_revision)
+            source=self.assets._source_tx(db,project,requirement)
+            head=self._head(db,project,requirement,source["requirement_sha256"])
+            if not head:
+                raise ContractViolation("G3_ASSET_UNAPPROVED",requirement,"Approve an eligible primary original first.")
+            planned=[]
+            for item in reviews:
+                sha,evidence=self._review_tx(db,project,item)
+                if sha!=source["requirement_sha256"]:
+                    raise ContractViolation("G3_CHOICE_SOURCE_STALE",requirement,"Source requirement changed.")
+                original=self.store.get_artifact(evidence["original_sha256"])
+                if hashlib.sha256(original).hexdigest()!=evidence["original_sha256"]:
+                    raise ContractViolation("G3_SOURCE_CORRUPT",item["candidate_id"],"Immutable bytes have changed.")
+                planned.append({"candidate_id":item["candidate_id"],
+                                "requirement_sha256":sha,
+                                "source_story_sha256":source["story_sha256"],
+                                "evidence":evidence,"original_sha256":evidence["original_sha256"],
+                                "review_approval_id":"choice_review_"+uuid4().hex})
+            if len({v["original_sha256"] for v in planned})!=len(planned) or head["candidate_id"] not in {v["candidate_id"] for v in planned}:
+                raise ContractViolation("G3_CHOICE_SET_INVALID",requirement,"Include distinct originals and the current primary source.")
+            payload=[{k:v for k,v in entry.items() if k!="review_approval_id"} for entry in planned]
+            sha=_digest(payload)
+            set_id="choice_"+uuid4().hex
+            db.execute("INSERT INTO asset_choice_set_events VALUES(?,?,?,?,?,?,?,?,?)",
+                       (set_id,project,requirement,slot,source["requirement_sha256"],sha,
+                        json.dumps(payload,sort_keys=True),reason.strip(),rev+1))
+            for item in planned:
+                db.execute("INSERT INTO asset_choice_set_items VALUES(?,?,?,?,?)",
+                           (item["review_approval_id"],set_id,item["candidate_id"],
+                            item["original_sha256"],_digest(item["evidence"])))
+            db.execute("""INSERT INTO asset_choice_set_heads VALUES(?,?,?,?)
+                ON CONFLICT(project_id,requirement_id,slot_id) DO UPDATE SET set_id=excluded.set_id""",
+                (project,requirement,slot,set_id))
+            mark_stale(db,project,"g3_choice_set")
+            db.execute("UPDATE projects SET revision=? WHERE project_id=?",(rev+1,project))
+            return {"set_id":set_id,"set_sha256":sha,"project_revision":rev+1,
+                    "g3_reapproval_required":True,
+                    "items":[{"candidate_id":x["candidate_id"],
+                              "review_approval_id":x["review_approval_id"],
+                              "original_sha256":x["original_sha256"]} for x in planned]}
+
+    def current_choice_set(self, project, requirement, slot):
+        with self.store._connection() as db:
+            source=self.assets._source_tx(db,project,requirement)
+            selected=self._active_choice_sets(db,project,requirement,source["requirement_sha256"]).get(slot)
+            if selected is None:
+                return {"set_id":None,"items":[],"g3_current":False}
+            g3=GateService.__new__(GateService)
+            g3.store=self.store
+            current=g3._status(db,project,"G3")[0]=="APPROVED"
+            return {**selected,"g3_current":current}
+
+    def approved_slot_options(self, project: str, requirement: str, slot: str):
+        """Only fresh same-slot G3 pool items are usable by G4; source metadata is display-only."""
+        with self.store._connection() as db:
+            source=self.assets._source_tx(db,project,requirement)
+            pools=self._active_choice_sets(db,project,requirement,source["requirement_sha256"])
+            pool=pools.get(slot)
+            gate=GateService.__new__(GateService)
+            gate.store=self.store
+            if not pool or gate._status(db,project,"G3")[0]!="APPROVED":
+                return {"choice_set_id":None,"choice_set_sha256":None,"options":[]}
+            primary=self._head(db,project,requirement,source["requirement_sha256"])
+            if not primary:
+                raise ContractViolation("G3_ASSET_UNAPPROVED",requirement,"Current approved primary is missing.")
+            story=self.store.get_story(project).data()
+            requirement_class=next(r["asset_class"] for r in story["asset_requirements"]
+                                   if r["requirement_id"]==requirement)
+            options=[]
+            for item in pool["items"]:
+                cand=self.assets._owned_tx(db,project,requirement,item["candidate_id"])
+                evidence=item["evidence"]
+                if (item["requirement_sha256"]!=source["requirement_sha256"] or
+                    item["source_story_sha256"]!=source["story_sha256"] or
+                    item["original_sha256"]!=cand["original_sha256"] or
+                    cand["asset_class"]!=primary["evidence"]["asset_class"] or
+                    evidence["rights_status"]!="ELIGIBLE" or
+                    evidence["candidate_id"]!=cand["candidate_id"] or
+                    not evidence["rights_evidence_note"] or not evidence["historical_context_note"]):
+                    raise ContractViolation("G3_CHOICE_SOURCE_STALE",slot,"Reviewed original no longer matches current rights/requirement.")
+                sha=item["original_sha256"]
+                self.store.get_artifact(sha)
+                rid=db.execute("""SELECT review_approval_id FROM asset_choice_set_items
+                    WHERE set_id=? AND candidate_id=? AND original_sha256=? AND evidence_sha256=?""",
+                    (pool["set_id"],cand["candidate_id"],sha,_digest(evidence))).fetchone()
+                if not rid:
+                    raise ContractViolation("G3_CHOICE_SET_CORRUPT",slot,"Missing immutable operator review record.")
+                options.append({"candidate_id":cand["candidate_id"],
+                                "original_sha256":sha,
+                                "review_approval_id":rid[0],
+                                "asset_class":requirement_class,
+                                "source_candidate_class":cand["asset_class"],
+                                "title":cand.get("title","Reviewed original"),
+                                "source_provider":cand["provider"]})
+            return {"requirement_id":requirement,"slot_id":slot,
+                    "choice_set_id":pool["set_id"],"choice_set_sha256":pool["set_sha256"],
+                    "options":options}
+
+    @staticmethod
+    def _active_mask_derivatives(db,project,requirement,requirement_sha):
+        rows=db.execute("""SELECT e.review_id,e.slot_id,e.parent_candidate_id,e.parent_original_sha256,
+                                 e.derivative_asset_id,e.derivative_sha256,e.width,e.height,
+                                 e.source_crop_json,e.requirement_sha256
+            FROM asset_mask_derivative_heads h JOIN asset_mask_derivative_events e ON e.review_id=h.review_id
+            WHERE h.project_id=? AND h.requirement_id=? ORDER BY e.slot_id""",
+            (project,requirement)).fetchall()
+        return {slot+":"+parent:{"review_id":rid,"slot_id":slot,
+                     "parent_candidate_id":parent,"parent_original_sha256":parent_sha,
+                     "derivative_asset_id":derivative_id,"derivative_sha256":sha,
+                     "width":w,"height":h,"source_crop":json.loads(crop)}
+                for rid,slot,parent,parent_sha,derivative_id,sha,w,h,crop,req_sha in rows
+                if req_sha==requirement_sha}
+
+    def review_mask_derivative(self,project,requirement,slot,parent_id,parent_sha,
+                               png,source_crop,review_reason,expected_revision):
+        from backend.app.assets.alpha_mask import rgba_alpha_extent
+        from backend.app.assets.download import inspect
+        if len(review_reason.strip())<8 or source_crop!={"x":0,"y":0,"w":1,"h":1}:
+            raise ContractViolation("MASK_DERIVATIVE_INVALID",slot,
+                                    "Review full-source aligned alpha; arbitrary transforms need G3 re-review.")
+        width,height=rgba_alpha_extent(png)
+        story=self.store.get_story(project).data()
+        authored=next((s for setup in story["visual_setups"] if setup["preferred_template"]=="T02"
+                       for s in setup["direction"]["asset_slots"]
+                       if s["slot_id"]==slot and s["requirement_id"]==requirement),None)
+        if not authored:
+            raise ContractViolation("MASK_DERIVATIVE_SLOT_INVALID",slot,"A current authored T02 portrait slot is required.")
+        original=self.store.get_artifact(parent_sha)
+        dimensions=inspect(original)
+        if (dimensions["width"],dimensions["height"])!=(width,height):
+            raise ContractViolation("MASK_DERIVATIVE_DIMENSION_MISMATCH",slot,
+                                    "Mask pixels must correspond to exact parent original dimensions.")
+        with self.store._transaction() as db:
+            rev=self._revision(db,project,expected_revision)
+            source=self.assets._source_tx(db,project,requirement)
+            primary=self._head(db,project,requirement,source["requirement_sha256"])
+            candidate=self.assets._owned_tx(db,project,requirement,parent_id)
+            eligible=(primary is not None and
+                      primary["candidate_id"]==parent_id and primary["original_sha256"]==parent_sha)
+            pools=self._active_choice_sets(db,project,requirement,source["requirement_sha256"])
+            if not eligible:
+                eligible=any(x["candidate_id"]==parent_id and x["original_sha256"]==parent_sha
+                             for p in pools.values() for x in p["items"])
+            requirement_class=next(r["asset_class"] for r in story["asset_requirements"]
+                                   if r["requirement_id"]==requirement)
+            if (not eligible or candidate["original_sha256"]!=parent_sha or
+                candidate["source_requirement_sha256"]!=source["requirement_sha256"] or
+                requirement_class not in ("ARCHIVAL_PHOTO","HISTORICAL_ARTWORK") or
+                candidate["provider"]=="glabs_webhook"):
+                raise ContractViolation("MASK_DERIVATIVE_PARENT_UNAPPROVED",slot,
+                                        "Choose current reviewed G3 original from exact portrait requirement.")
+            sha,new=self.store.artifacts.put(png)
+            try:
+                rel=str(self.store.artifacts.path(sha).relative_to(self.store.artifacts.root)).replace("\\","/")
+                db.execute("INSERT OR IGNORE INTO artifacts VALUES(?,?,?,?)",
+                           (sha,len(png),"mask_derivative",rel))
+                row=db.execute("SELECT byte_count,kind,relative_path FROM artifacts WHERE sha256=?",(sha,)).fetchone()
+                if row!=(len(png),"mask_derivative",rel):
+                    raise ContractViolation("MASK_DERIVATIVE_INVALID",slot,"Derivative cannot reuse an unrelated artifact.")
+                rid="mask_review_"+uuid4().hex
+                asset_id="mask_"+rid.split("_")[-1]
+                db.execute("INSERT INTO asset_mask_derivative_events VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                           (rid,project,requirement,slot,source["requirement_sha256"],
+                            parent_id,parent_sha,asset_id,sha,width,height,
+                            json.dumps(source_crop,sort_keys=True),review_reason.strip(),rev+1))
+                db.execute("""INSERT INTO asset_mask_derivative_heads VALUES(?,?,?,?,?)
+                    ON CONFLICT(project_id,requirement_id,slot_id,parent_candidate_id)
+                    DO UPDATE SET review_id=excluded.review_id""",
+                    (project,requirement,slot,parent_id,rid))
+                mark_stale(db,project,"g3_derivative")
+                db.execute("UPDATE projects SET revision=? WHERE project_id=?",(rev+1,project))
+            except BaseException:
+                if new:self.store.artifacts.path(sha).unlink(missing_ok=True)
+                raise
+            return {"review_id":rid,"derivative_asset_id":asset_id,"derivative_sha256":sha,
+                    "width":width,"height":height,"project_revision":rev+1,
+                    "g3_reapproval_required":True}
+
+    def reviewed_mask(self,project,requirement,slot,parent_id):
+        with self.store._connection() as db:
+            source=self.assets._source_tx(db,project,requirement)
+            active=self._active_mask_derivatives(db,project,requirement,source["requirement_sha256"])
+            item=active.get(slot+":"+parent_id)
+            gate=GateService.__new__(GateService)
+            gate.store=self.store
+            if not item or gate._status(db,project,"G3")[0]!="APPROVED":
+                return None
+            candidate=self.assets._owned_tx(db,project,requirement,parent_id)
+            primary=self._head(db,project,requirement,source["requirement_sha256"])
+            pools=self._active_choice_sets(db,project,requirement,source["requirement_sha256"])
+            eligible=(primary is not None and primary["candidate_id"]==parent_id and
+                      primary["original_sha256"]==item["parent_original_sha256"])
+            eligible=eligible or any(
+                reviewed["candidate_id"]==parent_id and
+                reviewed["original_sha256"]==item["parent_original_sha256"]
+                for pool in pools.values() for reviewed in pool["items"] if pool["set_id"])
+            if (not eligible or candidate["original_sha256"]!=item["parent_original_sha256"] or
+                candidate["source_requirement_sha256"]!=source["requirement_sha256"]):
+                raise ContractViolation("MASK_DERIVATIVE_PARENT_UNAPPROVED",slot,
+                                        "Parent no longer belongs to the current G3-approved source pool.")
+            self.store.get_artifact(item["parent_original_sha256"])
+            original=self.store.get_artifact(item["derivative_sha256"])
+            from backend.app.assets.alpha_mask import rgba_alpha_extent
+            if rgba_alpha_extent(original)!=(item["width"],item["height"]):
+                raise ContractViolation("MASK_DERIVATIVE_INVALID",slot,"Reviewed alpha bytes changed.")
+            return {**item,"requirement_id":requirement}
+
+    @staticmethod
     def gate_candidate(db, project, store):
         row=db.execute("SELECT sha256,story_json FROM story_candidates WHERE project_id=? ORDER BY revision DESC LIMIT 1",
                        (project,)).fetchone()
@@ -228,6 +496,8 @@ class AssetResolution:
         if not db.execute("SELECT 1 FROM sqlite_master WHERE name='asset_approval_heads'").fetchone():
             return None
         pinned=[]
+        choices=[]
+        derivatives=[]
         for r in requirements:
             rid=r["requirement_id"]
             current=AssetCandidates._source_tx(db,project,rid)
@@ -236,15 +506,41 @@ class AssetResolution:
                 return None
             # A replaced/corrupt immutable original cannot be approved as render input.
             store.get_artifact(head["original_sha256"])
+            pools=AssetResolution._active_choice_sets(db,project,rid,current["requirement_sha256"])
+            for slot, pool in pools.items():
+                for item in pool["items"]:
+                    registered=AssetCandidates._owned_tx(db,project,rid,item["candidate_id"])
+                    if (registered["original_sha256"]!=item["original_sha256"] or
+                        registered["source_requirement_sha256"]!=current["requirement_sha256"]):
+                        raise ContractViolation("G3_CHOICE_SOURCE_STALE",rid,"Choice set's reviewed source changed.")
+                    store.get_artifact(item["original_sha256"])
+                choices.append({"requirement_id":rid,"slot_id":slot,
+                                "set_id":pool["set_id"],"set_sha256":pool["set_sha256"]})
+            for derivative in AssetResolution._active_mask_derivatives(
+                    db,project,rid,current["requirement_sha256"]).values():
+                original=AssetCandidates._owned_tx(db,project,rid,derivative["parent_candidate_id"])
+                if original["original_sha256"]!=derivative["parent_original_sha256"]:
+                    raise ContractViolation("MASK_DERIVATIVE_PARENT_UNAPPROVED",rid,"Reviewed mask parent was replaced.")
+                store.get_artifact(derivative["derivative_sha256"])
+                derivatives.append({"requirement_id":rid,**derivative})
             pinned.append({"requirement_id":rid,"requirement_sha256":current["requirement_sha256"],
                            "candidate_sha256":head["approved_candidate_sha256"],
                            "original_sha256":head["original_sha256"],
                            "review_approval_id":head["approval_record_id"]})
         manifest={"assets":sorted(pinned,key=lambda x:x["requirement_id"])}
+        if choices:
+            manifest["choice_sets"]=sorted(choices,key=lambda x:(x["requirement_id"],x["slot_id"]))
+        if derivatives:
+            manifest["mask_derivatives"]=sorted(derivatives,key=lambda x:(x["requirement_id"],x["slot_id"],x["parent_candidate_id"]))
         # A new human review event is a new G3 candidate even when the exact
         # original image and review text match an earlier approved version.
         # This makes STALE -> new review -> READY_FOR_REVIEW possible without
         # silently resurrecting a historical G3 approval (A -> B -> A).
-        fingerprint=_digest({"review_lineage": [(x["requirement_id"],x["requirement_sha256"],
-                                                x["review_approval_id"]) for x in manifest["assets"]]})
+        lineage={"review_lineage": [(x["requirement_id"],x["requirement_sha256"],
+                                                x["review_approval_id"]) for x in manifest["assets"]]}
+        if choices:
+            lineage["choice_sets"]=manifest["choice_sets"]
+        if derivatives:
+            lineage["mask_derivatives"]=manifest["mask_derivatives"]
+        fingerprint=_digest(lineage)
         return _digest(manifest),fingerprint

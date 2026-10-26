@@ -1,6 +1,8 @@
 """B1-04: registered source-bound layers; originals remain immutable."""
 from __future__ import annotations
 
+import re
+
 from backend.app.contracts import ContractViolation
 from backend.app.director.layout import pixel_geometry, role_bounds, selected_layout
 
@@ -17,7 +19,31 @@ def _blocked(code, path, what):
     raise ContractViolation(code, path, what)
 
 
-def _text_layout(source, rect, font_measure):
+def _wrapped_lines(text, size, available_width, font_measure):
+    """Count browser-style soft wraps without discarding authored newlines."""
+    lines = []
+    for logical in text.split("\n"):
+        if logical == "":
+            lines.append("")
+            continue
+        tokens = re.findall(r"\S+|[^\S\n]+", logical)
+        if any(not token.isspace() and font_measure(token, size)[0] > available_width
+               for token in tokens):
+            return None
+        current = ""
+        for token in tokens:
+            proposed = current + token
+            if font_measure(proposed, size)[0] <= available_width:
+                current = proposed
+                continue
+            if current:
+                lines.append(current)
+            current = token.lstrip() if token.isspace() else token
+        lines.append(current)
+    return lines
+
+
+def _text_layout(source, rect, font_measure, *, slot_max_lines, padding_px=6):
     """Measure actual glyphs through a supplied pinned glyph-width provider.
 
     No character-count fitting and no quiet font replacement. B2 controls final
@@ -26,26 +52,21 @@ def _text_layout(source, rect, font_measure):
     if font_measure is None or not callable(font_measure):
         _blocked("FONT_METRICS_REQUIRED", source["text_id"],
                  "Supply measured pinned-font glyph bounds before compiling text.")
-    max_lines = min(source["max_lines"], 8)
+    if not isinstance(slot_max_lines, int) or isinstance(slot_max_lines, bool) or slot_max_lines < 1:
+        _blocked("TYPOGRAPHY_OVERFLOW", source["text_id"],
+                 "Registered text slots require a positive max_lines ceiling.")
+    max_lines = min(source["max_lines"], slot_max_lines, 8)
     text = source["text"]
+    available_width = rect["w"] - 2 * padding_px
+    available_height = rect["h"] - 2 * padding_px
+    if available_width <= 0 or available_height <= 0:
+        _blocked("TYPOGRAPHY_OVERFLOW", source["text_id"],
+                 "Text padding leaves no visible content box in this approved layout.")
     options = (64, 56, 48, 40, 32, 28, 24, 20)
     for size in options:
-        words = text.split()
-        lines = []
-        current = ""
-        for word in words:
-            proposed = (current + " " + word).strip()
-            if font_measure(proposed, size)[0] <= rect["w"]:
-                current = proposed
-            else:
-                if current:
-                    lines.append(current)
-                current = word
-        if current:
-            lines.append(current)
-        if (len(lines) <= max_lines and
-                all(font_measure(line, size)[0] <= rect["w"] for line in lines) and
-                len(lines) * font_measure("Hg", size)[1] * 1.16 <= rect["h"]):
+        lines = _wrapped_lines(text, size, available_width, font_measure)
+        if (lines is not None and len(lines) <= max_lines and
+                len(lines) * size * 1.16 <= available_height):
             return {"font_token": "headline_sans", "font_size_px": size,
                     "line_height": 1.16, "letter_spacing_px": 0,
                     "horizontal_align": "left", "vertical_align": "center",
@@ -55,7 +76,8 @@ def _text_layout(source, rect, font_measure):
 
 
 def build_layers(plan: dict, approved: dict, requirements: dict, *,
-                 maps: dict | None = None, font_measure=None) -> tuple[list[dict], dict[str,str]]:
+                 maps: dict | None = None, font_measure=None,
+                 reviewed_masks: dict | None = None) -> tuple[list[dict], dict[str,str]]:
     layout = selected_layout(plan)
     rects = pixel_geometry(plan)
     authored = plan["editorial_direction"]
@@ -183,16 +205,29 @@ def build_layers(plan: dict, approved: dict, requirements: dict, *,
                           "evidence_badge": "archival" if candidate else "none"},
             "path_geometry_ref": (maps[plan["setup_id"]]["route_feature_id"] if is_route else
                                   "connector_" + plan["setup_id"] if is_editorial_connector else None),
-            "text_layout": _text_layout(txt, rect, font_measure) if txt else None,
+            "text_layout": _text_layout(
+                txt, rect, font_measure, slot_max_lines=slot["max_lines"],
+                padding_px=10 if role == "headline" else 6
+            ) if txt else None,
             "template_slot_id": sid,
             "source_asset_slot_id": source["slot_id"] if source else None,
         }
         layers.append(layer)
-    # The authored strict cutout contract cannot silently become a framed portrait.
-    # G3 currently authorizes originals, not a reviewed derivative mask identity.
+    # Only a current, separately G3-reviewed derivative may implement strict T02.
+    # Other native masks and framed portraits retain their prior behavior.
     if plan["template_id"] == "T02" and plan["template_payload"]["cutout_policy"] == "use_reviewed_mask":
-        _blocked("PORTRAIT_MASK_UNREVIEWED", plan["setup_id"],
-                 "Strict T02 cutout requires a G3-reviewed mask identity; frame the original until approved.")
+        portrait_slot=plan["template_payload"]["portrait_slot_id"]
+        portrait=next((layer for layer in layers
+                       if layer["source_asset_slot_id"]==portrait_slot and
+                       layer["layer_kind"] in ("portrait","archival_photo")),None)
+        reviewed=(reviewed_masks or {}).get(portrait_slot)
+        if (not portrait or not reviewed or
+            reviewed["parent_candidate_id"]!=portrait["asset_id"] or
+            reviewed["source_crop"]!={"x":0,"y":0,"w":1,"h":1}):
+            _blocked("PORTRAIT_MASK_UNREVIEWED",plan["setup_id"],
+                     "Current G3 mask must exactly match the authored portrait and full source coordinate frame.")
+        portrait["mask"]={"kind":"polygon_asset",
+                          "asset_id":reviewed["derivative_asset_id"],"feather_px":0}
     # T06 excerpt UV is an explicit non-destructive crop on the approved original.
     if plan["template_id"] == "T06":
         payload = plan["template_payload"]

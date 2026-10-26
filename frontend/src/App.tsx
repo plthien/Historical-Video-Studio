@@ -1,8 +1,9 @@
-import {useCallback, useState} from "react";
+import {useCallback, useRef, useState} from "react";
 import {api, ApiError, type Gate, type GateDecision, type GateId, type JobInfo, type ProjectInfo, type StoryPayload, type StoryView} from "./api/client";
 import {workspaces} from "./routes/workspaces";
 import {VoiceStudio} from "./workspaces/Voice/VoiceStudio";
 import {AssetStudio} from "./workspaces/Assets/AssetStudio";
+import {StoryboardStudio} from "./workspaces/Storyboard/StoryboardStudio";
 
 type Notice = {kind: "success" | "error"; message: string};
 const idKey = () => crypto.randomUUID();
@@ -35,18 +36,33 @@ export function App() {
   const [decisionComment, setDecisionComment] = useState("");
   const [pending, setPending] = useState<string | null>(null);
   const [notice, setNotice] = useState<Notice | null>(null);
+  const activeProjectId = useRef<string | null>(null);
+  const refreshGeneration = useRef(0);
 
-  const refresh = useCallback(async (projectId: string) => {
-    const current = await api.project(projectId);
-    setProject(current);
-    const [story, taskList] = await Promise.all([
-      api.story(projectId).catch((e: unknown) => {
-        if (e instanceof ApiError && (e.status === 424 || e.status === 404)) return null;
-        throw e;
-      }), api.jobs(projectId)
-    ]);
-    setStoryView(story);
-    setJobs(taskList);
+  const refresh = useCallback(async (projectId: string, switchProject = false) => {
+    // A late response from an old workspace must never switch the active
+    // project after Create/Open selected a different SQLite project.
+    const prior = activeProjectId.current;
+    if (!switchProject && prior !== null && prior !== projectId) return;
+    if (switchProject) activeProjectId.current = projectId;
+    const generation = ++refreshGeneration.current;
+    try {
+      const [current, story, taskList] = await Promise.all([
+        api.project(projectId),
+        api.story(projectId).catch((e: unknown) => {
+          if (e instanceof ApiError && (e.status === 424 || e.status === 404)) return null;
+          throw e;
+        }), api.jobs(projectId)
+      ]);
+      if (generation !== refreshGeneration.current || activeProjectId.current !== projectId) return;
+      setProject(current);
+      setStoryView(story);
+      setJobs(taskList);
+    } catch (error) {
+      if (switchProject && generation === refreshGeneration.current)
+        activeProjectId.current = prior;
+      throw error;
+    }
   }, []);
 
   async function execute(label: string, action: () => Promise<void>) {
@@ -70,7 +86,7 @@ export function App() {
     await execute("Project creation", async () => {
       const created = await api.createProject(title);
       setStoryView(null); setStoryText("");
-      await refresh(created.project_id);
+      await refresh(created.project_id, true);
       setWorkspace("project");
     });
   }
@@ -149,7 +165,8 @@ export function App() {
         {!active.enabled ? <div className="unavailable" role="note">
           <strong>Not available in A1</strong>
           <p>This workspace requires the {active.owner} owner implementation. No provider, approved media, alignment, render, or export result is simulated.</p>
-        </div> : workspace === "assets" && project ?
+        </div> : workspace === "storyboard" && project ?
+          <StoryboardStudio projectId={project.project_id} onRefresh={() => refresh(project.project_id)}/> : workspace === "assets" && project ?
           <AssetStudio projectId={project.project_id} projectRevision={project.project_revision} onRefresh={() => refresh(project.project_id)}/> : workspace === "voice" && project ?
           <VoiceStudio project={project} story={storyView} onRefresh={() => refresh(project.project_id)}/> : workspace === "project" ?
           <div className="stack">
@@ -163,7 +180,7 @@ export function App() {
               <input id="existing-id" value={existingId} onChange={e => setExistingId(e.target.value)}
                 placeholder="proj_..." disabled={!!pending}/>
               <button disabled={!!pending || !existingId.trim()} onClick={() => void execute("Open project", async () => {
-                await refresh(existingId.trim());
+                await refresh(existingId.trim(), true);
               })}>Open existing project</button>
             </div>
             {project && <div className="panel">

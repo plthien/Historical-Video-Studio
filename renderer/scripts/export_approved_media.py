@@ -45,9 +45,119 @@ with store._connection() as db:
         if hashlib.sha256(original).hexdigest()!=approval["original_sha256"]:
             raise RuntimeError("G3_SOURCE_CORRUPT "+rid)
         assets[approval["candidate_id"]]=approval
-referenced={x["asset_id"] for s in timeline["scenes"] for x in s["layers"] if x["asset_id"]}
+# Exact G4 effective selection is independent of the frozen G3 primary map.
+from backend.app.director.fingerprint import digest
+if head["manifest"].get("effective_asset_snapshot_sha256") != digest([
+        {"scene_id":s["scene_id"],"assets":s["asset_ids"]} for s in timeline["scenes"]]):
+    raise RuntimeError("G4_EFFECTIVE_SOURCE_CORRUPT")
+seen_selection=set()
+for setup,patches in head["manifest"].get("asset_selection_overrides",{}).items():
+    scene=next((s for s in timeline["scenes"] if s["setup_id"]==setup),None)
+    if not scene:
+        raise RuntimeError("G4_SELECTED_SCENE_MISSING "+setup)
+    for layer_id,choice in patches.items():
+        layer=next((l for l in scene["layers"] if l["layer_id"]==layer_id),None)
+        if not layer or layer["asset_id"]!=choice["candidate_id"] or layer["source_asset_slot_id"]!=choice["slot_id"]:
+            raise RuntimeError("G4_SELECTED_LAYER_MISMATCH "+layer_id)
+        if layer["layer_kind"] in ("map","territory"):
+            raise RuntimeError("G4_MAP_SELECTION_UNREVIEWED "+layer_id)
+        plan=next(p for p in head["blueprint"]["setup_plans"] if p["setup_id"]==setup)
+        authored=next((v for v in plan["editorial_direction"]["asset_slots"]
+                       if v["slot_id"]==choice["slot_id"] and v["requirement_id"]==choice["requirement_id"]),None)
+        if not authored:
+            raise RuntimeError("G4_SOURCE_SLOT_MISMATCH "+layer_id)
+        options=AssetResolution(store).approved_slot_options(args.project,choice["requirement_id"],choice["slot_id"])
+        selected=next((v for v in options["options"] if
+                       v["candidate_id"]==choice["candidate_id"] and
+                       v["review_approval_id"]==choice["review_approval_id"] and
+                       v["original_sha256"]==choice["original_sha256"]),None)
+        if not selected or options["choice_set_id"]!=choice["choice_set_id"] or options["choice_set_sha256"]!=choice["choice_set_sha256"]:
+            raise RuntimeError("G4_SELECTED_SOURCE_STALE "+layer_id)
+        assets[choice["candidate_id"]]={"original_sha256":selected["original_sha256"],
+            "approval_record_id":selected["review_approval_id"],"candidate_id":selected["candidate_id"]}
+        seen_selection.add((setup,layer_id))
+# Reviewed polygon derivative is a different asset from the immutable parent.
+mask_derivatives=[]
+for scene in timeline["scenes"]:
+    plan=next(p for p in head["blueprint"]["setup_plans"] if p["setup_id"]==scene["setup_id"])
+    for layer in scene["layers"]:
+        mask=layer["mask"]
+        if mask["kind"]!="polygon_asset":
+            continue
+        authored=next((s for s in plan["editorial_direction"]["asset_slots"]
+                       if s["slot_id"]==layer["source_asset_slot_id"]),None)
+        if not authored or not layer["asset_id"] or not mask["asset_id"]:
+            raise RuntimeError("RENDER_MASK_DERIVATIVE_UNAPPROVED "+layer["layer_id"])
+        item=AssetResolution(store).reviewed_mask(
+            args.project,authored["requirement_id"],authored["slot_id"],layer["asset_id"])
+        parent=assets.get(layer["asset_id"])
+        if (not item or not parent or item["derivative_asset_id"]!=mask["asset_id"] or
+            item["parent_original_sha256"]!=parent["original_sha256"] or
+            item["source_crop"]!={"x":0,"y":0,"w":1,"h":1}):
+            raise RuntimeError("RENDER_MASK_DERIVATIVE_UNAPPROVED "+layer["layer_id"])
+        original=store.get_artifact(item["derivative_sha256"])
+        from backend.app.assets.alpha_mask import rgba_alpha_extent
+        if rgba_alpha_extent(original)!=(item["width"],item["height"]):
+            raise RuntimeError("RENDER_MASK_DERIVATIVE_CORRUPT "+layer["layer_id"])
+        if item["derivative_asset_id"] in assets and assets[item["derivative_asset_id"]]["original_sha256"]!=item["derivative_sha256"]:
+            raise RuntimeError("RENDER_MASK_DERIVATIVE_AMBIGUOUS "+layer["layer_id"])
+        assets[item["derivative_asset_id"]]={"candidate_id":item["derivative_asset_id"],
+            "original_sha256":item["derivative_sha256"],
+            "approval_record_id":item["review_id"]}
+        mask_derivatives.append({
+            "derivativeAssetId":item["derivative_asset_id"],
+            "derivativeSha256":item["derivative_sha256"],
+            "parentCandidateId":layer["asset_id"],
+            "parentOriginalSha256":item["parent_original_sha256"],
+            "reviewId":item["review_id"],"width":item["width"],"height":item["height"],
+            "sourceCrop":item["source_crop"]})
+referenced={aid for s in timeline["scenes"] for layer in s["layers"]
+            for aid in (layer["asset_id"],layer["mask"]["asset_id"]) if aid}
 if referenced-set(assets):
     raise RuntimeError("G4_ASSET_NOT_APPROVED "+str(referenced-set(assets)))
+# Numeric evidence is a separate current G1-reviewed approval, never a render prop assertion.
+from backend.app.projects.numeric_series import NumericSeries
+owner=NumericSeries(store)
+numeric={}
+with store._connection() as db:
+    current=db.execute("""SELECT e.claim_id,e.series_id,e.approval_id,e.series_sha256,e.snapshot_json
+        FROM numeric_series_heads h JOIN numeric_series_events e
+          ON h.approval_id=e.approval_id
+        WHERE h.project_id=?""",(args.project,)).fetchall()
+for claim,sid,approval,series_sha,raw in current:
+    row=owner.get(args.project,claim,sid)
+    record=json.loads(raw)
+    if (row is None or not row["current"] or row["approval_id"]!=approval or
+        row["series_sha256"]!=series_sha or
+        hashlib.sha256(canonical(record)).hexdigest()!=series_sha):
+        raise RuntimeError("RENDER_NUMBER_SERIES_STALE "+sid)
+    for point in record["observations"]:
+        store.get_artifact(point["source_evidence_sha256"])
+    if sid in numeric:
+        raise RuntimeError("RENDER_NUMBER_SERIES_AMBIGUOUS "+sid)
+    numeric[sid]={
+        "seriesId":sid,"claimId":claim,"storySha256":record["frozen_story_sha256"],
+        "g1ApprovalId":record["g1_approval_id"],"approvalId":approval,
+        "seriesSha256":series_sha,"durationFrames":record["authored_duration_frames"],
+        "precision":record["precision"],"unit":record["unit"],
+        "startValue":record["start_value"],"endValue":record["end_value"],
+        "observations":[{"frameOffset":v["frame_offset"],"value":v["value"],
+                         "evidenceSha256":v["source_evidence_sha256"]}
+                        for v in record["observations"]]
+    }
+for scene in timeline["scenes"]:
+    for event in scene["events"]:
+        if event["preset_id"]!="number-count":
+            continue
+        sid=event["params"].get("approved_numeric_series_id")
+        source=numeric.get(sid)
+        layer=next((l for l in scene["layers"] if l["layer_id"]==event["layer_id"]),None)
+        if (not source or not layer or layer["source_claim_id"]!=source["claimId"] or
+            event["duration_frames"]!=source["durationFrames"] or
+            event["params"]["source_claim_id"]!=source["claimId"]):
+            raise RuntimeError("RENDER_NUMBER_SERIES_UNVERIFIED "+event["event_id"])
+if draft.current_numeric_heads(store,args.project)!=head["manifest"].get("numeric_series_heads",{}):
+    raise RuntimeError("G4_NUMERIC_SERIES_STALE")
 records=[]
 for aid in sorted(referenced):
     source=assets[aid]
@@ -143,9 +253,15 @@ manifest={
  "mediaRoot":str(store.artifacts.root.resolve()),
  "assets":records,"geometries":geometries,"maps":list(reviewed_maps.values()),
  "fontFile":str(font_path),"fontSha256":font["font_sha256"],
- "fontFamily":font["font_family"],"sourceKind":"APPROVED_LOCAL"
+ "fontFamily":font["font_family"],"sourceKind":"APPROVED_LOCAL",
+ "approvedNumericSeries":numeric,"maskDerivatives":mask_derivatives
 }
 args.output.parent.mkdir(parents=True,exist_ok=True)
 args.output.write_bytes(canonical({"timeline":timeline,"manifest":manifest}))
+if (store.revision(args.project)!=head["revision"] or
+    draft.current_gate_heads(store,args.project)!=head["manifest"]["gate_heads"] or
+    draft.current_numeric_heads(store,args.project)!=head["manifest"].get("numeric_series_heads",{})):
+    args.output.unlink(missing_ok=True)
+    raise RuntimeError("G4_SOURCE_STALE: approval changed during media export")
 print(json.dumps({"state":"APPROVED_LOCAL","g4Head":head["manifest_sha256"],
                   "assetCount":len(records),"geometryCount":len(geometries)}))

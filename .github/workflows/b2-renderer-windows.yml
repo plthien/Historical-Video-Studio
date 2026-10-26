@@ -25,6 +25,7 @@ jobs:
           git diff --check origin/main...HEAD
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Install exact Remotion lock on Windows
+        id: renderer_deps
         shell: pwsh
         run: |
           Push-Location renderer
@@ -52,19 +53,43 @@ jobs:
             if (-not $installed) { throw "FFmpeg and ffprobe unavailable on Windows runner" }
           }
       - name: Produce genuine B1 compiler A/B/C synthetic inputs
+        id: b1_fixture
         shell: pwsh
         run: |
           powershell -NoProfile -ExecutionPolicy Bypass -File scripts/windows/verify-environment.ps1
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           & .venv/Scripts/python.exe -m renderer.scripts.export_b1_fixture
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: PR10 authoritative numeric/G3 choice and reviewed mask owner tests
+        id: source_auth
+        shell: pwsh
+        run: |
+          & .venv/Scripts/python.exe -m pytest -q tests/backend/test_numeric_series.py tests/assets/test_choice_sets.py tests/assets/test_mask_derivative.py
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: B2 targeted visual-functional real-frame repair gates
+        id: host_fixture
         shell: pwsh
         run: |
           & .venv/Scripts/python.exe -m renderer.scripts.prepare_host_fixture
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           npm --prefix renderer run test:repair
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: PR10 complete G1 numeric, G3 T02, G4 A/B real Chromium source-authority proof
+        id: pr10_real
+        shell: pwsh
+        run: |
+          & .venv/Scripts/python.exe -m renderer.scripts.prepare_pr10_fixture --case numeric
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          & .venv/Scripts/python.exe -m renderer.scripts.prepare_pr10_fixture --case mask
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          npm --prefix renderer run test:pr10
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          $ledger = "renderer/.artifacts/pr10-evidence/g03-g05-g06-real-chromium.json"
+          if (-not (Test-Path $ledger)) { throw "Missing real Chromium PR10 authority ledger" }
+          $proof = Get-Content $ledger -Raw | ConvertFrom-Json
+          if (@($proof.g03.frames).Count -lt 3 -or -not $proof.g05.derivativeReview -or -not $proof.g06.pixelsChanged) {
+            throw "PR10 incomplete real source-authorized frame proof"
+          }
       - name: Verify shared composition with real pixel hashes
         shell: pwsh
         run: |
@@ -95,6 +120,150 @@ jobs:
             & .venv/Scripts/python.exe -m backend.tools.smoke --case $case --mode local
             if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           }
+
+      # Owners remain independent: a failed Player must not suppress the later
+      # renderer/SQLite/long-project evidence. 'outcome', not 'conclusion',
+      # is checked by the final aggregate nonzero gate.
+      - name: B2 motion phase Chromium frames
+        id: motion
+        if: ${{ always() && steps.b1_fixture.outcome == 'success' }}
+        continue-on-error: true
+        shell: pwsh
+        run: |
+          npm --prefix renderer run test:frames -- --case motion-phases
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: B2 multi-layer H264 Chromium render
+        id: multilayer
+        if: ${{ always() && steps.b1_fixture.outcome == 'success' }}
+        continue-on-error: true
+        shell: pwsh
+        run: |
+          npm --prefix renderer run render:smoke -- --case multi-layer-visual
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: B2 G4 real SQLite editor API smoke
+        id: sqlite
+        if: ${{ always() && steps.host_fixture.outcome == 'success' }}
+        continue-on-error: true
+        shell: pwsh
+        run: |
+          & .venv/Scripts/python.exe -m backend.tools.smoke --case scene-edit --mode local
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: B2 frontend pinned dependencies and Chromium
+        id: browser_setup
+        if: ${{ always() && steps.b1_fixture.outcome == 'success' }}
+        continue-on-error: true
+        shell: pwsh
+        run: |
+          npm --prefix frontend ci --no-audit --no-fund
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          Push-Location frontend
+          try {
+            npx playwright install chromium
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          } finally { Pop-Location }
+          npm --prefix frontend run typecheck
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          npm --prefix frontend run build
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: B2 real browser Storyboard and Player frames
+        id: editor
+        if: ${{ always() && steps.host_fixture.outcome == 'success' && steps.browser_setup.outcome == 'success' }}
+        continue-on-error: true
+        shell: pwsh
+        run: |
+          $env:HVS_B2_FIXTURE = '1'
+          npm --prefix frontend run test:e2e -- --grep "storyboard-editor uses"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: PR10 real G3-approved Browser A/B selection and critical Chromium text
+        id: pr10_browser
+        if: ${{ always() && steps.pr10_real.outcome == 'success' && steps.browser_setup.outcome == 'success' }}
+        continue-on-error: true
+        shell: pwsh
+        run: |
+          $env:HVS_B2_FIXTURE = '1'
+          $env:HVS_PR10_FIXTURE = 'mask'
+          npm --prefix frontend run test:e2e -- tests/e2e/pr10-source.spec.ts
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: PR10 independently G1/G3-reviewed T06 multiline Chromium clipping
+        id: pr10_typography
+        if: ${{ always() && steps.browser_setup.outcome == 'success' }}
+        continue-on-error: true
+        shell: pwsh
+        run: |
+          & .venv/Scripts/python.exe -m renderer.scripts.prepare_pr10_fixture --case typography
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          $env:HVS_B2_FIXTURE = '1'
+          $env:HVS_PR10_FIXTURE = 'typography'
+          npm --prefix frontend run test:e2e -- tests/e2e/pr10-typography.spec.ts
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: B2 real Browser Node paired frame parity
+        id: parity
+        if: ${{ always() && steps.host_fixture.outcome == 'success' && steps.browser_setup.outcome == 'success' }}
+        continue-on-error: true
+        shell: pwsh
+        run: |
+          npm --prefix renderer run test:frames -- --case player-renderer-parity
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: B2 prepare 61 scene SQLite native fixture
+        id: fixture61
+        if: ${{ always() && steps.b1_fixture.outcome == 'success' }}
+        continue-on-error: true
+        shell: pwsh
+        run: |
+          & .venv/Scripts/python.exe -m renderer.scripts.prepare_host_fixture --scene-count 61
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: B2 61 scene UI real Player performance
+        id: longui
+        if: ${{ always() && steps.fixture61.outcome == 'success' && steps.browser_setup.outcome == 'success' }}
+        continue-on-error: true
+        shell: pwsh
+        run: |
+          $env:HVS_B2_FIXTURE = '1'
+          $env:HVS_B2_LONGFORM = '1'
+          npm --prefix frontend run test:e2e -- --grep "longform-storyboard"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: B2 61 scene registered Composition stills and H264 excerpt
+        id: longrender
+        if: ${{ always() && steps.b1_fixture.outcome == 'success' }}
+        continue-on-error: true
+        shell: pwsh
+        run: |
+          npm --prefix renderer run render:smoke -- --case 60-scene-longform
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: B2 mandatory owner aggregate verdict
+        if: always()
+        shell: pwsh
+        env:
+          B2_PR10_REAL: ${{ steps.pr10_real.outcome }}
+          B2_PR10_BROWSER: ${{ steps.pr10_browser.outcome }}
+          B2_PR10_TYPOGRAPHY: ${{ steps.pr10_typography.outcome }}
+          B2_SOURCE_AUTH: ${{ steps.source_auth.outcome }}
+          B2_MOTION: ${{ steps.motion.outcome }}
+          B2_MULTILAYER: ${{ steps.multilayer.outcome }}
+          B2_SQLITE: ${{ steps.sqlite.outcome }}
+          B2_SETUP: ${{ steps.browser_setup.outcome }}
+          B2_EDITOR: ${{ steps.editor.outcome }}
+          B2_PARITY: ${{ steps.parity.outcome }}
+          B2_FIXTURE61: ${{ steps.fixture61.outcome }}
+          B2_LONGUI: ${{ steps.longui.outcome }}
+          B2_LONGRENDER: ${{ steps.longrender.outcome }}
+        run: |
+          $results = @{
+            pr10_real=$env:B2_PR10_REAL; pr10_browser=$env:B2_PR10_BROWSER; pr10_typography=$env:B2_PR10_TYPOGRAPHY; source_auth=$env:B2_SOURCE_AUTH; motion=$env:B2_MOTION; multilayer=$env:B2_MULTILAYER; sqlite=$env:B2_SQLITE;
+            browser_setup=$env:B2_SETUP; editor=$env:B2_EDITOR; parity=$env:B2_PARITY;
+            fixture61=$env:B2_FIXTURE61; longui=$env:B2_LONGUI; longrender=$env:B2_LONGRENDER
+          }
+          $results | ConvertTo-Json | Out-File -FilePath "b2-owners.json" -Encoding utf8
+          foreach ($entry in $results.GetEnumerator()) {
+            Write-Host "$($entry.Key): $($entry.Value)"
+          }
+          # Independently parse real artifacts, not only the motion process exit.
+          # Re-run the *same* production verifier with mutation negatives.
+          & .venv/Scripts/python.exe renderer/scripts/verify_motion_ledgers.py --self-test
+          if ($LASTEXITCODE -ne 0) { throw "B2 cross-ledger/PNG/ROI or mutation integrity failed" }
+          if (@($results.Values | Where-Object { $_ -ne 'success' }).Count -gt 0) {
+            throw "B2 required owner failure or skipped dependency (see b2-owners.json)"
+          }
       - name: Upload exact-render screenshot MP4 and ffprobe evidence
         if: always()
         uses: actions/upload-artifact@v4
@@ -102,5 +271,13 @@ jobs:
           name: b2-real-render-native-windows
           path: |
             renderer/.artifacts/renders/
+            renderer/.artifacts/pr10-evidence/
             renderer/.artifacts/compiled-30.json
+            renderer/.artifacts/slot-max-lines-evidence.json
+            frontend/.artifacts/parity/
+            frontend/.artifacts/longform/
+            frontend/.artifacts/typography/
+            frontend/.artifacts/pr10/
+            frontend/test-results/
+            b2-owners.json
           if-no-files-found: warn

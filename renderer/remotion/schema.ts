@@ -8,20 +8,33 @@ export type MediaKind = 'SYNTHETIC'|'APPROVED_LOCAL';
 export type MediaItem={assetId:string; originalSha256:string; mime:'image/png'|'image/jpeg'|'image/webp'; dataUri:string; sourceKind:MediaKind; approvalRecordId:string};
 export type Geometry = {geometryRef:string; coordinates:[number,number][]; coordinateSpace:'WGS84'|'ANNOTATION_CANVAS'; sourceOriginalSha256:string; historicalMapId:string|null; reviewedYear:number|null; bbox:[number,number,number,number]|null};
 export type ReviewedMap={historicalMapId:string;projection:string;viewport:[number,number,number,number];reviewedYear:number;sourceOriginalSha256:string;coordinateKind:'geo_wgs84'|'raster_uv'};
-export type ResolvedMedia={assets:Record<string,MediaItem>; geometries:Record<string,Geometry>; maps:Record<string,ReviewedMap>; fontFamily:string; fontSha256:string; fontDataUri:string; sourceKind:MediaKind; authorizingG4ManifestSha256:string};
-export type Layer={layer_id:string; layer_kind:string; asset_id:string|null; text:string|null; source_claim_id:string|null; z_index:number;depth_order:number;rect_px:Rect; crop_normalized:Rect;object_fit:'contain'|'cover'|'fill';mask:{kind:string;asset_id:string|null;feather_px:number};map_binding:{historical_map_id:string;feature_id:string|null;coordinate_kind:string;anchor_latlon:[number,number]|null}|null; parent_layer_id:string|null;group_id:string; text_layout:{font_size_px:number;line_height:number;max_lines:number;horizontal_align:string;vertical_align:string}|null; template_slot_id:string;source_asset_slot_id:string|null; path_geometry_ref:string|null; treatment:{kind:string;source_preserving:boolean;evidence_badge:string}};
+export type MaskDerivative={derivativeAssetId:string;derivativeSha256:string;parentCandidateId:string;parentOriginalSha256:string;reviewId:string;width:number;height:number;sourceCrop:{x:number;y:number;w:number;h:number}};
+export type ApprovedNumericSeries={seriesId:string;claimId:string;storySha256:string;g1ApprovalId:string;approvalId:string;seriesSha256:string;durationFrames:number;precision:number;unit:string;startValue:string;endValue:string;observations:{frameOffset:number;value:string;evidenceSha256:string}[]};
+export type ResolvedMedia={maskDerivatives?:Record<string,MaskDerivative>;approvedNumericSeries?:Record<string,ApprovedNumericSeries>;assets:Record<string,MediaItem>; geometries:Record<string,Geometry>; maps:Record<string,ReviewedMap>; fontFamily:string; fontSha256:string; fontDataUri:string; sourceKind:MediaKind; syntheticNumericSeries?:Record<string,{fixtureId:string;values:number[]}>; authorizingG4ManifestSha256:string};
+export type Layer={word_spans?:{word_id:string;word_text:string;start:number;end:number}[];layer_id:string; layer_kind:string; asset_id:string|null; text:string|null; source_claim_id:string|null; z_index:number;depth_order:number;rect_px:Rect; crop_normalized:Rect;object_fit:'contain'|'cover'|'fill';mask:{kind:string;asset_id:string|null;feather_px:number};style:{font_token:string|null;color_token:string|null;stroke_token:string|null;max_lines:number};map_binding:{historical_map_id:string;feature_id:string|null;coordinate_kind:string;anchor_latlon:[number,number]|null}|null; parent_layer_id:string|null;group_id:string; text_layout:{font_size_px:number;line_height:number;max_lines:number;horizontal_align:string;vertical_align:string}|null; template_slot_id:string;source_asset_slot_id:string|null; path_geometry_ref:string|null; treatment:{kind:string;source_preserving:boolean;evidence_badge:string}};
 export type Key={frame:number;value:number;easing:string};
 export type Motion={event_id:string; layer_id:string; preset_id:string;start_frame:number; duration_frames:number;params:Record<string,unknown>;keyframes:Key[];motion_space:string;affected_layer_ids:string[];animated_property:string;stagger:{order:string[];offset_frames:number}|null};
 export type Beat={local_start_frame:number;local_end_frame:number;focus_layer_id:string;activated_layer_ids:string[];hidden_layer_ids:string[]};
 export type CameraKey={at_frame:number;x_px:number;y_px:number;scale:number;rotation_deg:number;opacity:number;easing:string};
 export type Scene={scene_id:string;setup_id:string;template_id:string;variant_id:string;start_frame:number;duration_frames:number;asset_ids:string[];layers:Layer[];events:Motion[];camera:{keyframes:CameraKey[];transform_order:string;focus_path:unknown[]};staging:{beat_sequence:Beat[];composition_graph:{edges:unknown[]};};transition_out:{type:string;duration_frames:number}};
-export type Timeline={schema_version:'CompiledTimeline.v1';project_id:string;fps:30;width:1920;height:1080;total_frames:number;dependency_fingerprint:string;audio_sha256:string;word_map_sha256:string;asset_snapshot_sha256:string;scenes:Scene[]};
+export type Timeline={schema_version:'CompiledTimeline.v1';project_id:string;story_sha256:string;fps:30;width:1920;height:1080;total_frames:number;dependency_fingerprint:string;audio_sha256:string;word_map_sha256:string;asset_snapshot_sha256:string;scenes:Scene[]};
 const ajv=new Ajv2020({allErrors:true,strict:false});
 const validate=ajv.compile(timelineSchema);
 const validLayouts=new Set(layouts.layouts.map(l=>l.template_id+':'+l.variant_id));
 const motionById=new Map(motions.presets.map(m=>[m.preset_id,m]));
+const paramValidators=new Map(motions.presets.map(m=>[m.preset_id,ajv.compile(m.parameter_schema)]));
+const implementedPrimitives=new Set([
+ 'layer_scale','layer_stagger','svg_path_length','mask_progress','verified_text_reveal',
+ 'number_interpolate','word_transform','layer_depth_separation','two_scene_mask_wipe',
+ 'camera_focus_tracking','camera_focus_push','static_hold','short_transition_pan',
+ 'dual_opacity_mix','frame_cut','word_mask_highlight','verified_geometry_mask',
+ 'paper_card_transform','editorial_bezier_or_line_draw',
+]);
+
 export class RenderBlocked extends Error{constructor(readonly code:string, readonly subject:string, detail:string){super(code+' at '+subject+': '+detail);this.name='RenderBlocked';}}
 export const fail=(code:string,at:string,message:string):never=>{throw new RenderBlocked(code,at,message)};
+if(motionById.size!==19||motions.presets.some(m=>!implementedPrimitives.has(m.render_recipe.primitive)))
+ fail('RENDER_MOTION_PRIMITIVE_UNSUPPORTED','registry','All 19 pinned v1.2.0 recipes must be implemented');
 export function assertTimeline(input:unknown):asserts input is Timeline {
  if(!validate(input))fail('RENDER_SCHEMA_INVALID','timeline',ajv.errorsText(validate.errors,{separator:'; '}));
  const t=input as Timeline;
@@ -34,10 +47,41 @@ export function assertTimeline(input:unknown):asserts input is Timeline {
   const ids=new Set(s.layers.map(l=>l.layer_id));
   if(ids.size!==s.layers.length)fail('RENDER_LAYER_DUPLICATE',s.setup_id,'Layer identities must be unique');
   for(const l of s.layers){
+   if(l.word_spans){
+    if(l.text===null)fail('RENDER_WORD_SPAN_UNTRUSTED',l.layer_id,'Only source text can bind spoken words');
+    let previous=0;
+    const ids=new Set<string>();
+    const norm=(text:string)=>text.toLocaleLowerCase('en').replace(/[^\p{L}\p{N}_]+/gu,'');
+    for(const span of l.word_spans){
+     if(ids.has(span.word_id)||!Number.isInteger(span.start)||!Number.isInteger(span.end)||
+        span.start<previous||span.end<=span.start||span.end>l.text!.length||
+        !norm(span.word_text)||norm(l.text!.slice(span.start,span.end))!==norm(span.word_text))
+      fail('RENDER_WORD_SPAN_UNTRUSTED',l.layer_id,'Word offsets must map exact G2 token text to frozen G1 glyphs');
+     ids.add(span.word_id);previous=span.end;
+    }
+   }
    const r=l.rect_px,c=l.crop_normalized;
    if(r.w<=0||r.h<=0||r.x<0||r.y<0||r.x+r.w>1920||r.y+r.h>1080)fail('RENDER_RECT_INVALID',l.layer_id,'Compiled rect exceeds canvas');
+   // Even a single authored line must physically fit inside the immutable
+   // presentation rect. Chromium glyph bounding tests verify the tighter
+   // multi-line/width constraint; this preflight blocks impossible layouts
+   // before a draft can be presented as renderable.
+   if(l.text!==null&&l.text_layout&&
+      l.text_layout.font_size_px*l.text_layout.line_height>r.h+0.01)
+    fail('TYPOGRAPHY_OVERFLOW',l.layer_id,
+      'A full source-text line exceeds its authored layer height');
+   if(l.text!==null&&l.text_layout&&l.text_layout.max_lines>l.style.max_lines)
+    fail('TYPOGRAPHY_OVERFLOW',l.layer_id,
+      'Compiled text line ceiling exceeds its registered presentation slot');
    if(c.x<0||c.y<0||c.w<=0||c.h<=0||c.x+c.w>1.0000001||c.y+c.h>1.0000001)fail('RENDER_CROP_INVALID',l.layer_id,'UV outside original');
-   if(l.mask.kind!=='none')fail('RENDER_MASK_UNSUPPORTED',l.layer_id,'Requires separately verified G3 derivative mask');
+   if(!['none','rectangle','ellipse','polygon_asset'].includes(l.mask.kind)||
+      (l.mask.kind==='none'&&l.mask.feather_px!==0)||
+      (l.mask.kind==='polygon_asset'?!l.mask.asset_id:
+       l.mask.asset_id!==null))
+    fail('RENDER_MASK_UNTRUSTED',l.layer_id,'Native shapes never carry assets; polygon requires reviewed derivative.');
+   if(l.mask.kind==='polygon_asset'&&!s.asset_ids.includes(l.mask.asset_id!))
+    fail('RENDER_MASK_UNTRUSTED',l.layer_id,'Reviewed derivative must be pinned in scene asset manifest');
+   if(l.mask.feather_px>40)fail('RENDER_MASK_FEATHER',l.layer_id,'Limit native feather to 40 pixels');
    if(l.parent_layer_id&&!ids.has(l.parent_layer_id))fail('RENDER_PARENT_UNKNOWN',l.layer_id,'Unknown hierarchy parent');
    if(l.asset_id&&!s.asset_ids.includes(l.asset_id))fail('RENDER_ASSET_UNLISTED',l.layer_id,'Asset absent from frozen scene manifest');
   }
@@ -47,14 +91,113 @@ export function assertTimeline(input:unknown):asserts input is Timeline {
    if(!ids.has(e.layer_id)||e.affected_layer_ids.some(id=>!ids.has(id)))fail('RENDER_MOTION_TARGET',e.event_id,'Unresolved layer reference');
    if(e.start_frame<0||e.start_frame+e.duration_frames>s.duration_frames)fail('RENDER_MOTION_BOUNDS',e.event_id,'Event outside scene');
    if(e.motion_space!==spec!.render_recipe.transform_space)fail('RENDER_MOTION_SPACE',e.event_id,'Compiled motion-space mismatches registered preset');
+   if(!implementedPrimitives.has(spec!.render_recipe.primitive))
+    fail('RENDER_MOTION_PRIMITIVE_UNSUPPORTED',e.event_id,'Compiled recipe has no compositor');
+   const validateParams=paramValidators.get(e.preset_id)!;
+   if(!validateParams(e.params))fail('RENDER_MOTION_PARAMS',e.event_id,
+    ajv.errorsText(validateParams.errors,{separator:'; '}));
+   if(e.duration_frames<spec!.min_duration_frames||e.duration_frames>spec!.max_duration_frames)
+    fail('RENDER_MOTION_DURATION',e.event_id,'Duration differs from registered bounds');
+   if(e.keyframes.length<2||e.keyframes[0]?.frame!==0||
+     e.keyframes[e.keyframes.length-1]?.frame!==e.duration_frames||
+     e.keyframes.some((k,i)=>!Number.isFinite(k.value)||
+      i>0&&k.frame<=e.keyframes[i-1]!.frame))
+    fail('RENDER_MOTION_KEYFRAMES',e.event_id,'Invalid compiled local frame keys');
   }
  }
  if(end!==t.total_frames)fail('RENDER_FRAME_COVERAGE',t.project_id,'Total frame ceiling does not equal scene sum');
 }
+/** Validate before rendering *any* frame, including offstage synthetic text.
+ *  A synthetic value series is never a G1-approved historical observation. */
+export function verifiedSyntheticCount(e:Motion, layer:Layer, media:ResolvedMedia):number[]{
+ const claim=e.params.source_claim_id,ending=Number(e.params.end_value);
+ if(claim!==layer.source_claim_id||!layer.text||
+    Number(layer.text.replace(/,/g,''))!==ending||
+    e.params.intermediate_truthful!==true)
+  fail('RENDER_COUNT_FACT_UNVERIFIED',e.event_id,'Frozen factual endpoint/claim mismatch');
+ const series=media.sourceKind==='SYNTHETIC'?
+    media.syntheticNumericSeries?.[String(claim)]:undefined;
+ if(!series)return fail('RENDER_NUMBER_SERIES_UNVERIFIED',e.event_id,
+   'Only a synthetic sequence can prove mechanics without G1 reviewed intermediates');
+ const values=series.values;
+ if(typeof series.fixtureId!=='string'||!series.fixtureId.startsWith('synthetic_')||
+    !Array.isArray(values)||values.length<2||values.some(v=>!Number.isFinite(v))||
+    values[0]!==Number(e.params.start_value)||values[values.length-1]!==ending)
+  fail('RENDER_NUMBER_SERIES_UNVERIFIED',e.event_id,
+   'Unverified synthetic numeric endpoints or test-only provenance');
+ const precision=Number(e.params.precision),direction=Math.sign(ending-values[0]);
+ if(!Number.isInteger(precision)||precision<0||precision>3||
+    values.some((v,i)=>Number(v.toFixed(precision))!==v||
+      (i>0&&direction*(v-values[i-1])<0)))
+  fail('RENDER_NUMBER_SERIES_INVALID',e.event_id,
+   'Nonmonotonic or unsupported-precision synthetic observations');
+ return values;
+}
+/** Production numeric strings are never interpolated. Every displayed number is an operator-reviewed observation. */
+export function verifiedApprovedCount(e:Motion,layer:Layer,media:ResolvedMedia):ApprovedNumericSeries{
+ if(media.sourceKind!=='APPROVED_LOCAL'||typeof e.params.approved_numeric_series_id!=='string')
+  return fail('RENDER_NUMBER_SERIES_UNVERIFIED',e.event_id,'Current host-issued G1 numeric-series identity required');
+ const series=media.approvedNumericSeries?.[e.params.approved_numeric_series_id];
+ if(!series||series.seriesId!==e.params.approved_numeric_series_id||
+    !series.approvalId.startsWith('numeric_')||
+    !/^[a-f0-9]{64}$/.test(series.seriesSha256)||
+    !/^[a-f0-9]{64}$/.test(series.storySha256)||
+    !series.g1ApprovalId||series.claimId!==layer.source_claim_id||
+    e.params.source_claim_id!==layer.source_claim_id||
+    series.durationFrames!==e.duration_frames||series.precision!==e.params.precision||
+    series.startValue!==e.params.approved_numeric_start_text||
+    series.endValue!==e.params.approved_numeric_end_text||
+    Number(series.startValue)!==Number(e.params.start_value)||
+    Number(series.endValue)!==Number(e.params.end_value)||
+    layer.text===null||Number(layer.text.replace(/,/g,''))!==Number(series.endValue)||
+    e.params.intermediate_truthful!==true)
+  return fail('RENDER_NUMBER_SERIES_UNVERIFIED',e.event_id,'Current reviewed series does not match frozen claim, motion or G1 source');
+ const rows=series.observations;
+ if(!Array.isArray(rows)||rows.length<3||rows[0]?.frameOffset!==0||
+    rows[rows.length-1]?.frameOffset!==e.duration_frames||
+    rows[0]?.value!==series.startValue||rows[rows.length-1]?.value!==series.endValue)
+  return fail('RENDER_NUMBER_SERIES_INVALID',e.event_id,'Missing reviewed intermediate or authored endpoints');
+ const decimal=/^(?:0|[1-9][0-9]*)(?:\.[0-9]+)?$|^-(?:[1-9][0-9]*)(?:\.[0-9]+)?$/;
+ if(!Number.isInteger(series.precision)||series.precision<0||series.precision>3||
+    rows.some((row,i)=>!Number.isInteger(row.frameOffset)||row.frameOffset<0||
+      (i>0&&row.frameOffset<=rows[i-1]!.frameOffset)||
+      !decimal.test(row.value)||row.value.split('.')[1]?.length>series.precision||
+      !Number.isFinite(Number(row.value))||Math.abs(Number(row.value))>1e9||
+      !/^[a-f0-9]{64}$/.test(row.evidenceSha256)))
+  return fail('RENDER_NUMBER_SERIES_INVALID',e.event_id,'Unreviewed frame, precision or evidence');
+ const step=Math.sign(Number(series.endValue)-Number(series.startValue));
+ if(rows.some((row,i)=>i>0&&step*(Number(row.value)-Number(rows[i-1]!.value))<0))
+  return fail('RENDER_NUMBER_SERIES_INVALID',e.event_id,'Reviewed series must be monotone');
+ return series;
+}
 export function assertMedia(t:Timeline,m:ResolvedMedia){
+ // Check source/number provenance independent of whether the motion layer
+ // happens to be visible at the sampled frame.
+ for(const scene of t.scenes)for(const event of scene.events){
+  if(event.preset_id!=='number-count')continue;
+  const layer=scene.layers.find(item=>item.layer_id===event.layer_id);
+  if(!layer)return fail('RENDER_COUNT_TARGET_UNRESOLVED',event.event_id,'Numeric display layer missing');
+  if(m.sourceKind==="APPROVED_LOCAL")verifiedApprovedCount(event,layer,m);
+  else verifiedSyntheticCount(event,layer,m);
+ }
  if(!m|| !/^[a-f0-9]{64}$/.test(m.authorizingG4ManifestSha256))fail('RENDER_DRAFT_UNTRUSTED',t.project_id,'Node must attach verified G4 draft manifest');
  if(!/^[a-f0-9]{64}$/.test(m.fontSha256)||!m.fontDataUri.startsWith('data:font/'))fail('RENDER_FONT_UNTRUSTED',t.project_id,'Pinned local font required');
  for(const s of t.scenes)for(const l of s.layers){
+  if(l.mask.kind==='polygon_asset'){
+   const id=l.mask.asset_id ?? fail('RENDER_MASK_DERIVATIVE_UNAPPROVED',l.layer_id,'No G3 derivative ID');
+   const meta=m.maskDerivatives?.[id], raster=m.assets[id], parent=l.asset_id&&m.assets[l.asset_id];
+   if(!meta||!raster||!parent||meta.derivativeAssetId!==id||
+      meta.derivativeSha256!==raster.originalSha256||meta.parentCandidateId!==l.asset_id||
+      meta.parentOriginalSha256!==parent.originalSha256||!meta.reviewId.startsWith('mask_review_')||
+      raster.mime!=='image/png'||meta.width<4||meta.height<4||meta.width>4096||meta.height>4096||
+      Object.keys(meta.sourceCrop).length!==4||
+      meta.sourceCrop.x!==0||meta.sourceCrop.y!==0||meta.sourceCrop.w!==1||meta.sourceCrop.h!==1||
+      l.layer_kind!=='portrait'&&l.layer_kind!=='archival_photo')
+    fail('RENDER_MASK_DERIVATIVE_UNAPPROVED',l.layer_id,
+         'G3-reviewed alpha derivative, exact parent, dimensions and full source transform required');
+   if(l.crop_normalized.x!==0||l.crop_normalized.y!==0||l.crop_normalized.w!==1||l.crop_normalized.h!==1)
+    fail('RENDER_MASK_CROP_UNSUPPORTED',l.layer_id,'Re-review a mask for non-full source crops');
+  }
   if(l.asset_id){let a=m.assets[l.asset_id];if(!a||a.assetId!==l.asset_id||!a.originalSha256||!a.approvalRecordId||!a.dataUri.startsWith('data:image/'))fail('RENDER_MEDIA_UNTRUSTED',l.layer_id,'Asset bytes/rights need local verified resolver');}
   if(l.map_binding){
    const map=m.maps[l.map_binding.historical_map_id];

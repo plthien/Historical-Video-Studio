@@ -1732,6 +1732,17 @@
                         "string",
                         "null"
                       ]
+                    },
+                    "crop_normalized": {
+                      "type": ["object", "null"],
+                      "additionalProperties": false,
+                      "required": ["x", "y", "w", "h"],
+                      "properties": {
+                        "x": {"type": "number", "minimum": 0, "exclusiveMaximum": 1},
+                        "y": {"type": "number", "minimum": 0, "exclusiveMaximum": 1},
+                        "w": {"type": "number", "exclusiveMinimum": 0, "maximum": 1},
+                        "h": {"type": "number", "exclusiveMinimum": 0, "maximum": 1}
+                      }
                     }
                   }
                 }

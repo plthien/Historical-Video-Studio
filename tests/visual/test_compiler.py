@@ -464,6 +464,72 @@ def test_layers_registered_variants_and_g3_source_binding():
         build_layers(first,bad,classes,font_measure=measure)
 
 
+def test_text_layout_preserves_hard_lines_and_renderer_content_box():
+    from backend.app.director.layers import _text_layout
+
+    # Deterministic glyph metrics make the exact hard+soft wrapping boundary
+    # visible without substituting character-count fitting in production.
+    measure=lambda text,size:(len(text)*size//2,size)
+    source={"text_id":"text_multiline","text":"ALPHA BETA\nGAMMA DELTA","max_lines":2}
+    original=copy.deepcopy(source)
+    layout=_text_layout(source,{"w":240,"h":120},measure,slot_max_lines=2,padding_px=6)
+    assert layout["font_size_px"]==40
+    assert layout["max_lines"]==2
+    assert source==original
+
+    # The compiled ceiling is the strictest of the immutable G1 source and
+    # the registered presentation slot. Neither input may be rewritten.
+    for source_max,slot_max,expected in ((3,1,1),(1,3,1),(3,3,3)):
+        candidate={"text_id":f"ceiling_{source_max}_{slot_max}",
+                   "text":"VISIBLE","max_lines":source_max}
+        frozen=copy.deepcopy(candidate)
+        fitted=_text_layout(candidate,{"w":500,"h":200},measure,
+                            slot_max_lines=slot_max,padding_px=6)
+        assert fitted["max_lines"]==expected
+        assert fitted["font_size_px"] in (64,56,48,40,32,28,24,20)
+        assert candidate==frozen
+
+    regular=_text_layout({"text_id":"regular","text":"ALPHA BETA","max_lines":2},
+                         {"w":220,"h":100},measure,slot_max_lines=2,padding_px=6)
+    headline=_text_layout({"text_id":"headline","text":"ALPHA BETA","max_lines":2},
+                          {"w":220,"h":100},measure,slot_max_lines=2,padding_px=10)
+    assert headline["font_size_px"]<=regular["font_size_px"]
+
+    with pytest.raises(ContractViolation,match="TYPOGRAPHY_OVERFLOW"):
+        _text_layout({"text_id":"invalid_slot","text":"VISIBLE","max_lines":2},
+                     {"w":500,"h":200},measure,slot_max_lines=0,padding_px=6)
+
+    supported=(64,56,48,40,32,28,24,20)
+    for expected_size in supported:
+        fitted=_text_layout({"text_id":f"size_{expected_size}","text":"WW","max_lines":1},
+                            {"w":expected_size+12,"h":100},measure,
+                            slot_max_lines=1,padding_px=6)
+        assert fitted["font_size_px"]==expected_size
+
+    impossible=[
+        ({"text_id":"three_hard","text":"A\nB\nC","max_lines":3},{"w":500,"h":200},1),
+        ({"text_id":"hard_soft","text":"ALPHA BETA\nGAMMA DELTA","max_lines":2},{"w":100,"h":200},2),
+        ({"text_id":"blank_line","text":"A\n\nB","max_lines":2},{"w":500,"h":200},2),
+        ({"text_id":"unbreakable","text":"W"*30,"max_lines":3},{"w":200,"h":200},2),
+        ({"text_id":"height","text":"VISIBLE","max_lines":1},{"w":500,"h":30},2),
+        ({"text_id":"padding","text":"VISIBLE","max_lines":1},{"w":10,"h":100},2),
+    ]
+    for candidate,rect,slot_max in impossible:
+        frozen=copy.deepcopy(candidate)
+        with pytest.raises(ContractViolation,match="TYPOGRAPHY_OVERFLOW"):
+            _text_layout(candidate,rect,measure,slot_max_lines=slot_max,padding_px=6)
+        assert candidate==frozen
+
+
+def test_windows_font_measure_rejects_wrong_pinned_hash():
+    import os
+    from backend.app.director.layout import windows_font_measure
+
+    font=Path(os.environ["WINDIR"])/"Fonts"/"arial.ttf"
+    with pytest.raises(ContractViolation,match="FONT_IDENTITY_STALE"):
+        windows_font_measure(str(font),"0"*64)
+
+
 def test_motion_nineteen_distinct_registered_grammars_and_blockers():
     from backend.app.director.motion import presets,compile_event
     entries=presets()
@@ -1257,3 +1323,125 @@ def test_b1_g4_real_sqlite_positive_invalid_staging_selective_revision_and_stale
     assert canonical(refreshed["timeline"])==canonical(recompiled)
     assert store.revision(pid)==refreshed["revision"]
     assert all(x["state"]!="APPROVED" for x in gates.board(pid)[3:])
+
+
+def test_g4_authorized_focus_move_changes_bounded_camera_without_rebinding_source():
+    from backend.app.director.camera import build_camera
+    layers=[
+        {"layer_id":"layer_a","rect_px":{"x":100,"y":100,"w":400,"h":400}},
+        {"layer_id":"layer_b","rect_px":{"x":1200,"y":500,"w":400,"h":300}},
+    ]
+    refs={"subject_a":"layer_a","subject_b":"layer_b"}
+    plan={"setup_id":"setup_focus","editorial_direction":{"camera_intent":"static"}}
+    limits={"min_scale":0.9,"max_scale":1.2,"max_translation_px":180}
+    static=build_camera(plan,layers,[
+        {"beat_id":"beat_a","focus_ref":"subject_a","start_frame":0,"focus_move":"static"},
+        {"beat_id":"beat_b","focus_ref":"subject_b","start_frame":30,"focus_move":"static"},
+    ],refs,duration_frames=60,limits=limits)
+    pushed=build_camera(plan,layers,[
+        {"beat_id":"beat_a","focus_ref":"subject_a","start_frame":0,"focus_move":"static"},
+        {"beat_id":"beat_b","focus_ref":"subject_b","start_frame":30,
+         "focus_move":"overview_to_detail"},
+    ],refs,duration_frames=60,limits=limits)
+    assert static["mode"]=="static" and pushed["mode"]=="push_in"
+    assert static["focus_path"]==pushed["focus_path"]
+    assert static["keyframes"][-1]["scale"]==1
+    assert 1 < pushed["keyframes"][-1]["scale"] <= limits["max_scale"]
+    assert abs(pushed["keyframes"][-1]["x_px"]) <= limits["max_translation_px"]
+    assert abs(pushed["keyframes"][-1]["y_px"]) <= limits["max_translation_px"]
+
+
+def test_g4_direction_revision_itemizes_the_complete_current_source_delta():
+    from backend.app.api.storyboard import mark
+
+    source = {"layout_variant_hint": "A", "visual_beats": [{"focus_move": "static"}]}
+    plan = {"setup_id": "setup_001", "editorial_direction": {
+        "layout_variant_hint": "B", "visual_beats": [{"focus_move": "detail_to_overview"}]}}
+    mark(plan, "a" * 64, "Change authored focus", source)
+    assert plan["direction_revision"]["edited_paths"] == ["layout_variant_hint", "visual_beats"]
+    plan["editorial_direction"]["layout_variant_hint"] = "A"
+    mark(plan, "a" * 64, "Restore layout variant", source)
+    assert plan["direction_revision"]["edited_paths"] == ["visual_beats"]
+
+
+def test_b2_camera_event_params_compile_into_real_causal_track():
+    from backend.app.director.camera import compose_camera_events
+    from backend.app.contracts import ContractViolation
+    import pytest
+
+    k = lambda frame: {"at_frame": frame, "x_px": 0, "y_px": 0,
+                       "scale": 1, "rotation_deg": 0, "opacity": 1,
+                       "easing": "linear"}
+    baseline = {"mode": "static", "keyframes": [k(0), k(19)],
+                "focus_path": [{"at_frame": 0, "focus_layer_id": "layer_a",
+                                "focus_geo_feature_id": None, "framing": "subject_center"}],
+                "focus_entity_id": "layer_a", "clamp_to_content": True,
+                "transform_order": "layer_then_group_then_camera"}
+    layers = [
+        {"layer_id": "layer_a", "rect_px": {"x": 100, "y": 200, "w": 200, "h": 200}},
+        {"layer_id": "layer_b", "rect_px": {"x": 1300, "y": 200, "w": 200, "h": 200}},
+    ]
+    limits = {"min_scale": .9, "max_scale": 1.2, "max_translation_px": 300}
+    pan = {"event_id": "event_pan", "preset_id": "camera-pan", "motion_space": "screen",
+           "start_frame": 5, "duration_frames": 10,
+           "params": {"start_target_layer_id": "layer_a",
+                      "end_target_layer_id": "layer_b",
+                      "max_translate_px": 240, "keep_context_visible": True}}
+    before = compose_camera_events(baseline, [pan], layers, duration_frames=20, limits=limits)
+    bounded = compose_camera_events(baseline, [{**pan, "params": {
+        **pan["params"], "max_translate_px": 40}}], layers,
+        duration_frames=20, limits=limits)
+    assert before["keyframes"][4]["x_px"] == bounded["keyframes"][4]["x_px"] == 0
+    assert before["keyframes"][5]["x_px"] == bounded["keyframes"][5]["x_px"] == 0
+    assert before["keyframes"][10]["x_px"] < bounded["keyframes"][10]["x_px"] < 0
+    assert before["keyframes"][19]["x_px"] == -240
+    assert bounded["keyframes"][19]["x_px"] == -40
+    assert baseline["keyframes"] == [k(0), k(19)]  # no hidden source mutation
+    push = {"event_id": "event_push", "preset_id": "camera-push",
+            "motion_space": "screen", "start_frame": 5, "duration_frames": 10,
+            "params": {"focus_layer_id": "layer_b", "from_scale": 1,
+                       "to_scale": 1.1, "max_drift_px": 30}}
+    zoom = compose_camera_events(baseline, [push], layers,
+                                 duration_frames=20, limits=limits)
+    assert zoom["keyframes"][4]["scale"] == zoom["keyframes"][5]["scale"] == 1
+    assert zoom["keyframes"][10]["scale"] > 1
+    assert zoom["keyframes"][19]["scale"] == 1.1
+    with pytest.raises(ContractViolation):
+        compose_camera_events(baseline, [{**pan, "params": {
+            **pan["params"], "end_target_layer_id": "layer_forged"}}],
+            layers, duration_frames=20, limits=limits)
+    with pytest.raises(ContractViolation):
+        compose_camera_events(baseline, [{**pan, "motion_space": "layer_local"}],
+            layers, duration_frames=20, limits=limits)
+    with pytest.raises(ContractViolation):
+        compose_camera_events(baseline, [pan, {**pan, "event_id": "event_overlap",
+                                               "start_frame": 8}], layers,
+            duration_frames=20, limits=limits)
+
+
+def test_b2_word_spans_bind_only_unambiguous_frozen_g2_tokens():
+    from backend.app.director.compiler import _attach_verified_word_spans
+    from backend.app.contracts import ContractViolation
+    import pytest
+
+    event = {"event_id": "event_word", "preset_id": "kinetic-type",
+             "params": {"word_ids": ["word_000002"], "max_offset_px": 24,
+                        "line_preservation": True}}
+    word_map = {"words": [{"word_id": "word_000002", "text": "keeper"}]}
+    layer = {"layer_id": "layer_words", "text": "The keeper, returned."}
+    _attach_verified_word_spans(layer, event, word_map)
+    assert layer["word_spans"] == [
+        {"word_id": "word_000002", "word_text": "keeper",
+         "start": 4, "end": 11}]
+    with pytest.raises(ContractViolation):
+        _attach_verified_word_spans(
+            {"layer_id": "layer_repeat", "text": "keeper and keeper"},
+            event, word_map)
+    with pytest.raises(ContractViolation):
+        _attach_verified_word_spans(
+            {"layer_id": "layer_unrelated", "text": "An unrelated claim"},
+            event, word_map)
+    with pytest.raises(ContractViolation):
+        _attach_verified_word_spans(
+            {"layer_id": "layer_forged", "text": "keeper"},
+            {**event, "params": {"word_ids": ["word_forged"]}}, word_map)

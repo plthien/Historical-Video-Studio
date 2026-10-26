@@ -42,6 +42,11 @@ jobs:
       - name: Repeat bootstrap in the same isolated environment
         shell: powershell
         run: powershell -NoProfile -ExecutionPolicy Bypass -File scripts/windows/verify-environment.ps1
+      - name: PR10 G1 numeric approvals and G3 choices use real API SQLite
+        shell: pwsh
+        run: |
+          & .venv/Scripts/python.exe -m pytest -q tests/backend/test_numeric_series.py tests/assets/test_choice_sets.py tests/assets/test_mask_derivative.py
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: B1-06 G4 approved SQLite closure and staging negatives
         shell: pwsh
         run: |

@@ -74,7 +74,8 @@ def bind_beats(blueprint:dict,word_map:dict, *,
                 raise ContractViolation("CUE_SECTION_MISMATCH",bid,"Cue section must be the beat's authored section.")
             item=resolve_cue(b["cue"],word_map,bid)
             item.update({"setup_id":plan["setup_id"],"focus_ref":b["focus_ref"],
-                         "staging":b["staging"],"continuity":b["continuity"]})
+                         "focus_move":b["focus_move"],"staging":b["staging"],
+                         "continuity":b["continuity"]})
             resolved.append(item)
         output.extend(resolved)
     # Compute cuts across ALL ordered setups, not independently per setup:
