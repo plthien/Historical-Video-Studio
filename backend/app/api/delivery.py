@@ -28,6 +28,7 @@ class RenderRetry(Strict):
 
 
 class ReviewHeartbeat(Strict):
+    expected_revision: int = Field(ge=0)
     nonce: str = Field(min_length=16)
     position_seconds: float = Field(ge=0)
     playing_video: bool
@@ -105,10 +106,12 @@ def mount(app, service, idempotent):
                           lambda: service.start_review(project_id, render_job_id))
 
     @app.post("/api/v1/projects/{project_id}/review-sessions/{session_id}/heartbeat")
-    def review_heartbeat(project_id: str, session_id: str, body: ReviewHeartbeat):
-        return service.review_heartbeat(project_id, session_id, body.nonce,
-                                        body.position_seconds, body.playing_video,
-                                        body.playing_with_audio)
+    def review_heartbeat(project_id: str, session_id: str, body: ReviewHeartbeat,
+                         key: str = Header(alias="Idempotency-Key", min_length=12)):
+        return idempotent(project_id, "g5-review-heartbeat:" + session_id, key, body.model_dump(),
+            lambda: service.review_heartbeat(project_id, session_id, body.nonce,
+                                              body.expected_revision, body.position_seconds,
+                                              body.playing_video, body.playing_with_audio))
 
     @app.post("/api/v1/projects/{project_id}/review-sessions/{session_id}/complete")
     def complete_review(project_id: str, session_id: str, body: ReviewComplete,

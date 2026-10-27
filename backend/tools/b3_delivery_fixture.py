@@ -86,7 +86,7 @@ def main():
     review = service.start_review(project, rendered["render_job_id"])
     time.sleep(.1)
     muted = service.review_heartbeat(project, review["review_session_id"], review["nonce"],
-                                     .1, True, False)
+                                     store.revision(project), .1, True, False)
     if muted["listened_seconds"] != 0:
         raise RuntimeError("B3_MUTED_REVIEW_EARNED_LISTENING_CREDIT")
     try:
@@ -101,7 +101,7 @@ def main():
     while position < duration:
         time.sleep(.5); position = min(duration, position + .5)
         service.review_heartbeat(project, review["review_session_id"], review["nonce"],
-                                 position, True, True)
+                                 store.revision(project), position, True, True)
     service.complete_review(project, review["review_session_id"], review["nonce"])
     g5_board = next(x for x in gates.board(project) if x["gate_id"] == "G5")
     g5 = gates.decide(project, "G5", {"decision": "APPROVED",

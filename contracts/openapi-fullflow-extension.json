@@ -1114,7 +1114,8 @@
         "summary": "Credit separate natural video viewing and audible playback progress",
         "parameters": [
           {"name": "project_id", "in": "path", "required": true, "schema": {"type": "string"}},
-          {"name": "session_id", "in": "path", "required": true, "schema": {"type": "string"}}
+          {"name": "session_id", "in": "path", "required": true, "schema": {"type": "string"}},
+          {"name": "Idempotency-Key", "in": "header", "required": true, "schema": {"type": "string", "minLength": 12}}
         ],
         "requestBody": {
           "required": true,
@@ -1840,8 +1841,9 @@
       "ReviewHeartbeat": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["nonce", "position_seconds", "playing_video", "playing_with_audio"],
+        "required": ["expected_revision", "nonce", "position_seconds", "playing_video", "playing_with_audio"],
         "properties": {
+          "expected_revision": {"type": "integer", "minimum": 0},
           "nonce": {"type": "string", "minLength": 16},
           "position_seconds": {"type": "number", "minimum": 0},
           "playing_video": {"type": "boolean"},

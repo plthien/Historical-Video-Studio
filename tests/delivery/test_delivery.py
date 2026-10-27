@@ -273,10 +273,10 @@ def test_gate_5_muted_video_credits_viewing_but_not_listening(tmp_path, monkeypa
         db.execute("UPDATE g5_review_sessions SET last_monotonic=0 WHERE session_id=?", (session["review_session_id"],))
     monkeypatch.setattr("backend.app.render.worker.time.monotonic", lambda: 10.0)
     progress = service.review_heartbeat("proj_gate5_muted", session["review_session_id"], session["nonce"],
-                                        10.0, True, False)
+                                        store.revision("proj_gate5_muted"), 10.0, True, False)
     assert progress["viewed_seconds"] == 10 and progress["listened_seconds"] == 0
     with pytest.raises(ContractViolation, match="G5_REVIEW_INCOMPLETE"):
         service.complete_review("proj_gate5_muted", session["review_session_id"], session["nonce"])
     with pytest.raises(ContractViolation, match="G5_REVIEW_PLAYER_STATE_INVALID"):
         service.review_heartbeat("proj_gate5_muted", session["review_session_id"], session["nonce"],
-                                 10.0, False, True)
+                                 store.revision("proj_gate5_muted"), 10.0, False, True)

@@ -266,8 +266,10 @@ class DeliveryService:
                        (session, project, job_id, candidate[0], nonce, now, now, 0, 0, 0))
         return {"review_session_id": session, "nonce": nonce, "candidate_sha256": candidate[0]}
 
-    def review_heartbeat(self, project, session_id, nonce, position_seconds,
+    def review_heartbeat(self, project, session_id, nonce, expected_revision, position_seconds,
                          playing_video, playing_with_audio):
+        if expected_revision != self.store.revision(project):
+            _fail("REVISION_CONFLICT", project, "Reload the current review before continuing playback.")
         if playing_with_audio and not playing_video:
             _fail("G5_REVIEW_PLAYER_STATE_INVALID", session_id,
                   "Audio playback cannot be credited while video is not naturally playing.")

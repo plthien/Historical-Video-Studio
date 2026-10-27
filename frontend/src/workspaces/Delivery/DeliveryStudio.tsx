@@ -48,7 +48,7 @@ export function DeliveryStudio({project,onRefresh}:{project:ProjectInfo;onRefres
      const playingVideo=!media.paused&&!media.ended&&!media.seeking&&media.readyState>=HTMLMediaElement.HAVE_CURRENT_DATA&&
       Number.isFinite(media.playbackRate)&&media.playbackRate>0&&media.playbackRate<=2;
      const playingWithAudio=playingVideo&&!media.muted&&Number.isFinite(media.volume)&&media.volume>0;
-     void deliveryApi.heartbeat(project.project_id,review,media.currentTime,playingVideo,playingWithAudio)
+     void deliveryApi.heartbeat(project.project_id,review,project.project_revision,media.currentTime,playingVideo,playingWithAudio,key())
       .then(setReviewProgress).catch(()=>{});}}/>
    <button disabled={!!busy||!!review} onClick={()=>void run('Start verified review',async()=>setReview(await deliveryApi.startReview(project.project_id,job.render_job_id,key())))}>Start server-issued view/listen review</button>
    {review&&<p aria-label="review-progress">Viewed {reviewProgress.viewed_seconds.toFixed(2)}s Â· listened {reviewProgress.listened_seconds.toFixed(2)}s</p>}
