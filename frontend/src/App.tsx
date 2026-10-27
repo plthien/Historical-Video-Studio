@@ -224,11 +224,20 @@ export function App() {
           <ul>{jobs.map(job => <li key={job.job_id}>
             <strong>{job.job_id}</strong> — {job.kind}: {job.state}
             {job.error_code && <span> · {job.error_code}</span>}
+            {job.progress&&<span> · progress {job.progress.completed}/{job.progress.total} frames</span>}
+            {job.cancel_requested===1&&<small>Cancellation requested; confirmation is pending.</small>}
+            {job.remediation&&<small>{job.remediation}</small>}
             {["QUEUED","RUNNING","FAILED_RETRYABLE","BLOCKED_REVIEW"].includes(job.state) &&
               <button disabled={!!pending} onClick={() => void cancelJob(job.job_id)}>
                 {job.cancel_requested ? "Reconcile cancellation with provider" : "Request cancellation"}</button>}
-            {job.kind==="glabs_image"&&job.state==="FAILED_RETRYABLE"&&!job.cancel_requested&&
+            {job.retry_action==="managed_resume"&&
               <button disabled={!!pending} onClick={()=>void retryJob(job.job_id)}>Retry / resume original task</button>}
+            {job.retry_action==="render_retry"&&
+              <button disabled={!!pending} onClick={()=>setWorkspace("delivery")}>Open Final Video retry</button>}
+            {job.retry_action==="voice_alignment_retry"&&
+              <button disabled={!!pending} onClick={()=>setWorkspace("voice")}>Open Voice alignment retry</button>}
+            {job.output_available&&
+              <button disabled={!!pending} onClick={()=>setWorkspace("delivery")}>Open reviewed output</button>}
             {job.kind==="glabs_image"&&job.state==="BLOCKED_REVIEW"&&
               <small>Restore original webhook credentials, then reconcile cancellation. No automatic paid resubmission.</small>}
           </li>)}</ul>}

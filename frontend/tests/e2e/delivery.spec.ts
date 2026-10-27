@@ -3,7 +3,7 @@ import {createHash} from 'node:crypto';
 import {mkdirSync,writeFileSync} from 'node:fs';
 import {resolve} from 'node:path';
 
-test('delivery reload exposes exact QC-passed audiovisual export',async({page,request})=>{
+test('full-flow delivery reload exposes exact QC-passed audiovisual export',async({page,request})=>{
  test.skip(process.env.HVS_B3_FIXTURE!=='1','Requires native B3 SQLite/Remotion fixture');
  await page.goto('/');
  await page.getByLabel('Project ID').fill('proj_001');

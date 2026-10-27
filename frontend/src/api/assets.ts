@@ -1,5 +1,5 @@
 /** A3 local APIs: explicit source decisions and human review, never implicit approvals. */
-import {request} from "./client";
+import {origin,request} from "./client";
 const p=encodeURIComponent;
 export interface Requirement {
   requirement: Record<string,unknown>; requirement_id:string; status:string; resolution_mode:string;
@@ -19,6 +19,13 @@ export interface AssetReview {
   requirement_id:string; candidate_id:string; original_sha256:string; rights_status:"ELIGIBLE";
   rights_evidence_note:string; historical_context_note:string;
 }
+export interface BatchValidationItem {
+  requirement_id:string; candidate_id:string; original_sha256:string;
+  status:"VALID"|"STALE"|"INVALID"|"BLOCKED"; error_code:string|null; reason:string;
+}
+export interface BatchValidation {
+  project_revision:number; revision_matches:boolean; items:BatchValidationItem[];
+}
 export interface ProviderInfo {provider:string;configured:boolean;live_status:string;base_url:string}
 export const assetApi={
   requirements:(id:string)=>request<{project_revision:number;requirements:Requirement[]}>("/projects/"+p(id)+"/assets/requirements"),
@@ -32,7 +39,7 @@ export const assetApi={
     request<AssetCandidate>("/projects/"+p(id)+"/assets/"+p(rid)+"/hydrate","POST",
       {expected_revision:revision,candidate_id},crypto.randomUUID()),
   previewUrl:(id:string,rid:string,candidate_id:string)=>
-    "http://127.0.0.1:8000/api/v1/projects/"+p(id)+"/assets/"+p(rid)+"/candidates/"+p(candidate_id)+"/original-preview",
+    origin+"/projects/"+p(id)+"/assets/"+p(rid)+"/candidates/"+p(candidate_id)+"/original-preview",
   original:(id:string,revision:number,rid:string,candidate_id:string)=>
     request<AssetCandidate>("/projects/"+p(id)+"/assets/original","POST",
       {expected_revision:revision,requirement_id:rid,candidate_id},crypto.randomUUID()),
@@ -41,6 +48,9 @@ export const assetApi={
       {expected_revision:revision,data_base64,title,source_note,rights_note},crypto.randomUUID()),
   batch:(id:string,revision:number,reviews:AssetReview[])=>
     request<{approved:{requirement_id:string;approval_record_id:string}[]}>("/projects/"+p(id)+"/assets/batch-approve","POST",
+      {expected_revision:revision,reviews},crypto.randomUUID()),
+  validateBatch:(id:string,revision:number,reviews:AssetReview[])=>
+    request<BatchValidation>("/projects/"+p(id)+"/assets/batch-validate","POST",
       {expected_revision:revision,reviews},crypto.randomUUID()),
   providers:()=>request<{providers:ProviderInfo[]}>("/providers"),
   settings:(provider:string,api_key:string|undefined,base_url:string,clear_key=false)=>

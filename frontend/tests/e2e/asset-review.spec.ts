@@ -182,7 +182,7 @@ test("asset-review: zero requirements still needs an explicit G3 decision",async
 
 
 // V4: small shared local-server fixture for independent scope/race/conflict evidence.
-const baseApi="http://127.0.0.1:8000/api/v1";
+const baseApi=`http://127.0.0.1:${process.env.HVS_B3_FIXTURE==="1"?8011:8000}/api/v1`;
 const tinyPng=Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAADElEQVR4nGMwSpkGAAH4AS3k7SvZAAAAAElFTkSuQmCC","base64");
 async function createAssetProject(page: import("@playwright/test").Page,title:string,initialVisit=true){
   if(initialVisit)await page.goto("/");
@@ -244,16 +244,18 @@ async function incrementClaimRevision(page:import("@playwright/test").Page,id:st
 
 function approvalLedger(projectId:string) {
   const root=path.resolve(here,"../../..");
+  const fixtureDb=path.join(root,"renderer",".artifacts","approved-player-test","g4.sqlite");
+  const database=process.env.HVS_B2_FIXTURE==="1"?fixtureDb:path.join(root,"frontend",".e2e-data","state.sqlite");
   const script=[
     "import json,sqlite3,sys",
-    "con=sqlite3.connect('frontend/.e2e-data/state.sqlite')",
+    "con=sqlite3.connect(sys.argv[2])",
     "pid=sys.argv[1]",
     "heads=con.execute('SELECT requirement_id,approval_id FROM asset_approval_heads WHERE project_id=? ORDER BY requirement_id',(pid,)).fetchall()",
     "events=con.execute('SELECT requirement_id,approval_id FROM asset_approval_events WHERE project_id=? ORDER BY requirement_id',(pid,)).fetchall()",
     "print(json.dumps({'heads':heads,'events':events}))"
   ].join("\n");
   const result=execFileSync(path.join(root,".venv","Scripts","python.exe"),
-    ["-c",script,projectId],{cwd:root,encoding:"utf8"});
+    ["-c",script,projectId,database],{cwd:root,encoding:"utf8"});
   return JSON.parse(result.trim()) as {heads:[string,string][];events:[string,string][]};
 }
 
@@ -329,7 +331,7 @@ test("asset-review V4: out-of-order A candidate response cannot overwrite select
 
 // C01-F: both local preflight and server commit-time revisions reject atomically.
 // A request captured via Playwright route goes to the REAL backend after an independent edit.
-test("asset-review V4: revision conflict never commits partial batch or retries itself",async({page})=>{
+test("asset-review V4 batch: revision conflict never commits partial batch or retries itself",async({page})=>{
   const P=await createAssetProject(page,"V4 concurrent review");
   const [A,B]=P.requirements;
   await stageVerified(page,A,"Conflict source A");
@@ -385,13 +387,16 @@ test("asset-review V4: revision conflict never commits partial batch or retries 
 function jobSql(action:"seed"|"read",projectId:string,state:string,errorCode:string,jobId="") {
   const root=path.resolve(here,"../../..");
   const python=path.join(root,".venv","Scripts","python.exe"); // Windows-only repo test contract.
+  const fixtureRoot=path.join(root,"renderer",".artifacts","approved-player-test");
+  const database=process.env.HVS_B2_FIXTURE==="1"?path.join(fixtureRoot,"g4.sqlite"):path.join(root,"frontend",".e2e-data","state.sqlite");
+  const media=process.env.HVS_B2_FIXTURE==="1"?path.join(fixtureRoot,"artifacts"):path.join(root,"frontend",".e2e-data","media");
   const script=[
     "import json,sys,uuid",
     "from pathlib import Path",
     "from backend.app.projects.storage import ProjectStore",
     "from backend.app.jobs.queue import JobQueue",
-    "db=Path('frontend/.e2e-data/state.sqlite')",
-    "store=ProjectStore(db,Path('frontend/.e2e-data/media'))",
+    "db=Path(sys.argv[6])",
+    "store=ProjectStore(db,Path(sys.argv[7]))",
     "q=JobQueue(store)",
     "if sys.argv[1]=='seed':",
     "    job=q.submit(sys.argv[2],'glabs_image','v4fixture-'+uuid.uuid4().hex,{},store.revision(sys.argv[2]))",
@@ -401,14 +406,14 @@ function jobSql(action:"seed"|"read",projectId:string,state:string,errorCode:str
     "else:",
     "    print(json.dumps(q.get(sys.argv[5])))"
   ].join("\n");
-  const output=execFileSync(python,["-c",script,action,projectId,state,errorCode,jobId],{
+  const output=execFileSync(python,["-c",script,action,projectId,state,errorCode,jobId,database,media],{
     cwd:root,encoding:"utf8"
   });
   return JSON.parse(output.trim()) as {job_id:string;project_id:string;state:string;
     provider_task_id:string|null;cancel_requested:number;error_code:string|null};
 }
 
-test("asset-review V4: jobs UI reflects persisted safe cancel versus uncertain review",async({page})=>{
+test("asset-review V4 queue: jobs UI reflects persisted safe cancel versus uncertain review",async({page})=>{
   await page.goto("/");
   await page.getByLabel("Project title").fill("V4 safe cancel UI");
   await page.getByRole("button",{name:"Create project"}).click();

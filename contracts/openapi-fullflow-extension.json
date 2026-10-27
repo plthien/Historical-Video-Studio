@@ -837,6 +837,39 @@
         }
       }
     },
+    "/projects/{project_id}/assets/batch-validate": {
+      "post": {
+        "operationId": "post__projects_project_id_assets_batch_validate",
+        "tags": ["assets"],
+        "summary": "Validate each staged asset review without committing approvals",
+        "parameters": [
+          {
+            "name": "project_id",
+            "in": "path",
+            "required": true,
+            "schema": {"type": "string"}
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {"type": "string", "minLength": 12}
+          }
+        ],
+        "responses": {
+          "200": {"description": "Item-level VALID, STALE, INVALID or BLOCKED results; no mutation"},
+          "422": {"description": "Malformed batch request"}
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {"$ref": "#/components/schemas/AssetBatchApproval"}
+            }
+          }
+        }
+      }
+    },
     "/projects/{project_id}/storyboard/scenes": {
       "get": {
         "operationId": "get__projects_project_id_storyboard_scenes",

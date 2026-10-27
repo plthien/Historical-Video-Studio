@@ -4,6 +4,8 @@ param([switch]$SkipInstall)
 $ErrorActionPreference = "Stop"
 Set-StrictMode -Version Latest
 $repo = (Resolve-Path (Join-Path $PSScriptRoot "../..")).Path
+$venv = Join-Path $repo ".venv"
+$venvPython = Join-Path $venv "Scripts/python.exe"
 Push-Location $repo
 try {
     function Run-Checked([string]$Name, [string]$Exe, [string[]]$Arguments) {
@@ -11,8 +13,12 @@ try {
         & $Exe @Arguments
         if ($LASTEXITCODE -ne 0) { throw "$Name failed with exit code $LASTEXITCODE" }
     }
-    $python = (& py -3.12 -c "import sys; print(sys.version_info.major, sys.version_info.minor)").Trim()
-    if ($LASTEXITCODE -ne 0 -or $python -ne "3 12") { throw "Python 3.12 is required: py -3.12" }
+    if (Test-Path $venvPython) {
+        $python = (& $venvPython -c "import sys; print(sys.version_info.major, sys.version_info.minor)").Trim()
+    } else {
+        $python = (& py -3.12 -c "import sys; print(sys.version_info.major, sys.version_info.minor)").Trim()
+    }
+    if ($LASTEXITCODE -ne 0 -or $python -ne "3 12") { throw "Python 3.12 is required: py -3.12 or the repository .venv" }
     $nodeMajor = (& node -p "process.versions.node.split('.')[0]").Trim()
     if ($LASTEXITCODE -ne 0 -or $nodeMajor -ne "22") { throw "Node 22 is required" }
     $npmMajor = (& npm --version).Trim().Split('.')[0]
@@ -21,8 +27,6 @@ try {
         if (-not (Get-Command $app -ErrorAction SilentlyContinue)) { throw "$app not found on PATH" }
         Run-Checked "$app version" $app @("-version")
     }
-    $venv = Join-Path $repo ".venv"
-    $venvPython = Join-Path $venv "Scripts/python.exe"
     if (-not (Test-Path $venvPython)) {
         Run-Checked "Create isolated Python 3.12 venv" "py" @("-3.12", "-m", "venv", $venv)
     }

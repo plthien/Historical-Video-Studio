@@ -240,6 +240,53 @@ class AssetResolution:
                 db.execute("UPDATE projects SET revision=? WHERE project_id=?",(revision+1,project))
             return {"project_revision": revision+int(changed), "approved":created}
 
+    def validate_batch(self, project, items, expected_revision):
+        """Validate every staged row without mutating approval heads.
+
+        This is presentation support only. ``approve_batch`` remains the sole
+        atomic commit and repeats all validation inside its transaction.
+        """
+        if not isinstance(items, list) or not items or len(items) > 100:
+            raise ContractViolation("ASSET_BATCH_INVALID", project,
+                                    "Select 1–100 explicit candidate reviews.")
+        required = {"requirement_id", "candidate_id", "original_sha256", "rights_status",
+                    "rights_evidence_note", "historical_context_note"}
+        if any(not isinstance(item, dict) or not required.issubset(item) for item in items):
+            raise ContractViolation("ASSET_BATCH_INVALID", project, "Incomplete candidate review.")
+        if len({item["requirement_id"] for item in items}) != len(items):
+            raise ContractViolation("ASSET_BATCH_INVALID", project, "Choose one candidate per requirement.")
+        current_revision = self.store.revision(project)
+        if current_revision != expected_revision:
+            return {"project_revision": current_revision, "revision_matches": False,
+                    "items": [{"requirement_id": item["requirement_id"],
+                               "candidate_id": item["candidate_id"],
+                               "original_sha256": item["original_sha256"],
+                               "status": "BLOCKED", "error_code": "REVISION_CONFLICT",
+                               "reason": "Project changed; refresh and validate the complete batch again."}
+                              for item in items]}
+        results = []
+        with self.store._connection() as db:
+            for item in items:
+                try:
+                    self.store.get_artifact(item["original_sha256"])
+                    self._review_tx(db, project, item)
+                    status, code = "VALID", None
+                    reason = "Exact current original, source revision and rights review are valid."
+                except ContractViolation as exc:
+                    if exc.code in {"ASSET_SOURCE_STALE", "ASSET_ORIGINAL_SHA_MISMATCH"}:
+                        status = "STALE"
+                    elif exc.code in {"ASSET_RESOLUTION_REQUIRED", "ARTIFACT_NOT_FOUND",
+                                      "ARTIFACT_SIZE_MISMATCH", "ARTIFACT_SHA_MISMATCH"}:
+                        status = "BLOCKED"
+                    else:
+                        status = "INVALID"
+                    code, reason = exc.code, exc.remediation
+                results.append({"requirement_id": item["requirement_id"],
+                                "candidate_id": item["candidate_id"],
+                                "original_sha256": item["original_sha256"],
+                                "status": status, "error_code": code, "reason": reason})
+        return {"project_revision": current_revision, "revision_matches": True, "items": results}
+
     @staticmethod
     def _active_choice_sets(db, project, requirement, requirement_sha):
         """Immutable current pool, not historic asset_approval_events or old set history."""
