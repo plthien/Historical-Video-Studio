@@ -11,7 +11,7 @@ from backend.app.contracts import ContractViolation
 
 
 class Strict(BaseModel):
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="forbid", allow_inf_nan=False)
 
 
 class RenderStart(Strict):
@@ -30,6 +30,7 @@ class RenderRetry(Strict):
 class ReviewHeartbeat(Strict):
     nonce: str = Field(min_length=16)
     position_seconds: float = Field(ge=0)
+    playing_video: bool
     playing_with_audio: bool
 
 
@@ -106,7 +107,8 @@ def mount(app, service, idempotent):
     @app.post("/api/v1/projects/{project_id}/review-sessions/{session_id}/heartbeat")
     def review_heartbeat(project_id: str, session_id: str, body: ReviewHeartbeat):
         return service.review_heartbeat(project_id, session_id, body.nonce,
-                                        body.position_seconds, body.playing_with_audio)
+                                        body.position_seconds, body.playing_video,
+                                        body.playing_with_audio)
 
     @app.post("/api/v1/projects/{project_id}/review-sessions/{session_id}/complete")
     def complete_review(project_id: str, session_id: str, body: ReviewComplete,

@@ -74,11 +74,21 @@ jobs:
       - name: Exact G4 to Remotion H264 AAC QC G5 export closure
         shell: pwsh
         run: |
+          & .venv/Scripts/python.exe -m pytest -q tests/delivery/test_delivery.py
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           & .venv/Scripts/python.exe -m backend.tools.b3_delivery_fixture
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           $summary = Get-Content renderer/.artifacts/b3-delivery/summary.json -Raw | ConvertFrom-Json
           if ($summary.render_job.state -ne 'SUCCEEDED' -or $summary.render_job.qc_status -ne 'PASS') {
             throw 'B3 exact delivery fixture did not produce a QC-passed real render'
+          }
+          $verdict = Get-Content renderer/.artifacts/b3-delivery/three-p1-verdict.json -Raw | ConvertFrom-Json
+          if ($verdict.restart.result -ne 'RECOVERED_QUEUED_FINAL_RENDER_AUTO_DISPATCHED' -or
+              $verdict.black_frame.problem -ne 'QC_VISUAL_ANOMALY' -or
+              $verdict.near_silent_aac.problem -ne 'QC_AUDIO_CONTENT_MISMATCH' -or
+              $verdict.review.muted_listened_seconds -ne 0 -or
+              $verdict.review.audible_complete -ne 'PASS') {
+            throw 'B3 three-P1 verdict evidence is incomplete'
           }
       - name: Real Delivery browser reload playback credits and download
         shell: pwsh

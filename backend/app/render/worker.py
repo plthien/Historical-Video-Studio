@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+import math
 import os
 import subprocess
 import tempfile
@@ -265,29 +266,49 @@ class DeliveryService:
                        (session, project, job_id, candidate[0], nonce, now, now, 0, 0, 0))
         return {"review_session_id": session, "nonce": nonce, "candidate_sha256": candidate[0]}
 
-    def review_heartbeat(self, project, session_id, nonce, position_seconds, playing):
+    def review_heartbeat(self, project, session_id, nonce, position_seconds,
+                         playing_video, playing_with_audio):
+        if playing_with_audio and not playing_video:
+            _fail("G5_REVIEW_PLAYER_STATE_INVALID", session_id,
+                  "Audio playback cannot be credited while video is not naturally playing.")
+        if not isinstance(position_seconds, (int, float)) or not math.isfinite(position_seconds) or position_seconds < 0:
+            _fail("G5_REVIEW_PLAYER_STATE_INVALID", session_id,
+                  "Report a finite non-negative media position.")
         now = time.monotonic()
         with self.store._transaction() as db:
-            row = db.execute("SELECT nonce,last_monotonic,last_position,viewed_seconds,listened_seconds,completed "
-                             "FROM g5_review_sessions WHERE session_id=? AND project_id=?",
+            row = db.execute("SELECT s.nonce,s.last_monotonic,s.last_position,s.viewed_seconds,"
+                             "s.listened_seconds,s.completed,s.job_id,s.candidate_sha256 "
+                             "FROM g5_review_sessions s JOIN jobs j ON j.job_id=s.job_id "
+                             "JOIN g5_candidates c ON c.job_id=s.job_id "
+                             "AND c.candidate_sha256=s.candidate_sha256 "
+                             "WHERE s.session_id=? AND s.project_id=? AND j.state='SUCCEEDED'",
                              (session_id, project)).fetchone()
             if not row or row[0] != nonce or row[5]: _fail("G5_REVIEW_SESSION_INVALID", session_id, "Start a current server review session.")
             elapsed = max(0, min(now - row[1], 10)); advanced = max(0, position_seconds - row[2])
-            credited = min(elapsed, advanced + .25) if playing else 0
+            if playing_video and advanced > elapsed * 2 + .5:
+                _fail("G5_REVIEW_PLAYER_STATE_INVALID", session_id,
+                      "Seeking or implausible position jumps cannot earn review credit.")
+            viewed = min(elapsed, advanced + .25) if playing_video else 0
+            listened = viewed if playing_with_audio else 0
             db.execute("UPDATE g5_review_sessions SET last_monotonic=?,last_position=?,"
                        "viewed_seconds=viewed_seconds+?,listened_seconds=listened_seconds+? WHERE session_id=?",
-                       (now, position_seconds, credited, credited, session_id))
-            return {"viewed_seconds": row[3] + credited, "listened_seconds": row[4] + credited}
+                       (now, position_seconds, viewed, listened, session_id))
+            return {"viewed_seconds": row[3] + viewed, "listened_seconds": row[4] + listened}
 
     def complete_review(self, project, session_id, nonce):
         with self.store._transaction() as db:
             row = db.execute("SELECT s.job_id,s.candidate_sha256,s.nonce,s.viewed_seconds,s.listened_seconds,"
-                             "r.manifest_sha256 FROM g5_review_sessions s JOIN render_attempts r ON r.job_id=s.job_id "
+                             "r.manifest_sha256 FROM g5_review_sessions s "
+                             "JOIN render_attempts r ON r.job_id=s.job_id "
+                             "JOIN jobs j ON j.job_id=s.job_id AND j.state='SUCCEEDED' "
+                             "JOIN g5_candidates c ON c.job_id=s.job_id "
+                             "AND c.candidate_sha256=s.candidate_sha256 "
                              "WHERE s.session_id=? AND s.project_id=?", (session_id, project)).fetchone()
             if not row or row[2] != nonce: _fail("G5_REVIEW_SESSION_INVALID", session_id, "Use the issued review nonce.")
             duration = json.loads(self.store.get_artifact(row[5]))["video"]["total_frames"] / 30
             if min(row[3], row[4]) + 1 / 30 < duration:
                 _fail("G5_REVIEW_INCOMPLETE", session_id, "View and listen to the complete current MP4.")
+            manifest.verify(self.store, project, row[5])
             db.execute("UPDATE g5_review_sessions SET completed=1 WHERE session_id=?", (session_id,))
         return {"review_session_id": session_id, "candidate_sha256": row[1], "completed": True}
 

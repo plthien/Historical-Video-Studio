@@ -9,6 +9,7 @@ export function DeliveryStudio({project,onRefresh}:{project:ProjectInfo;onRefres
  const [job,setJob]=useState<RenderJob|null>(null);const [review,setReview]=useState<ReviewSession|null>(null);
  const [approval,setApproval]=useState<string|null>(null);const [result,setResult]=useState<ExportResult|null>(null);
  const [credits,setCredits]=useState<unknown[]>([]);const [busy,setBusy]=useState<string|null>(null);
+ const [reviewProgress,setReviewProgress]=useState({viewed_seconds:0,listened_seconds:0});
  const [notice,setNotice]=useState<string>('');const video=useRef<HTMLVideoElement|null>(null);
  const g4=project.gates.find(g=>g.gate_id==='G4')!;const g5=project.gates.find(g=>g.gate_id==='G5')!;
  useEffect(()=>{let live=true;api.jobs(project.project_id).then(async jobs=>{
@@ -43,8 +44,14 @@ export function DeliveryStudio({project,onRefresh}:{project:ProjectInfo;onRefres
   </section>
   {job?.state==='SUCCEEDED'&&job.qc_status==='PASS'&&<section className="panel"><h3>G5 audiovisual review</h3>
    <video ref={video} controls src={deliveryApi.media(project.project_id,job.render_job_id)} style={{width:'100%'}}
-    onTimeUpdate={()=>{const media=video.current;if(review&&media&&!media.paused)void deliveryApi.heartbeat(project.project_id,review,media.currentTime,true);}}/>
+    onTimeUpdate={()=>{const media=video.current;if(!review||!media)return;
+     const playingVideo=!media.paused&&!media.ended&&!media.seeking&&media.readyState>=HTMLMediaElement.HAVE_CURRENT_DATA&&
+      Number.isFinite(media.playbackRate)&&media.playbackRate>0&&media.playbackRate<=2;
+     const playingWithAudio=playingVideo&&!media.muted&&Number.isFinite(media.volume)&&media.volume>0;
+     void deliveryApi.heartbeat(project.project_id,review,media.currentTime,playingVideo,playingWithAudio)
+      .then(setReviewProgress).catch(()=>{});}}/>
    <button disabled={!!busy||!!review} onClick={()=>void run('Start verified review',async()=>setReview(await deliveryApi.startReview(project.project_id,job.render_job_id,key())))}>Start server-issued view/listen review</button>
+   {review&&<p aria-label="review-progress">Viewed {reviewProgress.viewed_seconds.toFixed(2)}s Â· listened {reviewProgress.listened_seconds.toFixed(2)}s</p>}
    <button disabled={!!busy||!review} onClick={()=>void run('Complete verified review',async()=>{if(!review)return;await deliveryApi.completeReview(project.project_id,review,key());await onRefresh();})}>Confirm complete video and audio review</button>
    <button disabled={!!busy} onClick={()=>void run('Load credits',async()=>setCredits((await deliveryApi.credits(project.project_id)).assets))}>Inspect source credits ({credits.length})</button>
    <p>G5 status: <strong>{g5.state}</strong></p><button disabled={!!busy||g5.state!=='READY_FOR_REVIEW'} onClick={()=>void decide('G5')}>Approve exact G5 render</button>

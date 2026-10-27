@@ -123,18 +123,41 @@ def create_app(database: str | Path | None = None, media_root: str | Path | None
     async def lifespan(application: FastAPI):
         import asyncio
         application.state.recovery = recover_interrupted(queue)
-        # Recover persisted A3 jobs on restart; never submit a second provider task
-        # when a durable task_id or uncertain first POST already exists.
+        # Dispatch persisted work by its existing durable ID. Each handler must
+        # still win JobQueue.claim(), which remains the sole execution lease.
         with store._connection() as db:
-            queued = [row[0] for row in db.execute(
-                "SELECT job_id FROM jobs WHERE kind='glabs_image' AND state='QUEUED'")]
-        tasks = [asyncio.create_task(asyncio.to_thread(application.state.run_glabs_job,job_id))
-                 for job_id in queued if hasattr(application.state,"run_glabs_job")]
+            queued_glabs = [row[0] for row in db.execute(
+                "SELECT job_id FROM jobs WHERE kind='glabs_image' AND state='QUEUED' "
+                "AND cancel_requested=0")]
+            queued_renders = [row[0] for row in db.execute(
+                "SELECT job_id FROM jobs WHERE kind='final_render' AND state='QUEUED' "
+                "AND cancel_requested=0")]
+
+        async def run_persisted(kind: str, job_id: str, operation):
+            try:
+                result = await asyncio.to_thread(operation, job_id)
+                application.state.startup_job_outcomes[(kind, job_id)] = result
+            except Exception as exc:
+                # Keep the exception visible for diagnostics. Owners persist
+                # their job outcome before returning/raising.
+                application.state.startup_job_outcomes[(kind, job_id)] = {
+                    "state": "DISPATCH_FAILED", "error": type(exc).__name__
+                }
+
+        application.state.startup_job_outcomes = {}
+        tasks = [asyncio.create_task(run_persisted("glabs_image", job_id,
+                                                   application.state.run_glabs_job))
+                 for job_id in queued_glabs if hasattr(application.state, "run_glabs_job")]
+        tasks.extend(asyncio.create_task(run_persisted("final_render", job_id,
+                                                       application.state.delivery.process))
+                     for job_id in queued_renders)
+        application.state.startup_job_tasks = tasks
         try:
             yield
         finally:
             for task in tasks:
-                task.cancel()
+                if not task.done():
+                    task.cancel()
 
     app = FastAPI(title="Historical Video Studio Local API", version="1.0.0", lifespan=lifespan)
     app.add_middleware(CORSMiddleware, allow_origins=["http://127.0.0.1:5173", "http://localhost:5173",

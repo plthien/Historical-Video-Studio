@@ -1107,6 +1107,26 @@
         }
       }
     },
+    "/projects/{project_id}/review-sessions/{session_id}/heartbeat": {
+      "post": {
+        "operationId": "post__projects_project_id_review_sessions_session_id_heartbeat",
+        "tags": ["render"],
+        "summary": "Credit separate natural video viewing and audible playback progress",
+        "parameters": [
+          {"name": "project_id", "in": "path", "required": true, "schema": {"type": "string"}},
+          {"name": "session_id", "in": "path", "required": true, "schema": {"type": "string"}}
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {"application/json": {"schema": {"$ref": "#/components/schemas/ReviewHeartbeat"}}}
+        },
+        "responses": {
+          "200": {"description": "Independent viewed and listened seconds for the bound review session"},
+          "422": {"description": "Malformed or impossible player state"},
+          "424": {"description": "Stale review candidate or render dependency"}
+        }
+      }
+    },
     "/projects/{project_id}/delivery/export": {
       "post": {
         "operationId": "post__projects_project_id_delivery_export",
@@ -1815,6 +1835,17 @@
           "container": {
             "const": "mp4"
           }
+        }
+      },
+      "ReviewHeartbeat": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["nonce", "position_seconds", "playing_video", "playing_with_audio"],
+        "properties": {
+          "nonce": {"type": "string", "minLength": 16},
+          "position_seconds": {"type": "number", "minimum": 0},
+          "playing_video": {"type": "boolean"},
+          "playing_with_audio": {"type": "boolean", "description": "May be true only while playing_video is true and the local media element is unmuted with volume above zero."}
         }
       },
       "FinalExport": {
