@@ -36,7 +36,7 @@ export class ApiError extends Error {
     super(problem.message);
   }
 }
-const origin = "http://127.0.0.1:8000/api/v1";
+export const origin = import.meta.env.VITE_API_ORIGIN ?? "http://127.0.0.1:8000/api/v1";
 export async function request<T>(path: string, method = "GET", payload?: unknown, idempotencyKey?: string,
                                  signal?: AbortSignal): Promise<T> {
   const response = await fetch(origin + path, {

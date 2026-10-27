@@ -333,6 +333,18 @@ paths:
       parameters:
         - {$ref: '#/components/parameters/ProjectId'}
         - {$ref: '#/components/parameters/Idempotency'}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [expected_revision, codec, container]
+              properties:
+                expected_revision: {type: integer, minimum: 0}
+                codec: {const: h264}
+                container: {const: mp4}
       responses:
         '202':
           description: Render queued

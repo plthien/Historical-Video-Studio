@@ -1,0 +1,149 @@
+name: B3 Delivery I Native Windows
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+jobs:
+  b3-delivery:
+    runs-on: windows-latest
+    timeout-minutes: 55
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - name: Exact-head lineage and whitespace
+        shell: pwsh
+        run: |
+          $expected = '${{ github.event.pull_request.head.sha || github.sha }}'
+          if ((git rev-parse HEAD) -ne $expected) { throw "Checkout HEAD does not match workflow head: $expected" }
+          git diff --check origin/main...HEAD
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Native FFmpeg and FFprobe
+        shell: pwsh
+        run: |
+          if (-not (Get-Command ffmpeg -ErrorAction SilentlyContinue) -or -not (Get-Command ffprobe -ErrorAction SilentlyContinue)) {
+            $installed = $false
+            for ($attempt = 1; $attempt -le 3; $attempt++) {
+              choco install ffmpeg --yes --no-progress
+              if ($LASTEXITCODE -eq 0 -and (Get-Command ffmpeg -ErrorAction SilentlyContinue) -and (Get-Command ffprobe -ErrorAction SilentlyContinue)) {
+                $installed = $true; break
+              }
+              if ($attempt -lt 3) { Start-Sleep -Seconds (5 * $attempt) }
+            }
+            if (-not $installed) { throw 'FFmpeg/FFprobe unavailable after bounded retries' }
+          }
+          ffmpeg -version
+          ffprobe -version
+      - name: Pinned Python, Remotion and frontend dependencies
+        shell: pwsh
+        run: |
+          powershell -NoProfile -ExecutionPolicy Bypass -File scripts/windows/verify-environment.ps1
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          npm --prefix renderer ci --no-audit --no-fund
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          npm --prefix renderer run typecheck
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          npm --prefix frontend ci --no-audit --no-fund
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          npm --prefix frontend run build
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: B3-01 durable manifest render cancel retry
+        shell: pwsh
+        run: |
+          & .venv/Scripts/python.exe -m pytest -q tests/delivery/test_delivery.py -k "render or manifest or cancel"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          & .venv/Scripts/python.exe -m backend.tools.smoke --case render-mp4 --mode local
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: B3-02 actual FFprobe decoded frame QC
+        shell: pwsh
+        run: |
+          & .venv/Scripts/python.exe -m pytest -q tests/delivery/test_delivery.py -k "qc or ffprobe or black_frame"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          & .venv/Scripts/python.exe -m backend.tools.smoke --case final-video-qc --mode local
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: B3-03 attribution review gate and export
+        shell: pwsh
+        run: |
+          & .venv/Scripts/python.exe -m pytest -q tests/delivery/test_delivery.py -k "attribution or gate_5 or export"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          & .venv/Scripts/python.exe -m backend.tools.smoke --case export-approved --mode local
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Exact G4 to Remotion H264 AAC QC G5 export closure
+        shell: pwsh
+        run: |
+          & .venv/Scripts/python.exe -m pytest -q tests/delivery/test_delivery.py
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          & .venv/Scripts/python.exe -m backend.tools.b3_delivery_fixture
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          $summary = Get-Content renderer/.artifacts/b3-delivery/summary.json -Raw | ConvertFrom-Json
+          if ($summary.render_job.state -ne 'SUCCEEDED' -or $summary.render_job.qc_status -ne 'PASS') {
+            throw 'B3 exact delivery fixture did not produce a QC-passed real render'
+          }
+          $verdict = Get-Content renderer/.artifacts/b3-delivery/three-p1-verdict.json -Raw | ConvertFrom-Json
+          if ($verdict.restart.result -ne 'REAL_WINDOWS_KILL_RESTART_PASS' -or
+              $verdict.black_frame.problem -ne 'QC_VISUAL_ANOMALY' -or
+              $verdict.near_silent_aac.problem -ne 'QC_AUDIO_CONTENT_MISMATCH' -or
+              $verdict.review.muted_listened_seconds -ne 0 -or
+              $verdict.review.audible_complete -ne 'PASS') {
+            throw 'B3 three-P1 verdict evidence is incomplete'
+          }
+          $g04 = Get-Content renderer/.artifacts/b3-delivery/g04-real-process-kill-restart.json -Raw | ConvertFrom-Json
+          $video = @($g04.media.ffprobe.streams | Where-Object codec_type -eq 'video')[0]
+          $audio = @($g04.media.ffprobe.streams | Where-Object codec_type -eq 'audio')[0]
+          $realRenderer = @($g04.original_process.owned_processes | Where-Object { $_.tsx_cmd -and $_.render_final_ts })
+          if ($g04.result -ne 'REAL_WINDOWS_KILL_RESTART_PASS' -or
+              $g04.os -ne 'Windows' -or
+              $realRenderer.Count -lt 1 -or
+              -not $g04.original_process.live_before_kill -or
+              -not $g04.original_process.renderer_dead_after_kill -or
+              $g04.restarted_process.recovery.resume_existing_provider_task -ne 1 -or
+              $g04.original_identity.job_id -ne $g04.recovered_identity.job_id -or
+              $g04.original_identity.attempt_id -ne $g04.recovered_identity.attempt_id -or
+              $g04.original_identity.manifest_sha256 -ne $g04.recovered_identity.manifest_sha256 -or
+              -not $g04.recovered_identity.lease_changed -or
+              $g04.recovered_identity.retry_count -ne $g04.original_identity.retry_count -or
+              $g04.media.qc_status -ne 'PASS' -or
+              -not $g04.media.g5_candidate_sha256 -or
+              $video.codec_name -ne 'h264' -or $audio.codec_name -ne 'aac' -or
+              $g04.stale_source_negative.state -ne 'FAILED_TERMINAL' -or
+              $g04.stale_source_negative.error_code -ne 'G4_APPROVAL_REQUIRED' -or
+              $g04.stale_source_negative.renderer_process_started -or
+              $g04.stale_source_negative.output_published -or
+              $g04.stale_source_negative.g5_candidate_published -or
+              $g04.single_owner.duplicate_owners -ne 0 -or
+              $g04.single_owner.successful_operations -ne 1 -or
+              $g04.single_owner.old_renderer_still_alive -or
+              $g04.unapproved_export -or
+              -not $g04.cleanup_ok) {
+            throw 'B3 G04 real Windows kill/restart evidence is incomplete'
+          }
+      - name: Real Delivery browser reload playback credits and download
+        shell: pwsh
+        run: |
+          Push-Location frontend
+          try {
+            npx playwright install chromium
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          } finally { Pop-Location }
+          $env:HVS_B2_FIXTURE = '1'
+          $env:HVS_B3_FIXTURE = '1'
+          npm --prefix frontend run test:e2e -- tests/e2e/delivery.spec.ts
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Upload immutable B3 media evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: b3-delivery-native-windows
+          path: |
+            renderer/.artifacts/b3-delivery/
+            frontend/dist/
+            frontend/.artifacts/delivery/
+            frontend/test-results/
+          if-no-files-found: error

@@ -79,14 +79,24 @@ class VisualDirectionEdit(Strict):
     edits: list[DirectionBeat] = Field(min_length=1)
 
 
+class G4CandidateInput(Strict):
+    expected_revision: int = Field(ge=0)
+
+
 def blocked(code: str, subject: str, remedy: str):
     raise ContractViolation(code, subject, remedy)
 
 
 def current(store, project: str):
     head = draft.load(store, project)
-    if store.revision(project) != head["revision"]:
-        blocked("G4_DRAFT_STALE", project, "Reload the current immutable G4 draft.")
+    project_revision = store.revision(project)
+    if project_revision != head["revision"]:
+        from backend.app.projects.gates import GateService
+        g4 = next(item for item in GateService(store).board(project) if item["gate_id"] == "G4")
+        if not (project_revision > head["revision"] and g4["state"] in
+                ("APPROVED", "CHANGES_REQUESTED", "REJECTED")):
+            blocked("G4_DRAFT_STALE", project, "Reload the current immutable G4 draft.")
+        head = {**head, "draft_revision": head["revision"], "revision": project_revision}
     if draft.current_gate_heads(store, project) != head["manifest"]["gate_heads"]:
         blocked("G4_SOURCE_STALE", project, "Current G1/G2/G3 approval differs from the draft.")
     return head
@@ -151,15 +161,24 @@ def mark(plan: dict, story_sha: str, reason: str, source_direction: dict):
 
 
 def mount(app, store, idempotent):
+    @app.post("/api/v1/projects/{project_id}/storyboard/candidate")
+    def prepare_candidate(project_id: str, body: G4CandidateInput,
+                          key: str = Header(alias="Idempotency-Key", min_length=12)):
+        return idempotent(project_id, "storyboard-g4-candidate", key, body.model_dump(),
+                          lambda: draft.prepare_review_candidate(
+                              store, project_id, body.expected_revision))
+
     @app.get("/api/v1/projects/{project_id}/storyboard/scenes")
     def scenes(project_id: str, offset: int = Query(default=0, ge=0),
                limit: int = Query(default=30, ge=1, le=100)):
         head = current(store, project_id)
+        from backend.app.projects.gates import GateService
+        g4 = next(item for item in GateService(store).board(project_id) if item["gate_id"] == "G4")
         items = head["timeline"]["scenes"]
         authored_plans = {p["setup_id"]: p for p in head["blueprint"]["setup_plans"]}
         return {"project_revision": head["revision"], "draft_manifest_sha256": head["manifest_sha256"],
                 "story_revision_sha256": head["blueprint"]["story_revision_sha256"],
-                "status": "G4_DRAFT_NOT_OPERATOR_APPROVED",
+                "status": "G4_DRAFT_NOT_OPERATOR_APPROVED", "g4_gate": g4,
                 "total": len(items), "offset": offset, "limit": limit,
                 "scenes": [{"scene_id": s["scene_id"], "setup_id": s["setup_id"],
                             "template_id": s["template_id"], "variant_id": s["variant_id"],
@@ -173,8 +192,10 @@ def mount(app, store, idempotent):
     @app.get("/api/v1/projects/{project_id}/storyboard/timeline")
     def timeline(project_id: str):
         head = current(store, project_id)
+        from backend.app.projects.gates import GateService
+        g4 = next(item for item in GateService(store).board(project_id) if item["gate_id"] == "G4")
         return {"project_revision": head["revision"], "draft_manifest_sha256": head["manifest_sha256"],
-                "status": "G4_DRAFT_NOT_OPERATOR_APPROVED", "timeline": head["timeline"]}
+                "status": "G4_DRAFT_NOT_OPERATOR_APPROVED", "g4_gate": g4, "timeline": head["timeline"]}
 
     @app.get("/api/v1/projects/{project_id}/storyboard/scenes/{scene_id}/asset-options/{layer_id}")
     def asset_options(project_id: str, scene_id: str, layer_id: str):

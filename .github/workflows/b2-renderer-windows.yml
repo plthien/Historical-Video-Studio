@@ -13,6 +13,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
@@ -22,6 +23,8 @@ jobs:
       - name: Diff/lineage
         shell: pwsh
         run: |
+          $expected = '${{ github.event.pull_request.head.sha || github.sha }}'
+          if ((git rev-parse HEAD) -ne $expected) { throw "Checkout HEAD does not match workflow head: $expected" }
           git diff --check origin/main...HEAD
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Install exact Remotion lock on Windows

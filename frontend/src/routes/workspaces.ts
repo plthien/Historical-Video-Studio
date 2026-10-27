@@ -5,5 +5,5 @@ export const workspaces = [
   {id: "voice", title: "Voice Studio (G2)", owner: "A2", enabled: true},
   {id: "assets", title: "Historical Assets (G3)", owner: "A3", enabled: true},
   {id: "storyboard", title: "Motion Storyboard (G4)", owner: "B1/B2", enabled: true},
-  {id: "delivery", title: "Render & Delivery (G5)", owner: "B3", enabled: false}
+  {id: "delivery", title: "Render & Delivery (G5)", owner: "B3", enabled: true}
 ] as const;

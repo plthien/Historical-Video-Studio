@@ -1,6 +1,6 @@
 /** Typed B2-05 transport. Source identities are returned by the Windows-local host,
  * never minted by browser form inputs. */
-import {request} from './client';
+import {request,type Gate} from './client';
 import type {HistoryProps} from '../../../renderer/remotion/HistoryComposition';
 export interface StoryboardScene {
   scene_id:string;setup_id:string;template_id:string;variant_id:string;
@@ -21,10 +21,11 @@ export interface AssetOptions {
 }
 export interface ScenePage {
  project_revision:number;draft_manifest_sha256:string;story_revision_sha256:string;status:'G4_DRAFT_NOT_OPERATOR_APPROVED';
+ g4_gate:Gate;
  total:number;offset:number;limit:number;scenes:StoryboardScene[];
 }
 export interface TimelineView {project_revision:number;draft_manifest_sha256:string;
- status:'G4_DRAFT_NOT_OPERATOR_APPROVED';timeline:HistoryProps['timeline'];}
+ status:'G4_DRAFT_NOT_OPERATOR_APPROVED';g4_gate:Gate;timeline:HistoryProps['timeline'];}
 export interface BrowserPreview {project_revision:number;draft_manifest_sha256:string;
  status:'G4_DRAFT_VIEW_ONLY';props:HistoryProps;}
 export interface EditResult {timeline:HistoryProps['timeline'];recomputed_setup_ids:string[];

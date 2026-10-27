@@ -305,7 +305,21 @@ class GateService:
             if gate != "G1":
                 # A2/A3/B1–B3 must supply real pipeline evidence before approval.
                 # No generic artifact, schema-valid fixture, or invented table can authorize them.
-                if payload["decision"] == "APPROVED" and gate not in ("G2","G3"):
+                if payload["decision"] == "APPROVED" and gate == "G4":
+                    # Owner reconstruction happens while this approval transaction
+                    # holds the write lock, so a browser-supplied hash or stale draft
+                    # can never become authority.
+                    from backend.app.director.draft import verify_review_candidate
+                    verify_review_candidate(self.store, project_id, candidate[0], candidate[1])
+                    row = db.execute(
+                        "SELECT manifest_sha256,project_revision FROM g4_compiled_drafts WHERE project_id=?",
+                        (project_id,)).fetchone()
+                    if not row or row[1] != revision:
+                        _fail("G4_DRAFT_STALE", gate, "Current G4 draft changed during approval.", gate)
+                elif payload["decision"] == "APPROVED" and gate == "G5":
+                    from backend.app.render.worker import verify_g5_candidate
+                    verify_g5_candidate(self.store, db, project_id, candidate[0], candidate[1])
+                elif payload["decision"] == "APPROVED" and gate not in ("G2", "G3"):
                     _fail("GATE_ILLEGAL_TRANSITION", gate, "Owner pipeline approval evidence is not implemented.", gate)
                 if gate == "G3" and payload["decision"] == "APPROVED":
                     from backend.app.assets.resolution import AssetResolution

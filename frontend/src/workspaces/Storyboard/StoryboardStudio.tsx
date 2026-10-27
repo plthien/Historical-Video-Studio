@@ -2,6 +2,7 @@ import {useCallback,useEffect,useMemo,useRef,useState} from 'react';
 import {ApiError} from '../../api/client';
 import {storyboardApi,type ScenePage,type BrowserPreview,type StoryboardScene,type AssetOptions} from '../../api/storyboard';
 import {RemotionPreview} from '../../components/RemotionPreview';
+import {deliveryApi} from '../../api/delivery';
 
 function describe(error:unknown){
  if(error instanceof ApiError)return `${error.status} ${error.problem.code}: ${error.problem.message} — ${error.problem.remediation}`;
@@ -125,7 +126,21 @@ export function StoryboardStudio({projectId,onRefresh}:{projectId:string;onRefre
   {page&&<>
    <div className="panel">
     <h3>Scenes ({page.total})</h3>
-    <small>Revision {page.project_revision} · {page.status} · manifest {currentSource?.slice(0,16)}</small>
+    <small>Revision {page.project_revision} · G4 {page.g4_gate.state} · manifest {currentSource?.slice(0,16)}</small>
+    <p>Preview is view-only. Production render authority requires this exact candidate and an explicit operator decision.</p>
+    <div className="buttonrow">
+     <button disabled={!!pending||page.g4_gate.state==='APPROVED'} onClick={()=>void operation('Prepare G4 review candidate',async()=>{
+      await deliveryApi.prepareG4(projectId,page.project_revision,crypto.randomUUID());await load(offset,selected??undefined);await onRefresh();
+     })}>Prepare G4 review candidate</button>
+     <button disabled={!!pending||page.g4_gate.state!=='READY_FOR_REVIEW'||!page.g4_gate.candidate_sha256||!page.g4_gate.dependency_fingerprint}
+      onClick={()=>void operation('Approve inspected G4',async()=>{
+       const gate=page.g4_gate;if(!gate.candidate_sha256||!gate.dependency_fingerprint)return;
+       await deliveryApi.decide(projectId,'G4',{decision:'APPROVED',candidate_sha256:gate.candidate_sha256,
+        dependency_fingerprint:gate.dependency_fingerprint,expected_revision:page.project_revision,
+        affected_ids:[],comment:'Explicit operator approval after Storyboard Player inspection'},crypto.randomUUID());
+       await load(offset,selected??undefined);await onRefresh();
+      })}>Approve inspected G4</button>
+    </div>
     <div className="buttonrow">
      <button disabled={offset===0||!!pending} onClick={()=>void operation('Previous scenes',()=>load(Math.max(0,offset-24)))}>Previous 24</button>
      <button disabled={offset+24>=page.total||!!pending} onClick={()=>void operation('Next scenes',()=>load(offset+24))}>Next 24</button>

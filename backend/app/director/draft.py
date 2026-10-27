@@ -2,7 +2,9 @@
 from __future__ import annotations
 
 import json
+import os
 from hashlib import sha256
+from pathlib import Path
 
 from backend.app.contracts import ContractViolation
 from backend.app.director.fingerprint import canonical, digest
@@ -125,6 +127,106 @@ def load(store, project, *, allow_auxiliary_stale=False):
             "manifest":manifest, "timeline":timeline, "blueprint":blueprint}
 
 
+def _g4_candidate_document(store, project):
+    """Build the only G4 candidate identity from verified owner state.
+
+    The document deliberately contains identities, not browser props or paths.  Its
+    dependency fingerprint changes whenever any production render dependency does.
+    """
+    head = load(store, project)
+    current_revision = store.revision(project)
+    if head["revision"] != current_revision:
+        # A G4 approval itself advances the project CAS without altering the
+        # immutable draft.  No other revision may borrow that exception.
+        from backend.app.projects.gates import GateService
+        state = {item["gate_id"]: item for item in GateService(store).board(project)}["G4"]
+        if not (current_revision > head["revision"] and state["state"] in
+                ("APPROVED", "CHANGES_REQUESTED", "REJECTED")):
+            _fail("G4_DRAFT_STALE", project, "Reload the current immutable G4 draft.")
+    manifest = head["manifest"]
+    font = manifest["font_identity"]
+    font_path = Path(os.environ.get("WINDIR", r"C:\Windows")) / "Fonts" / font["font_file"]
+    try:
+        font_bytes = font_path.read_bytes()
+    except OSError:
+        _fail("FONT_IDENTITY_STALE", project, "Restore the pinned native Windows font.")
+    if sha256(font_bytes).hexdigest() != font["font_sha256"]:
+        _fail("FONT_IDENTITY_STALE", project, "Pinned font bytes changed; recompile G4.")
+    # Verify every selected original/derivative is still content-addressed locally.
+    asset_ids = sorted({value for scene in head["timeline"]["scenes"]
+                        for layer in scene["layers"]
+                        for value in (layer.get("asset_id"), layer.get("mask", {}).get("asset_id"))
+                        if value})
+    with store._connection() as db:
+        resolved = {}
+        for asset_id in asset_ids:
+            row = db.execute(
+                "SELECT original_sha256 FROM asset_approval_events WHERE project_id=? AND candidate_id=? "
+                "UNION ALL SELECT i.original_sha256 FROM asset_choice_set_items i "
+                "JOIN asset_choice_set_events e ON e.set_id=i.set_id WHERE e.project_id=? AND i.candidate_id=? "
+                "UNION ALL SELECT derivative_sha256 FROM asset_mask_derivative_events "
+                "WHERE project_id=? AND derivative_asset_id=?",
+                (project, asset_id, project, asset_id, project, asset_id)).fetchall()
+            if len({item[0] for item in row}) != 1:
+                _fail("G4_ASSET_NOT_APPROVED", asset_id,
+                      "Every selected source or derivative needs one current reviewed identity.")
+            content_sha = row[0][0]
+            store.get_artifact(content_sha)
+            resolved[asset_id] = content_sha
+        g2 = db.execute("SELECT approval_id FROM gate_heads WHERE project_id=? AND gate_id='G2'",
+                        (project,)).fetchone()
+        voice = db.execute(
+            "SELECT f.audio_sha256,f.transcript_sha256,w.map_sha256 FROM final_audio f "
+            "JOIN word_maps w ON w.project_id=f.project_id AND w.approval_id=f.approval_id "
+            "WHERE f.project_id=? AND f.approval_id=?",
+            (project, g2[0] if g2 else None)).fetchone()
+    if not voice or tuple(voice)[0] != manifest["audio_sha256"] or tuple(voice)[2] != manifest["word_map_sha256"]:
+        _fail("WORD_MAP_STALE", project, "Current G2 WAV and word map must match this G4 draft.")
+    store.get_artifact(voice[0]); store.get_artifact(voice[2])
+    dependencies = {
+        "draft_manifest_sha256": head["manifest_sha256"],
+        "timeline_sha256": manifest["timeline_sha256"],
+        "gate_heads": manifest["gate_heads"],
+        "numeric_series_heads": manifest.get("numeric_series_heads", {}),
+        "audio_sha256": voice[0], "transcript_sha256": voice[1],
+        "word_map_sha256": voice[2], "font_identity": font,
+        "runtime_identity": manifest["runtime_identity"],
+        "asset_snapshot_sha256": manifest["asset_snapshot_sha256"],
+        "effective_asset_snapshot_sha256": manifest["effective_asset_snapshot_sha256"],
+        "resolved_assets": resolved,
+    }
+    return {"schema_version": "G4ReviewCandidate.v1", "project_id": project,
+            "generation": head["generation"], "project_revision": head["revision"],
+            "dependencies": dependencies,
+            "dependency_fingerprint": digest(dependencies)}
+
+
+def prepare_review_candidate(store, project, expected_revision):
+    """Stage current owner-produced G4 bytes for explicit human review."""
+    if store.revision(project) != expected_revision:
+        _fail("APPROVAL_REVISION_CONFLICT", project, "Reload before preparing G4 review.")
+    document = _g4_candidate_document(store, project)
+    raw = canonical(document)
+    candidate_sha = store.put_artifact(raw, "g4_review_candidate")
+    from backend.app.projects.gates import GateService
+    GateService(store).publish_candidate(project, "G4", candidate_sha,
+                                         document["dependency_fingerprint"], expected_revision)
+    return {"candidate_sha256": candidate_sha,
+            "dependency_fingerprint": document["dependency_fingerprint"],
+            "project_revision": expected_revision}
+
+
+def verify_review_candidate(store, project, candidate_sha, dependency_fingerprint):
+    """Recreate and compare owner state; callers must additionally hold a DB write txn."""
+    expected = _g4_candidate_document(store, project)
+    raw = canonical(expected)
+    if (sha256(raw).hexdigest() != candidate_sha or
+            expected["dependency_fingerprint"] != dependency_fingerprint or
+            store.get_artifact(candidate_sha) != raw):
+        _fail("G4_SOURCE_STALE", project, "Prepare and review the latest verified G4 candidate.")
+    return expected
+
+
 def publish(store, project, timeline, blueprint, maps, map_requests, font_identity,
             *, expected_revision, previous=None, edit_kind=None, layer_overrides=None,
             crop_overrides=None, motion_overrides=None,
@@ -214,7 +316,7 @@ def publish(store, project, timeline, blueprint, maps, map_requests, font_identi
                 db.execute("INSERT INTO g4_compiled_drafts VALUES(?,?,?,?)",
                            (project, generation, new_revision, manifest_sha))
         else:
-            if row != (previous["generation"], previous["revision"],
+            if row != (previous["generation"], previous.get("draft_revision", previous["revision"]),
                        previous["manifest_sha256"]):
                 _fail("G4_DRAFT_STALE", project,
                       "Another trusted draft superseded the supplied G4 baseline.")
