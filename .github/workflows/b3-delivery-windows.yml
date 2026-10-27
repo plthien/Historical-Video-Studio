@@ -11,7 +11,9 @@ jobs:
       contents: read
     steps:
       - uses: actions/checkout@v4
-        with: {fetch-depth: 0}
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
       - uses: actions/setup-python@v5
         with: {python-version: '3.12'}
       - uses: actions/setup-node@v4
@@ -19,6 +21,8 @@ jobs:
       - name: Exact-head lineage and whitespace
         shell: pwsh
         run: |
+          $expected = '${{ github.event.pull_request.head.sha || github.sha }}'
+          if ((git rev-parse HEAD) -ne $expected) { throw "Checkout HEAD does not match workflow head: $expected" }
           git diff --check origin/main...HEAD
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Native FFmpeg and FFprobe
