@@ -83,12 +83,42 @@ jobs:
             throw 'B3 exact delivery fixture did not produce a QC-passed real render'
           }
           $verdict = Get-Content renderer/.artifacts/b3-delivery/three-p1-verdict.json -Raw | ConvertFrom-Json
-          if ($verdict.restart.result -ne 'RECOVERED_QUEUED_FINAL_RENDER_AUTO_DISPATCHED' -or
+          if ($verdict.restart.result -ne 'REAL_WINDOWS_KILL_RESTART_PASS' -or
               $verdict.black_frame.problem -ne 'QC_VISUAL_ANOMALY' -or
               $verdict.near_silent_aac.problem -ne 'QC_AUDIO_CONTENT_MISMATCH' -or
               $verdict.review.muted_listened_seconds -ne 0 -or
               $verdict.review.audible_complete -ne 'PASS') {
             throw 'B3 three-P1 verdict evidence is incomplete'
+          }
+          $g04 = Get-Content renderer/.artifacts/b3-delivery/g04-real-process-kill-restart.json -Raw | ConvertFrom-Json
+          $video = @($g04.media.ffprobe.streams | Where-Object codec_type -eq 'video')[0]
+          $audio = @($g04.media.ffprobe.streams | Where-Object codec_type -eq 'audio')[0]
+          $realRenderer = @($g04.original_process.owned_processes | Where-Object { $_.tsx_cmd -and $_.render_final_ts })
+          if ($g04.result -ne 'REAL_WINDOWS_KILL_RESTART_PASS' -or
+              $g04.os -ne 'Windows' -or
+              $realRenderer.Count -lt 1 -or
+              -not $g04.original_process.live_before_kill -or
+              -not $g04.original_process.renderer_dead_after_kill -or
+              $g04.restarted_process.recovery.resume_existing_provider_task -ne 1 -or
+              $g04.original_identity.job_id -ne $g04.recovered_identity.job_id -or
+              $g04.original_identity.attempt_id -ne $g04.recovered_identity.attempt_id -or
+              $g04.original_identity.manifest_sha256 -ne $g04.recovered_identity.manifest_sha256 -or
+              -not $g04.recovered_identity.lease_changed -or
+              $g04.recovered_identity.retry_count -ne $g04.original_identity.retry_count -or
+              $g04.media.qc_status -ne 'PASS' -or
+              -not $g04.media.g5_candidate_sha256 -or
+              $video.codec_name -ne 'h264' -or $audio.codec_name -ne 'aac' -or
+              $g04.stale_source_negative.state -ne 'FAILED_TERMINAL' -or
+              $g04.stale_source_negative.error_code -ne 'G4_APPROVAL_REQUIRED' -or
+              $g04.stale_source_negative.renderer_process_started -or
+              $g04.stale_source_negative.output_published -or
+              $g04.stale_source_negative.g5_candidate_published -or
+              $g04.single_owner.duplicate_owners -ne 0 -or
+              $g04.single_owner.successful_operations -ne 1 -or
+              $g04.single_owner.old_renderer_still_alive -or
+              $g04.unapproved_export -or
+              -not $g04.cleanup_ok) {
+            throw 'B3 G04 real Windows kill/restart evidence is incomplete'
           }
       - name: Real Delivery browser reload playback credits and download
         shell: pwsh
