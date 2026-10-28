@@ -136,6 +136,15 @@ def test_http_g4_initial_compile_without_map_requires_no_map_request(tmp_path):
     story["asset_requirements"]=[x for x in long_story["asset_requirements"]
                                  if x["requirement_id"]=="req_09_source_page"]
     story["visual_setups"]=[x for x in long_story["visual_setups"] if x["setup_id"]=="setup_09"]
+    # The generic multi-template example repeats the same occurrence=0 cue
+    # on beats 09_1 and 09_2. For this isolated positive timing fixture,
+    # bind beat 09_2 to the NEXT actual "the" in its frozen narration.
+    # Keep the real compiler CUE_RANGE_INVALID guard unchanged.
+    beats=story["visual_setups"][0]["direction"]["visual_beats"]
+    assert [x["beat_id"] for x in beats]==["beat_09_0","beat_09_1","beat_09_2"]
+    assert beats[1]["cue"]==beats[2]["cue"]=={
+        "section_id":"sec_09","phrase":"the","occurrence":0}
+    beats[2]["cue"]={"section_id":"sec_09","phrase":"the","occurrence":1}
     payload=next(x["template_payload"] for x in long_blueprint["setup_plans"] if x["setup_id"]=="setup_09")
     pid=story["project"]["project_id"]
     app=create_app(tmp_path/"nonmap.sqlite",tmp_path/"media")
