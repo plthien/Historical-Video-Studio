@@ -82,8 +82,14 @@ try {
         if (-not (Test-Path (Join-Path $repo "renderer\node_modules"))) { Run-Checked "Install pinned renderer" "npm.cmd" @("ci", "--prefix", "renderer") }
     }
     # Dist/index.html existing does not prove the bundle matches this checkout.
-    $build = & (Join-Path $PSScriptRoot "verify-frontend-build.ps1") -RepoRoot $repo -SkipBootstrap:$SkipBootstrap
+    # Verification writes an identity manifest. Read it from disk rather than
+    # depending on PowerShell 5.1 pipeline output/enumeration semantics.
+    & (Join-Path $PSScriptRoot "verify-frontend-build.ps1") -RepoRoot $repo -SkipBootstrap:$SkipBootstrap | Out-Host
     if ($LASTEXITCODE -and $LASTEXITCODE -ne 0) { throw "Frontend bundle identity verification failed." }
+    $buildPath = Join-Path $frontend "build-info.json"
+    if (-not (Test-Path -LiteralPath $buildPath)) { throw "FRONTEND_BUNDLE_STALE: verified manifest absent." }
+    $build = Get-Content -LiteralPath $buildPath -Raw | ConvertFrom-Json
+    if (-not $build.source_commit -or -not $build.bundle_sha256) { throw "FRONTEND_BUNDLE_STALE: manifest identity incomplete." }
     $evidence.frontend_source_commit = $build.source_commit
     $evidence.frontend_bundle_sha256 = $build.bundle_sha256
     if (-not (Test-Path $venvPython)) { throw "Missing .venv. Run without -SkipBootstrap first." }
