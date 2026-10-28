@@ -1,3 +1,4 @@
+import {openExistingProject} from "./project-workflow-helper";
 import {test,expect} from '@playwright/test';
 import {mkdirSync,writeFileSync} from 'node:fs';
 import {resolve} from 'node:path';
@@ -18,8 +19,7 @@ test('pr10 source-authorized T06 multiline document and adversarial critical cli
  expect(excerpt).toBeDefined();
  expect(excerpt.text.includes('\n')).toBeTruthy();
  await page.goto('/');
- await page.getByLabel('Project ID').fill(project);
- await page.getByRole('button',{name:'Open existing project'}).click();
+ await openExistingProject(page,project);
  await page.getByRole('button',{name:/Motion Storyboard/}).click();
  await page.getByRole('button',{name:'Load real read-only Remotion Player'}).click();
  const stage=page.getByTestId('player-stage');
