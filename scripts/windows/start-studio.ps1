@@ -80,11 +80,12 @@ try {
         }
         Run-Checked "Install pinned backend" $venvPython @("-m", "pip", "install", "--disable-pip-version-check", "-r", "backend/requirements.lock")
         if (-not (Test-Path (Join-Path $repo "renderer\node_modules"))) { Run-Checked "Install pinned renderer" "npm.cmd" @("ci", "--prefix", "renderer") }
-        if (-not (Test-Path (Join-Path $frontend "index.html"))) {
-            Run-Checked "Install pinned frontend" "npm.cmd" @("ci", "--prefix", "frontend")
-            Run-Checked "Build frontend" "npm.cmd" @("run", "build", "--prefix", "frontend")
-        }
     }
+    # Dist/index.html existing does not prove the bundle matches this checkout.
+    $build = & (Join-Path $PSScriptRoot "verify-frontend-build.ps1") -RepoRoot $repo -SkipBootstrap:$SkipBootstrap
+    if ($LASTEXITCODE -and $LASTEXITCODE -ne 0) { throw "Frontend bundle identity verification failed." }
+    $evidence.frontend_source_commit = $build.source_commit
+    $evidence.frontend_bundle_sha256 = $build.bundle_sha256
     if (-not (Test-Path $venvPython)) { throw "Missing .venv. Run without -SkipBootstrap first." }
     if (-not (Test-Path (Join-Path $frontend "index.html"))) { throw "Missing frontend build. Run without -SkipBootstrap first." }
     $probe = [System.Net.Sockets.TcpListener]::new([System.Net.IPAddress]::Loopback, $Port)
@@ -121,7 +122,12 @@ try {
         $project = Invoke-RestMethod -Uri "http://127.0.0.1:$Port/api/v1/projects/$VerifyProjectId" -TimeoutSec 5
         $evidence.project_read = [ordered]@{project_id=$project.project_id; project_revision=$project.project_revision}
     }
-    Write-Host "STUDIO_READY http://127.0.0.1:$Port/ DB=$env:HVS_DB PID=$($backend.Id)"
+    $uiBuild = Invoke-RestMethod -Uri "http://127.0.0.1:$Port/build-info.json" -TimeoutSec 5
+    if ($uiBuild.bundle_sha256 -ne $build.bundle_sha256 -or $uiBuild.source_commit -ne $build.source_commit) {
+        throw "FRONTEND_BUNDLE_STALE: served UI build-info disagrees with verified checkout."
+    }
+    Write-Host "STUDIO_READY http://127.0.0.1:$Port/ DB=$env:HVS_DB PID=$($backend.Id) UI=$($build.source_commit)"
+
     if ($Smoke) { Write-Host "STUDIO_SMOKE_PASS"; return }
     if (-not $NoBrowser) { Start-Process "http://127.0.0.1:$Port/" }
     Write-Host "Press Ctrl+C to stop the local studio."
