@@ -92,7 +92,7 @@ def test_live_authority_rejects_same_story_identity_under_distinct_project_title
 
 
 @pytest.mark.parametrize("mutation,expected", [
-    ("claim_stale", ":G1:STALE:"),
+    ("claim_stale", ":G1:READY_FOR_REVIEW:"),
     ("asset_stale", ":G3:STALE:"),
     ("g4_stale", ":G4:STALE:"),
     ("g5_stale", ":G5:STALE:"),
