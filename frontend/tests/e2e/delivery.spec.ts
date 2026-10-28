@@ -4,7 +4,7 @@ import {createHash} from 'node:crypto';
 import {mkdirSync,readFileSync,writeFileSync} from 'node:fs';
 import {resolve} from 'node:path';
 
-test('full-flow delivery reload exposes exact QC-passed audiovisual export',async({page,request})=>{
+test('full-flow delivery reload exposes exact QC-passed audiovisual export',async({page,request},testInfo)=>{
  test.skip(process.env.HVS_B3_FIXTURE!=='1','Requires native B3 SQLite/Remotion fixture');
  const configPath=process.env.HVS_FULL_FLOW_CONFIG;
  const project=configPath
@@ -17,6 +17,21 @@ test('full-flow delivery reload exposes exact QC-passed audiovisual export',asyn
  await expect(page.getByText(/G4 production authority/)).toBeVisible();
  await expect(page.getByText(/Status: APPROVED/).first()).toBeVisible();
  const media=page.locator('video');await expect(media).toBeVisible();
+ const originalViewport=page.viewportSize()!;
+ for(const dimensions of [{width:1366,height:768},{width:1920,height:1080}]){
+   await page.setViewportSize(dimensions);
+   await expect(media).toBeVisible();
+   await page.screenshot({path:testInfo.outputPath(`pr13-g5-populated-actual-video-${dimensions.width}.png`),animations:"disabled"});
+   const metrics=await page.evaluate(()=>{
+     const video=document.querySelector('video')!.getBoundingClientRect();
+     return {overflow:document.documentElement.scrollWidth>document.documentElement.clientWidth+2,
+             width:video.width,height:video.height,viewport:innerWidth};
+   });
+   expect(metrics.overflow).toBe(false);
+   expect(metrics.width).toBeGreaterThan(200);
+   expect(metrics.width).toBeLessThan(metrics.viewport);
+ }
+ await page.setViewportSize(originalViewport);
  const start=page.getByRole('button',{name:'Start server-issued view/listen review'});
  if(await start.isEnabled()){
   await start.click();
