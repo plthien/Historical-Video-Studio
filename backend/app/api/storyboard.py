@@ -200,6 +200,17 @@ def mount(app, store, idempotent):
                 )
             """)
 
+    def prevent_reauthoring_current_compiled_story(db, project_id: str, story_sha: str):
+        existing=db.execute("SELECT manifest_sha256 FROM g4_compiled_drafts "
+                            "WHERE project_id=?", (project_id,)).fetchone()
+        if not existing:
+            return
+        manifest=json.loads(store.get_artifact(existing[0]))
+        if manifest["story_sha256"] == story_sha:
+            blocked("G4_DRAFT_EXISTS", project_id,
+                    "The current G1 Story already has a frozen G4 draft. "
+                    "Use bounded scene edits; reauthoring source setup/map requires a new G1 revision.")
+
     @app.get("/api/v1/projects/{project_id}/storyboard/blueprint-authoring")
     def read_blueprint_authoring(project_id: str):
         ensure_authored_payload_table()
@@ -250,6 +261,7 @@ def mount(app, store, idempotent):
                 row = db.execute("SELECT revision FROM projects WHERE project_id=?", (project_id,)).fetchone()
                 if row is None or row[0] != body.expected_revision:
                     blocked("REVISION_CONFLICT", project_id, "Reload current project before saving typed G4 payload.")
+                prevent_reauthoring_current_compiled_story(db, project_id, body.story_sha256)
                 db.execute("INSERT INTO g4_authored_setup_payloads VALUES(?,?,?,?,?,?) "
                            "ON CONFLICT(project_id,story_sha256,setup_id) DO UPDATE SET "
                            "template_id=excluded.template_id,registry_version=excluded.registry_version,"
@@ -369,6 +381,7 @@ def mount(app, store, idempotent):
                                (project_id,)).fetchone()
                 if not rev or rev[0]!=body.expected_revision:
                     blocked("REVISION_CONFLICT",project_id,"Refresh G4 map authoring before saving.")
+                prevent_reauthoring_current_compiled_story(db,project_id,body.story_sha256)
                 db.execute("INSERT INTO g4_reviewed_map_requests VALUES(?,?,?,?,?) "
                            "ON CONFLICT(project_id,story_sha256,requirement_id) DO UPDATE SET "
                            "source_original_sha256=excluded.source_original_sha256,"
