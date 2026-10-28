@@ -42,7 +42,9 @@ export class ApiError extends Error {
     super(problem.message);
   }
 }
-export const origin = import.meta.env.VITE_API_ORIGIN ?? "http://127.0.0.1:8000/api/v1";
+// Replaced by Vite from config/ports.json; E2E may set VITE_API_ORIGIN separately.
+declare const __HVS_DEFAULT_API_ORIGIN__: string;
+export const origin = import.meta.env.VITE_API_ORIGIN ?? __HVS_DEFAULT_API_ORIGIN__;
 export async function request<T>(path: string, method = "GET", payload?: unknown, idempotencyKey?: string,
                                  signal?: AbortSignal): Promise<T> {
   const response = await fetch(origin + path, {
