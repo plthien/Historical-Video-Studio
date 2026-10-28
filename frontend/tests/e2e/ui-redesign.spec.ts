@@ -3,7 +3,7 @@ import {mkdirSync,readFileSync,writeFileSync} from "node:fs";
 import path from "node:path";
 import {execFileSync} from "node:child_process";
 
-const output=path.resolve("frontend/.artifacts/ui-redesign");
+const output=path.resolve(".artifacts/ui-redesign");
 const fixture=path.resolve("../contracts/examples/visual_cases/StoryPackage.visual_cases.synthetic.json");
 const widths=[{width:1366,height:768},{width:1920,height:1080}];
 
