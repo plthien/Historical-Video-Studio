@@ -188,8 +188,16 @@ def create_app(database: str | Path | None = None, media_root: str | Path | None
                     task.cancel()
 
     app = FastAPI(title="Historical Video Studio Local API", version="1.0.0", lifespan=lifespan)
-    app.add_middleware(CORSMiddleware, allow_origins=["http://127.0.0.1:5173", "http://localhost:5173",
-                                                       "http://127.0.0.1:5174", "http://localhost:5174"],
+    # Local frontend origins are sourced from the same checked-in ports.json
+    # as the Windows launcher and Vite. Retain isolated Playwright origins.
+    port_config = json.loads((Path(__file__).resolve().parents[3] / "config" / "ports.json").read_text(encoding="utf-8"))
+    frontend_port = port_config["frontend_port"]
+    if not isinstance(frontend_port, int) or isinstance(frontend_port, bool) or not 1 <= frontend_port <= 65535:
+        raise ValueError("Invalid frontend_port in config/ports.json")
+    cors_ports = {frontend_port, 5173, 5174}  # E2E's separately bound Vite servers.
+    cors_origins = [f"http://{host}:{port}" for port in sorted(cors_ports)
+                    for host in ("127.0.0.1", "localhost")]
+    app.add_middleware(CORSMiddleware, allow_origins=cors_origins,
                        allow_credentials=False, allow_methods=["GET", "POST", "PUT", "PATCH"],
                        allow_headers=["Content-Type", "Idempotency-Key"])
     app.state.store, app.state.gates, app.state.queue = store, gates, queue
