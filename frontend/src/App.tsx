@@ -55,7 +55,13 @@ export function App() {
     // project after Create/Open selected a different SQLite project.
     const prior = activeProjectId.current;
     if (!switchProject && prior !== null && prior !== projectId) return;
-    if (switchProject) activeProjectId.current = projectId;
+    if (switchProject) {
+      activeProjectId.current = projectId;
+      setBrief("");
+      setClipboardDenied(false);
+      setSectionEdit(null);
+      setSettings({topic:"",audience:"General adults",runtime_minutes:7,editorial_goals:"Clear evidence-led history"});
+    }
     const generation = ++refreshGeneration.current;
     try {
       const [current, story, taskList] = await Promise.all([
@@ -157,8 +163,14 @@ export function App() {
   const active = workspaces.find(w => w.id === workspace) ?? workspaces[0];
   const g1 = project?.gates.find(g => g.gate_id === "G1");
   const nextGate = project?.gates.find(g=>g.state!=="APPROVED");
+  const g2=project?.gates.find(g=>g.gate_id==="G2");
+  const g3=project?.gates.find(g=>g.gate_id==="G3");
+  const chooseParallel = g2?.state==="APPROVED"?"assets":
+    g3?.state==="APPROVED"?"voice":
+    (g2?.blockers.length&&!g3?.blockers.length)?"assets":
+    (g3?.blockers.length&&!g2?.blockers.length)?"voice":"voice";
   const nextWorkspace = !storyView?"project":nextGate?.gate_id==="G1"?"story":
-    nextGate?.gate_id==="G2"?"voice":nextGate?.gate_id==="G3"?"assets":
+    nextGate?.gate_id==="G2"||nextGate?.gate_id==="G3"?chooseParallel:
     nextGate?.gate_id==="G4"?"storyboard":"delivery";
   async function buildBrief(){
     if(!project)return;
