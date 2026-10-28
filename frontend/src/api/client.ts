@@ -28,6 +28,9 @@ export interface JobInfo {
   remediation:string|null; progress:{completed:number;total:number}|null;
   output_available?:boolean;
 }
+export interface AuthoringBriefInput {
+  topic:string; audience:string; runtime_minutes:number; editorial_goals:string;
+}
 export interface ProjectCreated { project_id: string; project_revision: number; next_action: string; }
 export interface GateDecision {
   decision: "APPROVED" | "CHANGES_REQUESTED" | "REJECTED";
@@ -55,6 +58,22 @@ export async function request<T>(path: string, method = "GET", payload?: unknown
 }
 const safe = encodeURIComponent;
 export const api = {
+  listProjects() { return request<{project_id:string;title:string;project_revision:number}[]>("/projects"); },
+  authoringSettings(id:string) {
+    return request<{settings:AuthoringBriefInput|null}>(`/projects/${safe(id)}/authoring-settings`);
+  },
+  saveAuthoringSettings(id:string,settings:AuthoringBriefInput,expected_revision:number,key:string) {
+    return request<{project_revision:number}>(`/projects/${safe(id)}/authoring-settings`,"PUT",
+      {...settings,expected_revision},key);
+  },
+  buildBrief(id:string,settings:AuthoringBriefInput) {
+    return request<{brief_version:string;content:string;file_name:string}>(`/projects/${safe(id)}/authoring-brief`,"POST",settings);
+  },
+  patchSection(id:string,sectionId:string,expected_revision:number,narration:string,reason:string,key:string) {
+    return request<{project_revision:number;changed:boolean;candidate_sha256:string}>(
+      `/projects/${safe(id)}/story/sections/${safe(sectionId)}`,"PATCH",
+      {expected_revision,narration,reason},key);
+  },
   createProject(title: string) {
     return request<ProjectCreated>("/projects", "POST", {
       title, language: "en", style_id: "HistoryEditorialPaper.v1"
