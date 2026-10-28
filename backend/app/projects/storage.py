@@ -29,6 +29,13 @@ class ProjectStore:
                     PRIMARY KEY (project_id, revision),
                     FOREIGN KEY (project_id) REFERENCES projects(project_id)
                 );
+                CREATE TABLE IF NOT EXISTS story_section_edits (
+                    project_id TEXT NOT NULL,revision INTEGER NOT NULL,
+                    section_id TEXT NOT NULL,reason TEXT NOT NULL,
+                    previous_story_sha256 TEXT NOT NULL,new_story_sha256 TEXT NOT NULL,
+                    PRIMARY KEY(project_id,revision,section_id),
+                    FOREIGN KEY(project_id) REFERENCES projects(project_id)
+                );
                 CREATE TABLE IF NOT EXISTS artifacts (
                     sha256 TEXT PRIMARY KEY, byte_count INTEGER NOT NULL, kind TEXT NOT NULL,
                     relative_path TEXT NOT NULL UNIQUE
@@ -69,7 +76,8 @@ class ProjectStore:
             raise ContractViolation("PROJECT_NOT_FOUND", project_id, "Create the project before importing.")
         return row[0]
 
-    def import_story(self, candidate: StoryCandidate, expected_revision: int) -> int:
+    def import_story(self, candidate: StoryCandidate, expected_revision: int,
+                     audit: dict | None = None) -> int:
         from backend.app.projects.gates import GateService
         GateService(self)  # ensure the gate ledger exists before same-transaction invalidation
         with self._transaction() as db:
@@ -108,6 +116,15 @@ class ProjectStore:
                        (candidate.project_id, new_revision, candidate.sha256, candidate.canonical_bytes))
             db.execute("UPDATE projects SET revision=? WHERE project_id=? AND revision=?",
                        (new_revision, candidate.project_id, row[0]))
+            if audit is not None:
+                if (not previous or not audit.get("section_id") or
+                        not isinstance(audit.get("reason"), str) or not audit["reason"].strip()):
+                    raise ContractViolation("STORY_EDIT_AUDIT_INVALID", candidate.project_id,
+                                            "A bounded section correction requires original Story, section and reason.")
+                db.execute("INSERT INTO story_section_edits VALUES(?,?,?,?,?,?)",
+                           (candidate.project_id,new_revision,audit["section_id"],audit["reason"],
+                            previous[0],candidate.sha256))
+
             return new_revision
 
     def get_story(self, project_id: str, revision: int | None = None) -> StoryCandidate:
