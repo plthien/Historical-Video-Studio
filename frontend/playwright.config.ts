@@ -4,6 +4,7 @@ import {fileURLToPath} from "node:url";
 const here = path.dirname(fileURLToPath(import.meta.url));
 import {defineConfig} from "@playwright/test";
 const b2Fixture=process.env.HVS_B2_FIXTURE==="1";
+const parityProduction=process.env.HVS_PARITY_PRODUCTION==="1";
 const b3Fixture=process.env.HVS_B3_FIXTURE==="1";
 const apiPort=b3Fixture?8011:8000;
 const uiPort=b3Fixture?5174:5173;
@@ -27,7 +28,7 @@ export default defineConfig({
      reuseExistingServer: false, timeout: 60_000,
      env: {...process.env, HVS_DB: fullFlowConfig?.db??(b2Fixture?path.join(b2Root,"g4.sqlite"):path.resolve(here, ".e2e-data/state.sqlite")),
            HVS_MEDIA: fullFlowConfig?.artifactRoot??(b2Fixture?path.join(b2Root,"artifacts"):path.resolve(here, ".e2e-data/media"))}},
-    {command: b3Fixture?"npm run dev -- --port 5174":"npm run dev", cwd: here, url: `http://127.0.0.1:${uiPort}`,
+    {command: parityProduction?"npx vite preview --host 127.0.0.1 --port 5173 --strictPort":b3Fixture?"npm run dev -- --port 5174":"npm run dev", cwd: here, url: `http://127.0.0.1:${uiPort}`,
      reuseExistingServer: false, timeout: 60_000,
      env: {...process.env,VITE_API_ORIGIN:`http://127.0.0.1:${apiPort}/api/v1`}}
   ],
