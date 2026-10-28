@@ -18,7 +18,11 @@ function initial(requirement:MapAuthoringView["requirements"][number]):Record<st
     const existing=requirement.request.map_record;
     // Always use current G3 authority, even if a stale request was saved
     // before the original or approval was replaced.
-    return {...existing,source_asset_id:source?.source_asset_id??"",
+    const sameSource=existing.source_asset_id===source?.source_asset_id
+      && existing.source_original_sha256===source?.source_original_sha256
+      && existing.rights_review_record_id===source?.rights_review_record_id;
+    return {...existing,user_approved:sameSource&&existing.user_approved===true,
+      source_asset_id:source?.source_asset_id??"",
       source_original_sha256:source?.source_original_sha256??"",
       rights_review_record_id:source?.rights_review_record_id??""};
   }
@@ -74,7 +78,11 @@ export function MapAuthoring({projectId,onRevision}:{
   const bbox=draft.geography_bbox as Record<string,unknown>|undefined;
   const approvedFeatureIds=Array.isArray(draft.approved_feature_ids)?
     draft.approved_feature_ids.filter((x):x is string=>typeof x==="string"):[];
-  const labels=asArray(draft.labels) as EvidenceLabel[];
+  const labels:EvidenceLabel[]=asArray(draft.labels).map(label=>({
+    label_id:text(label.label_id),text:text(label.text),
+    feature_id:label.feature_id==null?null:text(label.feature_id),
+    lon:number(label.lon),lat:number(label.lat)
+  }));
   const isRaster=draft.geography_mode==="raster_georeferenced";
   function setMapMode(mode:string){
     setDraft(d=>({...d,geography_mode:mode,
@@ -120,7 +128,7 @@ export function MapAuthoring({projectId,onRevision}:{
         expected_revision:view.project_revision,story_sha256:view.story_sha256,year:y,
         map_record:record,feature_ids:list(renderFeatures),
         route_feature_id:route||null,
-        reviewed_tie_points:validatedPoints.length?validatedPoints:null,
+        reviewed_tie_points:isRaster&&validatedPoints.length?validatedPoints:null,
       };
       await storyboardApi.saveMap(projectId,current.requirement_id,body,crypto.randomUUID());
       setNotice("Map request passed current G3 original SHA, rights event, G1 year and geometry ingest; not G4 approved.");
