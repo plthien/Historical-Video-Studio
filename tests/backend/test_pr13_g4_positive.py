@@ -144,7 +144,8 @@ def test_http_g4_initial_compile_without_map_requires_no_map_request(tmp_path):
     store.import_story(StoryCandidate.parse(story),0)
     gates=GateService(store)
     gates.review_claim(pid,"claim_09","REVIEWED","SYNTHETIC_TEST_ONLY independent claim review",
-                       store.revision(pid))
+                       store.revision(pid),
+                       source_url="https://example.org/SYNTHETIC_TEST_ONLY/claim_09")
     g1=gates.board(pid)[0]
     gates.decide(pid,"G1",{"decision":"APPROVED",
         "candidate_sha256":g1["candidate_sha256"],
