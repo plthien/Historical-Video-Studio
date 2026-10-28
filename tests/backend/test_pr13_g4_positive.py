@@ -145,6 +145,14 @@ def test_http_g4_initial_compile_without_map_requires_no_map_request(tmp_path):
     assert beats[1]["cue"]==beats[2]["cue"]=={
         "section_id":"sec_09","phrase":"the","occurrence":0}
     beats[2]["cue"]={"section_id":"sec_09","phrase":"the","occurrence":1}
+    # T09's actual layout registry allows freeze-hold and title-mask-reveal
+    # but NOT camera-push on its source document. A still evidence opening
+    # is a supported hold; the subsequent text reveals keep their authored
+    # subtle_push hint, which dispatches to T09 title-mask-reveal.
+    assert beats[0]["staging"][0]["operation"]=="enter"
+    assert beats[0]["staging"][0]["motion_hint"]=="subtle_push"
+    beats[0]["staging"][0]["operation"]="hold"
+    beats[0]["staging"][0]["motion_hint"]="none"
     payload=next(x["template_payload"] for x in long_blueprint["setup_plans"] if x["setup_id"]=="setup_09")
     pid=story["project"]["project_id"]
     app=create_app(tmp_path/"nonmap.sqlite",tmp_path/"media")
