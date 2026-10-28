@@ -80,3 +80,42 @@ def test_g4_payload_rejects_foreign_project_or_stale_story(tmp_path):
         assert result.status_code == 422
         assert "STORY_SHA_MISMATCH" in result.text
         assert client.get(f"/api/v1/projects/{pid}/storyboard/blueprint-authoring").json()["setups"][0]["payload"] is None
+
+
+def test_source_bound_map_authoring_refuses_unapproved_original_and_keeps_revision(tmp_path):
+    app=create_app(tmp_path/"map.sqlite",tmp_path/"media")
+    story=json.loads((CASE/"StoryPackage.visual_cases.synthetic.json").read_text(encoding="utf-8"))
+    pid=story["project"]["project_id"]
+    app.state.store.create_project(pid,"Historical map")
+    with TestClient(app) as client:
+        imported=client.post(f"/api/v1/projects/{pid}/story/import?expected_revision=0",
+                             json=story,headers={"Idempotency-Key":"map-initial-import-001"})
+        assert imported.status_code==200,imported.text
+        url=f"/api/v1/projects/{pid}/storyboard/map-authoring"
+        current=client.get(url)
+        assert current.status_code==200,current.text
+        maps=current.json()["requirements"]
+        assert maps and all(x["request"] is None for x in maps)
+        requirement=maps[0]
+        uri=url+"/"+requirement["requirement_id"]
+        revision=current.json()["project_revision"]
+        body={"expected_revision":revision,"story_sha256":current.json()["story_sha256"],
+              "year":requirement["start_year"],"map_record":{
+                  "schema_version":"HistoricalMap.v1",
+                  "historical_map_id":"synthetic_test_map",
+                  "source_asset_id":"fake_unapproved_asset",
+                  "source_original_sha256":"a"*64,
+                  "valid_year_from":requirement["start_year"],
+                  "valid_year_to":requirement["end_year"]},
+              "feature_ids":[],"route_feature_id":None,"reviewed_tie_points":None}
+        denied=client.put(uri,json=body,headers={"Idempotency-Key":"map-denied-unapproved-001"})
+        assert denied.status_code==422,denied.text
+        assert client.get(url).json()["project_revision"]==revision
+        mismatch=client.put(uri,json={**body,"story_sha256":"f"*64},
+                            headers={"Idempotency-Key":"map-stale-story-001"})
+        assert mismatch.status_code==422
+        assert "STORY_SHA_MISMATCH" in mismatch.text
+        bad_year=client.put(uri,json={**body,"year":requirement["end_year"]+1},
+                            headers={"Idempotency-Key":"map-bad-year-001"})
+        assert bad_year.status_code==422
+        assert "MAP_PERIOD_MISMATCH" in bad_year.text
