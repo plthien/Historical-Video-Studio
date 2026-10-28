@@ -50,7 +50,7 @@ function BundleDigest {
 $sourceAvailable=Test-Path (Join-Path $sourceDir "App.tsx")
 if ($sourceAvailable) {
     $files=@(Get-ChildItem $sourceDir -File -Recurse | ForEach-Object FullName)
-    foreach ($extra in @("frontend/package-lock.json","frontend/package.json","frontend/index.html",
+    foreach ($extra in @("config/ports.json","frontend/package-lock.json","frontend/package.json","frontend/index.html",
                           "frontend/vite.config.ts","frontend/tsconfig.json")) {
         $file=Join-Path $RepoRoot $extra
         if (Test-Path $file) { $files+= $file }
