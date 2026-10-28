@@ -49,6 +49,7 @@ export function MapAuthoring({projectId,onRevision}:{
   const [advanced,setAdvanced]=useState("");
   const [year,setYear]=useState("");
   const [renderFeatures,setRenderFeatures]=useState("");
+  const [approvedFeaturesText,setApprovedFeaturesText]=useState("");
   const [route,setRoute]=useState("");
   const [tiePoints,setTiePoints]=useState<EvidencePoint[]>([]);
   const [error,setError]=useState("");
@@ -64,6 +65,8 @@ export function MapAuthoring({projectId,onRevision}:{
     setDraft(value);setAdvanced(JSON.stringify(value,null,2));
     setYear(String(current.request?.year??current.start_year));
     setRenderFeatures(current.request?.feature_ids.join(", ")??"");
+    setApprovedFeaturesText(Array.isArray(value.approved_feature_ids)?
+      value.approved_feature_ids.join(", "):"");
     setRoute(current.request?.route_feature_id??"");
     setTiePoints(asArray(current.request?.reviewed_tie_points).map(p=>({
       u:number(p.u),v:number(p.v),lon:number(p.lon),lat:number(p.lat),
@@ -76,8 +79,9 @@ export function MapAuthoring({projectId,onRevision}:{
   }
   const source=current?.approved_source;
   const bbox=draft.geography_bbox as Record<string,unknown>|undefined;
-  const approvedFeatureIds=Array.isArray(draft.approved_feature_ids)?
-    draft.approved_feature_ids.filter((x):x is string=>typeof x==="string"):[];
+  // Keep raw typing separate: stripping trailing commas on each keystroke
+  // prevents the operator from entering a second reviewed feature ID.
+  const approvedFeatureIds=list(approvedFeaturesText);
   const labels:EvidenceLabel[]=asArray(draft.labels).map(label=>({
     label_id:text(label.label_id),text:text(label.text),
     feature_id:label.feature_id==null?null:text(label.feature_id),
@@ -215,8 +219,8 @@ export function MapAuthoring({projectId,onRevision}:{
           </fieldset>
           <div className="field-group">
             <label htmlFor="map-approved-features">Feature IDs reviewed on actual period source</label>
-            <input id="map-approved-features" value={approvedFeatureIds.join(", ")}
-              onChange={e=>patch("approved_feature_ids",list(e.target.value))}
+            <input id="map-approved-features" value={approvedFeaturesText}
+              onChange={e=>setApprovedFeaturesText(e.target.value)}
               placeholder="Comma separated, exact feature IDs; empty for raster"/>
             <label htmlFor="map-render-features">Subset of approved features to render</label>
             <input id="map-render-features" value={renderFeatures}
@@ -277,7 +281,11 @@ export function MapAuthoring({projectId,onRevision}:{
             <button type="button" onClick={()=>{
               try{const value:unknown=JSON.parse(advanced);
                 if(!value||typeof value!=="object"||Array.isArray(value))throw Error("HistoricalMap must be an object");
-                setDraft(value as Record<string,unknown>);setError("");
+                const parsed=value as Record<string,unknown>;
+                setDraft(parsed);
+                setApprovedFeaturesText(Array.isArray(parsed.approved_feature_ids)?
+                  parsed.approved_feature_ids.join(", "):"");
+                setError("");
               }catch(e){setError(errorText(e));}
             }}>Apply reviewed advanced fields</button>
           </details>
