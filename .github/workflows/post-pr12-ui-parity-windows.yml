@@ -28,6 +28,27 @@ jobs:
           if ((git rev-parse HEAD) -ne $expected) { throw "HEAD mismatch: $expected" }
           git diff --check origin/main...HEAD
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Parse Windows launch scripts with native Windows PowerShell 5.1
+        shell: powershell
+        run: |
+          $ErrorActionPreference = 'Stop'
+          foreach ($file in @('scripts/windows/start-studio.ps1',
+                              'scripts/windows/verify-frontend-build.ps1',
+                              'scripts/windows/package.ps1')) {
+            $path = (Resolve-Path -LiteralPath $file).Path
+            $bytes = [System.IO.File]::ReadAllBytes($path)
+            if (@($bytes | Where-Object { $_ -gt 127 }).Count -gt 0) {
+              throw "Non-ASCII launcher byte found in $file; Windows PowerShell 5.1 may misparse BOM-less UTF-8."
+            }
+            $tokens = $null
+            $errorsFound = $null
+            [void][System.Management.Automation.Language.Parser]::ParseFile(
+              $path, [ref]$tokens, [ref]$errorsFound)
+            if ($errorsFound.Count -gt 0) {
+              throw "Windows PowerShell parse failed in $file : $($errorsFound[0].Message)"
+            }
+            Write-Host "POWERSHELL_5_1_PARSE_PASS $file"
+          }
       - name: Install and verify FFmpeg and ffprobe before environment checks
         shell: pwsh
         run: |
