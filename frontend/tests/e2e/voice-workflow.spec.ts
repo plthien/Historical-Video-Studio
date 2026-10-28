@@ -29,6 +29,14 @@ test("voice-workflow: two selected sections, one G2 approval and truthful alignm
     await expect(box.getByText(/Selected am_adam/)).toBeVisible({timeout:45000});
     await expect(box.locator("audio:visible")).toHaveCount(1);
   }
+  const originalViewport=page.viewportSize()!;
+  for(const viewport of [{width:1366,height:768},{width:1920,height:1080}]){
+    await page.setViewportSize(viewport);
+    await expect(page.locator(".voice-section-main audio:visible")).toHaveCount(1);
+    await page.screenshot({path:info.outputPath(`pr13-g2-populated-selected-audio-${viewport.width}.png`),animations:"disabled"});
+    expect(await page.evaluate(()=>document.documentElement.scrollWidth<=document.documentElement.clientWidth+2)).toBe(true);
+  }
+  await page.setViewportSize(originalViewport);
   await expect(page.getByRole("button",{name:"Approve G2"})).toBeEnabled({timeout:30000});
   await page.getByRole("button",{name:"Approve G2"}).click();
   await expect(page.getByText(/Final WAV: \d+ samples/)).toBeVisible({timeout:60000});
