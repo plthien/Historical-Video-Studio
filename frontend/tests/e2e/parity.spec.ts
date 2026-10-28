@@ -1,3 +1,4 @@
+import {openExistingProject} from "./project-workflow-helper";
 import {test,expect} from '@playwright/test';
 import {createHash} from 'node:crypto';
 import {readFileSync,writeFileSync,mkdirSync} from 'node:fs';
@@ -34,8 +35,7 @@ test('storyboard-editor real browser Player vs Node renderStill same immutable f
  mkdirSync(output,{recursive:true});
  await page.setViewportSize({width:2400,height:1450});
  await page.goto('/');
- await page.getByLabel('Project ID').fill('proj_001');
- await page.getByRole('button',{name:'Open existing project'}).click();
+ await openExistingProject(page,'proj_001');
  await page.getByRole('button',{name:/Motion Storyboard/}).click();
  await expect(page.getByText(/Scenes \(2\)/)).toBeVisible();
  await page.getByRole('button',{name:'Load real read-only Remotion Player'}).click();
