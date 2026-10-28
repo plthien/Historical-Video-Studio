@@ -11,14 +11,20 @@ function Digest([string]$Path) {
     return (Get-FileHash -LiteralPath $Path -Algorithm SHA256).Hash.ToLowerInvariant()
 }
 function Fingerprint([string[]]$Files) {
+    # Windows PowerShell 5.1/.NET Framework: no Path.GetRelativePath / Convert.ToHexString.
+    $prefix=[System.IO.Path]::GetFullPath($RepoRoot).TrimEnd([char[]]@('\','/')) + [System.IO.Path]::DirectorySeparatorChar
     $rows=@($Files | Sort-Object -Unique | ForEach-Object {
-        $relative=[System.IO.Path]::GetRelativePath($RepoRoot,$_)
-        $relative.Replace("\","/") + ":" + (Digest $_)
+        $absolute=[System.IO.Path]::GetFullPath($_)
+        if (-not $absolute.StartsWith($prefix,[System.StringComparison]::OrdinalIgnoreCase)) {
+            throw "Cannot fingerprint file outside repository: $absolute"
+        }
+        $relative=$absolute.Substring($prefix.Length)
+        $relative.Replace('\','/') + ":" + (Digest $absolute)
     })
     $sha=[System.Security.Cryptography.SHA256]::Create()
     try {
         $bytes=[System.Text.Encoding]::UTF8.GetBytes(($rows -join "`n"))
-        return [Convert]::ToHexString($sha.ComputeHash($bytes)).ToLowerInvariant()
+        return ([System.BitConverter]::ToString($sha.ComputeHash($bytes))).Replace("-","").ToLowerInvariant()
     } finally { $sha.Dispose() }
 }
 $sourceAvailable=Test-Path (Join-Path $sourceDir "App.tsx")
