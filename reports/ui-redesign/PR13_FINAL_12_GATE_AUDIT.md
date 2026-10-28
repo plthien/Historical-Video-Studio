@@ -1,9 +1,9 @@
 # PR #13 — Final 12-gate audit ledger (V2 implementation checkpoint)
 
-**Design authority:** PR13_APPROVED_UI_REDESIGN_V2  
-**Mandatory branch:** `feat/v1-ui-mockup-parity-and-authoring-bridge`  
-**Base main:** `d368088dba5713b3b4b51b635f585585bd8baf9a`  
-**Initial independent PR head:** `6048c72af5968af5c1f0da361ff379d28b989c6b`  
+**Design authority:** PR13_APPROVED_UI_REDESIGN_V2
+**Mandatory branch:** `feat/v1-ui-mockup-parity-and-authoring-bridge`
+**Base main:** `d368088dba5713b3b4b51b635f585585bd8baf9a`
+**Initial independent PR head:** `6048c72af5968af5c1f0da361ff379d28b989c6b`
 **This audit's source checkpoint:** `db8100fd716dfc35516ca4410a132cf2cec64418` (not a self-referential final commit).
 **Exactly tested HEAD:** to be resolved by Actions `source-head.json`, not inferred from a PR title or old run.
 **Verdict policy:** unsupported, queued, unavailable, not yet executed = **FAIL** for G01–G12.
