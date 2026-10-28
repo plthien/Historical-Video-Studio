@@ -47,6 +47,11 @@ function BundleDigest {
     # Exclude only the manifest to prevent a circular SHA dependency.
     return (Fingerprint -Files $files)
 }
+# A packaged frontend has no TS sources, so its API-origin config must also
+# be checked against the compiled bundle manifest (not just the git SHA).
+$portsFile=Join-Path $RepoRoot "config/ports.json"
+if (-not (Test-Path -LiteralPath $portsFile)) { throw "Missing config/ports.json" }
+$portsSha=Digest $portsFile
 $sourceAvailable=Test-Path (Join-Path $sourceDir "App.tsx")
 if ($sourceAvailable) {
     $files=@(Get-ChildItem $sourceDir -File -Recurse | ForEach-Object FullName)
@@ -69,7 +74,7 @@ if (Test-Path (Join-Path $RepoRoot ".git")) {
 $stored=$null
 if (Test-Path $info) { try { $stored=Get-Content $info -Raw | ConvertFrom-Json } catch {} }
 $ready=Test-Path (Join-Path $dist "index.html")
-$fresh=$ready -and $stored -and $stored.schema_version -eq "HVSFrontendBuild.v1"
+$fresh=$ready -and $stored -and $stored.schema_version -eq "HVSFrontendBuild.v1" -and $stored.port_config_sha256 -eq $portsSha
 if ($fresh -and $sourceAvailable) {
     $fresh=$stored.input_sha256 -eq $fingerprint -and $stored.source_commit -eq $head
 }
@@ -95,6 +100,7 @@ if (-not $fresh) {
         schema_version="HVSFrontendBuild.v1"
         source_commit=$head
         input_sha256=$fingerprint
+        port_config_sha256=$portsSha
         bundle_sha256=(BundleDigest)
         generated_utc=[DateTime]::UtcNow.ToString("o")
     }
