@@ -1,4 +1,5 @@
 import {test,expect} from "@playwright/test";
+import {startNewProject,importStoryFromEditor,openExistingProject} from "./project-workflow-helper";
 import {readFileSync} from "node:fs";
 import path from "node:path";
 import {fileURLToPath} from "node:url";
@@ -8,22 +9,19 @@ const full=JSON.parse(readFileSync(path.resolve(root,
 
 test("voice-workflow: two selected sections, one G2 approval and truthful alignment failure",async({page},info)=>{
   await page.goto("/");
-  await page.getByLabel("Project title").fill("A2 voice real-backend mocked-boundary check");
-  await page.getByRole("button",{name:"Create project"}).click();
-  await expect(page.getByRole("status")).toContainText("Project creation completed");
-  const project=(await page.locator(".topline strong").innerText()).trim();
+  const project=await startNewProject(page,"A2 voice real-backend mocked-boundary check");
   const story=structuredClone(full);
   story.project.project_id=project;
   story.sections=story.sections.slice(0,2);
   story.visual_setups=story.visual_setups.slice(0,4);
   story.claims.forEach((c:{critical:boolean})=>{c.critical=false;});
-  await page.getByLabel("StoryPackage JSON").fill(JSON.stringify(story));
-  await page.getByRole("button",{name:"Import and validate story"}).click();
+  await importStoryFromEditor(page,story);
   await expect(page.getByRole("button",{name:"Approve G1"})).toBeEnabled();
   await page.getByRole("button",{name:"Approve G1"}).click();
   await expect(page.getByRole("status")).toContainText("G1 approved completed");
   await page.getByRole("navigation").getByRole("button",{name:/Voice Studio/i}).click();
   for(const section of ["sec_001","sec_002"]){
+    await page.locator(".voice-section-rail button").filter({hasText:section}).click();
     const box=page.getByRole("article",{name:"Voice section "+section});
     await box.getByLabel("Voice ID "+section).fill("am_adam");
     await box.getByLabel("Speed "+section).fill("1.0");
@@ -40,8 +38,7 @@ test("voice-workflow: two selected sections, one G2 approval and truthful alignm
   await expect(page.getByRole("button",{name:/Assemble final WAV|^Align final WAV$/})).toHaveCount(0);
   await page.screenshot({path:info.outputPath("voice-g2-alignment-blocked.png")});
   await page.reload();
-  await page.getByLabel("Project ID").fill(project);
-  await page.getByRole("button",{name:"Open existing project"}).click();
+  await openExistingProject(page,project);
   await page.getByRole("navigation").getByRole("button",{name:/Voice Studio/i}).click();
   await expect(page.getByRole("article",{name:"Voice section sec_001"}).getByText(/Selected am_adam/)).toBeVisible();
   await expect(page.locator(".voice-studio")).toContainText("PROVIDER_CREDENTIALS_MISSING");
