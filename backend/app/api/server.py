@@ -351,7 +351,10 @@ def create_app(database: str | Path | None = None, media_root: str | Path | None
             previous = section["narration"]
             section["narration"] = body.narration
             updated = StoryCandidate.parse(current)
-            revision = store.import_story(updated, body.expected_revision)
+            revision = store.import_story(
+                updated, body.expected_revision,
+                audit={"section_id": section_id, "reason": body.reason}
+                if previous != body.narration else None)
             return {"project_id": project_id, "section_id": section_id,
                     "previous_story_sha256": source.sha256,
                     "candidate_sha256": updated.sha256,
