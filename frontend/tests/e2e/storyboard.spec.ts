@@ -1,3 +1,4 @@
+import {openExistingProject} from "./project-workflow-helper";
 import {test,expect} from '@playwright/test';
 import {PNG} from 'pngjs';
 import {existsSync,renameSync,mkdirSync,writeFileSync} from 'node:fs';
@@ -11,9 +12,8 @@ test('storyboard-editor uses real persisted G4 scenes and native read-only Playe
  page.on('pageerror',e=>fatalErrors.push(e.message));
  page.on('console',m=>{if(m.type()==='error'&&/Invalid hook call|useContext|HistoryComposition|React/i.test(m.text()))fatalErrors.push(m.text());});
  await page.goto('/');
- await page.getByLabel('Project ID').fill('proj_001');
- await page.getByRole('button',{name:'Open existing project'}).click();
- await expect(page.getByText('proj_001',{exact:true}).first()).toBeVisible();
+ await openExistingProject(page,'proj_001');
+ await expect(page.locator(".topline strong").filter({hasText:"proj_001"}).first()).toBeVisible();
  await page.getByRole('button',{name:/Motion Storyboard/}).click();
  await expect(page.getByText(/Scenes \(2\)/)).toBeVisible({timeout:25000});
  await expect(page.getByRole('listbox',{name:'Storyboard scenes'}).getByRole('option')).toHaveCount(2);
