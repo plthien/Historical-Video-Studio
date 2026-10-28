@@ -59,10 +59,10 @@ if (-not $fresh) {
     if ($SkipBootstrap) { throw "FRONTEND_BUNDLE_STALE: -SkipBootstrap does not permit old/unknown frontend. Launch without -SkipBootstrap to rebuild." }
     Write-Host "FRONTEND_REBUILD_REQUIRED: source inputs or checkout HEAD differ from built UI."
     if (-not (Test-Path (Join-Path $RepoRoot "frontend/node_modules"))) {
-        & npm.cmd ci --prefix frontend --no-audit --no-fund
+        & npm.cmd ci --prefix frontend --no-audit --no-fund | Out-Host
         if ($LASTEXITCODE -ne 0) { throw "Frontend npm ci failed" }
     }
-    & npm.cmd run build --prefix frontend
+    & npm.cmd run build --prefix frontend | Out-Host
     if ($LASTEXITCODE -ne 0) { throw "Fresh frontend build failed" }
     if (-not (Test-Path (Join-Path $dist "index.html"))) { throw "Missing frontend/dist/index.html after build" }
     $stored=[ordered]@{
