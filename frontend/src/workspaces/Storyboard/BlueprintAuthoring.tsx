@@ -29,6 +29,26 @@ function sourceHint(name:string,setup:BlueprintSetup){
   if(key.includes("quote")||key.includes("text"))return "Select an actual immutable Story on-screen text ID, not a new fabricated quotation.";
   return "";
 }
+/** Only enumerate IDs declared in the immutable G1 setup. Never synthesize sources. */
+function eligibleSourceIds(path:string,setup:BlueprintSetup):string[]{
+  const field=path.split(".").at(-1)??"";
+  const direction=setup.direction as {
+    on_screen_text?:{text_id:string}[];
+    asset_slots?:{slot_id:string}[];
+    visual_beats?:{beat_id:string}[];
+    reveal_plan?:{beat_id:string}[];
+  };
+  if(/(?:^|_)claim_(?:id|ref)$/.test(field))return setup.claim_refs;
+  if(/(?:^|_)text_id$/.test(field)||field.endsWith("_text_ids"))
+    return (direction.on_screen_text??[]).map(x=>x.text_id);
+  if(field.endsWith("_slot_id")||field==="slot_id")
+    return (direction.asset_slots??[]).map(x=>x.slot_id);
+  if(field.endsWith("_requirement_id"))
+    return setup.requirement_refs;
+  if(field.endsWith("_beat_id"))
+    return [...new Set([...(direction.visual_beats??[]),...(direction.reveal_plan??[])].map(x=>x.beat_id))];
+  return [];
+}
 function Field({name,path,schema,value,required,setup,onChange}:{
   name:string;path:string;schema:Schema;value:unknown;required:boolean;setup:BlueprintSetup;onChange:(v:unknown)=>void;
 }){
@@ -70,16 +90,19 @@ function Field({name,path,schema,value,required,setup,onChange}:{
     <input id={inputId} type="checkbox" checked={Boolean(value)} onChange={e=>onChange(e.target.checked)}/>
   </div>;
   const isNumber=effective.type==="integer"||effective.type==="number";
-  const strings=(effective.enum??[]).filter((x):x is string=>typeof x==="string");
+  const enums=(effective.enum??[]).filter((x):x is string=>typeof x==="string");
+  const lockedRefs=effective.type==="string"?eligibleSourceIds(path,setup):[];
+  const options=enums.length?enums:lockedRefs;
+  const currentValue=typeof value==="string"||typeof value==="number"?value:"";
   const hint=sourceHint(name,setup);
   return <div className="field-group">
     <label htmlFor={inputId}>{name}{required?" *":""}</label>
     {nullable&&<label><input type="checkbox" checked={value==null} onChange={e=>onChange(e.target.checked?null:emptyValue(effective))}/> Not applicable / null</label>}
-    {strings.length?<select id={inputId} value={typeof value==="string"?value:""}
+    {options.length?<select id={inputId} value={typeof currentValue==="string"?currentValue:""}
       onChange={e=>onChange(e.target.value)} disabled={nullable&&value===null}>
-      <option value="">Choose an authorized value</option>
-      {strings.map(x=><option value={x} key={x}>{x.replaceAll("_"," ")}</option>)}
-    </select>:<input id={inputId} type={isNumber?"number":"text"} value={value??""}
+      <option value="">Choose an eligible value</option>
+      {options.map(x=><option value={x} key={x}>{x.replaceAll("_"," ")}</option>)}
+    </select>:<input id={inputId} type={isNumber?"number":"text"} value={currentValue}
       min={effective.minimum} max={effective.maximum} minLength={effective.minLength}
       step={effective.type==="integer"?1:undefined} disabled={nullable&&value===null}
       onChange={e=>onChange(isNumber?(e.target.value===""?null:Number(e.target.value)):e.target.value)}/>}
@@ -110,7 +133,7 @@ export function BlueprintAuthoring({projectId,onBuilt}:{
   useEffect(()=>{setDrafts({});setData(null);setError("");setNotice("");void reload().catch(e=>setError(errorText(e)));},[reload]);
   const setup=data?.setups.find(x=>x.setup_id===selected);
   const payload=setup?drafts[setup.setup_id]??{template_id:setup.template_id}:{};
-  useEffect(()=>{setRaw(JSON.stringify(payload,null,2));},[selected]);
+  useEffect(()=>{setRaw(JSON.stringify(payload,null,2));},[selected,JSON.stringify(payload)]);
   async function run(label:string,fn:()=>Promise<void>){
     if(busy)return;setBusy(label);setError("");setNotice("");
     try{await fn();setNotice(label+" completed against the exact persisted source.");}
