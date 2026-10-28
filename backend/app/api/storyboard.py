@@ -210,10 +210,27 @@ def mount(app, store, idempotent):
         if not existing:
             return
         manifest=json.loads(store.get_artifact(existing[0]))
-        if manifest["story_sha256"] == story_sha:
-            blocked("G4_DRAFT_EXISTS", project_id,
-                    "The current G1 Story already has a frozen G4 draft. "
-                    "Use bounded scene edits; reauthoring source setup/map requires a new G1 revision.")
+        if manifest["story_sha256"] != story_sha:
+            return  # New immutable Story identity: fresh source-authoring lineage.
+        # A separately re-approved G2/G3 source may legitimately need a new
+        # historical map or setup payload, even when G1 Story text is unchanged.
+        # Compare exact persisted approval heads INSIDE the current CAS transaction,
+        # avoiding a second writer connection while BEGIN IMMEDIATE is held.
+        rows=db.execute("SELECT gate_id,candidate_sha256,dependency_fingerprint,approval_id "
+                        "FROM gate_heads WHERE project_id=? AND gate_id IN ('G1','G2','G3')",
+                        (project_id,)).fetchall()
+        stale=db.execute("SELECT gate_id FROM gate_staleness WHERE project_id=? "
+                         "AND gate_id IN ('G1','G2','G3')",(project_id,)).fetchall()
+        if len(rows) != 3 or stale:
+            blocked("G4_SOURCE_STALE",project_id,
+                    "Reapprove current G1/G2/G3 source heads before reauthoring a compiled storyboard.")
+        current={gate:{"candidate_sha256":candidate,"dependency_fingerprint":fingerprint,
+                       "approval_id":approval} for gate,candidate,fingerprint,approval in rows}
+        if current != manifest["gate_heads"]:
+            return  # Reapproved upstream source: draft.publish creates new G4 generation.
+        blocked("G4_DRAFT_EXISTS", project_id,
+                "The same approved G1/G2/G3 head already has a compiled G4 draft. "
+                "Use bounded scene edits rather than resetting its authored source.")
 
     @app.get("/api/v1/projects/{project_id}/storyboard/blueprint-authoring")
     def read_blueprint_authoring(project_id: str):
