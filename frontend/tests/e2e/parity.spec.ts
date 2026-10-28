@@ -93,11 +93,20 @@ test('storyboard-editor real browser Player vs Node renderStill same immutable f
    variation.add(browserPNG.data[i]);
   }
   const meanDiff=total/count,pixelMismatch=big/count;
+  // Retain genuine failed-frame evidence. Thresholds remain unchanged.
+  const browserFile=path.join(output,'browser-f'+frame+'.png');
+  writeFileSync(browserFile,PNG.sync.write(browserPNG));
+  const diagnostics={frame,sceneId:owningScene!.scene_id,meanDiff,pixelMismatch,
+    browserRgbaFirstPixel:[...browserPNG.data.subarray(0,4)],
+    nodeRgbaFirstPixel:[...nodePNG.data.subarray(0,4)],
+    browserVariation:variation.size,
+    stageBounds:bounds,
+    browserSha256:hash(readFileSync(browserFile)),nodeSha256:hash(readFileSync(file)),
+    screenshotBytes: screenshot.data.length};
+  writeFileSync(path.join(output,'diagnostic-f'+frame+'.json'),JSON.stringify(diagnostics,null,2));
   expect(variation.size).toBeGreaterThan(3);
   expect(meanDiff,'Mean browser vs Node RGB difference').toBeLessThan(20);
   expect(pixelMismatch,'Fraction >30 RGB error per channel').toBeLessThan(0.14);
-  const browserFile=path.join(output,'browser-f'+frame+'.png');
-  writeFileSync(browserFile,PNG.sync.write(browserPNG));
   evidence.push({frame,width:1920,height:1080,meanDiff,pixelMismatch,nodeFile:file,browserFile,
    sceneId:owningScene!.scene_id,
    nodeSha256:hash(readFileSync(file)),
