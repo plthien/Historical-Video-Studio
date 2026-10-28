@@ -46,6 +46,14 @@ class ClaimReview(BaseModel):
     source_url: str | None = None
 
 
+class ScriptEdit(BaseModel):
+    """One bounded change to an existing narration section; no G1 fact changes."""
+    model_config = ConfigDict(extra="forbid")
+    expected_revision: int = Field(ge=0)
+    narration: str = Field(min_length=1, max_length=100000)
+    reason: str = Field(min_length=1, max_length=2000)
+
+
 class NumericObservation(BaseModel):
     model_config = ConfigDict(extra="forbid")
     frame_offset: int = Field(ge=0)
@@ -265,6 +273,37 @@ def create_app(database: str | Path | None = None, media_root: str | Path | None
         return {"project_revision": store.revision(project_id),
                 "candidate_sha256": story.sha256, "story": story.data(),
                 "claim_reviews": gates.reviews(project_id)}
+
+    @app.patch("/api/v1/projects/{project_id}/story/sections/{section_id}")
+    def patch_story_section(project_id: str, section_id: str, body: ScriptEdit,
+                            idempotency_key: str = Header(alias="Idempotency-Key")):
+        # The current StoryPackage is the source of truth; only narration changes.
+        # ProjectStore.import_story performs canonical validation, CAS and
+        # selective G1/G2/G4/G5 staleness in its existing single transaction.
+        def apply():
+            source = store.get_story(project_id)
+            current = source.data()
+            section = next((item for item in current["sections"]
+                            if item["section_id"] == section_id), None)
+            if section is None:
+                raise ContractViolation("STORY_SECTION_NOT_FOUND", section_id,
+                                        "Select an existing section of the current StoryPackage.")
+            if not body.narration.strip():
+                raise ContractViolation("STORY_NARRATION_INVALID", section_id,
+                                        "Provide nonempty narration.")
+            previous = section["narration"]
+            section["narration"] = body.narration
+            updated = StoryCandidate.parse(current)
+            revision = store.import_story(updated, body.expected_revision)
+            return {"project_id": project_id, "section_id": section_id,
+                    "previous_story_sha256": source.sha256,
+                    "candidate_sha256": updated.sha256,
+                    "project_revision": revision,
+                    "changed": previous != body.narration,
+                    "next_action": "REVIEW_G1" if previous != body.narration else "NONE"}
+
+        return idempotent(project_id, f"story-section:{section_id}",
+                          idempotency_key, body.model_dump(), apply)
 
     @app.post("/api/v1/projects/{project_id}/story/claims/{claim_id}/review")
     def review_claim(project_id: str, claim_id: str, body: ClaimReview,
