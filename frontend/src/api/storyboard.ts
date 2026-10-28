@@ -41,7 +41,21 @@ export interface BlueprintAuthoring {
  project_revision:number;story_sha256:string;registry_version:string;
  setups:BlueprintSetup[];ready:boolean;
 }
+export interface ReviewedMapInput {
+  expected_revision:number;story_sha256:string;year:number;map_record:Record<string,unknown>;
+  feature_ids:string[];route_feature_id:string|null;reviewed_tie_points:Record<string,unknown>[]|null;
+}
+export interface MapAuthoringView{
+  project_revision:number;story_sha256:string;requirements:{
+    requirement_id:string;start_year:number;end_year:number;
+    request:Omit<ReviewedMapInput,"expected_revision"|"story_sha256">|null;
+  }[];
+}
 export const storyboardApi={
+  mapAuthoring:(id:string)=>request<MapAuthoringView>(path(id)+'/map-authoring'),
+  saveMap:(id:string,rid:string,body:ReviewedMapInput,key:string)=>
+    request<{project_revision:number;requirement_id:string;source_original_sha256:string}>(
+      path(id)+'/map-authoring/'+encodeURIComponent(rid),'PUT',body,key),
  blueprint:(id:string)=>request<BlueprintAuthoring>(path(id)+'/blueprint-authoring'),
  savePayload:(id:string,setup:string,revision:number,story_sha256:string,payload:Record<string,unknown>,key:string)=>
   request<{project_revision:number}>(path(id)+'/blueprint-authoring/'+encodeURIComponent(setup),'PUT',
