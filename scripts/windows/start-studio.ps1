@@ -145,15 +145,14 @@ try {
     if ($uiBuildResponse.StatusCode -ne 200) {
         throw "FRONTEND_BUNDLE_HTTP_INVALID: $uiBuildUrl returned HTTP $($uiBuildResponse.StatusCode)."
     }
+    # Some Windows hosts label static JSON as text/plain. Decode the body
+    # explicitly and verify the required fields instead of trusting its MIME.
     $uiBuildContentType = [string]$uiBuildResponse.Headers["Content-Type"]
-    if ($uiBuildContentType -notmatch "(?i)(application/json|\\+json)") {
-        throw "FRONTEND_BUNDLE_HTTP_INVALID: $uiBuildUrl returned Content-Type '$uiBuildContentType' instead of JSON."
-    }
     $uiBuild = $null
     try {
         $uiBuild = ConvertFrom-Json -InputObject ([string]$uiBuildResponse.Content) -ErrorAction Stop
     } catch {
-        throw "FRONTEND_BUNDLE_HTTP_INVALID: $uiBuildUrl returned invalid JSON: $($_.Exception.Message)"
+        throw "FRONTEND_BUNDLE_HTTP_INVALID: $uiBuildUrl returned non-JSON content (Content-Type '$uiBuildContentType'): $($_.Exception.Message)"
     }
     if ($null -eq $uiBuild -or $null -eq $uiBuild.PSObject.Properties["bundle_sha256"] -or
         $null -eq $uiBuild.PSObject.Properties["source_commit"] -or
