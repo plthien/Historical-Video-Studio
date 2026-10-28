@@ -183,7 +183,7 @@ export function StoryboardStudio({projectId,onRefresh}:{projectId:string;onRefre
      setSnapshot(result);
      previewRequest.current=null;
    })}>{pending==='Load verified browser preview'?'Verifying host…':'Load real read-only Remotion Player'}</button>
-   
+
 
    </section>
    {scene&&<section className="panel scene-inspector" aria-label="Scene inspector">
