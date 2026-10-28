@@ -1,3 +1,4 @@
+import {openExistingProject} from "./project-workflow-helper";
 import {test,expect} from '@playwright/test';
 import {mkdirSync,writeFileSync,readFileSync} from 'node:fs';
 import {bundle} from '../../../renderer/node_modules/@remotion/bundler/dist/index.js';
@@ -13,8 +14,7 @@ test('pr10 reviewed-asset-picker changes real Chromium T02 A/B and preserves lon
  const uri='http://127.0.0.1:8000/api/v1/projects/'+project;
  const gateBefore=(await (await request.get(uri+'/gates')).json()) as {gate_id:string;state:string;dependency_fingerprint:string}[];
  await page.goto('/');
- await page.getByLabel('Project ID').fill(project);
- await page.getByRole('button',{name:'Open existing project'}).click();
+ await openExistingProject(page,project);
  await expect(page.getByText(project,{exact:true}).first()).toBeVisible();
  await page.getByRole('button',{name:/Motion Storyboard/}).click();
  await expect(page.getByLabel('Scene inspector')).toBeVisible();
@@ -116,8 +116,7 @@ test('pr10 reviewed-asset-picker changes real Chromium T02 A/B and preserves lon
    expect(after.dependency_fingerprint).toBe(before.dependency_fingerprint);
  }
  await page.reload();
- await page.getByLabel('Project ID').fill(project);
- await page.getByRole('button',{name:'Open existing project'}).click();
+ await openExistingProject(page,project);
  await page.getByRole('button',{name:/Motion Storyboard/}).click();
  await expect(page.getByLabel('Scene inspector')).toBeVisible();
  await page.getByLabel('Layer to reposition').selectOption(portrait);
