@@ -52,6 +52,12 @@ def test_section_patch_keeps_immutable_history_and_no_unrelated_setup_mutation(t
         assert current["visual_setups"] == story["visual_setups"]
         assert current["asset_requirements"] == story["asset_requirements"]
         assert app.state.store.get_story(pid, revision).data() == story
+        with app.state.store._connection() as db:
+            audit = db.execute("SELECT section_id,reason,previous_story_sha256,new_story_sha256 "
+                               "FROM story_section_edits WHERE project_id=? AND revision=?",
+                               (pid,revision+1)).fetchone()
+        assert audit == (section["section_id"],"Editorial correction",original.json()["candidate_sha256"],
+                         changed.json()["candidate_sha256"])
         assert client.patch(path, json={**body, "narration": changed_text+" again"},
                             headers={"Idempotency-Key": "patch-test-unique-002"}).status_code == 409
         assert client.patch(path+"-unknown", json=body,
