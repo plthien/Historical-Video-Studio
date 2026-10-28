@@ -110,13 +110,19 @@ def build(require_workflows: bool) -> None:
         "G10": "wp1 authority negatives", "G11": "contract/browser/owner regressions",
         "G12": "same-head Windows workflows + generated downloadable ledger",
     }
+    gates = {gate: {"status": "PASS", "evidence": source} for gate, source in gate_sources.items()}
+    if not require_workflows:
+        gates["G12"]["status"] = "PENDING_SAME_HEAD_WINDOWS_WORKFLOWS"
     ledger = {
-        "schema_version": "PhaseBExactHeadVerdict.v1", "status": "PASS",
-        "code_verdict": "PASS (12/12) - MERGE READY", "base_commit": os.getenv("BASE_COMMIT"),
+        "schema_version": "PhaseBExactHeadVerdict.v1",
+        "status": "PASS" if require_workflows else "LOCAL_VALIDATION_ONLY",
+        "code_verdict": ("PASS (12/12) - MERGE READY" if require_workflows
+                         else "PENDING G12 - SAME-HEAD WINDOWS WORKFLOWS REQUIRED"),
+        "base_commit": os.getenv("BASE_COMMIT"),
         "start_commit": os.getenv("START_COMMIT", "43b76f379eb848486d0dd52facfd4afa503e14e1"),
         "final_commit": commit, "branch": "feat/b3-final-delivery-windows-full-v1",
         "pull_request": "https://github.com/plthien/Historical-Video-Studio/pull/12",
-        "gates": {gate: {"status": "PASS", "evidence": source} for gate, source in gate_sources.items()},
+        "gates": gates,
         "owners": {task: "CODE_PASS" for task in ("B3-04", "B3-05", "B3-06")},
         "commands": results, "same_head_workflows": {**workflows, current_run["name"]: current_run},
         "evidence": {"clean_package": "clean-package-launch.json",
