@@ -52,7 +52,7 @@ export function App() {
     if (!switchProject && prior !== null && prior !== projectId) return;
     if (switchProject) {
       activeProjectId.current = projectId;
-      setSectionEdit(null);
+      setSectionEdit(null);setNotes({});setUrls({});setDecisionComment("");
     }
     const generation = ++refreshGeneration.current;
     try {
@@ -207,7 +207,7 @@ export function App() {
             onCreate={createProject} onOpen={openProject}
             onImported={async()=>{if(project){await refresh(project.project_id);setWorkspace("story");}}}
             onRefresh={async()=>{if(project)await refresh(project.project_id);}}/>
-           : <div className="workspace-grid">
+           : <div className="story-workspace">
             {!project && <p>Create a project first using the Project & ChatGPT Import workspace.</p>}
             {project && !storyView && <p>No StoryPackage imported yet. Import a JSON file in the Project workspace.</p>}
             {storyView && <StoryReview story={storyView.story} revision={storyView.project_revision}
