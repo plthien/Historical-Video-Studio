@@ -45,7 +45,7 @@ function BundleDigest {
     }
     # Hash every published JS/CSS/media file, not just index.html.
     # Exclude only the manifest to prevent a circular SHA dependency.
-    return Fingerprint $files
+    return (Fingerprint -Files $files)
 }
 $sourceAvailable=Test-Path (Join-Path $sourceDir "App.tsx")
 if ($sourceAvailable) {
