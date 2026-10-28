@@ -177,3 +177,9 @@ pre{white-space:pre-wrap;max-width:100%;overflow-x:auto}
 .asset-resolution-panel textarea,.asset-candidates-panel textarea{min-height:85px}
 .asset-gate-panel button{width:100%;margin-top:12px}
 @media(max-width:1100px){.asset-studio{display:block}.asset-studio>*{margin-bottom:16px}}
+
+/* A full-resolution Remotion screenshot must never be clipped by the responsive stage viewport.
+   Keep the player responsive normally; when a verifier expands the stage to 1920px,
+   the composition pixels remain intact and unclipped for exact Node parity. */
+.stage-panel .media-stage:has([data-testid="player-stage"]){overflow:visible;aspect-ratio:auto;display:block;border:0;background:transparent}
+.stage-panel .media-stage:has([data-testid="player-stage"])>section{max-width:100%}
