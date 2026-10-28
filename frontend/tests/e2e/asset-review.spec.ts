@@ -42,6 +42,15 @@ test("asset-review: operator choice persists and never auto-approves G3",async({
   await expect(page.locator(".asset-studio .notice.success")).toContainText("Manual upload completed");
   await expect(page.locator(".asset-original-preview")).toBeVisible();
   await expect(page.locator(".asset-original-preview")).toHaveJSProperty("naturalWidth",1);
+  const originalViewport=page.viewportSize()!;
+  for(const viewport of [{width:1366,height:768},{width:1920,height:1080}]){
+    await page.setViewportSize(viewport);
+    await expect(page.locator(".asset-original-preview")).toBeVisible();
+    await page.screenshot({path:testInfo.outputPath(`pr13-g3-populated-approved-original-candidate-${viewport.width}.png`),animations:"disabled"});
+    expect(await page.evaluate(()=>document.documentElement.scrollWidth<=document.documentElement.clientWidth+2)).toBe(true);
+  }
+  await page.setViewportSize(originalViewport);
+
   await expect(page.locator(".asset-studio")).toContainText("Synthetic context");
   await expect(page.locator(".asset-studio")).toContainText("Test fixture only");
   const requirementSelect=page.getByLabel("Asset requirement");
