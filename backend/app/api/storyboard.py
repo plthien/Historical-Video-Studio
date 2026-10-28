@@ -14,7 +14,10 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from backend.app.contracts import ContractViolation
 from backend.app.director import draft
-from backend.app.director.compiler import revise_g4
+from backend.app.director.compiler import revise_g4, compile_from_store
+from backend.app.director.blueprint import normalize_story
+from backend.app.director.template_payloads import require_payload
+from backend.app.contracts import validate_visual_blueprint
 from backend.app.assets.provenance import AssetCandidates
 from backend.app.assets.resolution import AssetResolution
 from backend.app.director.fingerprint import digest
@@ -77,6 +80,17 @@ class VisualDirectionEdit(Strict):
     setup_id: str = Field(min_length=3)
     edit_reason: str = Field(min_length=3, max_length=400)
     edits: list[DirectionBeat] = Field(min_length=1)
+
+
+class AuthoredSetupPayload(Strict):
+    expected_revision: int = Field(ge=0)
+    story_sha256: str = Field(pattern=r"^[a-f0-9]{64}$")
+    payload: dict
+
+
+class G4BuildInput(Strict):
+    expected_revision: int = Field(ge=0)
+    story_sha256: str = Field(pattern=r"^[a-f0-9]{64}$")
 
 
 class G4CandidateInput(Strict):
@@ -161,6 +175,117 @@ def mark(plan: dict, story_sha: str, reason: str, source_direction: dict):
 
 
 def mount(app, store, idempotent):
+    def ensure_authored_payload_table():
+        with store._connection() as db:
+            db.execute("""
+                CREATE TABLE IF NOT EXISTS g4_authored_setup_payloads (
+                    project_id TEXT NOT NULL,
+                    story_sha256 TEXT NOT NULL,
+                    setup_id TEXT NOT NULL,
+                    template_id TEXT NOT NULL,
+                    registry_version TEXT NOT NULL,
+                    payload_json TEXT NOT NULL,
+                    PRIMARY KEY (project_id,story_sha256,setup_id),
+                    FOREIGN KEY (project_id) REFERENCES projects(project_id)
+                )
+            """)
+
+    @app.get("/api/v1/projects/{project_id}/storyboard/blueprint-authoring")
+    def read_blueprint_authoring(project_id: str):
+        ensure_authored_payload_table()
+        story_obj = store.get_story(project_id)
+        story = story_obj.data()
+        schema = json.loads((ROOT / "contracts/schema/VisualBlueprint.v1.schema.json").read_text(encoding="utf-8"))
+        variants = schema["properties"]["setup_plans"]["items"]["properties"]["template_payload"]["oneOf"]
+        by_template = {item["properties"]["template_id"]["const"]: item for item in variants}
+        with store._connection() as db:
+            saved = {row[0]: json.loads(row[1]) for row in db.execute(
+                "SELECT setup_id,payload_json FROM g4_authored_setup_payloads "
+                "WHERE project_id=? AND story_sha256=?", (project_id, story_obj.sha256))}
+        setups = [{"setup_id": setup["setup_id"], "template_id": setup["preferred_template"],
+                   "section_refs": setup["section_refs"], "claim_refs": setup["claim_refs"],
+                   "requirement_refs": setup["requirement_refs"], "direction": setup["direction"],
+                   "schema": by_template[setup["preferred_template"]],
+                   "payload": saved.get(setup["setup_id"])}
+                  for setup in story["visual_setups"]]
+        return {"project_revision": store.revision(project_id),
+                "story_sha256": story_obj.sha256, "registry_version": "VisualBlueprint.v1",
+                "setups": setups, "ready": all(x["payload"] is not None for x in setups)}
+
+    @app.put("/api/v1/projects/{project_id}/storyboard/blueprint-authoring/{setup_id}")
+    def save_blueprint_payload(project_id: str, setup_id: str, body: AuthoredSetupPayload,
+                               key: str = Header(alias="Idempotency-Key", min_length=12)):
+        def apply():
+            ensure_authored_payload_table()
+            current_story = store.get_story(project_id)
+            if current_story.sha256 != body.story_sha256:
+                blocked("STORY_SHA_MISMATCH", project_id, "Reload Story and authoring fields after G1 changes.")
+            setup = next((x for x in current_story.data()["visual_setups"]
+                          if x["setup_id"] == setup_id), None)
+            if setup is None:
+                blocked("G4_SETUP_UNKNOWN", setup_id, "Select a setup from current StoryPackage.")
+            checked = require_payload(setup, body.payload)
+            from jsonschema import Draft202012Validator
+            schema = json.loads((ROOT / "contracts/schema/VisualBlueprint.v1.schema.json").read_text(encoding="utf-8"))
+            variants = schema["properties"]["setup_plans"]["items"]["properties"]["template_payload"]["oneOf"]
+            variant = next(x for x in variants if x["properties"]["template_id"]["const"] == setup["preferred_template"])
+            errors = list(Draft202012Validator(variant).iter_errors(checked))
+            if errors:
+                blocked("TEMPLATE_PAYLOAD_INVALID", setup_id, errors[0].message)
+            with store._transaction() as db:
+                row = db.execute("SELECT revision FROM projects WHERE project_id=?", (project_id,)).fetchone()
+                if row is None or row[0] != body.expected_revision:
+                    blocked("REVISION_CONFLICT", project_id, "Reload current project before saving typed G4 payload.")
+                db.execute("INSERT INTO g4_authored_setup_payloads VALUES(?,?,?,?,?,?) "
+                           "ON CONFLICT(project_id,story_sha256,setup_id) DO UPDATE SET "
+                           "template_id=excluded.template_id,registry_version=excluded.registry_version,"
+                           "payload_json=excluded.payload_json",
+                           (project_id, body.story_sha256, setup_id, setup["preferred_template"],
+                            "VisualBlueprint.v1", json.dumps(checked,sort_keys=True,ensure_ascii=False)))
+                db.execute("UPDATE projects SET revision=revision+1 WHERE project_id=? AND revision=?",
+                           (project_id,body.expected_revision))
+            return {"project_revision": body.expected_revision+1,
+                    "story_sha256": body.story_sha256, "setup_id": setup_id,
+                    "status": "AUTHORED_NOT_COMPILED"}
+        return idempotent(project_id, "g4-authored:"+setup_id, key, body.model_dump(), apply)
+
+    @app.post("/api/v1/projects/{project_id}/storyboard/compile")
+    def compile_initial_storyboard(project_id: str, body: G4BuildInput,
+                                   key: str = Header(alias="Idempotency-Key", min_length=12)):
+        def apply():
+            ensure_authored_payload_table()
+            current_story = store.get_story(project_id)
+            if current_story.sha256 != body.story_sha256:
+                blocked("STORY_SHA_MISMATCH", project_id, "Reload the current source StoryPackage.")
+            if store.revision(project_id) != body.expected_revision:
+                blocked("REVISION_CONFLICT", project_id, "Reload current project revision before compiling.")
+            story = current_story.data()
+            with store._connection() as db:
+                saved = {row[0]: json.loads(row[1]) for row in db.execute(
+                    "SELECT setup_id,payload_json FROM g4_authored_setup_payloads "
+                    "WHERE project_id=? AND story_sha256=? AND registry_version='VisualBlueprint.v1'",
+                    (project_id,body.story_sha256))}
+            blueprint = normalize_story(story, saved, expected_story_sha256=body.story_sha256)
+            validate_visual_blueprint(story, blueprint)
+            # Never trust client-supplied WAV, word timing, rights, or GDI font identity.
+            from backend.app.director.layout import windows_font_measure
+            from pathlib import Path
+            from backend.app.director import draft
+            import hashlib
+            word_map, final_audio, _ = sources(store, project_id)
+            font_file = Path(os.environ["WINDIR"]) / "Fonts" / os.getenv("HVS_G4_FONT_FILE", "arial.ttf")
+            if not font_file.is_file():
+                blocked("FONT_IDENTITY_STALE", project_id, "Configure a pinned native Windows font file.")
+            font_hash = hashlib.sha256(font_file.read_bytes()).hexdigest()
+            _, font_identity = windows_font_measure(str(font_file), font_hash)
+            compile_from_store(store,project_id,blueprint,word_map,final_audio,
+                               maps=None,map_requests={},font_identity=font_identity)
+            head = draft.load(store,project_id)
+            return {"project_revision": store.revision(project_id),
+                    "draft_manifest_sha256": head["manifest_sha256"],
+                    "state": "COMPILED_AWAITING_G4_REVIEW"}
+        return idempotent(project_id, "g4-initial-compile", key, body.model_dump(), apply)
+
     @app.post("/api/v1/projects/{project_id}/storyboard/candidate")
     def prepare_candidate(project_id: str, body: G4CandidateInput,
                           key: str = Header(alias="Idempotency-Key", min_length=12)):
