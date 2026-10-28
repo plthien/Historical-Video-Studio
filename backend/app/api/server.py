@@ -309,6 +309,19 @@ def create_app(database: str | Path | None = None, media_root: str | Path | None
 
     @app.post("/api/v1/projects/{project_id}/authoring-brief")
     def create_authoring_brief(project_id: str, body: AuthoringBriefInput):
+        # Only the current operator-saved settings may produce a current brief.
+        # This prevents raw HTTP clients from presenting unsaved or cross-project
+        # choices as an authoritative project-bound prompt package.
+        store.revision(project_id)
+        with store._connection() as db:
+            db.execute("CREATE TABLE IF NOT EXISTS project_authoring_settings "
+                       "(project_id TEXT PRIMARY KEY, metadata_json TEXT NOT NULL, "
+                       "FOREIGN KEY(project_id) REFERENCES projects(project_id))")
+            row = db.execute("SELECT metadata_json FROM project_authoring_settings WHERE project_id=?",
+                             (project_id,)).fetchone()
+        if row is None or json.loads(row[0]) != body.model_dump():
+            raise ContractViolation("BRIEF_SETTINGS_UNSAVED", project_id,
+                                    "Save current authoring settings for this project, then rebuild the brief.")
         brief = build_brief(store, project_id, **body.model_dump())
         return {"brief_version": "HVS-EXTERNAL-STORY-BRIEF.v1",
                 "content": brief, "file_name": f"{project_id}_story_authoring_brief.md"}
