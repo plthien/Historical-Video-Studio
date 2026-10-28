@@ -28,11 +28,17 @@ function GateBoard({gates}: {gates: Gate[]}) {
 export function App() {
   const [workspace, setWorkspace] = useState<string>(() => workspaces.some(w=>w.id===location.hash.slice(1))?location.hash.slice(1):"project");
   const [recent,setRecent] = useState<{project_id:string;title:string;project_revision:number}[]>([]);
+  const [recentStatus,setRecentStatus] = useState<"loading"|"ready"|"error">("loading");
   const [sectionEdit,setSectionEdit] = useState<string|null>(null);
   const [sectionNarration,setSectionNarration] = useState("");
   const [sectionReason,setSectionReason] = useState("");
   useEffect(()=>{location.hash=workspace;},[workspace]);
-  useEffect(()=>{void api.listProjects().then(setRecent).catch(()=>{});},[]);
+  const reloadRecents=useCallback(async()=>{
+    setRecentStatus("loading");
+    try {const items=await api.listProjects();setRecent(items);setRecentStatus("ready");}
+    catch {setRecentStatus("error");}
+  },[]);
+  useEffect(()=>{void reloadRecents();},[reloadRecents]);
 
   const [project, setProject] = useState<ProjectInfo | null>(null);
   const [storyView, setStoryView] = useState<StoryView | null>(null);
@@ -106,7 +112,7 @@ export function App() {
   async function createProject(name:string){
     const created=await api.createProject(name);
     await refresh(created.project_id,true);
-    setRecent(await api.listProjects());
+    await reloadRecents();
     setWorkspace("project");
   }
   async function openProject(id:string){await refresh(id,true);setWorkspace("project");}
@@ -199,7 +205,7 @@ export function App() {
             {pending==="Refresh"?"Refreshing…":"Refresh project"}</button>}
           {project&&<button className="quiet" type="button" onClick={()=>{
             activeProjectId.current=null;++refreshGeneration.current;sessionStorage.removeItem("hvs.activeProjectId");setProject(null);setStoryView(null);setJobs([]);setWorkspace("project");
-            void api.listProjects().then(setRecent).catch(()=>{});
+            void reloadRecents();
           }}>All projects</button>}
         </div>
       </header>
@@ -217,6 +223,7 @@ export function App() {
           <AssetStudio projectId={project.project_id} projectRevision={project.project_revision} onRefresh={() => refresh(project.project_id)}/> : workspace === "voice" && project ?
           <VoiceStudio project={project} story={storyView} onRefresh={() => refresh(project.project_id)}/> : workspace === "project" ?
           <ProjectWorkspace project={project} story={storyView} recent={recent}
+            recentStatus={recentStatus} onRetryRecents={reloadRecents}
             onCreate={createProject} onOpen={openProject}
             onImported={async()=>{if(project){await refresh(project.project_id);setWorkspace("story");}}}
             onRefresh={async()=>{if(project)await refresh(project.project_id);}}/>
