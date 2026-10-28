@@ -1,0 +1,66 @@
+name: Post-PR12 UI Parity Native Windows
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+jobs:
+  parity:
+    runs-on: windows-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify exact source head and non-destructive change scope
+        shell: pwsh
+        run: |
+          $expected = '${{ github.event.pull_request.head.sha || github.sha }}'
+          if ((git rev-parse HEAD) -ne $expected) { throw "HEAD mismatch: $expected" }
+          git diff --check origin/main...HEAD
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Bootstrap isolated native Windows backend
+        shell: pwsh
+        run: |
+          powershell -NoProfile -ExecutionPolicy Bypass -File scripts/windows/verify-environment.ps1
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Compile actual React production app
+        shell: pwsh
+        run: |
+          npm --prefix frontend ci --no-audit --no-fund
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          npm --prefix frontend run build
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Targeted persisted SQLite authoring and G4 guard tests
+        shell: pwsh
+        run: |
+          & .venv/Scripts/python.exe -m pytest -q tests/backend/test_post_pr12_authoring_story.py tests/backend/test_post_pr12_g4_authoring.py
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Twelve real compiled-app vs approved-mock Chromium comparisons
+        shell: pwsh
+        env:
+          HVS_PARITY_PRODUCTION: '1'
+        run: |
+          Push-Location frontend
+          try {
+            npx playwright install chromium
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+            npm run test:e2e -- tests/e2e/ui-parity.spec.ts
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          } finally { Pop-Location }
+      - name: Upload exact-HEAD screenshot, PNG differences and browser traces
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: post-pr12-ui-parity-compiled-windows
+          path: |
+            frontend/.artifacts/ui-parity/
+            frontend/test-results/
+            frontend/playwright-report/
+          if-no-files-found: warn
