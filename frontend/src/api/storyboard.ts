@@ -46,8 +46,10 @@ export interface ReviewedMapInput {
   feature_ids:string[];route_feature_id:string|null;reviewed_tie_points:Record<string,unknown>[]|null;
 }
 export interface MapAuthoringView{
-  project_revision:number;story_sha256:string;requirements:{
+  project_revision:number;story_sha256:string;g3_state:string;requirements:{
     requirement_id:string;start_year:number;end_year:number;
+    map_reconstruction_policy:string;
+    approved_source:{source_asset_id:string;source_original_sha256:string;rights_review_record_id:string}|null;
     request:Omit<ReviewedMapInput,"expected_revision"|"story_sha256">|null;
   }[];
 }
