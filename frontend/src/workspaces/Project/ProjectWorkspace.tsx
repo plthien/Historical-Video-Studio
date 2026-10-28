@@ -28,6 +28,8 @@ export function ProjectWorkspace({project,story,recent,recentStatus,onRetryRecen
   const [job,setJob]=useState("");
   const [notice,setNotice]=useState("");
   const [error,setError]=useState("");
+  const [importIssue,setImportIssue]=useState<{code:string;path:string;remediation:string}|null>(null);
+  const jsonArea=useRef<HTMLTextAreaElement|null>(null);
   const [clipboardDenied,setClipboardDenied]=useState(false);
   const [lastImport,setLastImport]=useState<{candidate_sha256:string;project_revision:number}|null>(null);
   const epoch=useRef(0);
@@ -40,7 +42,7 @@ export function ProjectWorkspace({project,story,recent,recentStatus,onRetryRecen
   useEffect(()=>{
     const generation=++epoch.current;
     setSettings(initial);setSaved(null);setBrief("");setBriefSignature("");
-    setStoryText("");setLastImport(null);setError("");setNotice("");setStep(story?2:0);
+    setStoryText("");setLastImport(null);setImportIssue(null);setError("");setNotice("");setStep(story?2:0);
     if(!projectId)return;
     void api.authoringSettings(projectId).then(result=>{
       if(epoch.current!==generation)return;
@@ -50,8 +52,15 @@ export function ProjectWorkspace({project,story,recent,recentStatus,onRetryRecen
   async function run(name:string,action:()=>Promise<void>){
     if(job)return;
     setJob(name);setNotice("");setError("");
+    if(name==="Importing StoryPackage")setImportIssue(null);
     try{await action();}
-    catch(e){setError(formatError(e));}
+    catch(e){
+      setError(formatError(e));
+      if(name==="Importing StoryPackage"&&e instanceof ApiError){
+        setImportIssue({code:e.problem.code,path:e.problem.entity_id??"/",
+          remediation:e.problem.remediation});
+      }
+    }
     finally{setJob("");}
   }
   async function create(){
@@ -91,6 +100,19 @@ export function ProjectWorkspace({project,story,recent,recentStatus,onRetryRecen
     const url=URL.createObjectURL(new Blob([brief],{type:"text/markdown;charset=utf-8"}));
     const link=document.createElement("a");link.href=url;link.download=projectId+"_story_authoring_brief.md";
     link.click();URL.revokeObjectURL(url);
+  }
+  function focusInvalidJsonField(){
+    if(!importIssue)return;
+    const tokens=importIssue.path.match(/[A-Za-z_][A-Za-z_0-9]*/g)??[];
+    const candidate=tokens.at(-1);
+    const textarea=jsonArea.current;
+    if(!candidate||!textarea)return;
+    const quoted='"'+candidate+'"';
+    const index=storyText.indexOf(quoted);
+    if(index<0)return;
+    textarea.focus();
+    textarea.setSelectionRange(index,index+quoted.length);
+    textarea.scrollIntoView({block:"center",behavior:"smooth"});
   }
   async function importStory(){
     if(!project)return;
@@ -202,7 +224,17 @@ export function ProjectWorkspace({project,story,recent,recentStatus,onRetryRecen
         <input type="file" id="story-file" accept=".json,application/json" disabled={!!job}
           onChange={async e=>{const file=e.currentTarget.files?.[0];if(file)setStoryText(await file.text());}}/>
         <label htmlFor="story-json">Or paste full StoryPackage JSON</label>
-        <textarea id="story-json" spellCheck={false} rows={12} value={storyText} onChange={e=>setStoryText(e.target.value)} placeholder="Paste a complete StoryPackage.v1 object…"/>
+        <textarea id="story-json" ref={jsonArea} spellCheck={false} rows={12} value={storyText}
+          onChange={e=>{setStoryText(e.target.value);setImportIssue(null);}}
+          placeholder="Paste a complete StoryPackage.v1 object…"/>
+        {importIssue&&<section className="notice error" role="alert" aria-label="import-validation-path">
+          <strong>{importIssue.code}</strong>
+          <p>Source path or entity: <code>{importIssue.path}</code></p>
+          <p>{importIssue.remediation}</p>
+          <button type="button" onClick={focusInvalidJsonField}>
+            Find first matching JSON key (verify occurrence)
+          </button>
+        </section>}
         <button className="primary" disabled={!!job||!storyText.trim()} onClick={()=>void importStory()}>
           {job==="Importing StoryPackage"?"Validating…":"Validate & import StoryPackage"}
         </button>
