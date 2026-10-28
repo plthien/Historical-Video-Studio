@@ -77,7 +77,7 @@ for(const size of widths){
       await page.getByRole("button",{name:"Save settings & continue"}).click();
       await expect(page.locator(".flow-steps button[aria-current=step]")).toContainText("ChatGPT Brief");
       await page.getByRole("button",{name:"Build versioned brief"}).click();
-      await expect(page.locator("#brief-preview")).toContainText("StoryPackage.v1");
+      await expect(page.locator("#brief-preview")).toHaveValue(/StoryPackage.v1/);
       const b=await measure(page,"project-state-b");
       checkGeometry(b);
       await page.screenshot({path:path.join(output,`projects-B-${size.width}.png`),animations:"disabled"});
