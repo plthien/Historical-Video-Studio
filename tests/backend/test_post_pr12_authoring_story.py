@@ -56,3 +56,32 @@ def test_section_patch_keeps_immutable_history_and_no_unrelated_setup_mutation(t
                             headers={"Idempotency-Key": "patch-test-unique-002"}).status_code == 409
         assert client.patch(path+"-unknown", json=body,
                             headers={"Idempotency-Key": "patch-test-unique-003"}).status_code == 422
+
+
+def test_local_project_settings_cas_reopen_and_recent_listing(tmp_path):
+    database = tmp_path / "db.sqlite"
+    media = tmp_path / "media"
+    with TestClient(create_app(database, media)) as client:
+        first = client.post("/api/v1/projects", json={"title": "First archive subject"}).json()
+        second = client.post("/api/v1/projects", json={"title": "Second archive subject"}).json()
+        items = client.get("/api/v1/projects").json()
+        assert [item["project_id"] for item in items[:2]] == [second["project_id"], first["project_id"]]
+        pid = first["project_id"]
+        settings = {"topic": "Historical maritime shipping", "audience": "Adults",
+                    "runtime_minutes": 8, "editorial_goals": "Careful geographic sources",
+                    "expected_revision": 0}
+        uri = f"/api/v1/projects/{pid}/authoring-settings"
+        saved = client.put(uri, json=settings, headers={"Idempotency-Key": "settings-save-unique-001"})
+        assert saved.status_code == 200, saved.text
+        assert saved.json()["project_revision"] == 1
+        assert client.put(uri, json=settings,headers={"Idempotency-Key": "settings-save-unique-001"}).json() == saved.json()
+        assert client.put(uri,json={**settings,"topic":"Different"},
+                          headers={"Idempotency-Key":"settings-save-unique-001"}).status_code == 409
+        assert client.put(uri,json={**settings,"topic":"Another topic"},
+                          headers={"Idempotency-Key":"settings-save-unique-002"}).status_code == 409
+        assert client.get(f"/api/v1/projects/{pid}").json()["project_revision"] == 1
+    with TestClient(create_app(database,media)) as reopened:
+        persisted = reopened.get(uri).json()["settings"]
+        assert persisted["topic"] == settings["topic"]
+        assert persisted["editorial_goals"] == settings["editorial_goals"]
+        assert reopened.get(f"/api/v1/projects/{pid}").json()["project_revision"] == 1
