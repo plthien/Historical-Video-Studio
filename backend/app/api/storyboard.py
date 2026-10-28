@@ -359,20 +359,33 @@ def mount(app, store, idempotent):
         ensure_reviewed_maps()
         candidate = store.get_story(project_id)
         story = candidate.data()
-        requirement_ids = {r["requirement_id"] for r in story["asset_requirements"]
-                           if r["asset_class"] == "HISTORICAL_MAP"}
+        requirements=[r for r in story["asset_requirements"]
+                      if r["asset_class"]=="HISTORICAL_MAP"]
+        from backend.app.projects.gates import GateService
+        gate={g["gate_id"]:g["state"] for g in GateService(store).board(project_id)}
+        approved={}
         with store._connection() as db:
-            records = {row[0]:json.loads(row[1]) for row in db.execute(
+            records={row[0]:json.loads(row[1]) for row in db.execute(
                 "SELECT requirement_id,map_request_json FROM g4_reviewed_map_requests "
                 "WHERE project_id=? AND story_sha256=?",
                 (project_id,candidate.sha256))}
+            if gate["G3"]=="APPROVED":
+                for requirement in requirements:
+                    rid=requirement["requirement_id"]
+                    source=AssetCandidates._source_tx(db,project_id,rid)
+                    head=AssetResolution._head(db,project_id,rid,source["requirement_sha256"])
+                    if head:
+                        approved[rid]={"source_asset_id":head["candidate_id"],
+                                       "source_original_sha256":head["original_sha256"],
+                                       "rights_review_record_id":head["approval_record_id"]}
         return {"project_revision":store.revision(project_id),
-                "story_sha256":candidate.sha256,
+                "story_sha256":candidate.sha256,"g3_state":gate["G3"],
                 "requirements":[{"requirement_id":r["requirement_id"],
                                  "start_year":r["start_year"],"end_year":r["end_year"],
+                                 "map_reconstruction_policy":r["map_reconstruction_policy"],
+                                 "approved_source":approved.get(r["requirement_id"]),
                                  "request":records.get(r["requirement_id"])}
-                                for r in story["asset_requirements"]
-                                if r["requirement_id"] in requirement_ids]}
+                                for r in requirements]}
 
     @app.put("/api/v1/projects/{project_id}/storyboard/map-authoring/{requirement_id}")
     def save_map_authoring(project_id: str, requirement_id: str, body: ReviewedMapRequest,
