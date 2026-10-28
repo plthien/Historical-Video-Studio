@@ -83,6 +83,23 @@ jobs:
           } finally {
             $original | Set-Content -LiteralPath $file -Encoding utf8
           }
+          # Verify compiled JS tampering is detected too; index.html may be unchanged.
+          $asset = Get-ChildItem -Path frontend/dist/assets -Filter *.js -File | Select-Object -First 1
+          if (-not $asset) { throw "No compiled JS asset available to verify bundle identity" }
+          $bytes = [System.IO.File]::ReadAllBytes($asset.FullName)
+          try {
+            [System.IO.File]::AppendAllText($asset.FullName, "\n/* TAMPER_NEGATIVE */")
+            $rejectedAsset = $false
+            try {
+              & .\scripts\windows\verify-frontend-build.ps1 -SkipBootstrap | Out-Null
+            } catch {
+              if ("$_" -match "FRONTEND_BUNDLE_STALE") { $rejectedAsset = $true }
+              else { throw }
+            }
+            if (-not $rejectedAsset) { throw "Launch accepted a tampered compiled JavaScript asset!" }
+          } finally {
+            [System.IO.File]::WriteAllBytes($asset.FullName, $bytes)
+          }
           & .\scripts\windows\verify-frontend-build.ps1 -SkipBootstrap | Out-Null
       - name: Targeted persisted SQLite authoring and G4 guard tests
         shell: pwsh
