@@ -5,10 +5,17 @@
 import {expect,type Page} from "@playwright/test";
 
 export async function openExistingProject(page:Page,id:string){
+  // On reload, sessionStorage restores the selected project asynchronously.
+  // Navigate to the Project workspace and wait for either the landing input or
+  // the hydrated selected-project controls before deciding to switch.
+  await page.getByRole("navigation").getByRole("button",{name:/Project & ChatGPT/i}).click();
   const all=page.getByRole("button",{name:"All projects"});
+  const lookup=page.locator("#project-lookup");
   if(await all.count())await all.click();
-  await page.getByText("Open by exact Project ID").click();
-  await page.locator("#project-lookup").fill(id);
+  else if(!(await lookup.count())){await expect(all).toBeVisible();await all.click();}
+  await expect(lookup).toBeAttached();
+  if(!(await lookup.isVisible()))await page.getByText("Open by exact Project ID").click();
+  await lookup.fill(id);
   await page.getByRole("button",{name:"Open ID",exact:true}).click();
   await expect(page.locator(".topline strong")).toContainText(id);
 }
