@@ -15,6 +15,13 @@ def test_brief_is_deterministic_and_project_scoped(tmp_path):
         pid = client.post("/api/v1/projects", json={"title": "Test external brief"}).json()["project_id"]
         body = {"topic": "Medieval road networks", "audience": "Adult learners",
                 "runtime_minutes": 7, "editorial_goals": "Documented source chronology"}
+        unsigned = client.post(f"/api/v1/projects/{pid}/authoring-brief", json=body)
+        assert unsigned.status_code == 422
+        assert "BRIEF_SETTINGS_UNSAVED" in unsigned.text
+        stored = client.put(f"/api/v1/projects/{pid}/authoring-settings",
+                            json={**body,"expected_revision":0},
+                            headers={"Idempotency-Key":"save-for-brief-build-001"})
+        assert stored.status_code == 200, stored.text
         url = f"/api/v1/projects/{pid}/authoring-brief"
         first = client.post(url, json=body)
         assert first.status_code == 200
@@ -23,7 +30,9 @@ def test_brief_is_deterministic_and_project_scoped(tmp_path):
         assert pid in first.json()["content"]
         assert "asset_requirements" in first.json()["content"]
         changed = client.post(url, json={**body, "topic": "Ancient maritime trade"})
-        assert changed.json()["content"] != first.json()["content"]
+        assert changed.status_code == 422
+        assert "BRIEF_SETTINGS_UNSAVED" in changed.text
+        assert first.json()["content"] == client.post(url, json=body).json()["content"]
         assert client.post(url, json={**body, "runtime_minutes": 11}).status_code == 422
 
 
