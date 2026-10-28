@@ -93,6 +93,16 @@ class G4BuildInput(Strict):
     story_sha256: str = Field(pattern=r"^[a-f0-9]{64}$")
 
 
+class ReviewedMapRequest(Strict):
+    expected_revision: int = Field(ge=0)
+    story_sha256: str = Field(pattern=r"^[a-f0-9]{64}$")
+    year: int = Field(ge=-10000, le=3000)
+    map_record: dict
+    feature_ids: list[str]
+    route_feature_id: str | None = None
+    reviewed_tie_points: list[dict] | None = None
+
+
 class G4CandidateInput(Strict):
     expected_revision: int = Field(ge=0)
 
@@ -287,13 +297,91 @@ def mount(app, store, idempotent):
                 blocked("FONT_IDENTITY_STALE", project_id, "Configure a pinned native Windows font file.")
             font_hash = hashlib.sha256(font_file.read_bytes()).hexdigest()
             _, font_identity = windows_font_measure(str(font_file), font_hash)
+            ensure_reviewed_maps()
+            with store._connection() as db:
+                map_requests={row[0]:json.loads(row[1]) for row in db.execute(
+                    "SELECT requirement_id,map_request_json FROM g4_reviewed_map_requests "
+                    "WHERE project_id=? AND story_sha256=?",(project_id,body.story_sha256))}
             compile_from_store(store,project_id,blueprint,word_map,final_audio,
-                               maps=None,map_requests={},font_identity=font_identity)
+                               maps=None,map_requests=map_requests,font_identity=font_identity)
             head = draft.load(store,project_id)
             return {"project_revision": store.revision(project_id),
                     "draft_manifest_sha256": head["manifest_sha256"],
                     "state": "COMPILED_AWAITING_G4_REVIEW"}
         return idempotent(project_id, "g4-initial-compile", key, body.model_dump(), apply)
+
+    def ensure_reviewed_maps():
+        with store._connection() as db:
+            db.execute("""
+                CREATE TABLE IF NOT EXISTS g4_reviewed_map_requests(
+                    project_id TEXT NOT NULL,story_sha256 TEXT NOT NULL,
+                    requirement_id TEXT NOT NULL,source_original_sha256 TEXT NOT NULL,
+                    map_request_json TEXT NOT NULL,
+                    PRIMARY KEY(project_id,story_sha256,requirement_id),
+                    FOREIGN KEY(project_id) REFERENCES projects(project_id)
+                )""")
+
+    @app.get("/api/v1/projects/{project_id}/storyboard/map-authoring")
+    def map_authoring(project_id: str):
+        ensure_reviewed_maps()
+        candidate = store.get_story(project_id)
+        story = candidate.data()
+        requirement_ids = {r["requirement_id"] for r in story["asset_requirements"]
+                           if r["asset_class"] == "HISTORICAL_MAP"}
+        with store._connection() as db:
+            records = {row[0]:json.loads(row[1]) for row in db.execute(
+                "SELECT requirement_id,map_request_json FROM g4_reviewed_map_requests "
+                "WHERE project_id=? AND story_sha256=?",
+                (project_id,candidate.sha256))}
+        return {"project_revision":store.revision(project_id),
+                "story_sha256":candidate.sha256,
+                "requirements":[{"requirement_id":r["requirement_id"],
+                                 "start_year":r["start_year"],"end_year":r["end_year"],
+                                 "request":records.get(r["requirement_id"])}
+                                for r in story["asset_requirements"]
+                                if r["requirement_id"] in requirement_ids]}
+
+    @app.put("/api/v1/projects/{project_id}/storyboard/map-authoring/{requirement_id}")
+    def save_map_authoring(project_id: str, requirement_id: str, body: ReviewedMapRequest,
+                           key: str = Header(alias="Idempotency-Key", min_length=12)):
+        def apply():
+            ensure_reviewed_maps()
+            current_story=store.get_story(project_id)
+            if current_story.sha256!=body.story_sha256:
+                blocked("STORY_SHA_MISMATCH",requirement_id,"Refresh source-bound G4 map request.")
+            requirement=next((r for r in current_story.data()["asset_requirements"]
+                              if r["requirement_id"]==requirement_id),None)
+            if not requirement or requirement["asset_class"]!="HISTORICAL_MAP":
+                blocked("MAP_REQUIREMENT_UNKNOWN",requirement_id,"Choose current G1 historical map requirement.")
+            if not requirement["start_year"]<=body.year<=requirement["end_year"]:
+                blocked("MAP_PERIOD_MISMATCH",requirement_id,"Selected period year must match the approved G1 requirement.")
+            # Verify exact historical map bytes, current G3 source/rights event, map
+            # feature IDs, route type, tie points and period using the unchanged
+            # authoritative ingest owner rather than trusting browser geometry.
+            from backend.app.maps.ingest import ingest_current_approved
+            ingest_current_approved(store,project_id,requirement_id,body.map_record,
+                                    year=body.year,feature_ids=body.feature_ids,
+                                    route_feature_id=body.route_feature_id,
+                                    reviewed_tie_points=body.reviewed_tie_points)
+            record=body.model_dump(exclude={"expected_revision","story_sha256"})
+            with store._transaction() as db:
+                rev=db.execute("SELECT revision FROM projects WHERE project_id=?",
+                               (project_id,)).fetchone()
+                if not rev or rev[0]!=body.expected_revision:
+                    blocked("REVISION_CONFLICT",project_id,"Refresh G4 map authoring before saving.")
+                db.execute("INSERT INTO g4_reviewed_map_requests VALUES(?,?,?,?,?) "
+                           "ON CONFLICT(project_id,story_sha256,requirement_id) DO UPDATE SET "
+                           "source_original_sha256=excluded.source_original_sha256,"
+                           "map_request_json=excluded.map_request_json",
+                           (project_id,current_story.sha256,requirement_id,
+                            body.map_record["source_original_sha256"],
+                            json.dumps(record,ensure_ascii=False,sort_keys=True)))
+                db.execute("UPDATE projects SET revision=revision+1 WHERE project_id=? AND revision=?",
+                           (project_id,body.expected_revision))
+            return {"project_revision":body.expected_revision+1,"requirement_id":requirement_id,
+                    "source_original_sha256":body.map_record["source_original_sha256"],
+                    "state":"REVIEWED_MAP_REQUEST_NOT_G4_APPROVED"}
+        return idempotent(project_id,"g4-map:"+requirement_id,key,body.model_dump(),apply)
 
     @app.post("/api/v1/projects/{project_id}/storyboard/candidate")
     def prepare_candidate(project_id: str, body: G4CandidateInput,
