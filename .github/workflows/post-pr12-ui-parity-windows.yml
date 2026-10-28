@@ -62,7 +62,7 @@ jobs:
       - name: Targeted persisted SQLite authoring and G4 guard tests
         shell: pwsh
         run: |
-          & .venv/Scripts/python.exe -m pytest -q tests/backend/test_post_pr12_authoring_story.py tests/backend/test_post_pr12_g4_authoring.py
+          & .venv/Scripts/python.exe -m pytest -q tests/backend/test_post_pr12_authoring_story.py tests/backend/test_post_pr12_g4_authoring.py tests/backend/test_pr13_g4_positive.py
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: New approved State A/B real SQLite and strict geometry acceptance
         shell: pwsh
