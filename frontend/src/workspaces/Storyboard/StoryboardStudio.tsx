@@ -157,7 +157,7 @@ export function StoryboardStudio({projectId,onRefresh}:{projectId:string;onRefre
        <strong>{s.scene_id}</strong> · {s.template_id}/{s.variant_id} · frame {s.start_frame}–{s.start_frame+s.duration_frames-1}
      </button>)}
     </div>
-   </div>
+   </aside>
    <section className="panel stage-panel" aria-label="Real Remotion Player stage">
      <small className="eyebrow">PERSISTED COMPILED SCENE · REAL PLAYER</small>
      <h3>{scene?.scene_id??"Select a scene"}</h3>
