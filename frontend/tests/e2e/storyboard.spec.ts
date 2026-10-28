@@ -6,7 +6,7 @@ import {createHash} from 'node:crypto';
 import {resolve} from 'node:path';
 import type {Motion,ResolvedMedia,Scene} from '../../../renderer/remotion/schema';
 
-test('storyboard-editor uses real persisted G4 scenes and native read-only Player',async({page,request})=>{
+test('storyboard-editor uses real persisted G4 scenes and native read-only Player',async({page,request},testInfo)=>{
  test.skip(process.env.HVS_B2_FIXTURE!=='1','Requires native Windows controlled SQLite G4, never mocked HTTP fixtures');
  const fatalErrors:string[]=[];
  page.on('pageerror',e=>fatalErrors.push(e.message));
@@ -25,6 +25,15 @@ test('storyboard-editor uses real persisted G4 scenes and native read-only Playe
  // A visible Player wrapper or updated seek input is NOT a rendered frame.
  const stage=page.getByTestId('player-stage');
  await expect(stage.locator('[data-global-frame="0"][data-scene-id]')).toBeVisible({timeout:30000});
+ const originalViewport=page.viewportSize()!;
+ for(const dimensions of [{width:1366,height:768},{width:1920,height:1080}]){
+   await page.setViewportSize(dimensions);
+   await expect(stage.locator('[data-global-frame="0"][data-scene-id]')).toBeVisible();
+   await page.screenshot({path:testInfo.outputPath(`pr13-g4-populated-real-player-${dimensions.width}.png`),animations:"disabled"});
+   const noOverflow=await page.evaluate(()=>document.documentElement.scrollWidth<=document.documentElement.clientWidth+2);
+   expect(noOverflow).toBe(true);
+ }
+ await page.setViewportSize(originalViewport);
  const first=PNG.sync.read(await stage.screenshot());
  // Native fixture contains real copied G3-authorized synthetic source bytes.
  // Temporarily hide exactly one original to exercise HTTP 424 through actual
