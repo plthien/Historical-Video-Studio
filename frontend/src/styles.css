@@ -46,3 +46,14 @@ label{font-size:12px;font-weight:600;color:var(--muted)}
 @media(max-width:1000px){.workspace-grid{grid-template-columns:1fr}}
 @media(max-width:950px){.shell{display:block}.sidebar{width:auto;border-right:0;border-bottom:1px solid var(--border)}.sidebar nav{grid-template-columns:repeat(3,minmax(0,1fr))}main{padding:18px}.gateboard{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:520px){.sidebar nav{grid-template-columns:repeat(2,minmax(0,1fr))}.gateboard{grid-template-columns:1fr}}
+
+/* Protected voice and source preview controls retain their earlier size boundaries. */
+.voice-studio audio{display:block;width:min(100%,520px);margin:10px 0}
+.voice-fields{display:flex;flex-wrap:wrap;gap:10px;align-items:end;margin:15px 0}
+.voice-fields label{display:grid;gap:5px;min-width:155px;flex:1}
+.voice-studio details{width:100%}
+.asset-original-preview{display:block;max-width:min(100%,680px);max-height:450px;width:auto;height:auto;object-fit:contain;border-radius:6px}
+.asset-studio figure{margin:12px 0}
+.asset-studio figcaption{font-size:12px;overflow-wrap:anywhere}
+li{margin:12px 0;overflow-wrap:anywhere}
+li button{margin-left:12px}
