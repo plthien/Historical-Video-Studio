@@ -16,7 +16,7 @@ EXAMPLE = ROOT / "contracts/examples/longform/StoryPackage.longform.synthetic.js
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--case", choices=["story-import", "reopen-project", "gate-transitions", "restart-running-job", "api-and-ui", "section-repair", "tts-kokoro", "tts-elevenlabs", "final-wav", "alignment-elevenlabs", "voice-ui", "archives-all", "archive-original-download", "glabs-image", "missing-asset-choice", "asset-ui", "phase-a", "normalize-visual", "historical-map", "align-scene-cues", "compile-layout", "compile-motion", "compile-longform", "scene-edit", "render-mp4", "final-video-qc", "export-approved"], required=False)
+    parser.add_argument("--case", choices=["story-import", "reopen-project", "gate-transitions", "restart-running-job", "api-and-ui", "section-repair", "tts-kokoro", "tts-elevenlabs", "final-wav", "alignment-elevenlabs", "voice-ui", "archives-all", "archive-original-download", "glabs-image", "missing-asset-choice", "asset-ui", "phase-a", "normalize-visual", "historical-map", "align-scene-cues", "compile-layout", "compile-motion", "compile-longform", "scene-edit", "render-mp4", "final-video-qc", "export-approved", "restart-during-render", "full-flow-two-topics"], required=False)
     parser.add_argument("--mode", choices=["local", "live"], default="local")
     parser.add_argument("--inspect", nargs=3, metavar=("DATABASE", "MEDIA_ROOT", "PROJECT_ID"))
     args = parser.parse_args()
@@ -31,6 +31,14 @@ def main() -> None:
     if args.case in ("render-mp4", "final-video-qc", "export-approved"):
         from backend.tools.delivery_smoke import run
         run(args.case, args.mode)
+        return
+    if args.case in ("restart-during-render", "full-flow-two-topics"):
+        from backend.tools.b3_final_smoke import restart_during_render, full_flow_two_topics
+        if args.case == "restart-during-render":
+            if args.mode != "local": parser.error("restart-during-render supports local mode only")
+            restart_during_render()
+        else:
+            full_flow_two_topics(args.mode)
         return
     if args.case == "scene-edit":
         from backend.tools.storyboard_smoke import main as check_storyboard

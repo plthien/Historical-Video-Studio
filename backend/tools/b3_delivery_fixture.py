@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+import argparse
 import hashlib
 import ctypes
 import os
@@ -480,13 +481,24 @@ def _stale_source_restart_negative(config: dict, store: ProjectStore,
 
 
 def main():
-    subprocess.run([sys.executable, "-m", "renderer.scripts.prepare_host_fixture"],
-                   cwd=ROOT, check=True)
-    config = json.loads((ROOT / "renderer/.artifacts/approved-player-test.json").read_text("utf-8"))
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--flow-root", type=Path)
+    parser.add_argument("--evidence-dir", type=Path)
+    parser.add_argument("--project-id")
+    parser.add_argument("--direct-render", action="store_true")
+    args = parser.parse_args()
+    flow_root = args.flow_root or ROOT / "renderer/.artifacts/approved-player-test"
+    config_path = flow_root.with_suffix(".json")
+    project_id = args.project_id or "proj_001"
+    subprocess.run([sys.executable, "-m", "renderer.scripts.prepare_host_fixture",
+                    "--output-dir", str(flow_root), "--config-path", str(config_path),
+                    "--project-id", project_id], cwd=ROOT, check=True)
+    config = json.loads(config_path.read_text("utf-8"))
     store = ProjectStore(config["db"], config["artifactRoot"]); project = config["project"]
     gates = GateService(store)
     queue = JobQueue(store); service = DeliveryService(store, queue)
-    evidence = ROOT / "renderer/.artifacts/b3-delivery"; evidence.mkdir(parents=True, exist_ok=True)
+    evidence = args.evidence_dir or ROOT / "renderer/.artifacts/b3-delivery"
+    evidence.mkdir(parents=True, exist_ok=True)
     negatives = []
     try:
         service.submit(project, store.revision(project), "b3-draft-must-not-render")
@@ -516,12 +528,32 @@ def main():
     if cancel_thread.is_alive() or queue.get(cancelled["render_job_id"])["state"] != "CANCELLED":
         raise RuntimeError("B3_EXACT_LOCAL_PROCESS_CANCEL_FAILED")
     negatives.append("LOCAL_RENDER_CANCEL_CONFIRMED")
-    rendered, g04_evidence = _real_process_kill_restart(
-        config, store, queue, service, project, evidence)
+    if args.direct_render:
+        queued = service.submit(project, store.revision(project), "b3-direct-real-render-0001")
+        rendered = service.process(queued["render_job_id"])
+        if rendered["state"] != "SUCCEEDED" or rendered["qc_status"] != "PASS":
+            raise RuntimeError("B3_DIRECT_NATIVE_RENDER_FAILED:" + json.dumps(rendered))
+        qc_report = json.loads(store.get_artifact(rendered["qc_report_sha256"]))
+        g04_evidence = {
+            "schema_version": "B3ContinuousDirectRender.v1", "scope": "SYNTHETIC_TEST_ONLY",
+            "code_identity": subprocess.check_output(
+                ["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip(),
+            "result": "DIRECT_REAL_RENDER_PASS", "errors": [],
+            "media": {"mp4_sha256": rendered["output_sha256"],
+                      "qc_report_sha256": rendered["qc_report_sha256"],
+                      "qc_status": rendered["qc_status"], "ffprobe": qc_report["ffprobe"]},
+            "single_owner": {"duplicate_owners": 0, "successful_operations": 1},
+            "cleanup_ok": True,
+        }
+        negatives.append("DIRECT_REAL_RENDER_PASS")
+    else:
+        rendered, g04_evidence = _real_process_kill_restart(
+            config, store, queue, service, project, evidence)
     service = DeliveryService(store, queue)
     if rendered["state"] != "SUCCEEDED" or rendered["qc_status"] != "PASS":
         raise RuntimeError("B3_NATIVE_RENDER_FAILED " + json.dumps(rendered))
-    negatives.append("REAL_WINDOWS_KILL_RESTART_PASS")
+    if not args.direct_render:
+        negatives.append("REAL_WINDOWS_KILL_RESTART_PASS")
     review = service.start_review(project, rendered["render_job_id"])
     time.sleep(.1)
     muted = service.review_heartbeat(project, review["review_session_id"], review["nonce"],

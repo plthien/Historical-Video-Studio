@@ -1,0 +1,13 @@
+{
+  "schema_version": "PhaseBCodeVerdict.v1",
+  "scope": "B3-04_B3-05_B3-06_CODE_ONLY",
+  "code_identity": "GENERATED_FROM_GIT_HEAD_BY_WINDOWS_CI",
+  "fixture_scope": "SYNTHETIC_TEST_ONLY",
+  "tasks": {
+    "B3-04": {"status": "PENDING_EXACT_HEAD_CI"},
+    "B3-05": {"status": "PENDING_EXACT_HEAD_CI"},
+    "B3-06": {"status": "PENDING_EXACT_HEAD_CI"}
+  },
+  "live_provider_evidence": "NOT_CLAIMED",
+  "full_v1_live_acceptance": "BLOCKED_PENDING_OPERATOR_INPUT"
+}

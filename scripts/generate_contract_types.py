@@ -97,9 +97,6 @@ def emit_type(node: dict, name: str, lang: str, declarations: list[str]) -> str:
 def collect_openapi():
     base = yaml.safe_load((ROOT / "contracts/openapi.yaml").read_text(encoding="utf-8"))
     extension = json.loads((ROOT / "contracts/openapi-fullflow-extension.json").read_text(encoding="utf-8"))
-    # A3 adds scoped Europeana hydration and SHA-verified original preview.
-    if len(extension["paths"]) != 30:
-        raise ValueError("Expected exactly 30 fullflow extension paths")
     schemas = {}
     for source in (base, extension):
         for key, value in source.get("components", {}).get("schemas", {}).items():

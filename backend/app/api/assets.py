@@ -350,6 +350,10 @@ def mount(app, store, gates, queue, idempotent):
         return idempotent(project_id,"asset-batch",key,body.model_dump(),
             lambda:resolver.approve_batch(project_id,[x.model_dump() for x in body.reviews],body.expected_revision))
 
+    @app.post("/api/v1/projects/{project_id}/assets/batch-validate")
+    def batch_validate(project_id:str,body:Batch,_key:str=Header(alias="Idempotency-Key")):
+        return resolver.validate_batch(project_id,[x.model_dump() for x in body.reviews],body.expected_revision)
+
     @app.post("/api/v1/projects/{project_id}/assets/generate")
     def generate(project_id:str,body:Generation,background:BackgroundTasks,key:str=Header(alias="Idempotency-Key")):
         k,base=stored_provider_key("glabs_webhook")

@@ -551,10 +551,14 @@ def test_alignment_api_status_and_media_bytes_on_real_store(tmp_path):
     from backend.app.api.server import create_app
     store,gates,voice,workflow,project,story=setup(tmp_path)
     approved=approval(store,gates,project)
+    # This API-focused fixture needs a completed local assembly and a still-
+    # queued alignment. Finish assembly before the app lifespan can recover it;
+    # otherwise startup may also attempt the real provider before this test can
+    # inspect the pre-alignment state.
+    assert workflow.status(project)["final_audio"] is None
+    assert workflow.process_one()["state"]=="SUCCEEDED"
     with TestClient(create_app(store.database,store.artifacts.root)) as client:
         base="/api/v1/projects/"+project+"/voice"
-        assert client.get(base+"/alignment").json()["final_audio"] is None
-        assert workflow.process_one()["state"]=="SUCCEEDED"
         metadata=client.get(base+"/alignment").json()
         final=metadata["final_audio"]
         assert metadata["g4_ready_dependency"] is False

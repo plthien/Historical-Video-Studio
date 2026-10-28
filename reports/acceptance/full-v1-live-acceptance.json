@@ -1,0 +1,15 @@
+{
+  "schema_version": "FullV1LiveAcceptance.v1",
+  "overall": "BLOCKED",
+  "reason": "No two operator-owned 5-10 minute projects and approval/rights ledger were supplied to this code implementation run.",
+  "projects": [],
+  "criteria": {
+    "two_distinct_storypackages": "NOT_RUN",
+    "real_g1_g2_g3_g4_g5_operator_decisions": "NOT_RUN",
+    "real_tts_and_elevenlabs_alignment": "NOT_RUN",
+    "verified_historical_rights": "NOT_RUN",
+    "two_300_to_600_second_h264_aac_exports": "NOT_RUN",
+    "eight_role_actual_media_review": "NOT_RUN"
+  },
+  "synthetic_ci_is_live_evidence": false
+}

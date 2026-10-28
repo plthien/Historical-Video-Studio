@@ -12,6 +12,7 @@ from uuid import uuid4
 from fastapi import FastAPI, Header, Request, BackgroundTasks
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, ConfigDict, Field
 
 from backend.app.api.imports import import_story
@@ -132,6 +133,9 @@ def create_app(database: str | Path | None = None, media_root: str | Path | None
             queued_renders = [row[0] for row in db.execute(
                 "SELECT job_id FROM jobs WHERE kind='final_render' AND state='QUEUED' "
                 "AND cancel_requested=0")]
+            queued_assemblies = [row[0] for row in db.execute(
+                "SELECT job_id FROM jobs WHERE kind='final_assembly' AND state='QUEUED' "
+                "AND cancel_requested=0")]
 
         async def run_persisted(kind: str, job_id: str, operation):
             try:
@@ -151,6 +155,9 @@ def create_app(database: str | Path | None = None, media_root: str | Path | None
         tasks.extend(asyncio.create_task(run_persisted("final_render", job_id,
                                                        application.state.delivery.process))
                      for job_id in queued_renders)
+        tasks.extend(asyncio.create_task(run_persisted("final_assembly", job_id,
+                                                       application.state.final_voice.process_pending))
+                     for job_id in queued_assemblies)
         application.state.startup_job_tasks = tasks
         try:
             yield
@@ -328,7 +335,37 @@ def create_app(database: str | Path | None = None, media_root: str | Path | None
     @app.get("/api/v1/projects/{project_id}/jobs")
     def project_jobs(project_id: str):
         store.revision(project_id)
-        return queue.list_for_project(project_id)
+        rows = queue.list_for_project(project_id)
+        with store._connection() as db:
+            has_render = bool(db.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name='render_attempts'").fetchone())
+            for row in rows:
+                row.pop("payload_json", None)
+                row.pop("payload_sha256", None)
+                row.pop("lease_token", None)
+                row["progress"] = None
+                if has_render and row["kind"] == "final_render":
+                    progress = db.execute("SELECT progress_frames,total_frames,output_sha256 FROM render_attempts WHERE job_id=?",
+                                          (row["job_id"],)).fetchone()
+                    if progress:
+                        row["progress"] = {"completed": progress[0], "total": progress[1]}
+                        row["output_available"] = bool(progress[2])
+                row["retry_action"] = (
+                    "managed_resume" if row["kind"] == "glabs_image" and row["state"] == "FAILED_RETRYABLE"
+                    and not row["cancel_requested"] else
+                    "render_retry" if row["kind"] == "final_render" and row["state"] == "FAILED_RETRYABLE" else
+                    "voice_alignment_retry" if row["kind"] == "final_alignment" and row["state"] == "FAILED_RETRYABLE" else None)
+                row["remediation"] = (
+                    "Restore the original provider credentials and reconcile the exact provider task."
+                    if row["kind"] == "glabs_image" and row["state"] == "BLOCKED_REVIEW" else
+                    "Open Final Video to retry against the current approved G4 timeline."
+                    if row.get("retry_action") == "render_retry" else
+                    "Open Voice to retry forced alignment against the exact final WAV."
+                    if row.get("retry_action") == "voice_alignment_retry" else
+                    "Resume the original provider task; this action never submits a replacement paid task."
+                    if row.get("retry_action") == "managed_resume" else
+                    "Review the persisted error and source approvals before taking another action."
+                    if row["error_code"] else None)
+        return rows
 
     @app.get("/api/v1/jobs/{job_id}")
     def job_read(job_id: str):
@@ -352,6 +389,13 @@ def create_app(database: str | Path | None = None, media_root: str | Path | None
             "remediation": "Complete its owner task before enabling this workspace action.",
             "retryable": False, "entity_id": remaining, "blocking_gate": None
         })
+
+    # The packaged/one-click application serves the built six-workspace UI
+    # from the same local process as the API. Development remains on Vite when
+    # frontend/dist does not exist.
+    frontend_dist = Path(os.getenv("HVS_FRONTEND_DIST", Path(__file__).parents[3] / "frontend" / "dist"))
+    if frontend_dist.joinpath("index.html").is_file():
+        app.mount("/", StaticFiles(directory=frontend_dist, html=True), name="studio-ui")
 
     return app
 

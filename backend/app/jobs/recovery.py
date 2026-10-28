@@ -28,7 +28,13 @@ def recover_interrupted(queue: JobQueue) -> dict[str, int]:
         for job_id, provider_task_id, cancel_requested, kind in db.execute(
             "SELECT job_id,provider_task_id,cancel_requested,kind FROM jobs WHERE state='RUNNING'"
         ).fetchall():
-            if kind == "final_render" and not cancel_requested:
+            if kind == "final_assembly" and not cancel_requested:
+                # Final WAV assembly is a deterministic local operation. It is
+                # safe to re-run from its frozen selection snapshot.
+                db.execute("UPDATE jobs SET state='QUEUED',resume_only=0,lease_token=NULL,error_code=NULL "
+                           "WHERE job_id=?", (job_id,))
+                resumed += 1
+            elif kind == "final_render" and not cancel_requested:
                 # Local render has no remote side effect. Partial temp files are
                 # never authoritative, so deterministic exact-input requeue is safe.
                 table = db.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name='render_attempts'").fetchone()

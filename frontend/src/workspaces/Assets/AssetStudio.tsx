@@ -1,5 +1,5 @@
 import {useCallback,useEffect,useRef,useState} from "react";
-import {assetApi,type Requirement,type AssetCandidate,type AssetReview} from "../../api/assets";
+import {assetApi,type Requirement,type AssetCandidate,type AssetReview,type BatchValidationItem} from "../../api/assets";
 import {api,ApiError,type Gate} from "../../api/client";
 import {ProviderSettings} from "../Settings/ProviderSettings";
 type StagedReview = AssetReview & {project_id:string;source_story_sha256:string;source_requirement_sha256:string;resolution_mode:string};
@@ -29,6 +29,7 @@ export function AssetStudio({projectId,projectRevision,onRefresh}:{projectId:str
   const [reviewNotes,setReviewNotes]=useState<Record<string,{rights:string;history:string}>>({});
   const [checks,setChecks]=useState<Record<string,boolean>>({});
   const [staged,setStaged]=useState<StagedReview[]>([]);
+  const [validation,setValidation]=useState<BatchValidationItem[]>([]);
   const stagedRef=useRef<StagedReview[]>([]);
   const selectedRef=useRef("");
   const projectRef=useRef(projectId);
@@ -36,7 +37,7 @@ export function AssetStudio({projectId,projectRevision,onRefresh}:{projectId:str
   const requestSeq=useRef(0);
   const reloadSeq=useRef(0);
   function saveStaged(next:StagedReview[]){
-    stagedRef.current=next;setStaged(next);
+    stagedRef.current=next;setStaged(next);setValidation([]);
   }
   const loadCandidates=useCallback(async(pid:string,rid:string)=>{
     const seq=++requestSeq.current;
@@ -117,7 +118,8 @@ export function AssetStudio({projectId,projectRevision,onRefresh}:{projectId:str
       setProblem(e instanceof ApiError?e.problem.code+": "+e.message+" — "+e.problem.remediation:
         e instanceof Error?e.message:String(e));
       // Fetch changed revisions and prune stale drafts, without silently retrying the mutation.
-      try{await reload();}catch{ /* Preserve the original actionable error. */ }
+      if(!(e instanceof Error&&e.message.startsWith("ASSET_BATCH_PREFLIGHT_FAILED")))
+        try{await reload();}catch{ /* Preserve the original actionable error. */ }
     }
     finally{setPending("");}
   }
@@ -171,13 +173,12 @@ export function AssetStudio({projectId,projectRevision,onRefresh}:{projectId:str
     const latest=await assetApi.requirements(projectId);
     if(latest.project_revision!==revision)
       throw new Error("REVISION_CONFLICT: Project changed. Reviews will be revalidated; inspect and retry explicitly.");
-    const valid=await validated(included,latest.requirements);
-    if(valid.length!==included.length){
-      // Prune only invalid entries; never approve an unexpectedly reduced batch.
-      saveStaged(valid);setChecks({});
-      throw new Error("ASSET_SOURCE_STALE: One or more originals changed. Valid drafts remain staged; review before retry.");
-    }
-    const result=await assetApi.batch(projectId,revision,valid.map(({project_id,source_story_sha256,source_requirement_sha256,resolution_mode,...review})=>review));
+    const reviews=included.map(({project_id,source_story_sha256,source_requirement_sha256,resolution_mode,...review})=>review);
+    const checked=await assetApi.validateBatch(projectId,revision,reviews);
+    setValidation(checked.items);
+    if(!checked.revision_matches||checked.items.some(item=>item.status!=="VALID"))
+      throw new Error("ASSET_BATCH_PREFLIGHT_FAILED: Inspect each staged row below. No approval was committed; repair or remove blocked rows, then submit explicitly again.");
+    const result=await assetApi.batch(projectId,revision,reviews);
     saveStaged([]);setChecks({});
     return result;
   }
@@ -281,6 +282,14 @@ export function AssetStudio({projectId,projectRevision,onRefresh}:{projectId:str
           {d.requirement_id} · {d.candidate_id} · {d.original_sha256.slice(0,12)} · {d.rights_evidence_note}
           <button type="button" disabled={!!pending} aria-label={"Remove staged "+d.requirement_id}
             onClick={()=>saveStaged(stagedRef.current.filter(x=>x.requirement_id!==d.requirement_id))}>Remove</button>
+        </li>)}</ul>
+      </div>}
+      {validation.length>0&&<div className="panel" aria-label="Batch validation results">
+        <h4>Batch validation results</h4>
+        <p>Validation does not approve a source. The complete batch is checked again atomically on submit.</p>
+        <ul>{validation.map(item=><li key={item.requirement_id}>
+          <strong>{item.requirement_id} · {item.status}</strong>
+          {item.error_code&&<> · {item.error_code}</>} — {item.reason}
         </li>)}</ul>
       </div>}
     </div>

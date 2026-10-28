@@ -24,6 +24,9 @@ export interface StoryView {
 export interface JobInfo {
   job_id: string; kind: string; state: string; error_code: string | null;
   provider_task_id: string | null; cancel_requested: number; retry_count: number;
+  retry_action:"managed_resume"|"render_retry"|"voice_alignment_retry"|null;
+  remediation:string|null; progress:{completed:number;total:number}|null;
+  output_available?:boolean;
 }
 export interface ProjectCreated { project_id: string; project_revision: number; next_action: string; }
 export interface GateDecision {
