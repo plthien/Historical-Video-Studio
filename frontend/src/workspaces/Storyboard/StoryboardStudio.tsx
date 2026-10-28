@@ -3,6 +3,7 @@ import {ApiError} from '../../api/client';
 import {storyboardApi,type ScenePage,type BrowserPreview,type StoryboardScene,type AssetOptions} from '../../api/storyboard';
 import {RemotionPreview} from '../../components/RemotionPreview';
 import {deliveryApi} from '../../api/delivery';
+import {BlueprintAuthoring} from './BlueprintAuthoring';
 
 function describe(error:unknown){
  if(error instanceof ApiError)return `${error.status} ${error.problem.code}: ${error.problem.message} — ${error.problem.remediation}`;
@@ -120,6 +121,9 @@ export function StoryboardStudio({projectId,onRefresh}:{projectId:string;onRefre
  const currentSource=page?.draft_manifest_sha256;
  return <div className="stack" aria-label="storyboard-editor">
   <p>Real G4 storyboard draft · source and voice locked. G4/G5 revisions require explicit operator edits; preview does not approve or export a video.</p>
+  <BlueprintAuthoring projectId={projectId} onBuilt={async()=>{
+    setError("");await load(0);await onRefresh();
+  }}/>
   {error&&<p role="alert" className="notice error">{error}</p>}
   {success&&<p role="status" className="notice success">{success}</p>}
   {!page&&<div className="panel" role="status">Loading current immutable G4 draft. G1/G2/G3 approval, G2 word map and G4 compilation are required.</div>}
