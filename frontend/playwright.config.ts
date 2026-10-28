@@ -28,7 +28,7 @@ export default defineConfig({
      reuseExistingServer: false, timeout: 60_000,
      env: {...process.env, HVS_DB: fullFlowConfig?.db??(b2Fixture?path.join(b2Root,"g4.sqlite"):path.resolve(here, ".e2e-data/state.sqlite")),
            HVS_MEDIA: fullFlowConfig?.artifactRoot??(b2Fixture?path.join(b2Root,"artifacts"):path.resolve(here, ".e2e-data/media"))}},
-    {command: parityProduction?"npx vite preview --host 127.0.0.1 --port 5173 --strictPort":b3Fixture?"npm run dev -- --port 5174":"npm run dev", cwd: here, url: `http://127.0.0.1:${uiPort}`,
+    {command: parityProduction?"npx vite preview --host 127.0.0.1 --port 5173 --strictPort":b3Fixture?"npm run dev -- --port 5174":"npm run dev -- --port 5173", cwd: here, url: `http://127.0.0.1:${uiPort}`,
      reuseExistingServer: false, timeout: 60_000,
      env: {...process.env,VITE_API_ORIGIN:`http://127.0.0.1:${apiPort}/api/v1`}}
   ],
