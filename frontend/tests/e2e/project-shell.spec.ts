@@ -11,7 +11,7 @@ const fixture = JSON.parse(readFileSync(path.resolve(here,
 
 test("project-shell: six destinations, real import and G1 human review", async ({page}, testInfo) => {
   await page.goto("/");
-  for (const name of ["Project & ChatGPT Import", "Story Review", "Voice Studio",
+  for (const name of ["Project & ChatGPT", "Story Review", "Voice Studio",
     "Historical Assets", "Motion Storyboard", "Render & Delivery"]) {
     await page.getByRole("navigation").getByRole("button", {name: new RegExp("^" + name, "i")}).click();
     await expect(page.locator(".content[aria-label] h2")).toContainText(new RegExp(name.split(" / ")[0], "i"));
