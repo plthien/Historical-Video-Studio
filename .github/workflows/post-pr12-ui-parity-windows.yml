@@ -54,13 +54,28 @@ jobs:
         run: |
           npm --prefix frontend ci --no-audit --no-fund
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          npm --prefix frontend run build
+          & scripts/windows/verify-frontend-build.ps1
+          if ($LASTEXITCODE -and $LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          npm --prefix frontend run typecheck
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          if (-not (Test-Path frontend/dist/build-info.json)) { throw "Missing source-bound production build-info" }
       - name: Targeted persisted SQLite authoring and G4 guard tests
         shell: pwsh
         run: |
           & .venv/Scripts/python.exe -m pytest -q tests/backend/test_post_pr12_authoring_story.py tests/backend/test_post_pr12_g4_authoring.py
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: New approved State A/B real SQLite and strict geometry acceptance
+        shell: pwsh
+        env:
+          HVS_PARITY_PRODUCTION: '1'
+        run: |
+          Push-Location frontend
+          try {
+            npx playwright install chromium
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+            npm run test:e2e -- tests/e2e/ui-redesign.spec.ts
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          } finally { Pop-Location }
       - name: Retained historical mockup comparison (diagnostic only)
         shell: pwsh
         env:
@@ -80,6 +95,8 @@ jobs:
           name: post-pr12-ui-parity-compiled-windows
           path: |
             frontend/.artifacts/ui-parity/
+            frontend/.artifacts/ui-redesign/
+            frontend/dist/build-info.json
             frontend/test-results/
             frontend/playwright-report/
           if-no-files-found: warn
