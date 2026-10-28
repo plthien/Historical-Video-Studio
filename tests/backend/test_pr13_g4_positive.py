@@ -123,3 +123,75 @@ def test_http_g4_initial_compile_with_reviewed_period_map(tmp_path):
         assert client.get(base+"/timeline").status_code==200
         # Source-bound compiler refuses edits after the original G3 approval
         # changes or a Story revision, rather than replaying this old draft.
+
+
+@pytest.mark.skipif(os.name!="nt",reason="Required genuine native Windows GDI integration")
+def test_http_g4_initial_compile_without_map_requires_no_map_request(tmp_path):
+    """Positive non-geographic T09 setup, still using exact persisted media and G1/G2/G3."""
+    long_story=load("contracts/examples/visual_cases/StoryPackage.visual_cases.synthetic.json")
+    long_blueprint=load("contracts/examples/visual_cases/VisualBlueprint.visual_cases.synthetic.json")
+    story={**long_story}
+    story["sections"]=[x for x in long_story["sections"] if x["section_id"]=="sec_09"]
+    story["claims"]=[x for x in long_story["claims"] if x["claim_id"]=="claim_09"]
+    story["asset_requirements"]=[x for x in long_story["asset_requirements"]
+                                 if x["requirement_id"]=="req_09_source_page"]
+    story["visual_setups"]=[x for x in long_story["visual_setups"] if x["setup_id"]=="setup_09"]
+    payload=next(x["template_payload"] for x in long_blueprint["setup_plans"] if x["setup_id"]=="setup_09")
+    pid=story["project"]["project_id"]
+    app=create_app(tmp_path/"nonmap.sqlite",tmp_path/"media")
+    store=app.state.store
+    store.create_project(pid,"SYNTHETIC_TEST_ONLY no-map storyboard")
+    store.import_story(StoryCandidate.parse(story),0)
+    gates=GateService(store)
+    gates.review_claim(pid,"claim_09","REVIEWED","SYNTHETIC_TEST_ONLY independent claim review",
+                       store.revision(pid))
+    g1=gates.board(pid)[0]
+    gates.decide(pid,"G1",{"decision":"APPROVED",
+        "candidate_sha256":g1["candidate_sha256"],
+        "dependency_fingerprint":g1["dependency_fingerprint"],
+        "expected_revision":store.revision(pid)})
+    voice=VoiceService(store,gates,JobQueue(store))
+    with patch.object(attempts,"_provider_identity",return_value={"model_id":"synthetic_test_only"}):
+        voice.enqueue(pid,"sec_09","kokoro_local","am_adam",1.0,
+                      "SYNTHETIC_TEST_ONLY",store.revision(pid),"g4route_nonmap_voice_001")
+        assert voice.process_one(lambda *_:wav_fixture(4.0))["state"]=="SUCCEEDED"
+    g2=gates.board(pid)[1]
+    gates.decide(pid,"G2",{"decision":"APPROVED",
+        "candidate_sha256":g2["candidate_sha256"],
+        "dependency_fingerprint":g2["dependency_fingerprint"],
+        "expected_revision":store.revision(pid)})
+    workflow=FinalVoiceWorkflow(store,gates,JobQueue(store))
+    assert workflow.process_one()["state"]=="SUCCEEDED"
+    final=workflow.status(pid)["final_audio"]
+    assert workflow.process_one(lambda audio,text:mock_alignment(final,text))["state"]=="SUCCEEDED"
+    resolver=AssetResolution(store)
+    resolver.choose(pid,"req_09_source_page","MANUAL_UPLOAD",
+                    "SYNTHETIC_TEST_ONLY original",store.revision(pid))
+    original=AssetCandidates(store).manual(pid,"req_09_source_page",PNG,
+                "SYNTHETIC_TEST_ONLY source","SYNTHETIC_TEST_ONLY context","Synthetic rights")
+    resolver.approve_batch(pid,[{
+        "requirement_id":"req_09_source_page","candidate_id":original["candidate_id"],
+        "original_sha256":original["original_sha256"],"rights_status":"ELIGIBLE",
+        "rights_evidence_note":"SYNTHETIC_TEST_ONLY rights review",
+        "historical_context_note":"SYNTHETIC_TEST_ONLY source context"}],store.revision(pid))
+    g3=gates.board(pid)[2]
+    gates.decide(pid,"G3",{"decision":"APPROVED",
+        "candidate_sha256":g3["candidate_sha256"],
+        "dependency_fingerprint":g3["dependency_fingerprint"],
+        "expected_revision":store.revision(pid)})
+    with TestClient(app) as client:
+        base=f"/api/v1/projects/{pid}/storyboard"
+        initial=client.get(base+"/blueprint-authoring")
+        assert initial.status_code==200,initial.text
+        identity=initial.json()["story_sha256"]
+        saved=client.put(base+"/blueprint-authoring/setup_09",
+            json={"expected_revision":store.revision(pid),"story_sha256":identity,"payload":payload},
+            headers=KEY("g4route-nonmap-payload-001"))
+        assert saved.status_code==200,saved.text
+        assert client.get(base+"/map-authoring").json()["requirements"]==[]
+        completed=client.post(base+"/compile",json={
+            "expected_revision":store.revision(pid),"story_sha256":identity},
+            headers=KEY("g4route-nonmap-compile-001"))
+        assert completed.status_code==200,completed.text
+        assert client.get(base+"/scenes").json()["scenes"][0]["template_id"]=="T09"
+        assert draft.load(store,pid)["manifest"]["map_requests"]=={}
