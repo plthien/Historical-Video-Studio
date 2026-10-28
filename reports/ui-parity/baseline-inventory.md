@@ -8,7 +8,7 @@ Baseline: `main@d368088dba5713b3b4b51b635f585585bd8baf9a`. Approved static basel
 | 02 Story review G1 | Script, claims, evidence, human gate decision | `App.tsx`, `backend/app/api/server.py` | `/story`, `/story/sections/{id}` PATCH, `/claims/{id}/review`, `/gates/G1/decision`; bounded correction wired |
 | 03 Voice Studio G2 | Section attempts, waveform/playback, selection/correction, final WAV/alignment | `frontend/src/workspaces/Voice/VoiceStudio.tsx` | `backend/app/api/voice.py`; owner logic retained, layout comparison NOT_COMPARABLE pending Chromium |
 | 04 Historical Assets G3 | Requirements board, originals, managed/manual resolution, explicit rights/batch approval | `frontend/src/workspaces/Assets/AssetStudio.tsx` | `backend/app/api/assets.py`; existing review owner retained, layout NOT_COMPARABLE |
-| 05 Motion Storyboard G4 | Scene list, real Player, timeline and inspector, typed compile | `frontend/src/workspaces/Storyboard/StoryboardStudio.tsx` | `backend/app/api/storyboard.py`, `backend/app/director/blueprint.py`; initial typed payload authoring/compile remains NOT IMPLEMENTED |
+| 05 Motion Storyboard G4 | Scene list, real Player, timeline and inspector, typed compile | `frontend/src/workspaces/Storyboard/StoryboardStudio.tsx` | `backend/app/api/storyboard.py`, `backend/app/director/blueprint.py`; initial typed payload authoring and compile route implemented; native Windows verified integration NOT RUN |
 | 06 Render & Delivery G5 | Render/QC, review media, exact export, credits | `frontend/src/workspaces/Delivery/DeliveryStudio.tsx` | `backend/app/api/delivery.py`; existing owner logic retained, layout NOT_COMPARABLE |
 
 ## Source-authority gap — initial G4 compile
