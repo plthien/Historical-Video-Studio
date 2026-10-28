@@ -1,10 +1,11 @@
 import {useCallback, useEffect, useRef, useState} from "react";
-import {api, ApiError, type Gate, type GateDecision, type GateId, type JobInfo, type ProjectInfo, type StoryPayload, type StoryView, type AuthoringBriefInput} from "./api/client";
+import {api, ApiError, type Gate, type GateDecision, type GateId, type JobInfo, type ProjectInfo, type StoryPayload, type StoryView} from "./api/client";
 import {workspaces} from "./routes/workspaces";
 import {VoiceStudio} from "./workspaces/Voice/VoiceStudio";
 import {AssetStudio} from "./workspaces/Assets/AssetStudio";
 import {StoryboardStudio} from "./workspaces/Storyboard/StoryboardStudio";
 import {DeliveryStudio} from "./workspaces/Delivery/DeliveryStudio";
+import {ProjectWorkspace} from "./workspaces/Project/ProjectWorkspace";
 
 type Notice = {kind: "success" | "error"; message: string};
 const idKey = () => crypto.randomUUID();
@@ -19,7 +20,7 @@ function NoticeView({notice}: {notice: Notice | null}) {
 }
 function GateBoard({gates}: {gates: Gate[]}) {
   return <div className="gateboard" aria-label="Five review gates">{gates.map(g =>
-    <section className="gate" key={g.gate_id}>
+    <section className="gate" data-state={g.state} key={g.gate_id}>
       <strong>{g.gate_id}</strong> <span>{g.state}</span>
       {g.blockers.length > 0 && <small>{g.blockers.slice(0, 2).join("; ")}{g.blockers.length > 2 ? ` +${g.blockers.length-2} more` : ""}</small>}
     </section>)}</div>;
@@ -27,9 +28,6 @@ function GateBoard({gates}: {gates: Gate[]}) {
 export function App() {
   const [workspace, setWorkspace] = useState<string>(() => workspaces.some(w=>w.id===location.hash.slice(1))?location.hash.slice(1):"project");
   const [recent,setRecent] = useState<{project_id:string;title:string;project_revision:number}[]>([]);
-  const [settings,setSettings] = useState<AuthoringBriefInput>({topic:"",audience:"General adults",runtime_minutes:7,editorial_goals:"Clear evidence-led history"});
-  const [brief,setBrief] = useState("");
-  const [clipboardDenied,setClipboardDenied] = useState(false);
   const [sectionEdit,setSectionEdit] = useState<string|null>(null);
   const [sectionNarration,setSectionNarration] = useState("");
   const [sectionReason,setSectionReason] = useState("");
@@ -39,9 +37,6 @@ export function App() {
   const [project, setProject] = useState<ProjectInfo | null>(null);
   const [storyView, setStoryView] = useState<StoryView | null>(null);
   const [jobs, setJobs] = useState<JobInfo[]>([]);
-  const [title, setTitle] = useState("Historical documentary");
-  const [existingId, setExistingId] = useState("");
-  const [storyText, setStoryText] = useState("");
   const [notes, setNotes] = useState<Record<string, string>>({});
   const [urls, setUrls] = useState<Record<string, string>>({});
   const [decisionComment, setDecisionComment] = useState("");
@@ -57,10 +52,7 @@ export function App() {
     if (!switchProject && prior !== null && prior !== projectId) return;
     if (switchProject) {
       activeProjectId.current = projectId;
-      setBrief("");
-      setClipboardDenied(false);
       setSectionEdit(null);
-      setSettings({topic:"",audience:"General adults",runtime_minutes:7,editorial_goals:"Clear evidence-led history"});
     }
     const generation = ++refreshGeneration.current;
     try {
@@ -75,9 +67,6 @@ export function App() {
       setProject(current);
       setStoryView(story);
       setJobs(taskList);
-      void api.authoringSettings(projectId).then(v=>{
-        if(activeProjectId.current===projectId&&v.settings)setSettings(v.settings);
-      }).catch(()=>{});
     } catch (error) {
       if (switchProject && generation === refreshGeneration.current)
         activeProjectId.current = prior;
@@ -102,24 +91,13 @@ export function App() {
     }
   }
 
-  async function createProject() {
-    await execute("Project creation", async () => {
-      const created = await api.createProject(title);
-      setStoryView(null); setStoryText("");
-      await refresh(created.project_id, true);
-      setWorkspace("project");
-      setRecent(await api.listProjects());
-    });
+  async function createProject(name:string){
+    const created=await api.createProject(name);
+    await refresh(created.project_id,true);
+    setRecent(await api.listProjects());
+    setWorkspace("project");
   }
-  async function importJson() {
-    if (!project) return;
-    await execute("Story import", async () => {
-      const payload: unknown = JSON.parse(storyText);
-      await api.importStory(project.project_id, payload, project.project_revision, idKey());
-      await refresh(project.project_id);
-      setWorkspace("story");
-    });
-  }
+  async function openProject(id:string){await refresh(id,true);setWorkspace("project");}
   async function reviewClaim(claimId: string, status: "REVIEWED" | "VERIFIED") {
     if (!project) return;
     await execute(`Claim ${claimId} review`, async () => {
@@ -172,30 +150,6 @@ export function App() {
   const nextWorkspace = !storyView?"project":nextGate?.gate_id==="G1"?"story":
     nextGate?.gate_id==="G2"||nextGate?.gate_id==="G3"?chooseParallel:
     nextGate?.gate_id==="G4"?"storyboard":"delivery";
-  async function buildBrief(){
-    if(!project)return;
-    await execute("Build authoring brief",async()=>{
-      const result=await api.buildBrief(project.project_id,settings);
-      setBrief(result.content);setClipboardDenied(false);
-    });
-  }
-  async function saveSettings(){
-    if(!project)return;
-    await execute("Save authoring settings",async()=>{
-      await api.saveAuthoringSettings(project.project_id,settings,project.project_revision,idKey());
-      await refresh(project.project_id);
-    });
-  }
-  async function copyBrief(){
-    try{await navigator.clipboard.writeText(brief);setClipboardDenied(false);}
-    catch{setClipboardDenied(true);}
-  }
-  function exportBrief(){
-    if(!project||!brief)return;
-    const url=URL.createObjectURL(new Blob([brief],{type:"text/markdown;charset=utf-8"}));
-    const link=document.createElement("a");
-    link.href=url;link.download=project.project_id+"_authoring_brief.md";link.click();URL.revokeObjectURL(url);
-  }
   async function correctSection(sectionId:string){
     if(!project)return;
     await execute("Correct Story section",async()=>{
@@ -214,18 +168,29 @@ export function App() {
           <b>{String(workspaces.indexOf(w)+1).padStart(2,"0")}</b><span>{w.title}</span>
         </button>)}</nav>
     </aside>
-    <main>
+    <main><div className="content-container">
       <header className="topline">
-        <div><small className="eyebrow">LOCAL PROJECT · ENGLISH FIRST</small><h2>{storyView?.story.project.title||recent.find(x=>x.project_id===project?.project_id)?.title||"Choose a project"}</h2><strong>{project ? project.project_id : "No project selected"}</strong>
-          <p>Revision: {project ? project.project_revision : "—"}</p></div>
-        <button type="button" disabled={!project||!!pending} onClick={()=>{
-          setWorkspace(nextWorkspace);
-          setNotice(nextGate?.blockers.length?{kind:"error",message:nextGate.blockers.join("; ")}:null);
-        }}>Next valid action · {nextGate?.gate_id||"Complete"}</button>
-        <button type="button" disabled={!project || !!pending} onClick={() => project && void execute("Refresh", () => refresh(project.project_id))}>
-          {pending === "Refresh" ? "Refreshing…" : "Refresh project"}</button>
+        <div>
+          <small className="eyebrow">{project?"LOCAL PRODUCTION · ENGLISH FIRST":"WINDOWS LOCAL · YOUR WORKSPACE"}</small>
+          <h2>{project?(storyView?.story.project.title||recent.find(x=>x.project_id===project.project_id)?.title||"Selected project"):"Projects"}</h2>
+          {project&&<><strong>{project.project_id} · Revision {project.project_revision}</strong>
+            <p>Current stage: {nextGate?.gate_id??"All gates approved"} · {nextGate?.state??"APPROVED"}</p></>}
+        </div>
+        <div className="header-actions">
+          {project&&<button type="button" className="primary" disabled={!!pending}
+            onClick={()=>{setWorkspace(nextWorkspace);setNotice(nextGate?.blockers.length?
+              {kind:"error",message:nextGate.blockers.join("; ")}:null);}}>
+            {nextGate?.state==="STALE"?"Repair":nextGate?.state==="BLOCKED"?"Review blockers":"Next valid action"} · {nextGate?.gate_id??"Delivery"}
+          </button>}
+          {project&&<button type="button" disabled={!!pending}
+            onClick={()=>void execute("Refresh",()=>refresh(project.project_id))}>
+            {pending==="Refresh"?"Refreshing…":"Refresh project"}</button>}
+          {project&&<button className="quiet" type="button" onClick={()=>{
+            activeProjectId.current=null;++refreshGeneration.current;setProject(null);setStoryView(null);setJobs([]);setWorkspace("project");
+          }}>All projects</button>}
+        </div>
       </header>
-      <p className="workflow-hint">Five human approvals: G1 Story → G2 Voice / G3 Assets → G4 Storyboard → G5 Delivery</p>
+      {project&&<p className="workflow-hint">Five explicit approvals: G1 Story → G2 Voice / G3 Assets → G4 Storyboard → G5 Delivery</p>}
       {project && <GateBoard gates={project.gates}/>}
       <NoticeView notice={notice}/>
       <section className="content" aria-label={active.title}>
@@ -238,65 +203,11 @@ export function App() {
           <StoryboardStudio projectId={project.project_id} onRefresh={() => refresh(project.project_id)}/> : workspace === "assets" && project ?
           <AssetStudio projectId={project.project_id} projectRevision={project.project_revision} onRefresh={() => refresh(project.project_id)}/> : workspace === "voice" && project ?
           <VoiceStudio project={project} story={storyView} onRefresh={() => refresh(project.project_id)}/> : workspace === "project" ?
-          <div className="workspace-grid">
-            <div className="panel">
-              <h3>External ChatGPT · authoring pipeline</h3>
-              <p>Build one versioned StoryPackage prompt. The app does not call an LLM.</p>
-              <label htmlFor="brief-topic">Topic / title</label>
-              <input id="brief-topic" value={settings.topic} onChange={e=>setSettings(x=>({...x,topic:e.target.value}))}/>
-              <label htmlFor="brief-audience">Audience</label>
-              <input id="brief-audience" value={settings.audience} onChange={e=>setSettings(x=>({...x,audience:e.target.value}))}/>
-              <label htmlFor="brief-minutes">Runtime 5–10 minutes</label>
-              <input id="brief-minutes" type="number" min="5" max="10" value={settings.runtime_minutes} onChange={e=>setSettings(x=>({...x,runtime_minutes:Number(e.target.value)}))}/>
-              <label htmlFor="brief-goals">Editorial goals / constraints</label>
-              <textarea id="brief-goals" value={settings.editorial_goals} onChange={e=>setSettings(x=>({...x,editorial_goals:e.target.value}))}/>
-              <div className="buttonrow">
-                <button disabled={!project||!!pending||!settings.topic.trim()} onClick={()=>void buildBrief()}>Build brief</button>
-                <button disabled={!project||!!pending} onClick={()=>void saveSettings()}>Save settings</button>
-              </div>
-              {brief&&<>
-                <label htmlFor="brief-preview">Versioned brief preview</label>
-                <textarea id="brief-preview" readOnly value={brief} rows={10} onFocus={e=>e.currentTarget.select()}/>
-                <div className="buttonrow"><button onClick={()=>void copyBrief()}>Copy</button>
-                  <button onClick={exportBrief}>Download .md</button></div>
-                {clipboardDenied&&<p role="status">Clipboard permission denied. Select and copy the preview manually.</p>}
-              </>}
-            </div>
-            <div className="stack">
-              <div className="panel"><h3>Project settings · fixed V1 profile</h3>
-                <p>English · HistoryEditorialPaper.v1 · 16:9 · 1920×1080 · 30fps</p>
-                <label htmlFor="new-title">Project title</label>
-            <input id="new-title" value={title} onChange={e => setTitle(e.target.value)} disabled={!!pending}/>
-            <button disabled={!!pending || title.trim().length < 4} onClick={() => void createProject()}>
-              {pending === "Project creation" ? "Creating…" : "Create project"}</button>
-            <div className="panel">
-              <h3>Open an existing local project</h3>
-              <label htmlFor="recent-projects">Recently created</label>
-              <select id="recent-projects" value={existingId} onChange={e=>setExistingId(e.target.value)}>
-                <option value="">Choose saved project</option>
-                {recent.map(x=><option key={x.project_id} value={x.project_id}>{x.title} · {x.project_id}</option>)}
-              </select>
-              <label htmlFor="existing-id">Project ID</label>
-              <input id="existing-id" value={existingId} onChange={e => setExistingId(e.target.value)}
-                placeholder="proj_..." disabled={!!pending}/>
-              <button disabled={!!pending || !existingId.trim()} onClick={() => void execute("Open project", async () => {
-                await refresh(existingId.trim(), true);
-              })}>Open existing project</button>
-            </div>
-            {project && <div className="panel">
-              <h3>Import external ChatGPT StoryPackage JSON</h3>
-              <p>Set <code>project.project_id</code> in your StoryPackage to <code>{project.project_id}</code>. The import is a draft, not G1 approval.</p>
-              <label htmlFor="story-file">Load JSON file</label>
-              <input type="file" id="story-file" accept=".json,application/json" onChange={async e => {
-                const file = e.currentTarget.files?.[0];
-                if (file) setStoryText(await file.text());
-              }}/>
-              <label htmlFor="story-json">StoryPackage JSON</label>
-              <textarea id="story-json" rows={10} value={storyText} onChange={e => setStoryText(e.target.value)} placeholder="Paste complete StoryPackage.v1 JSON" disabled={!!pending}/>
-              <button disabled={!!pending || !storyText.trim()} onClick={() => void importJson()}>
-                {pending === "Story import" ? "Validating and importing…" : "Import and validate story"}</button>
-            </div>}
-          </div></div></div> : <div className="workspace-grid">
+          <ProjectWorkspace project={project} story={storyView} recent={recent}
+            onCreate={createProject} onOpen={openProject}
+            onImported={async()=>{if(project){await refresh(project.project_id);setWorkspace("story");}}}
+            onRefresh={async()=>{if(project)await refresh(project.project_id);}}/>
+           : <div className="workspace-grid">
             {!project && <p>Create a project first using the Project & ChatGPT Import workspace.</p>}
             {project && !storyView && <p>No StoryPackage imported yet. Import a JSON file in the Project workspace.</p>}
             {storyView && <StoryReview story={storyView.story} revision={storyView.project_revision}
@@ -358,7 +269,7 @@ export function App() {
               <small>Restore original webhook credentials, then reconcile cancellation. No automatic paid resubmission.</small>}
           </li>)}</ul>}
       </details>}
-    </main>
+    </div></main>
   </div>;
 }
 
