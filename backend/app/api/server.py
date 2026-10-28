@@ -17,6 +17,7 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from backend.app.api.imports import import_story
 from backend.app.projects.models import StoryCandidate
+from backend.app.projects.authoring_brief import build_brief
 from backend.app.contracts import ContractViolation
 from backend.app.jobs import JobQueue, recover_interrupted
 from backend.app.projects.gates import GateService
@@ -44,6 +45,18 @@ class ClaimReview(BaseModel):
     status: str
     evidence_note: str = Field(min_length=1)
     source_url: str | None = None
+
+
+class AuthoringBriefInput(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    topic: str = Field(min_length=1, max_length=300)
+    audience: str = Field(min_length=1, max_length=300)
+    runtime_minutes: int = Field(ge=5, le=10)
+    editorial_goals: str = Field(default="", max_length=4000)
+
+
+class ProjectBriefSettings(AuthoringBriefInput):
+    expected_revision: int = Field(ge=0)
 
 
 class ScriptEdit(BaseModel):
@@ -255,6 +268,50 @@ def create_app(database: str | Path | None = None, media_root: str | Path | None
     def project(project_id: str):
         return {"project_id": project_id, "project_revision": store.revision(project_id),
                 "gates": gates.board(project_id)}
+
+    @app.get("/api/v1/projects")
+    def list_projects():
+        with store._connection() as db:
+            return [{"project_id": row[0], "title": row[1], "project_revision": row[2]}
+                    for row in db.execute(
+                        "SELECT project_id,title,revision FROM projects ORDER BY rowid DESC,project_id DESC")]
+
+    @app.get("/api/v1/projects/{project_id}/authoring-settings")
+    def get_authoring_settings(project_id: str):
+        store.revision(project_id)
+        with store._connection() as db:
+            db.execute("CREATE TABLE IF NOT EXISTS project_authoring_settings "
+                       "(project_id TEXT PRIMARY KEY, metadata_json TEXT NOT NULL, FOREIGN KEY(project_id) REFERENCES projects(project_id))")
+            row = db.execute("SELECT metadata_json FROM project_authoring_settings WHERE project_id=?", (project_id,)).fetchone()
+        return {"settings": json.loads(row[0]) if row else None}
+
+    @app.put("/api/v1/projects/{project_id}/authoring-settings")
+    def save_authoring_settings(project_id: str, body: ProjectBriefSettings,
+                                idempotency_key: str = Header(alias="Idempotency-Key")):
+        payload = body.model_dump()
+        def apply():
+            with store._transaction() as db:
+                row = db.execute("SELECT revision FROM projects WHERE project_id=?", (project_id,)).fetchone()
+                if row is None:
+                    raise ContractViolation("PROJECT_NOT_FOUND", project_id, "Open a valid project.")
+                if row[0] != body.expected_revision:
+                    raise ContractViolation("REVISION_CONFLICT", project_id, "Refresh current project settings.")
+                db.execute("CREATE TABLE IF NOT EXISTS project_authoring_settings "
+                           "(project_id TEXT PRIMARY KEY, metadata_json TEXT NOT NULL, FOREIGN KEY(project_id) REFERENCES projects(project_id))")
+                db.execute("INSERT INTO project_authoring_settings VALUES(?,?) "
+                           "ON CONFLICT(project_id) DO UPDATE SET metadata_json=excluded.metadata_json",
+                           (project_id, json.dumps(body.model_dump(exclude={"expected_revision"}), ensure_ascii=False, sort_keys=True)))
+                # Authoring preferences do not alter approved Story/G1 source truth.
+                db.execute("UPDATE projects SET revision=revision+1 WHERE project_id=? AND revision=?",
+                           (project_id, body.expected_revision))
+                return {"project_revision": body.expected_revision + 1}
+        return idempotent(project_id, "authoring-settings", idempotency_key, payload, apply)
+
+    @app.post("/api/v1/projects/{project_id}/authoring-brief")
+    def create_authoring_brief(project_id: str, body: AuthoringBriefInput):
+        brief = build_brief(store, project_id, **body.model_dump())
+        return {"brief_version": "HVS-EXTERNAL-STORY-BRIEF.v1",
+                "content": brief, "file_name": f"{project_id}_story_authoring_brief.md"}
 
     @app.post("/api/v1/projects/{project_id}/story/import")
     async def story_import(project_id: str, request: Request, expected_revision: int,
