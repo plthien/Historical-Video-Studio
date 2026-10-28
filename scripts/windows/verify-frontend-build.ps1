@@ -8,7 +8,16 @@ $info=Join-Path $dist "build-info.json"
 $packageManifest=Join-Path $RepoRoot "package-manifest.json"
 $sourceDir=Join-Path $RepoRoot "frontend/src"
 function Digest([string]$Path) {
-    return (Get-FileHash -LiteralPath $Path -Algorithm SHA256).Hash.ToLowerInvariant()
+    # Must run under stock Windows PowerShell 5.1 in an extracted ZIP.
+    # Avoid depending on Get-FileHash being imported into the host runspace.
+    $stream=[System.IO.File]::OpenRead($Path)
+    $algorithm=[System.Security.Cryptography.SHA256]::Create()
+    try {
+        return ([System.BitConverter]::ToString($algorithm.ComputeHash($stream))).Replace("-","").ToLowerInvariant()
+    } finally {
+        $algorithm.Dispose()
+        $stream.Dispose()
+    }
 }
 function Fingerprint([string[]]$Files) {
     # Windows PowerShell 5.1/.NET Framework: no Path.GetRelativePath / Convert.ToHexString.
@@ -26,6 +35,17 @@ function Fingerprint([string[]]$Files) {
         $bytes=[System.Text.Encoding]::UTF8.GetBytes(($rows -join "`n"))
         return ([System.BitConverter]::ToString($sha.ComputeHash($bytes))).Replace("-","").ToLowerInvariant()
     } finally { $sha.Dispose() }
+}
+function BundleDigest {
+    $files=@(Get-ChildItem -LiteralPath $dist -Recurse -File |
+        Where-Object { $_.FullName -ne $info } |
+        ForEach-Object FullName)
+    if ($files.Count -eq 0 -or -not (Test-Path (Join-Path $dist "index.html"))) {
+        throw "FRONTEND_BUNDLE_STALE: built index and assets must exist."
+    }
+    # Hash every published JS/CSS/media file, not just index.html.
+    # Exclude only the manifest to prevent a circular SHA dependency.
+    return Fingerprint $files
 }
 $sourceAvailable=Test-Path (Join-Path $sourceDir "App.tsx")
 if ($sourceAvailable) {
@@ -58,7 +78,7 @@ if ($fresh -and -not $sourceAvailable) {
     $fresh=$stored.source_commit -eq $head
 }
 if ($fresh) {
-    $fresh=$stored.bundle_sha256 -eq (Digest (Join-Path $dist "index.html"))
+    $fresh=$stored.bundle_sha256 -eq (BundleDigest)
 }
 if (-not $fresh) {
     if (-not $sourceAvailable) { throw "FRONTEND_BUNDLE_STALE: packaged build identity does not match source/package manifest. Re-package the exact checked-out version." }
@@ -75,7 +95,7 @@ if (-not $fresh) {
         schema_version="HVSFrontendBuild.v1"
         source_commit=$head
         input_sha256=$fingerprint
-        bundle_sha256=(Digest (Join-Path $dist "index.html"))
+        bundle_sha256=(BundleDigest)
         generated_utc=[DateTime]::UtcNow.ToString("o")
     }
     $stored | ConvertTo-Json | Set-Content -LiteralPath $info -Encoding utf8
