@@ -201,6 +201,10 @@ def mount(app, store, idempotent):
             """)
 
     def prevent_reauthoring_current_compiled_story(db, project_id: str, story_sha: str):
+        table=db.execute("SELECT 1 FROM sqlite_master WHERE type='table' "
+                         "AND name='g4_compiled_drafts'").fetchone()
+        if not table:
+            return  # Initial G4 authoring has not created a compiled draft table.
         existing=db.execute("SELECT manifest_sha256 FROM g4_compiled_drafts "
                             "WHERE project_id=?", (project_id,)).fetchone()
         if not existing:
