@@ -68,6 +68,9 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           & .venv/Scripts/python.exe -m backend.tools.smoke --case full-flow-two-topics --mode live
           if ($LASTEXITCODE -ne 2) { throw "Live preflight must report BLOCKED without operator inputs" }
+          # The expected blocked preflight leaves PowerShell's native exit code at 2.
+          # Reset it explicitly so the step reflects the assertion above.
+          cmd /c exit 0
       - name: Queue batch and full-flow browser behavior
         shell: pwsh
         run: |
