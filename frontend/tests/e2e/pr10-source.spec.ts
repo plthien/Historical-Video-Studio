@@ -15,7 +15,7 @@ test('pr10 reviewed-asset-picker changes real Chromium T02 A/B and preserves lon
  const gateBefore=(await (await request.get(uri+'/gates')).json()) as {gate_id:string;state:string;dependency_fingerprint:string}[];
  await page.goto('/');
  await openExistingProject(page,project);
- await expect(page.getByText(project,{exact:true}).first()).toBeVisible();
+ await expect(page.locator('.topline strong').filter({hasText:project})).toBeVisible();
  await page.getByRole('button',{name:/Motion Storyboard/}).click();
  await expect(page.getByLabel('Scene inspector')).toBeVisible();
  const layerPicker=page.getByLabel('Layer to reposition');
