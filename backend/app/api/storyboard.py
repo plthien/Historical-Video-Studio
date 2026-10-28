@@ -198,6 +198,10 @@ def mount(app, store, idempotent):
         schema = json.loads((ROOT / "contracts/schema/VisualBlueprint.v1.schema.json").read_text(encoding="utf-8"))
         variants = schema["properties"]["setup_plans"]["items"]["properties"]["template_payload"]["oneOf"]
         by_template = {item["properties"]["template_id"]["const"]: item for item in variants}
+        for setup in story["visual_setups"]:
+            if setup.get("preferred_template") not in by_template:
+                blocked("TEMPLATE_UNKNOWN", setup["setup_id"],
+                        "Choose an explicit pinned T01–T10 template before authoring.")
         with store._connection() as db:
             saved = {row[0]: json.loads(row[1]) for row in db.execute(
                 "SELECT setup_id,payload_json FROM g4_authored_setup_payloads "
@@ -272,6 +276,11 @@ def mount(app, store, idempotent):
             from pathlib import Path
             from backend.app.director import draft
             import hashlib
+            from backend.app.projects.gates import GateService
+            gate = {entry["gate_id"]: entry for entry in GateService(store).board(project_id)}
+            if any(gate[g]["state"] != "APPROVED" for g in ("G1","G2","G3")):
+                blocked("COMPILER_GATE_UNAPPROVED", project_id,
+                        "Approve the current G1 Story, G2 Voice and G3 Asset gates first.")
             word_map, final_audio, _ = sources(store, project_id)
             font_file = Path(os.environ["WINDIR"]) / "Fonts" / os.getenv("HVS_G4_FONT_FILE", "arial.ttf")
             if not font_file.is_file():
