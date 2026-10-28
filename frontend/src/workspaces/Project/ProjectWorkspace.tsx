@@ -9,8 +9,9 @@ const formatError=(e:unknown)=>{
   if(e instanceof SyntaxError)return "JSON_SYNTAX_INVALID · / — "+e.message+"; correct the file or pasted JSON before importing.";
   return e instanceof Error?e.message:String(e);
 };
-export function ProjectWorkspace({project,story,recent,onCreate,onOpen,onImported,onRefresh}:{
+export function ProjectWorkspace({project,story,recent,recentStatus,onRetryRecents,onCreate,onOpen,onImported,onRefresh}:{
   project:ProjectInfo|null;story:StoryView|null;recent:SavedProject[];
+  recentStatus:"loading"|"ready"|"error";onRetryRecents:()=>Promise<void>;
   onCreate:(title:string)=>Promise<void>;onOpen:(id:string)=>Promise<void>;
   onImported:()=>Promise<void>;onRefresh:()=>Promise<void>;
 }){
@@ -63,8 +64,12 @@ export function ProjectWorkspace({project,story,recent,onCreate,onOpen,onImporte
     if(!project||settings.runtime_minutes<5||settings.runtime_minutes>10||!settings.topic.trim()||!settings.audience.trim())return;
     await run("Saving settings",async()=>{
       await api.saveAuthoringSettings(projectId,settings,project.project_revision,crypto.randomUUID());
-      setSaved({...settings});await onRefresh();setStep(1);
-      setNotice("Settings saved to this project. Continue to ChatGPT Brief.");
+      // Authoritative readback, not a client-side optimistic 'saved' badge.
+      const persisted=await api.authoringSettings(projectId);
+      if(!persisted.settings||signature(persisted.settings)!==signature(settings))
+        throw Error("AUTHORING_SETTINGS_READBACK_MISMATCH · Refetch the persisted project settings before building a prompt.");
+      setSaved({...persisted.settings});await onRefresh();setStep(1);
+      setNotice("Settings verified from the saved project. Continue to ChatGPT Brief.");
     });
   }
   async function build(){
@@ -119,11 +124,18 @@ export function ProjectWorkspace({project,story,recent,onCreate,onOpen,onImporte
           <small className="eyebrow">CONTINUE WORK</small><h3>Recent Projects</h3>
           <label htmlFor="project-filter">Search your saved projects</label>
           <input id="project-filter" value={filter} onChange={e=>setFilter(e.target.value)} placeholder="Filter title or ID"/>
-          <div className="project-list">{filtered.length?filtered.map(item=>
-            <div className="project-list-item" key={item.project_id}>
-              <div><strong>{item.title}</strong><small>{item.project_id} · Revision {item.project_revision}</small></div>
-              <button disabled={!!job} onClick={()=>void open(item.project_id)}>Open</button>
-            </div>):<p>{recent.length?"No matching project.":"No saved projects yet. Create one to begin."}</p>}</div>
+          <div className="project-list">
+            {recentStatus==="loading"?<p role="status">Loading saved projects from SQLite…</p>:
+             recentStatus==="error"?<div role="alert" className="notice error">
+               <p>Could not load saved projects from the local backend. This does not mean the database is empty.</p>
+               <button disabled={!!job} onClick={()=>void onRetryRecents()}>Retry saved projects</button>
+             </div>:
+             filtered.length?filtered.map(item=>
+               <div className="project-list-item" key={item.project_id}>
+                 <div><strong>{item.title}</strong><small>{item.project_id} · Revision {item.project_revision}</small></div>
+                 <button disabled={!!job} onClick={()=>void open(item.project_id)}>Open</button>
+               </div>):<p>{recent.length?"No matching project.":"No saved projects yet. Create one to begin."}</p>}
+          </div>
           <details><summary>Open by exact Project ID</summary>
             <label htmlFor="project-lookup">Project ID</label>
             <input id="project-lookup" value={lookup} onChange={e=>setLookup(e.target.value)} placeholder="proj_..."/>
