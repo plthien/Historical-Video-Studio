@@ -6,9 +6,10 @@ on:
 jobs:
   b3-final:
     runs-on: windows-latest
-    timeout-minutes: 75
+    timeout-minutes: 110
     permissions:
       contents: read
+      actions: read
     steps:
       - uses: actions/checkout@v4
         with:
@@ -29,8 +30,13 @@ jobs:
         shell: pwsh
         run: |
           if (-not (Get-Command ffmpeg -ErrorAction SilentlyContinue) -or -not (Get-Command ffprobe -ErrorAction SilentlyContinue)) {
-            choco install ffmpeg --yes --no-progress
-            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+            $installed = $false
+            for ($attempt = 1; $attempt -le 3; $attempt++) {
+              choco install ffmpeg --yes --no-progress
+              if ($LASTEXITCODE -eq 0 -and (Get-Command ffmpeg -ErrorAction SilentlyContinue) -and (Get-Command ffprobe -ErrorAction SilentlyContinue)) { $installed = $true; break }
+              if ($attempt -lt 3) { Start-Sleep -Seconds (5 * $attempt) }
+            }
+            if (-not $installed) { throw 'FFmpeg/FFprobe unavailable after bounded retries' }
           }
           ffmpeg -version
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
@@ -45,33 +51,31 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           npm.cmd --prefix renderer run typecheck
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-      - name: B3-04 queue batch and real restart
+          & .venv/Scripts/python.exe -m backend.tools.acceptance_ledger record --id environment --command 'verify-environment; frontend build; renderer typecheck'
+      - name: G10 current authority and blocked live preflight
         shell: pwsh
         run: |
-          & .venv/Scripts/python.exe -m pytest -q tests/integration/test_phase_b.py -k "restart or queue or batch"
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          & .venv/Scripts/python.exe -m backend.tools.smoke --case restart-during-render --mode local
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-      - name: B3-05 backup restore and launcher
-        shell: pwsh
-        run: |
-          & .venv/Scripts/python.exe -m pytest -q tests/integration/test_phase_b.py -k "backup or restore or package or launch"
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          powershell -NoProfile -ExecutionPolicy Bypass -File scripts/windows/package.ps1
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          powershell -NoProfile -ExecutionPolicy Bypass -File scripts/windows/start-studio.ps1 -Smoke -NoBrowser -SkipBootstrap -DataRoot .artifacts/launcher-smoke -Port 8173
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-      - name: B3-06 synthetic code lane and blocked live preflight
-        shell: pwsh
-        run: |
-          & .venv/Scripts/python.exe -m pytest -q tests/e2e/test_full_flow.py -m "not live"
+          & .venv/Scripts/python.exe -m pytest -q tests/e2e/test_full_flow.py -k "authority or live_preflight"
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           & .venv/Scripts/python.exe -m backend.tools.smoke --case full-flow-two-topics --mode live
           if ($LASTEXITCODE -ne 2) { throw "Live preflight must report BLOCKED without operator inputs" }
-          # The expected blocked preflight leaves PowerShell's native exit code at 2.
-          # Reset it explicitly so the step reflects the assertion above.
           cmd /c exit 0
-      - name: Queue batch and full-flow browser behavior
+          & .venv/Scripts/python.exe -m backend.tools.acceptance_ledger record --id wp1_authority --command 'pytest authority/live_preflight; live CLI blocked exit 2'
+      - name: G06 clean extracted package bootstrap and reopen
+        shell: pwsh
+        run: |
+          & .venv/Scripts/python.exe -m backend.tools.clean_package_smoke
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          & .venv/Scripts/python.exe -m pytest -q tests/integration/test_phase_b.py -k "clean_extracted_package_bootstrap_reopen_evidence"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          & .venv/Scripts/python.exe -m backend.tools.acceptance_ledger record --id wp2_clean_package --command 'clean_package_smoke; clean package evidence test'
+      - name: G09 one fresh continuous owner flow
+        shell: pwsh
+        run: |
+          & .venv/Scripts/python.exe -m pytest -q tests/e2e/test_full_flow.py -k "full_flow_short_real_media_fixture"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          & .venv/Scripts/python.exe -m backend.tools.acceptance_ledger record --id wp3_full_flow --command 'pytest one fresh local full flow'
+      - name: Same-project Chromium and queue batch behavior
         shell: pwsh
         run: |
           Push-Location frontend
@@ -79,13 +83,29 @@ jobs:
             npx playwright install chromium
             if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           } finally { Pop-Location }
-          $env:HVS_B2_FIXTURE = '1'
           $env:HVS_B3_FIXTURE = '1'
+          $trace = Get-Content reports/acceptance/generated/local-full-flow-trace.json -Raw | ConvertFrom-Json
+          $env:HVS_FULL_FLOW_CONFIG = $trace.browser.config
           Push-Location frontend
           try {
-            node.exe .\node_modules\@playwright\test\cli.js test --grep 'queue|batch|full-flow'
+            node.exe .\node_modules\@playwright\test\cli.js test tests/e2e/delivery.spec.ts
           } finally { Pop-Location }
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          Remove-Item Env:HVS_FULL_FLOW_CONFIG
+          $env:HVS_B2_FIXTURE = '1'
+          Push-Location frontend
+          try { node.exe .\node_modules\@playwright\test\cli.js test --grep 'queue|batch' }
+          finally { Pop-Location }
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          & .venv/Scripts/python.exe -m backend.tools.acceptance_ledger record --id wp3_browser --command 'same-project delivery Chromium; queue/batch Chromium'
+      - name: Preserved owner regressions
+        shell: pwsh
+        run: |
+          & .venv/Scripts/python.exe -m pytest -q tests/integration/test_phase_b.py tests/delivery/test_delivery.py
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          & .venv/Scripts/python.exe -m backend.tools.smoke --case restart-during-render --mode local
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          & .venv/Scripts/python.exe -m backend.tools.acceptance_ledger record --id owner_regressions --command 'phase B integration and delivery owner suites'
       - name: Production and contract regressions
         shell: pwsh
         run: |
@@ -97,27 +117,28 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           npm.cmd --prefix frontend run typecheck
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-      - name: Final exact-head code ledger
+          & .venv/Scripts/python.exe -m backend.tools.acceptance_ledger record --id contract_regressions --command 'design contracts; visual validation; frontend typecheck'
+      - name: Final exact-head downloadable code ledger
         shell: pwsh
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          BASE_COMMIT: ${{ github.event.pull_request.base.sha || 'bd14339daac4da118ee95394e8f6cc86c951c9ac' }}
+          START_COMMIT: 43b76f379eb848486d0dd52facfd4afa503e14e1
         run: |
-          $ledger = Get-Content reports/acceptance/phase-b-code-verdict.json -Raw | ConvertFrom-Json
-          $ledger.code_identity = git rev-parse HEAD
-          $ledger.tasks.'B3-04'.status = 'CODE_PASS'
-          $ledger.tasks.'B3-05'.status = 'CODE_PASS'
-          $ledger.tasks.'B3-06'.status = 'LOCAL_CODE_PASS'
-          New-Item -ItemType Directory -Force .artifacts/acceptance | Out-Null
-          $ledger | ConvertTo-Json -Depth 8 | Set-Content .artifacts/acceptance/phase-b-code-verdict.json -Encoding utf8
-          Copy-Item reports/acceptance/full-v1-live-acceptance.json .artifacts/acceptance/
-          Copy-Item reports/acceptance/OPERATOR_LIVE_SIGNOFF.md .artifacts/acceptance/
+          & .venv/Scripts/python.exe -m backend.tools.acceptance_ledger build --require-workflows
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          & .venv/Scripts/python.exe -m backend.tools.acceptance_ledger verify
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Upload B3 final evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: b3-final-native-windows
           path: |
-            .artifacts/
+            reports/acceptance/generated/*.json
             release/windows/*.zip
             release/windows/*/package-manifest.json
-            renderer/.artifacts/b3-delivery/
-            frontend/test-results/
+            frontend/.artifacts/delivery/*.json
+            frontend/.artifacts/delivery/*.png
+            frontend/test-results/**
           if-no-files-found: error

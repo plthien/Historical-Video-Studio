@@ -17,3 +17,4 @@ renderer/.artifacts/
 frontend/.artifacts/
 .artifacts/
 release/
+reports/acceptance/generated/

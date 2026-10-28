@@ -206,3 +206,22 @@ def test_launch_rejects_occupied_port_without_orphan(tmp_path):
             cwd=ROOT, capture_output=True, text=True, timeout=30)
     assert completed.returncode != 0
     assert "already in use" in completed.stdout + completed.stderr
+
+
+@pytest.mark.skipif(os.name != "nt", reason="B3-05 is Windows-only")
+def test_clean_extracted_package_bootstrap_reopen_evidence():
+    """The expensive native owner command runs before this evidence assertion."""
+    evidence = ROOT / "reports/acceptance/generated/clean-package-launch.json"
+    if not evidence.is_file():
+        pytest.skip("Run backend.tools.clean_package_smoke before the evidence assertion")
+    document = json.loads(evidence.read_text("utf-8-sig"))
+    assert document["status"] == "PASS"
+    assert document["source_commit"] == subprocess.check_output(
+        ["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip()
+    assert document["manifest_file_count"] == document["verified_sha_count"] > 0
+    assert document["first_launch"]["skip_bootstrap"] is False
+    assert document["second_launch"]["skip_bootstrap"] is True
+    assert document["first_launch"]["process_cleanup"] is True
+    assert document["second_launch"]["process_cleanup"] is True
+    assert document["continuity"]["media_bytes_preserved"] is True
+    assert set(document["negatives"].values()) == {"PASS"}

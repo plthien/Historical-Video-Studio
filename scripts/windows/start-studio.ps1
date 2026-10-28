@@ -5,7 +5,9 @@ param(
     [switch]$NoBrowser,
     [switch]$SkipBootstrap,
     [int]$Port = 8000,
-    [string]$DataRoot = ""
+    [string]$DataRoot = "",
+    [string]$EvidencePath = "",
+    [string]$VerifyProjectId = ""
 )
 $ErrorActionPreference = "Stop"
 Set-StrictMode -Version Latest
@@ -14,6 +16,21 @@ if (-not $DataRoot) { $DataRoot = Join-Path $repo "data" }
 $data = [System.IO.Path]::GetFullPath($DataRoot)
 $frontend = Join-Path $repo "frontend\dist"
 $venvPython = Join-Path $repo ".venv\Scripts\python.exe"
+$script:BootstrapPython = $null
+$script:BootstrapPrefix = @()
+$script:EnvironmentSource = $null
+$evidence = [ordered]@{
+    schema_version = "HistoricalVideoStudioCleanLaunch.v1"
+    package_root = $repo
+    data_root = $data
+    port = $Port
+    skip_bootstrap = [bool]$SkipBootstrap
+    api_ready = $false
+    ui_status = $null
+    project_read = $null
+    backend_pid = $null
+    process_cleanup = $false
+}
 
 function Run-Checked([string]$Name, [string]$Exe, [string[]]$Arguments) {
     Write-Host "==> $Name"
@@ -25,10 +42,21 @@ function Require-Version {
     $pythonArgs = @()
     if (Test-Path $venvPython) {
         $pythonExe = $venvPython; $pythonArgs = @("-c", "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}')")
+        $script:EnvironmentSource = "existing_package_venv"
     } elseif (Get-Command py -ErrorAction SilentlyContinue) {
         $candidate = & py -3.12 -c "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}')" 2>$null
         if ($LASTEXITCODE -eq 0 -and "$candidate".Trim() -eq "3.12") {
             $pythonExe = "py"; $pythonArgs = @("-3.12", "-c", "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}')")
+            $script:BootstrapPython = "py"; $script:BootstrapPrefix = @("-3.12")
+            $script:EnvironmentSource = "windows_py_3_12"
+        }
+    }
+    if (-not $pythonExe -and (Get-Command python -ErrorAction SilentlyContinue)) {
+        $candidate = & python -c "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}')" 2>$null
+        if ($LASTEXITCODE -eq 0 -and "$candidate".Trim() -eq "3.12") {
+            $pythonExe = "python"; $pythonArgs = @("-c", "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}')")
+            $script:BootstrapPython = "python"; $script:BootstrapPrefix = @()
+            $script:EnvironmentSource = "path_python_3_12"
         }
     }
     if (-not $pythonExe) { throw "Python 3.12 is required (py -3.12)." }
@@ -46,7 +74,10 @@ $backend = $null
 try {
     Require-Version
     if (-not $SkipBootstrap) {
-        if (-not (Test-Path $venvPython)) { Run-Checked "Create Python environment" "py" @("-3.12", "-m", "venv", ".venv") }
+        if (-not (Test-Path $venvPython)) {
+            if (-not $script:BootstrapPython) { throw "Python 3.12 bootstrap executable is unavailable." }
+            Run-Checked "Create Python environment" $script:BootstrapPython @($script:BootstrapPrefix + @("-m", "venv", ".venv"))
+        }
         Run-Checked "Install pinned backend" $venvPython @("-m", "pip", "install", "--disable-pip-version-check", "-r", "backend/requirements.lock")
         if (-not (Test-Path (Join-Path $repo "renderer\node_modules"))) { Run-Checked "Install pinned renderer" "npm.cmd" @("ci", "--prefix", "renderer") }
         if (-not (Test-Path (Join-Path $frontend "index.html"))) {
@@ -78,6 +109,18 @@ try {
     if ($backend.HasExited -or -not $health -or $health.status -ne "ready") {
         throw "Studio failed health/UI readiness. Inspect $stderr"
     }
+    $evidence.api_ready = $true
+    $evidence.ui_status = $ui.StatusCode
+    $evidence.environment_source = $script:EnvironmentSource
+    $evidence.backend_pid = $backend.Id
+    $manifestPath = Join-Path $repo "package-manifest.json"
+    if (Test-Path -LiteralPath $manifestPath) {
+        $evidence.source_commit = (Get-Content -LiteralPath $manifestPath -Raw | ConvertFrom-Json).source_commit
+    }
+    if ($VerifyProjectId) {
+        $project = Invoke-RestMethod -Uri "http://127.0.0.1:$Port/api/v1/projects/$VerifyProjectId" -TimeoutSec 5
+        $evidence.project_read = [ordered]@{project_id=$project.project_id; project_revision=$project.project_revision}
+    }
     Write-Host "STUDIO_READY http://127.0.0.1:$Port/ DB=$env:HVS_DB PID=$($backend.Id)"
     if ($Smoke) { Write-Host "STUDIO_SMOKE_PASS"; return }
     if (-not $NoBrowser) { Start-Process "http://127.0.0.1:$Port/" }
@@ -94,8 +137,13 @@ finally {
             Stop-Process -Id $backend.Id -Force -ErrorAction SilentlyContinue
         }
         $backend.WaitForExit(10000) | Out-Null
-        if ($backend.HasExited) { Write-Host "STUDIO_STOPPED PID=$($backend.Id)" }
+        if ($backend.HasExited) { $evidence.process_cleanup = $true; Write-Host "STUDIO_STOPPED PID=$($backend.Id)" }
         else { Write-Warning "Could not stop studio process tree PID $($backend.Id)." }
+    }
+    if ($EvidencePath) {
+        $target = [System.IO.Path]::GetFullPath($EvidencePath)
+        New-Item -ItemType Directory -Force -Path (Split-Path -Parent $target) | Out-Null
+        $evidence | ConvertTo-Json -Depth 6 | Set-Content -LiteralPath $target -Encoding utf8
     }
     Pop-Location
 }

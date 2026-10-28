@@ -32,19 +32,24 @@ def load(name):return json.loads((ROOT/name).read_text(encoding="utf-8"))
 def main():
     parser=argparse.ArgumentParser()
     parser.add_argument("--scene-count",type=int,default=2)
+    parser.add_argument("--output-dir",type=Path)
+    parser.add_argument("--config-path",type=Path)
+    parser.add_argument("--project-id")
     args=parser.parse_args()
     if args.scene_count < 2 or args.scene_count > 120:
         raise ValueError("B2_SYNTHETIC_SCENE_COUNT_INVALID")
     if os.name!="nt":
         raise RuntimeError("APPROVED_PLAYER_TEST_FIXTURE_REQUIRES_NATIVE_WINDOWS")
-    out=ROOT/"renderer"/".artifacts"/("approved-player-test-longform" if args.scene_count>2
-                                      else "approved-player-test")
+    out=args.output_dir or ROOT/"renderer"/".artifacts"/("approved-player-test-longform" if args.scene_count>2
+                                                         else "approved-player-test")
     # Controlled generated fixture, never operator data. Owner commands must
     # be repeatable without inheriting an earlier SQLite approval head.
     if out.exists():
         shutil.rmtree(out)
     out.mkdir(parents=True,exist_ok=True)
     story=load("contracts/examples/StoryPackage.v1.valid.json")
+    if args.project_id:
+        story["project"]["project_id"]=args.project_id
     # Source claim is present in G1; pin that existing claim to its authored
     # map headline before the controlled G1 import/approval (not at render time).
     story["visual_setups"][0]["direction"]["on_screen_text"][0]["claim_ref"]="claim_001"
@@ -125,7 +130,9 @@ def main():
         font_measure=measure,font_identity=identity)
     config={"db":str(out/"g4.sqlite"),"artifactRoot":str(out/"artifacts"),
         "project":pid,"source":"SYNTHETIC_SQLITE_APPROVAL_FIXTURE_NOT_REAL_RIGHTS"}
-    (ROOT/"renderer"/".artifacts"/("approved-player-test-longform.json" if args.scene_count>2
-        else "approved-player-test.json")).write_text(json.dumps(config),encoding="utf-8")
+    config_path=args.config_path or ROOT/"renderer"/".artifacts"/("approved-player-test-longform.json" if args.scene_count>2
+        else "approved-player-test.json")
+    config_path.parent.mkdir(parents=True,exist_ok=True)
+    config_path.write_text(json.dumps(config),encoding="utf-8")
     print(json.dumps({"status":"LOCAL_PASS","kind":config["source"],"project":pid}))
 if __name__=="__main__":main()
