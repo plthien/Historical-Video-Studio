@@ -198,7 +198,7 @@ export function BlueprintAuthoring({projectId,onBuilt}:{
             <button disabled={!!busy} onClick={()=>void run("Reload source",reload)}>Reload authoritative source</button>
           </div>
         </>}
-        <MapAuthoring projectId={projectId} onRevision={async()=>{await reload();await onBuilt();}}/>
+        <MapAuthoring projectId={projectId} onRevision={reload}/>
         <button disabled={!!busy||!data.ready} onClick={compile}>
           Compile from current G1/G2/G3 and verified alignment
         </button>
