@@ -1,3 +1,4 @@
+import {openExistingProject} from "./project-workflow-helper";
 import {test,expect} from '@playwright/test';
 import {createHash} from 'node:crypto';
 import {mkdirSync,readFileSync,writeFileSync} from 'node:fs';
@@ -10,8 +11,7 @@ test('full-flow delivery reload exposes exact QC-passed audiovisual export',asyn
   ?(JSON.parse(readFileSync(resolve(process.cwd(),configPath),'utf8')) as {project:string}).project
   :'proj_001';
  await page.goto('/');
- await page.getByLabel('Project ID').fill(project);
- await page.getByRole('button',{name:'Open existing project'}).click();
+ await openExistingProject(page,project);
  await page.getByRole('button',{name:/Render & Delivery/}).click();
  await expect(page.getByText(/SUCCEEDED · 120\/120 frames · QC PASS/)).toBeVisible({timeout:30000});
  await expect(page.getByText(/G4 production authority/)).toBeVisible();
