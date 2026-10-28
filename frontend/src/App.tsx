@@ -42,6 +42,12 @@ export function App() {
   const [decisionComment, setDecisionComment] = useState("");
   const [pending, setPending] = useState<string | null>(null);
   const [notice, setNotice] = useState<Notice | null>(null);
+  const [buildInfo,setBuildInfo]=useState<{source_commit:string;bundle_sha256:string}|null>(null);
+  useEffect(()=>{void fetch("/build-info.json").then(r=>r.json()).then((x:unknown)=>{
+    if(x&&typeof x==="object"&&"source_commit" in x&&"bundle_sha256" in x)
+      setBuildInfo(x as {source_commit:string;bundle_sha256:string});
+  }).catch(()=>{});},[]);
+
   const activeProjectId = useRef<string | null>(null);
   const refreshGeneration = useRef(0);
 
@@ -67,12 +73,18 @@ export function App() {
       setProject(current);
       setStoryView(story);
       setJobs(taskList);
+      if (switchProject) sessionStorage.setItem("hvs.activeProjectId",projectId);
     } catch (error) {
       if (switchProject && generation === refreshGeneration.current)
         activeProjectId.current = prior;
       throw error;
     }
   }, []);
+
+  useEffect(()=>{
+    const stored=sessionStorage.getItem("hvs.activeProjectId");
+    if(stored){void refresh(stored,true).catch(()=>sessionStorage.removeItem("hvs.activeProjectId"));}
+  },[refresh]);
 
   async function execute(label: string, action: () => Promise<void>) {
     if (pending) return;
@@ -186,7 +198,8 @@ export function App() {
             onClick={()=>void execute("Refresh",()=>refresh(project.project_id))}>
             {pending==="Refresh"?"Refreshing…":"Refresh project"}</button>}
           {project&&<button className="quiet" type="button" onClick={()=>{
-            activeProjectId.current=null;++refreshGeneration.current;setProject(null);setStoryView(null);setJobs([]);setWorkspace("project");
+            activeProjectId.current=null;++refreshGeneration.current;sessionStorage.removeItem("hvs.activeProjectId");setProject(null);setStoryView(null);setJobs([]);setWorkspace("project");
+            void api.listProjects().then(setRecent).catch(()=>{});
           }}>All projects</button>}
         </div>
       </header>
@@ -269,6 +282,11 @@ export function App() {
               <small>Restore original webhook credentials, then reconcile cancellation. No automatic paid resubmission.</small>}
           </li>)}</ul>}
       </details>}
+      <footer className="provenance-line build-footer" aria-label="build-identity">
+        {buildInfo?
+          `UI source ${buildInfo.source_commit.slice(0,12)} · bundle ${buildInfo.bundle_sha256.slice(0,12)} · PR13 V2`:
+          "Development build · production SHA manifest not loaded"}
+      </footer>
     </div></main>
   </div>;
 }
