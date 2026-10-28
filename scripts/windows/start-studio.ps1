@@ -137,7 +137,30 @@ try {
         $project = Invoke-RestMethod -Uri "http://127.0.0.1:$Port/api/v1/projects/$VerifyProjectId" -TimeoutSec 5
         $evidence.project_read = [ordered]@{project_id=$project.project_id; project_revision=$project.project_revision}
     }
-    $uiBuild = Invoke-RestMethod -Uri "http://127.0.0.1:$Port/build-info.json" -TimeoutSec 5
+    # Use the raw HTTP response, because Windows PowerShell 5.1 may return
+    # plain text for a static .json file instead of deserializing its content.
+    # Never access .bundle_sha256 on an unverified HTTP value under StrictMode.
+    $uiBuildUrl = "http://127.0.0.1:$Port/build-info.json"
+    $uiBuildResponse = Invoke-WebRequest -UseBasicParsing -Uri $uiBuildUrl -TimeoutSec 5
+    if ($uiBuildResponse.StatusCode -ne 200) {
+        throw "FRONTEND_BUNDLE_HTTP_INVALID: $uiBuildUrl returned HTTP $($uiBuildResponse.StatusCode)."
+    }
+    $uiBuildContentType = [string]$uiBuildResponse.Headers["Content-Type"]
+    if ($uiBuildContentType -notmatch "(?i)(application/json|\\+json)") {
+        throw "FRONTEND_BUNDLE_HTTP_INVALID: $uiBuildUrl returned Content-Type '$uiBuildContentType' instead of JSON."
+    }
+    $uiBuild = $null
+    try {
+        $uiBuild = ConvertFrom-Json -InputObject ([string]$uiBuildResponse.Content) -ErrorAction Stop
+    } catch {
+        throw "FRONTEND_BUNDLE_HTTP_INVALID: $uiBuildUrl returned invalid JSON: $($_.Exception.Message)"
+    }
+    if ($null -eq $uiBuild -or $null -eq $uiBuild.PSObject.Properties["bundle_sha256"] -or
+        $null -eq $uiBuild.PSObject.Properties["source_commit"] -or
+        [string]::IsNullOrWhiteSpace([string]$uiBuild.bundle_sha256) -or
+        [string]::IsNullOrWhiteSpace([string]$uiBuild.source_commit)) {
+        throw "FRONTEND_BUNDLE_HTTP_INVALID: $uiBuildUrl returned JSON without source_commit and bundle_sha256."
+    }
     if ($uiBuild.bundle_sha256 -ne $build.bundle_sha256 -or $uiBuild.source_commit -ne $build.source_commit) {
         throw "FRONTEND_BUNDLE_STALE: served UI build-info disagrees with verified checkout."
     }
