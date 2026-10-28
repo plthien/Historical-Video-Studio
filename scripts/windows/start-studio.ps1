@@ -20,7 +20,7 @@ if ($Port -eq 0) {
     $ports = Get-Content -LiteralPath $portsPath -Raw | ConvertFrom-Json
     $Port = [int]$ports.backend_port
 }
-if ($Port -lt 1 -or $Port -gt 65535) { throw "Backend port must be 1–65535." }
+if ($Port -lt 1 -or $Port -gt 65535) { throw "Backend port must be between 1 and 65535." }
 if (-not $DataRoot) { $DataRoot = Join-Path $repo "data" }
 $data = [System.IO.Path]::GetFullPath($DataRoot)
 $frontend = Join-Path $repo "frontend\dist"
