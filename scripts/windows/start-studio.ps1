@@ -4,7 +4,7 @@ param(
     [switch]$Smoke,
     [switch]$NoBrowser,
     [switch]$SkipBootstrap,
-    [int]$Port = 8000,
+    [int]$Port = 0, # 0 reads backend_port from config/ports.json
     [string]$DataRoot = "",
     [string]$EvidencePath = "",
     [string]$VerifyProjectId = ""
@@ -12,6 +12,15 @@ param(
 $ErrorActionPreference = "Stop"
 Set-StrictMode -Version Latest
 $repo = (Resolve-Path (Join-Path $PSScriptRoot "../..")).Path
+# Normal launches do not require a -Port argument. The built UI is served
+# by this same FastAPI process; standalone Vite dev uses frontend_port.
+if ($Port -eq 0) {
+    $portsPath = Join-Path $repo "config/ports.json"
+    if (-not (Test-Path -LiteralPath $portsPath)) { throw "Missing config/ports.json" }
+    $ports = Get-Content -LiteralPath $portsPath -Raw | ConvertFrom-Json
+    $Port = [int]$ports.backend_port
+}
+if ($Port -lt 1 -or $Port -gt 65535) { throw "Backend port must be 1–65535." }
 if (-not $DataRoot) { $DataRoot = Join-Path $repo "data" }
 $data = [System.IO.Path]::GetFullPath($DataRoot)
 $frontend = Join-Path $repo "frontend\dist"
