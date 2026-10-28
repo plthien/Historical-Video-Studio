@@ -25,6 +25,25 @@ jobs:
           if ((git rev-parse HEAD) -ne $expected) { throw "HEAD mismatch: $expected" }
           git diff --check origin/main...HEAD
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Install and verify FFmpeg and ffprobe before environment checks
+        shell: pwsh
+        run: |
+          if (-not (Get-Command ffmpeg -ErrorAction SilentlyContinue) -or -not (Get-Command ffprobe -ErrorAction SilentlyContinue)) {
+            $installed = $false
+            for ($attempt = 1; $attempt -le 3; $attempt++) {
+              choco install ffmpeg --version=7.1.1 --yes --no-progress
+              if ($LASTEXITCODE -eq 0) { $installed = $true; break }
+              if ($attempt -lt 3) { Start-Sleep -Seconds (5 * $attempt) }
+            }
+            if (-not $installed) { throw "Pinned FFmpeg 7.1.1 install failed; verify Chocolatey package" }
+          }
+          $ffmpeg = Get-Command ffmpeg -ErrorAction SilentlyContinue
+          $ffprobe = Get-Command ffprobe -ErrorAction SilentlyContinue
+          if (-not $ffmpeg -or -not $ffprobe) { throw "Both ffmpeg and ffprobe must be on PATH" }
+          Write-Host "FFmpeg: $($ffmpeg.Source)"
+          Write-Host "FFprobe: $($ffprobe.Source)"
+          ffmpeg -version | Select-Object -First 1
+          ffprobe -version | Select-Object -First 1
       - name: Bootstrap isolated native Windows backend
         shell: pwsh
         run: |
@@ -42,7 +61,7 @@ jobs:
         run: |
           & .venv/Scripts/python.exe -m pytest -q tests/backend/test_post_pr12_authoring_story.py tests/backend/test_post_pr12_g4_authoring.py
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-      - name: Twelve real compiled-app vs approved-mock Chromium comparisons
+      - name: Retained historical mockup comparison (diagnostic only)
         shell: pwsh
         env:
           HVS_PARITY_PRODUCTION: '1'
