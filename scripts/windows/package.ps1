@@ -43,7 +43,7 @@ try {
         }
     }
     New-Item -ItemType Directory -Path $stage | Out-Null
-    foreach ($directory in @("backend", "contracts", "renderer", "scripts")) {
+    foreach ($directory in @("backend", "contracts", "renderer", "scripts", "config")) {
         $sourceDir = Join-Path $repo $directory
         $targetDir = Join-Path $stage $directory
         & robocopy $sourceDir $targetDir /E /NFL /NDL /NJH /NJS /XD node_modules .artifacts __pycache__ .pytest_cache /XF *.pyc *.sqlite *.sqlite-wal *.sqlite-shm *.log .env .env.* | Out-Null
