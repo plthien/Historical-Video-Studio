@@ -85,9 +85,23 @@ for(const size of widths){
       const s=await measure(page,"story-g1");
       checkGeometry(s);
       await page.screenshot({path:path.join(output,`story-G1-${size.width}.png`),animations:"disabled"});
+      const otherStates=[] as Awaited<ReturnType<typeof measure>>[];
+      for(const [index,workspace] of [
+        [2,"voice-G2"],[3,"assets-G3"],[4,"storyboard-G4"],[5,"delivery-G5"]
+      ] as const){
+        await page.locator(".sidebar nav button").nth(index).click();
+        await expect(page.locator(".sidebar nav button").nth(index)).toHaveAttribute("aria-current","page");
+        await expect(page.locator(".content").first()).toBeVisible();
+        const geometry=await measure(page,workspace);
+        checkGeometry(geometry);
+        otherStates.push(geometry);
+        await page.screenshot({path:path.join(output,`${workspace}-${size.width}.png`),animations:"disabled"});
+      }
       writeFileSync(path.join(output,`geometry-${size.width}.json`),
         JSON.stringify({design_authority:"PR13_APPROVED_UI_REDESIGN_V2",source:"REAL_COMPILED_CHROMIUM",
-          measured:[a,b,s],errors,media_evidence:"NOT_CAPTURED_IN_THIS_TEST"},null,2));
+          measured:[a,b,s,...otherStates],errors,
+          media_evidence:"BLOCKED_UNAPPROVED_FIXTURE: screenshots are genuine blocked G2–G5 workspaces, not populated media acceptance",
+          human_visual_review:"NOT_RUN",synthetic_fixture:"SYNTHETIC_TEST_ONLY"},null,2));
       expect(errors).toEqual([]);
     }finally{await context.close();}
   });
