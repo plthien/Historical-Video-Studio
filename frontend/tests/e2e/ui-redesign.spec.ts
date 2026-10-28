@@ -1,6 +1,7 @@
 import {test,expect} from "@playwright/test";
 import {mkdirSync,readFileSync,writeFileSync} from "node:fs";
 import path from "node:path";
+import {execFileSync} from "node:child_process";
 
 const output=path.resolve("frontend/.artifacts/ui-redesign");
 const fixture=path.resolve("../contracts/examples/visual_cases/StoryPackage.visual_cases.synthetic.json");
@@ -36,9 +37,25 @@ for(const size of widths){
     const context=await browser.newContext({viewport:size,deviceScaleFactor:1});
     const page=await context.newPage();
     const errors:string[]=[];
+    const failedRequests:string[]=[];
     page.on("pageerror",e=>errors.push(String(e)));
+    page.on("requestfailed",r=>failedRequests.push(`${r.method()} ${r.url()} ${r.failure()?.errorText}`));
     try{
       await page.goto("/");
+      const build=await page.request.get("/build-info.json");
+      expect(build.ok()).toBe(true);
+      const info=await build.json() as {schema_version:string;source_commit:string;bundle_sha256:string;input_sha256:string};
+      const head=execFileSync("git",["rev-parse","HEAD"],{cwd:path.resolve("..")}).toString().trim();
+      expect(info.schema_version).toBe("HVSFrontendBuild.v1");
+      expect(info.source_commit).toBe(head);
+      expect(info.bundle_sha256).toMatch(/^[0-9a-f]{64}$/);
+      writeFileSync(path.join(output,`source-head-${size.width}.json`),
+        JSON.stringify({design_authority:"PR13_APPROVED_UI_REDESIGN_V2",head,
+          base_sha:"d368088dba5713b3b4b51b635f585585bd8baf9a",
+          frontend_bundle_sha256:info.bundle_sha256,
+          frontend_input_sha256:info.input_sha256,
+          packaged_build_commit:info.source_commit},null,2));
+
       await expect(page.getByRole("region",{name:"project-home"})).toBeVisible();
       await expect(page.getByRole("region",{name:"new-project"})).toBeVisible();
       await expect(page.getByRole("region",{name:"recent-projects"})).toBeVisible();
@@ -99,9 +116,18 @@ for(const size of widths){
       }
       writeFileSync(path.join(output,`geometry-${size.width}.json`),
         JSON.stringify({design_authority:"PR13_APPROVED_UI_REDESIGN_V2",source:"REAL_COMPILED_CHROMIUM",
-          measured:[a,b,s,...otherStates],errors,
+          measured:[a,b,s,...otherStates],errors,failedRequests,
           media_evidence:"BLOCKED_UNAPPROVED_FIXTURE: screenshots are genuine blocked G2–G5 workspaces, not populated media acceptance",
           human_visual_review:"NOT_RUN",synthetic_fixture:"SYNTHETIC_TEST_ONLY"},null,2));
+      writeFileSync(path.join(output,`visual-review-ledger-${size.width}.json`),
+        JSON.stringify({design_authority:"PR13_APPROVED_UI_REDESIGN_V2",
+          measurement:"BROWSER_BOUNDING_BOXES_PASS_SUBJECT_TO_TEST",
+          screenshot_count:7,
+          visual_human_review:"NOT_RUN",
+          actual_g4_player:"BLOCKED_UNAPPROVED_FIXTURE",
+          actual_g5_media:"BLOCKED_UNAPPROVED_FIXTURE",
+          verdict:"FAIL_UNTIL_POPULATED_REAL_PLAYER_AND_MEDIA_REVIEW",
+          notes:"Screenshots show real SQLite project and truthful blocked downstream states; they are not fake populated media."},null,2));
       expect(errors).toEqual([]);
     }finally{await context.close();}
   });
