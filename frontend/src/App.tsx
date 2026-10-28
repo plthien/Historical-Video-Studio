@@ -276,30 +276,55 @@ export function App() {
 function StoryReview({story, reviewed, notes, urls, pending, onNote, onUrl, onReview}: {
   story: StoryPayload; revision: number;
   reviewed: StoryView["claim_reviews"]; notes: Record<string,string>; urls: Record<string,string>;
-  pending: string | null; onNote: (id:string, value:string)=>void;
-  onUrl: (id:string,value:string)=>void; onReview: (id:string,status:"REVIEWED"|"VERIFIED")=>Promise<void>;
-}) {
-  return <div className="panel">
-    <h3>Imported sections ({story.sections.length})</h3>
-    <details><summary>Read sections</summary>{story.sections.map(s =>
-      <article key={s.section_id}><strong>{s.section_id}</strong><p>{s.narration}</p></article>)}</details>
-    <h3>Historical claims ({story.claims.length})</h3>
-    {story.claims.map(c => {const saved = reviewed.find(r => r.claim_id === c.claim_id);
-      return <article key={c.claim_id} className="claim">
-        <strong>{c.claim_id} {c.critical && "· Critical"}</strong>
-        <p>{c.text}</p>
-        <small>Story source status: {c.status} · Human review: {saved?.status ?? "PENDING"}</small>
-        {c.source_leads.map(lead => <p key={lead.url}><a href={lead.url} target="_blank" rel="noreferrer">{lead.title || lead.url}</a></p>)}
-        <label htmlFor={`note-${c.claim_id}`}>Evidence review note</label>
-        <textarea id={`note-${c.claim_id}`} rows={2} value={notes[c.claim_id] ?? saved?.evidence_note ?? ""}
-          onChange={e => onNote(c.claim_id, e.target.value)} />
-        <label htmlFor={`url-${c.claim_id}`}>Additional source URL (optional)</label>
-        <input id={`url-${c.claim_id}`} value={urls[c.claim_id] ?? saved?.source_url ?? ""}
-          onChange={e => onUrl(c.claim_id, e.target.value)} />
-        <div className="buttonrow"><button disabled={!!pending || !(notes[c.claim_id] ?? saved?.evidence_note ?? "").trim()}
-          onClick={() => void onReview(c.claim_id,"REVIEWED")}>Record reviewed</button>
-        <button disabled={!!pending || !(notes[c.claim_id] ?? saved?.evidence_note ?? "").trim()}
-          onClick={() => void onReview(c.claim_id,"VERIFIED")}>Record verified</button></div>
-      </article>;})}
+  pending: string | null; onNote:(id:string,value:string)=>void;
+  onUrl:(id:string,value:string)=>void; onReview:(id:string,status:"REVIEWED"|"VERIFIED")=>Promise<void>;
+}){
+  const [selected,setSelected]=useState("");
+  const active=story.sections.find(s=>s.section_id===selected)??story.sections[0];
+  const critical=story.claims.filter(c=>c.critical);
+  const complete=critical.filter(c=>reviewed.some(r=>r.claim_id===c.claim_id&&
+    ["REVIEWED","VERIFIED"].includes(r.status))).length;
+  return <div className="story-review-layout" aria-label="story-review-layout">
+    <aside className="panel story-script-nav">
+      <small className="eyebrow">FROZEN STORY REVISION</small><h3>Script sections</h3>
+      <p className="provenance-line">{story.sections.length} sections</p>
+      {story.sections.map(s=><button key={s.section_id} type="button"
+        className={active?.section_id===s.section_id?"primary":"quiet"}
+        aria-current={active?.section_id===s.section_id?"true":undefined}
+        onClick={()=>setSelected(s.section_id)}>{s.section_id}</button>)}
+    </aside>
+    <section className="panel story-reading">
+      <small className="eyebrow">NARRATION · SOURCE LOCKED</small>
+      <h3>{active?.section_id??"No script section"}</h3>
+      {active&&<article className="story-narration">{active.narration}</article>}
+      <p className="provenance-line">Claim references: {active?.claim_refs.join(", ")||"none"}.
+        Use the bounded correction editor below to create a new immutable revision.</p>
+    </section>
+    <aside className="panel story-claims">
+      <small className="eyebrow">HUMAN RESEARCH APPROVAL · G1</small>
+      <h3>Historical claims ({story.claims.length})</h3>
+      <p className="provenance-line">Critical human reviews: {complete}/{critical.length}. Imported AI source status is not a human approval.</p>
+      <div className="section-scroll">{story.claims.map(c=>{
+        const saved=reviewed.find(r=>r.claim_id===c.claim_id);
+        return <article key={c.claim_id} className="claim">
+          <strong>{c.critical?"CRITICAL · ":""}{c.claim_id}</strong>
+          <p>{c.text}</p>
+          <p className="provenance-line">Imported: {c.status} · Human: {saved?.status??"PENDING"}</p>
+          {c.source_leads.map(lead=><p key={lead.url}><a href={lead.url} target="_blank" rel="noreferrer">{lead.title||lead.url}</a></p>)}
+          <label htmlFor={`note-${c.claim_id}`}>Human evidence review note</label>
+          <textarea id={`note-${c.claim_id}`} rows={2} value={notes[c.claim_id]??saved?.evidence_note??""}
+            onChange={e=>onNote(c.claim_id,e.target.value)}/>
+          <label htmlFor={`url-${c.claim_id}`}>Additional source URL (optional)</label>
+          <input id={`url-${c.claim_id}`} value={urls[c.claim_id]??saved?.source_url??""}
+            onChange={e=>onUrl(c.claim_id,e.target.value)}/>
+          <div className="buttonrow">
+            <button disabled={!!pending||!(notes[c.claim_id]??saved?.evidence_note??"").trim()}
+              onClick={()=>void onReview(c.claim_id,"REVIEWED")}>Record reviewed</button>
+            <button disabled={!!pending||!(notes[c.claim_id]??saved?.evidence_note??"").trim()}
+              onClick={()=>void onReview(c.claim_id,"VERIFIED")}>Record verified</button>
+          </div>
+        </article>;
+      })}</div>
+    </aside>
   </div>;
 }
