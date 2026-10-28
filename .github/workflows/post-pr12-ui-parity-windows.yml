@@ -59,6 +59,28 @@ jobs:
           npm --prefix frontend run typecheck
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           if (-not (Test-Path frontend/dist/build-info.json)) { throw "Missing source-bound production build-info" }
+      - name: Verify frontend hash identity and stale-bundle refusal
+        shell: pwsh
+        run: |
+          $file = "frontend/dist/build-info.json"
+          $original = Get-Content -LiteralPath $file -Raw
+          try {
+            & .\scripts\windows\verify-frontend-build.ps1 -SkipBootstrap | Out-Null
+            $tampered = $original | ConvertFrom-Json
+            $tampered.source_commit = ('0' * 40)
+            $tampered | ConvertTo-Json | Set-Content -LiteralPath $file -Encoding utf8
+            $rejected = $false
+            try {
+              & .\scripts\windows\verify-frontend-build.ps1 -SkipBootstrap | Out-Null
+            } catch {
+              if ("$_" -match "FRONTEND_BUNDLE_STALE") { $rejected = $true }
+              else { throw }
+            }
+            if (-not $rejected) { throw "Launch accepted a forged stale UI build!" }
+          } finally {
+            $original | Set-Content -LiteralPath $file -Encoding utf8
+          }
+          & .\scripts\windows\verify-frontend-build.ps1 -SkipBootstrap | Out-Null
       - name: Targeted persisted SQLite authoring and G4 guard tests
         shell: pwsh
         run: |
