@@ -107,7 +107,7 @@ if (-not $fresh) {
     # Windows PowerShell 5.1's Set-Content -Encoding utf8 writes EF BB BF.
     # Starlette then serves those BOM bytes unchanged, while a 5.1 HTTP client
     # can misdecode them. Emit UTF-8 *without* BOM on every new build.
-    $utf8NoBom = New-Object System.Text.UTF8Encoding($false)
+    $utf8NoBom = [System.Text.UTF8Encoding]::new($false)
     [System.IO.File]::WriteAllText($info, ($stored | ConvertTo-Json -Depth 6), $utf8NoBom)
 }
 # Recover already-verified old installs without rebuilding assets or touching
@@ -116,7 +116,7 @@ if ($fresh) {
     $existingBytes = [System.IO.File]::ReadAllBytes($info)
     if ($existingBytes.Length -ge 3 -and $existingBytes[0] -eq 239 -and
         $existingBytes[1] -eq 187 -and $existingBytes[2] -eq 191) {
-        $utf8NoBom = New-Object System.Text.UTF8Encoding($false)
+        $utf8NoBom = [System.Text.UTF8Encoding]::new($false)
         [System.IO.File]::WriteAllText($info, ($stored | ConvertTo-Json -Depth 6), $utf8NoBom)
         Write-Host "FRONTEND_MANIFEST_BOM_REMOVED"
     }
