@@ -34,6 +34,8 @@ jobs:
           $ErrorActionPreference = 'Stop'
           foreach ($file in @('scripts/windows/start-studio.ps1',
                               'scripts/windows/verify-frontend-build.ps1',
+                              'scripts/windows/read-frontend-manifest.ps1',
+                              'tests/windows/test-frontend-manifest-encoding.ps1',
                               'scripts/windows/package.ps1')) {
             $path = (Resolve-Path -LiteralPath $file).Path
             $bytes = [System.IO.File]::ReadAllBytes($path)
@@ -49,6 +51,11 @@ jobs:
             }
             Write-Host "POWERSHELL_5_1_PARSE_PASS $file"
           }
+      - name: Prove BOM and no-BOM manifest parsing on Windows PowerShell 5.1
+        shell: powershell
+        run: |
+          & .\\tests\\windows\\test-frontend-manifest-encoding.ps1
+          if ($LASTEXITCODE -and $LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Install and verify FFmpeg and ffprobe before environment checks
         shell: pwsh
         run: |
@@ -122,6 +129,16 @@ jobs:
             [System.IO.File]::WriteAllBytes($asset.FullName, $bytes)
           }
           & .\scripts\windows\verify-frontend-build.ps1 -SkipBootstrap | Out-Null
+      - name: Real Windows PowerShell 5.1 launcher smoke through HTTP SHA verification
+        shell: pwsh
+        run: |
+          powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/windows/start-studio.ps1 -Smoke -NoBrowser -SkipBootstrap -EvidencePath .artifacts/pr13-frontend-startup-smoke.json
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          $evidence = Get-Content .artifacts/pr13-frontend-startup-smoke.json -Raw | ConvertFrom-Json
+          if (-not $evidence.api_ready -or $evidence.ui_status -ne 200 -or
+              -not $evidence.process_cleanup -or -not $evidence.frontend_bundle_sha256) {
+              throw "Real launcher smoke did not reach verified ready/clean stop."
+          }
       - name: Targeted persisted SQLite authoring and G4 guard tests
         shell: pwsh
         run: |
@@ -160,6 +177,7 @@ jobs:
             frontend/.artifacts/ui-parity/
             frontend/.artifacts/ui-redesign/
             frontend/dist/build-info.json
+            .artifacts/pr13-frontend-startup-smoke.json
             frontend/test-results/
             frontend/playwright-report/
           if-no-files-found: warn
