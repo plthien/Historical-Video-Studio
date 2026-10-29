@@ -35,6 +35,7 @@ for(const size of widths){
   test(`PR13 redesigned State A/B real browser geometry ${size.width}x${size.height}`,async({browser})=>{
     mkdirSync(output,{recursive:true});
     const context=await browser.newContext({viewport:size,deviceScaleFactor:1});
+    await context.grantPermissions(["clipboard-read","clipboard-write"]);
     const page=await context.newPage();
     const errors:string[]=[];
     const failedRequests:string[]=[];
@@ -78,6 +79,16 @@ for(const size of widths){
       await expect(page.locator(".flow-steps button[aria-current=step]")).toContainText("ChatGPT Brief");
       await page.getByRole("button",{name:"Build versioned brief"}).click();
       await expect(page.locator("#brief-preview")).toHaveValue(/StoryPackage.v1/);
+      await expect(page.getByText(/HVS-EXTERNAL-STORY-BRIEF\.v2 · CURRENT/)).toBeVisible();
+      const preview=await page.locator("#brief-preview").inputValue();
+      await page.getByRole("button",{name:"Copy brief"}).click();
+      // Windows clipboard transport canonicalizes LF to CRLF; the prompt text is otherwise exact.
+      expect((await page.evaluate(()=>navigator.clipboard.readText())).replace(/\r\n/g,"\n")).toBe(preview);
+      const [download]=await Promise.all([
+        page.waitForEvent("download"),
+        page.getByRole("button",{name:"Download .md"}).click(),
+      ]);
+      expect(readFileSync(await download.path(),"utf8")).toBe(preview);
       const b=await measure(page,"project-state-b");
       checkGeometry(b);
       await page.screenshot({path:path.join(output,`projects-B-${size.width}.png`),animations:"disabled"});

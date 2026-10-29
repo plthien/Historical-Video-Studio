@@ -17,7 +17,7 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from backend.app.api.imports import import_story
 from backend.app.projects.models import StoryCandidate
-from backend.app.projects.authoring_brief import build_brief
+from backend.app.projects.authoring_brief import BRIEF_VERSION, build_brief
 from backend.app.contracts import ContractViolation
 from backend.app.jobs import JobQueue, recover_interrupted
 from backend.app.projects.gates import GateService
@@ -331,7 +331,7 @@ def create_app(database: str | Path | None = None, media_root: str | Path | None
             raise ContractViolation("BRIEF_SETTINGS_UNSAVED", project_id,
                                     "Save current authoring settings for this project, then rebuild the brief.")
         brief = build_brief(store, project_id, **body.model_dump())
-        return {"brief_version": "HVS-EXTERNAL-STORY-BRIEF.v1",
+        return {"brief_version": BRIEF_VERSION,
                 "content": brief, "file_name": f"{project_id}_story_authoring_brief.md"}
 
     @app.post("/api/v1/projects/{project_id}/story/import")

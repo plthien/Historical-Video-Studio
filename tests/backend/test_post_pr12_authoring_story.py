@@ -4,6 +4,7 @@ from pathlib import Path
 
 from fastapi.testclient import TestClient
 from backend.app.api.server import create_app
+from backend.app.projects.authoring_brief import BRIEF_VERSION
 
 ROOT = Path(__file__).resolve().parents[2]
 EXAMPLE = ROOT / "contracts/examples/longform/StoryPackage.longform.synthetic.json"
@@ -26,6 +27,7 @@ def test_brief_is_deterministic_and_project_scoped(tmp_path):
         first = client.post(url, json=body)
         assert first.status_code == 200
         assert first.json() == client.post(url, json=body).json()
+        assert first.json()["brief_version"] == BRIEF_VERSION
         assert "StoryPackage.v1" in first.json()["content"]
         assert pid in first.json()["content"]
         assert "asset_requirements" in first.json()["content"]
