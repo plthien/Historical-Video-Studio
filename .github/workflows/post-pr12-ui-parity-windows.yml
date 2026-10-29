@@ -90,6 +90,11 @@ jobs:
           npm --prefix frontend run typecheck
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           if (-not (Test-Path frontend/dist/build-info.json)) { throw "Missing source-bound production build-info" }
+          $manifestBytes = [System.IO.File]::ReadAllBytes((Resolve-Path frontend/dist/build-info.json).Path)
+          if ($manifestBytes.Length -lt 3) { throw "Frontend build manifest is empty" }
+          if ($manifestBytes[0] -eq 239 -and $manifestBytes[1] -eq 187 -and $manifestBytes[2] -eq 191) {
+            throw "FRONTEND_BUILD_MANIFEST_BOM_FORBIDDEN: write UTF-8 without BOM."
+          }
       - name: Verify frontend hash identity and stale-bundle refusal
         shell: pwsh
         run: |
