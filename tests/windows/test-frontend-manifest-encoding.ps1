@@ -40,7 +40,8 @@ Assert-Rejected -Bytes ($noBom.GetBytes('["not a manifest"]')) -Label "JSON arra
 Assert-Rejected -Bytes ($noBom.GetBytes('"not a manifest"')) -Label "JSON primitive"
 $badSha = $json.Replace(("d" * 64),("x" * 64))
 Assert-Rejected -Bytes ($noBom.GetBytes($badSha)) -Label "invalid checksum syntax"
-$misleading = $noBom.GetBytes([char]0xFEFF + $json)
+$leadingUnicodeBom = ([string][char]0xFEFF) + $json
+$misleading = $noBom.GetBytes($leadingUnicodeBom)
 $decoded = ConvertFrom-HvsFrontendManifestBytes -Bytes $misleading
 if ($decoded.bundle_sha256 -cne $manifest.bundle_sha256) {
     throw "FRONTEND_MANIFEST_UTF8_TEST_FAIL: leading Unicode BOM not handled."
