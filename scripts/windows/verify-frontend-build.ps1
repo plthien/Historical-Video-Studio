@@ -104,7 +104,22 @@ if (-not $fresh) {
         bundle_sha256=(BundleDigest)
         generated_utc=[DateTime]::UtcNow.ToString("o")
     }
-    $stored | ConvertTo-Json | Set-Content -LiteralPath $info -Encoding utf8
+    # Windows PowerShell 5.1's Set-Content -Encoding utf8 writes EF BB BF.
+    # Starlette then serves those BOM bytes unchanged, while a 5.1 HTTP client
+    # can misdecode them. Emit UTF-8 *without* BOM on every new build.
+    $utf8NoBom = New-Object System.Text.UTF8Encoding($false)
+    [System.IO.File]::WriteAllText($info, ($stored | ConvertTo-Json -Depth 6), $utf8NoBom)
+}
+# Recover already-verified old installs without rebuilding assets or touching
+# any SQLite data. The manifest is excluded from BundleDigest by design.
+if ($fresh) {
+    $existingBytes = [System.IO.File]::ReadAllBytes($info)
+    if ($existingBytes.Length -ge 3 -and $existingBytes[0] -eq 239 -and
+        $existingBytes[1] -eq 187 -and $existingBytes[2] -eq 191) {
+        $utf8NoBom = New-Object System.Text.UTF8Encoding($false)
+        [System.IO.File]::WriteAllText($info, ($stored | ConvertTo-Json -Depth 6), $utf8NoBom)
+        Write-Host "FRONTEND_MANIFEST_BOM_REMOVED"
+    }
 }
 Write-Host "FRONTEND_BUNDLE_VERIFIED HEAD=$head INPUT=$fingerprint BUNDLE=$($stored.bundle_sha256)"
 return $stored
