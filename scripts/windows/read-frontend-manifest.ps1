@@ -8,7 +8,7 @@ function ConvertFrom-HvsFrontendManifestBytes {
         throw "FRONTEND_BUNDLE_HTTP_INVALID: HTTP manifest body is empty."
     }
     try {
-        $strictUtf8 = New-Object System.Text.UTF8Encoding($false, $true)
+        $strictUtf8 = [System.Text.UTF8Encoding]::new($false, $true)
         $json = $strictUtf8.GetString($Bytes).TrimStart([char]0xFEFF)
         $manifest = ConvertFrom-Json -InputObject $json -ErrorAction Stop
     } catch {
@@ -41,7 +41,7 @@ function Get-HvsFrontendManifestHttp {
         # DownloadData preserves the raw bytes. Content-Type and the PowerShell
         # version cannot silently influence character decoding.
         $bytes = $client.DownloadData($uri)
-        return ConvertFrom-HvsFrontendManifestBytes -Bytes $bytes
+        return (ConvertFrom-HvsFrontendManifestBytes -Bytes $bytes)
     } catch {
         if ($_.Exception.Message -match "FRONTEND_BUNDLE_HTTP_INVALID") { throw }
         throw "FRONTEND_BUNDLE_HTTP_INVALID: unable to read $Url : $($_.Exception.Message)"
