@@ -16,17 +16,23 @@ def test_built_frontend_manifest_is_served_as_json(tmp_path, monkeypatch):
         "port_config_sha256": "c" * 64,
         "bundle_sha256": "d" * 64,
     }
-    (dist / "build-info.json").write_text(json.dumps(manifest), encoding="utf-8")
     monkeypatch.setenv("HVS_FRONTEND_DIST", str(dist))
     app = create_app(tmp_path / "state.sqlite", tmp_path / "media")
     with TestClient(app) as client:
         health = client.get("/api/v1/health")
         assert health.status_code == 200
-        served = client.get("/build-info.json")
-        assert served.status_code == 200, served.text
-        assert "json" in served.headers["content-type"].lower()
-        assert served.json() == manifest
-        assert served.json()["bundle_sha256"] == manifest["bundle_sha256"]
+        raw = json.dumps(manifest).encode("utf-8")
+        for prefix in (b"", bytes((239, 187, 191))):
+            # Reproduce the old PowerShell 5.1 UTF-8-with-BOM write and the
+            # new no-BOM write, through the *real* FastAPI static HTTP route.
+            expected = prefix + raw
+            (dist / "build-info.json").write_bytes(expected)
+            served = client.get("/build-info.json")
+            assert served.status_code == 200, served.text
+            assert "json" in served.headers["content-type"].lower()
+            assert served.content == expected
+            if not prefix:
+                assert served.json() == manifest
         page = client.get("/")
         assert page.status_code == 200
         assert "Historical Video Studio" in page.text
