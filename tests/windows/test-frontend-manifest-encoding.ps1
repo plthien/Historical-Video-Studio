@@ -12,7 +12,7 @@ $manifest = [ordered]@{
     bundle_sha256 = ("d" * 64)
 }
 $json = $manifest | ConvertTo-Json -Compress
-$noBom = New-Object System.Text.UTF8Encoding($false, $true)
+$noBom = [System.Text.UTF8Encoding]::new($false, $true)
 $plain = $noBom.GetBytes($json)
 $withBom = [byte[]](@(239, 187, 191) + @($plain))
 foreach ($testBytes in @($plain, $withBom)) {
