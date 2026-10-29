@@ -137,30 +137,13 @@ try {
         $project = Invoke-RestMethod -Uri "http://127.0.0.1:$Port/api/v1/projects/$VerifyProjectId" -TimeoutSec 5
         $evidence.project_read = [ordered]@{project_id=$project.project_id; project_revision=$project.project_revision}
     }
-    # Use the raw HTTP response, because Windows PowerShell 5.1 may return
-    # plain text for a static .json file instead of deserializing its content.
-    # Never access .bundle_sha256 on an unverified HTTP value under StrictMode.
+    # Windows PowerShell 5.1 decodes Invoke-WebRequest.Content using legacy
+    # response encoding. Read actual network bytes as strict UTF-8 instead.
+    . (Join-Path $PSScriptRoot "read-frontend-manifest.ps1")
     $uiBuildUrl = "http://127.0.0.1:$Port/build-info.json"
-    $uiBuildResponse = Invoke-WebRequest -UseBasicParsing -Uri $uiBuildUrl -TimeoutSec 5
-    if ($uiBuildResponse.StatusCode -ne 200) {
-        throw "FRONTEND_BUNDLE_HTTP_INVALID: $uiBuildUrl returned HTTP $($uiBuildResponse.StatusCode)."
-    }
-    # Some Windows hosts label static JSON as text/plain. Decode the body
-    # explicitly and verify the required fields instead of trusting its MIME.
-    $uiBuildContentType = [string]$uiBuildResponse.Headers["Content-Type"]
-    $uiBuild = $null
-    try {
-        $uiBuild = ConvertFrom-Json -InputObject ([string]$uiBuildResponse.Content) -ErrorAction Stop
-    } catch {
-        throw "FRONTEND_BUNDLE_HTTP_INVALID: $uiBuildUrl returned non-JSON content (Content-Type '$uiBuildContentType'): $($_.Exception.Message)"
-    }
-    if ($null -eq $uiBuild -or $null -eq $uiBuild.PSObject.Properties["bundle_sha256"] -or
-        $null -eq $uiBuild.PSObject.Properties["source_commit"] -or
-        [string]::IsNullOrWhiteSpace([string]$uiBuild.bundle_sha256) -or
-        [string]::IsNullOrWhiteSpace([string]$uiBuild.source_commit)) {
-        throw "FRONTEND_BUNDLE_HTTP_INVALID: $uiBuildUrl returned JSON without source_commit and bundle_sha256."
-    }
-    if ($uiBuild.bundle_sha256 -ne $build.bundle_sha256 -or $uiBuild.source_commit -ne $build.source_commit) {
+    $uiBuild = Get-HvsFrontendManifestHttp -Url $uiBuildUrl
+    if ($uiBuild.bundle_sha256 -cne $build.bundle_sha256 -or
+        $uiBuild.source_commit -cne $build.source_commit) {
         throw "FRONTEND_BUNDLE_STALE: served UI build-info disagrees with verified checkout."
     }
     Write-Host "STUDIO_READY http://127.0.0.1:$Port/ DB=$env:HVS_DB PID=$($backend.Id) UI=$($build.source_commit)"
