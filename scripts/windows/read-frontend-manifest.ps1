@@ -14,7 +14,7 @@ function ConvertFrom-HvsFrontendManifestBytes {
     } catch {
         throw "FRONTEND_BUNDLE_HTTP_INVALID: manifest is not valid UTF-8 JSON: $($_.Exception.Message)"
     }
-    if ($null -eq $manifest -or $manifest -isnot [psobject] -or
+    if ($null -eq $manifest -or $manifest -isnot [pscustomobject] -or
         $null -eq $manifest.PSObject.Properties["source_commit"] -or
         $null -eq $manifest.PSObject.Properties["bundle_sha256"] -or
         $null -eq $manifest.PSObject.Properties["schema_version"]) {
