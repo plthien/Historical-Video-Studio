@@ -1,0 +1,116 @@
+{
+  "design_authority": "PR13_APPROVED_UI_REDESIGN_V2",
+  "source": "REAL_COMPILED_CHROMIUM",
+  "measured": [
+    {
+      "label": "project-state-a",
+      "viewport": {
+        "width": 1366,
+        "height": 768
+      },
+      "sidebar_width": 238,
+      "content_left": 238,
+      "header_right": 1336,
+      "rightmost_control": 1281,
+      "doc_scroll_width": 1366,
+      "doc_client_width": 1366,
+      "horizontal_overflow": false,
+      "layout_version": "PR13_APPROVED_UI_REDESIGN_V2"
+    },
+    {
+      "label": "project-state-b",
+      "viewport": {
+        "width": 1366,
+        "height": 768
+      },
+      "sidebar_width": 238,
+      "content_left": 238,
+      "header_right": 1336,
+      "rightmost_control": 1336,
+      "doc_scroll_width": 1366,
+      "doc_client_width": 1366,
+      "horizontal_overflow": false,
+      "layout_version": "PR13_APPROVED_UI_REDESIGN_V2"
+    },
+    {
+      "label": "story-g1",
+      "viewport": {
+        "width": 1366,
+        "height": 768
+      },
+      "sidebar_width": 238,
+      "content_left": 238,
+      "header_right": 1336,
+      "rightmost_control": 1336,
+      "doc_scroll_width": 1366,
+      "doc_client_width": 1366,
+      "horizontal_overflow": false,
+      "layout_version": "PR13_APPROVED_UI_REDESIGN_V2"
+    },
+    {
+      "label": "voice-G2",
+      "viewport": {
+        "width": 1366,
+        "height": 768
+      },
+      "sidebar_width": 238,
+      "content_left": 238,
+      "header_right": 1336,
+      "rightmost_control": 1336,
+      "doc_scroll_width": 1366,
+      "doc_client_width": 1366,
+      "horizontal_overflow": false,
+      "layout_version": "PR13_APPROVED_UI_REDESIGN_V2"
+    },
+    {
+      "label": "assets-G3",
+      "viewport": {
+        "width": 1366,
+        "height": 768
+      },
+      "sidebar_width": 238,
+      "content_left": 238,
+      "header_right": 1336,
+      "rightmost_control": 1336,
+      "doc_scroll_width": 1366,
+      "doc_client_width": 1366,
+      "horizontal_overflow": false,
+      "layout_version": "PR13_APPROVED_UI_REDESIGN_V2"
+    },
+    {
+      "label": "storyboard-G4",
+      "viewport": {
+        "width": 1366,
+        "height": 768
+      },
+      "sidebar_width": 238,
+      "content_left": 238,
+      "header_right": 1336,
+      "rightmost_control": 1336,
+      "doc_scroll_width": 1366,
+      "doc_client_width": 1366,
+      "horizontal_overflow": false,
+      "layout_version": "PR13_APPROVED_UI_REDESIGN_V2"
+    },
+    {
+      "label": "delivery-G5",
+      "viewport": {
+        "width": 1366,
+        "height": 768
+      },
+      "sidebar_width": 238,
+      "content_left": 238,
+      "header_right": 1336,
+      "rightmost_control": 1336,
+      "doc_scroll_width": 1366,
+      "doc_client_width": 1366,
+      "horizontal_overflow": false,
+      "layout_version": "PR13_APPROVED_UI_REDESIGN_V2"
+    }
+  ],
+  "errors": [],
+  "failedRequests": [],
+  "media_evidence": "BLOCKED_UNAPPROVED_FIXTURE: screenshots are genuine blocked G2–G5 workspaces, not populated media acceptance",
+  "human_visual_review": "NOT_RUN",
+  "synthetic_fixture": "SYNTHETIC_TEST_ONLY"
+}
