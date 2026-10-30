@@ -77,6 +77,12 @@ def _tree_identity(root: Path) -> dict[str, str]:
             for path in root.rglob("*") if path.is_file()}
 
 
+def _tree_identity_digest(identity: dict[str, str]) -> str:
+    """Create a stable, non-content-bearing identity for an operator data tree."""
+    serialized = "\n".join(f"{relative}:{digest}" for relative, digest in sorted(identity.items()))
+    return hashlib.sha256(serialized.encode("utf-8")).hexdigest()
+
+
 def _launcher(root: Path, data: Path, port: int, evidence: Path, *, skip: bool,
               project: str = "", env: dict | None = None, expected: int = 0) -> subprocess.CompletedProcess[str]:
     command = [str(POWERSHELL), "-NoProfile", "-ExecutionPolicy", "Bypass", "-File",
@@ -168,13 +174,14 @@ def run(output: Path) -> dict:
         corrupt_evidence_path = temp / "corrupt.json"
         corrupt_evidence = (json.loads(corrupt_evidence_path.read_text("utf-8-sig"))
                             if corrupt_evidence_path.exists() else {})
+        persisted_after = _tree_identity(data)
         if ("FRONTEND_BUNDLE_STALE" not in corrupt_text or "BUILD_MISSING" not in corrupt_text
                 or "STUDIO_READY" in corrupt_text or corrupt_evidence.get("api_ready")
-                or corrupt_evidence.get("ui_status") == 200 or _tree_identity(data) != persisted_before):
+                or corrupt_evidence.get("ui_status") == 200 or persisted_after != persisted_before):
             raise RuntimeError("PACKAGE_CORRUPT_RUNTIME_NEGATIVE_MISSING:\n" + corrupt_text)
 
         report = {
-            "schema_version": "B3CleanPackageLaunchEvidence.v1", "status": "PASS",
+            "schema_version": "B3CleanPackageLaunchEvidence.v2", "status": "PASS",
             "scope": "SYNTHETIC_TEST_ONLY", "source_commit": head,
             "archive_sha256": hashlib.sha256(archive.read_bytes()).hexdigest(),
             "manifest_file_count": len(manifest["files"]), "verified_sha_count": verified_count,
@@ -184,6 +191,14 @@ def run(output: Path) -> dict:
                            "media_sha256": created, "media_bytes_preserved": True},
             "negatives": {"occupied_port": "PASS", "missing_ffmpeg": "PASS",
                           "missing_frontend_runtime": "PASS_BUILD_MISSING_NO_DATA_MUTATION"},
+            "negative_details": {"missing_frontend_runtime": {
+                "exit_code": corrupt.returncode,
+                "studio_ready": "STUDIO_READY" in corrupt_text,
+                "api_ready": bool(corrupt_evidence.get("api_ready")),
+                "ui_status": corrupt_evidence.get("ui_status"),
+                "data_tree_before_sha256": _tree_identity_digest(persisted_before),
+                "data_tree_after_sha256": _tree_identity_digest(persisted_after),
+            }},
             "commands": {"first_skip_bootstrap": False, "second_skip_bootstrap": True},
         }
     output.parent.mkdir(parents=True, exist_ok=True)

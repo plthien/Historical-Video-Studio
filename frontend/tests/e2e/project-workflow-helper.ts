@@ -3,8 +3,18 @@
  * saved settings, or source provenance.
  */
 import {expect,type Page} from "@playwright/test";
+import {readFileSync} from "node:fs";
 
-const apiPort=process.env.HVS_E2E_API_PORT??"8000";
+const portProfile=JSON.parse(readFileSync(new URL("../../../config/ports.json",import.meta.url),"utf8")) as {
+  backend_port:unknown
+};
+const canonicalPort=Number(portProfile.backend_port);
+if(!Number.isInteger(canonicalPort)||canonicalPort<1||canonicalPort>65535)
+  throw new Error("Invalid backend_port in config/ports.json");
+const apiPort=process.env.HVS_E2E_API_PORT??
+  (process.env.HVS_PARITY_PRODUCTION==="1"?String(canonicalPort):"8000");
+if(!/^\d+$/.test(apiPort)||Number(apiPort)<1||Number(apiPort)>65535)
+  throw new Error("Invalid HVS_E2E_API_PORT");
 export const apiBase=`http://127.0.0.1:${apiPort}/api/v1`;
 
 export async function openExistingProject(page:Page,id:string){

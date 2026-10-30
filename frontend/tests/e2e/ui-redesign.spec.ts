@@ -2,6 +2,7 @@ import {test,expect} from "@playwright/test";
 import {mkdirSync,readFileSync,writeFileSync} from "node:fs";
 import path from "node:path";
 import {execFileSync} from "node:child_process";
+import {apiBase,openExistingProject} from "./project-workflow-helper";
 
 const output=path.resolve(".artifacts/ui-redesign");
 const fixture=path.resolve("../contracts/examples/visual_cases/StoryPackage.visual_cases.synthetic.json");
@@ -50,12 +51,24 @@ for(const size of widths){
       expect(info.schema_version).toBe("HVSFrontendBuild.v1");
       expect(info.source_commit).toBe(head);
       expect(info.bundle_sha256).toMatch(/^[0-9a-f]{64}$/);
+      const backendProbe=await page.evaluate(async base=>{
+        const health=await fetch(base+"/health");
+        const projects=await fetch(base+"/projects");
+        return {health_status:health.status,health:await health.json(),
+          projects_status:projects.status,projects:await projects.json()};
+      },apiBase);
+      expect(backendProbe.health_status).toBe(200);
+      expect(backendProbe.health).toMatchObject({status:"ready",scope:"A1"});
+      expect(backendProbe.projects_status).toBe(200);
+      expect(Array.isArray(backendProbe.projects)).toBe(true);
       writeFileSync(path.join(output,`source-head-${size.width}.json`),
         JSON.stringify({design_authority:"PR13_APPROVED_UI_REDESIGN_V2",head,
           base_sha:"d368088dba5713b3b4b51b635f585585bd8baf9a",
           frontend_bundle_sha256:info.bundle_sha256,
           frontend_input_sha256:info.input_sha256,
-          packaged_build_commit:info.source_commit},null,2));
+          packaged_build_commit:info.source_commit,api_origin:apiBase,
+          preview_url:page.url(),backend_health_url:apiBase+"/health",
+          health_status:backendProbe.health_status,projects_status:backendProbe.projects_status},null,2));
 
       await expect(page.getByRole("region",{name:"project-home"})).toBeVisible();
       await expect(page.getByRole("region",{name:"new-project"})).toBeVisible();
@@ -67,7 +80,14 @@ for(const size of widths){
       await page.screenshot({path:path.join(output,`projects-A-${size.width}.png`),animations:"disabled"});
       const title="V2 maritime history "+size.width;
       await page.locator("#new-title").fill(title);
+      const createdResponse=page.waitForResponse(response=>
+        response.url()===apiBase+"/projects"&&response.request().method()==="POST");
       await page.getByRole("button",{name:"Create project"}).click();
+      const created=await createdResponse;
+      expect(created.status()).toBe(201);
+      const createdBody=await created.json() as {project_id:string,project_revision:number};
+      expect(createdBody.project_id).toMatch(/^proj_/);
+      expect(createdBody.project_revision).toBe(0);
       await expect(page.locator(".flow-steps")).toBeVisible();
       await expect(page.locator(".gateboard .gate")).toHaveCount(5);
       await expect(page.locator(".topline")).toContainText(title);
@@ -105,6 +125,10 @@ for(const size of widths){
       const id=await page.locator(".flow-context .provenance-line").first().textContent();
       const match=id?.match(/proj_[a-zA-Z0-9_-]+/);
       expect(match).toBeTruthy();
+      expect(match![0]).toBe(createdBody.project_id);
+      await page.locator("#story-json").fill("{");
+      await page.getByRole("button",{name:"Validate & import StoryPackage"}).click();
+      await expect(page.getByRole("alert")).toContainText("JSON_SYNTAX_INVALID");
       source.project.project_id=match![0];
       await page.locator("#story-json").fill(JSON.stringify(source));
       await page.getByRole("button",{name:"Validate & import StoryPackage"}).click();
@@ -113,6 +137,19 @@ for(const size of widths){
       const s=await measure(page,"story-g1");
       checkGeometry(s);
       await page.screenshot({path:path.join(output,`story-G1-${size.width}.png`),animations:"disabled"});
+      const revisionBeforeReload=await page.locator(".topline strong").innerText();
+      await page.reload();
+      await openExistingProject(page,createdBody.project_id);
+      expect(await page.locator(".topline strong").innerText()).toBe(revisionBeforeReload);
+      await page.getByRole("navigation").getByRole("button",{name:"Story review (G1)",exact:true}).click();
+      await expect(page.getByText(/Historical claims/)).toBeVisible();
+      writeFileSync(path.join(output,`production-handshake-${size.width}.json`),JSON.stringify({
+        source_commit:info.source_commit,bundle_sha256:info.bundle_sha256,input_sha256:info.input_sha256,
+        preview_url:page.url(),api_origin:apiBase,health_status:backendProbe.health_status,
+        projects_status:backendProbe.projects_status,create_status:created.status(),
+        project_id:createdBody.project_id,created_revision:createdBody.project_revision,
+        reopened_revision_text:revisionBeforeReload
+      },null,2));
       const otherStates=[] as Awaited<ReturnType<typeof measure>>[];
       for(const [index,workspace] of [
         [2,"voice-G2"],[3,"assets-G3"],[4,"storyboard-G4"],[5,"delivery-G5"]
@@ -140,6 +177,7 @@ for(const size of widths){
           verdict:"FAIL_UNTIL_POPULATED_REAL_PLAYER_AND_MEDIA_REVIEW",
           notes:"Screenshots show real SQLite project and truthful blocked downstream states; they are not fake populated media."},null,2));
       expect(errors).toEqual([]);
+      expect(failedRequests).toEqual([]);
     }finally{await context.close();}
   });
 }

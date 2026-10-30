@@ -11,8 +11,21 @@ const port=(value:string|undefined,fallback:number)=>{
   if(!Number.isInteger(parsed)||parsed<1||parsed>65535)throw new Error("Invalid isolated E2E port");
   return parsed;
 };
-const apiPort=port(process.env.HVS_E2E_API_PORT,b3Fixture?8011:8000);
+const portProfile=JSON.parse(readFileSync(path.resolve(here,"../config/ports.json"),"utf8")) as {
+  backend_port:unknown,frontend_port:unknown
+};
+const canonicalApiPort=port(String(portProfile.backend_port),0);
+port(String(portProfile.frontend_port),0);
+const requestedApiPort=process.env.HVS_E2E_API_PORT===undefined?undefined:
+  port(process.env.HVS_E2E_API_PORT,canonicalApiPort);
+if(parityProduction&&requestedApiPort!==undefined&&requestedApiPort!==canonicalApiPort){
+  throw new Error(`PRODUCTION_PREVIEW_API_PORT_MISMATCH: prebuilt dist targets ${canonicalApiPort}, requested ${requestedApiPort}`);
+}
+const apiPort=parityProduction?canonicalApiPort:(requestedApiPort??(b3Fixture?8011:8000));
 const uiPort=port(process.env.HVS_E2E_UI_PORT,b3Fixture?5174:5173);
+const inheritedEnvironment=Object.fromEntries(
+  Object.entries(process.env).filter((entry):entry is [string,string]=>entry[1]!==undefined)
+);
 const b2Root=path.resolve(here,"..","renderer",".artifacts",
   process.env.HVS_PR10_FIXTURE==="mask"?"pr10-mask":
   process.env.HVS_PR10_FIXTURE==="numeric"?"pr10-numeric":
@@ -35,7 +48,11 @@ export default defineConfig({
            HVS_MEDIA: fullFlowConfig?.artifactRoot??(b2Fixture?path.join(b2Root,"artifacts"):path.resolve(here, ".e2e-data/media"))}},
     {command: parityProduction?`npx vite preview --host 127.0.0.1 --port ${uiPort} --strictPort`:`npm run dev -- --port ${uiPort}`, cwd: here, url: `http://127.0.0.1:${uiPort}`,
      reuseExistingServer: false, timeout: 60_000,
-     env: {...process.env,VITE_API_ORIGIN:`http://127.0.0.1:${apiPort}/api/v1`}}
+     // A preview subprocess cannot rewrite import.meta.env in precompiled JS.
+     // Only the dev server receives an API override; production uses the
+     // canonical build-time origin validated above.
+     env: parityProduction?inheritedEnvironment:
+       {...inheritedEnvironment,VITE_API_ORIGIN:`http://127.0.0.1:${apiPort}/api/v1`}}
   ],
   reporter: [["list"], ["html", {open: "never"}]]
 });
