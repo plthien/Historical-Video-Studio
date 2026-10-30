@@ -17,6 +17,11 @@ test('full-flow delivery reload exposes exact QC-passed audiovisual export',asyn
  await expect(page.getByText(/G4 production authority/)).toBeVisible();
  await expect(page.getByText(/Status: APPROVED/).first()).toBeVisible();
  const media=page.locator('video');await expect(media).toBeVisible();
+ await media.evaluate(async element=>{const video=element as HTMLVideoElement;
+  if(video.readyState<2)await new Promise<void>(resolve=>video.addEventListener('loadeddata',()=>resolve(),{once:true}));
+  video.currentTime=Math.min(1,Number.isFinite(video.duration)?Math.max(0,video.duration-.1):1);
+  if(video.seeking)await new Promise<void>(resolve=>video.addEventListener('seeked',()=>resolve(),{once:true}));
+ });
  const originalViewport=page.viewportSize()!;
  for(const dimensions of [{width:1366,height:768},{width:1920,height:1080}]){
    await page.setViewportSize(dimensions);

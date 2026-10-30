@@ -1,5 +1,5 @@
 import {test, expect} from "@playwright/test";
-import {startNewProject,openExistingProject,selectImportStep,importStoryFromEditor} from "./project-workflow-helper";
+import {apiBase,startNewProject,openExistingProject,selectImportStep,importStoryFromEditor} from "./project-workflow-helper";
 import {readFileSync} from "node:fs";
 import path from "node:path";
 import {fileURLToPath} from "node:url";
@@ -71,7 +71,7 @@ test("project-shell: malformed JSON and stale revision are visible", async ({pag
   await page.getByRole("button", {name: "Validate & import StoryPackage"}).click();
   await expect(page.locator(".sidebar nav button[aria-current=page]")).toContainText("Story review");
   await expect(page.getByRole("button", {name: "Approve G1"})).toBeEnabled();
-  const result = await request.post(`http://127.0.0.1:8000/api/v1/projects/${id}/story/claims/claim_001/review`, {
+  const result = await request.post(`${apiBase}/projects/${id}/story/claims/claim_001/review`, {
     headers: {"Idempotency-Key": crypto.randomUUID()},
     data: {expected_revision: 1, status: "REVIEWED", evidence_note: "Independent operator edit"}});
   expect(result.status()).toBe(200);

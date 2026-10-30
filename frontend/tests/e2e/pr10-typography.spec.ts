@@ -1,4 +1,4 @@
-import {openExistingProject} from "./project-workflow-helper";
+import {apiBase,openExistingProject} from "./project-workflow-helper";
 import {test,expect} from '@playwright/test';
 import {mkdirSync,writeFileSync} from 'node:fs';
 import {resolve} from 'node:path';
@@ -8,7 +8,7 @@ test('pr10 source-authorized T06 multiline document and adversarial critical cli
  test.skip(process.env.HVS_PR10_FIXTURE!=='typography',
     'Requires native Windows synthetic G1/G2/G3 approved T06 document project');
  const project='proj_pr10_typography';
- const uri='http://127.0.0.1:8000/api/v1/projects/'+project;
+ const uri=apiBase+'/projects/'+project;
  const trusted=await request.get(uri+'/storyboard/preview');
  expect(trusted.status()).toBe(200);
  const authorized=await trusted.json();

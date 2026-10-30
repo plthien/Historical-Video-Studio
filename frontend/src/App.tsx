@@ -182,6 +182,7 @@ export function App() {
       <p className="sub">STUDIO · WINDOWS LOCAL</p>
       <nav aria-label="Workspaces">{workspaces.map(w =>
         <button key={w.id} type="button" aria-current={workspace === w.id ? "page" : undefined}
+          aria-label={w.title} data-testid={`workspace-${w.id}`}
           className={workspace === w.id ? "nav-active" : ""} onClick={() => {setWorkspace(w.id); setNotice(null);}}>
           <b>{String(workspaces.indexOf(w)+1).padStart(2,"0")}</b><span>{w.title}</span>
         </button>)}</nav>

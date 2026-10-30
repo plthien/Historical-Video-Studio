@@ -14,7 +14,7 @@ This ledger is finalized from commands executed on native Windows. The exact fin
 | E06 Cues | PASS | Controlled synthetic maps prove occurrence 0/1 plus `CUE_MISSING`, `CUE_AMBIGUOUS`, `CUE_OCCURRENCE_INVALID`, `CUE_SECTION_MISMATCH`, `CUE_RANGE_INVALID`, and `CUE_OVERLAP`. |
 | E07 Source discipline | PASS | Prompt fixes external status to UNVERIFIED, permits empty leads, forbids fabricated browsing/rights/quotes/maps, and documents the frozen-status/G4 mismatch without bypass. |
 | E08 UI handshake | PASS | Real Chromium + isolated SQLite/backend passed at 1366x768 and 1920x1080: V2 preview/copy/download, stale lock, rebuild, unchanged import and G1 navigation. Windows clipboard CRLF was normalized only when comparing text; downloaded bytes equalled preview exactly. |
-| E09 Contract/G4 | FAIL | Design validators and `test_post_pr12_g4_authoring.py` pass, but both native positive G4 tests stop at `VOICE_FFMPEG_FAILED` because `ffmpeg` is absent from PATH. No bypass or fake PASS. |
+| E09 Contract/G4 | PASS | With FFmpeg/ffprobe 9.0.1 explicitly available to the native process, both positive HTTP -> SQLite -> source-bound compiler paths pass: map T01 and non-map T09, using current G1/G2/G3 heads, Final WAV and WordTimingMap. No validator or production compiler was weakened. |
 | E10 Handoff | PASS | Generated sample is byte-compared with the generator; commands/results, blockers, final handoff SHA, and separate global status are recorded. |
 
 ## Required truth labels
@@ -29,7 +29,7 @@ Native Windows commands executed from the repository root:
 
 - `python -m pytest -q tests/backend/test_external_story_brief_v2.py tests/backend/test_post_pr12_authoring_story.py` -> exit 0, `6 passed`.
 - `python -m pytest -q tests/backend/test_post_pr12_g4_authoring.py` -> exit 0, `3 passed`.
-- Combined G4 command including `tests/backend/test_pr13_g4_positive.py` -> exit 1, `3 passed, 2 failed`; stored error `VOICE_FFMPEG_FAILED`. `ffmpeg -version` and `Get-Command ffmpeg` both report command not found.
+- Combined required backend/G4 command with the verified FFmpeg WinGet bin prepended to the exact process PATH -> exit 0, `12 passed, 1 warning` (the warning is only denied pytest cache creation). The prior missing-PATH failure remains useful baseline evidence, not the final result.
 - `python scripts/check_design_contracts.py` -> exit 0, `12 schema(s)` PASS.
 - `python scripts/validate_visual_design.py` -> exit 0, 10 typed templates/10 scenes/30 variants PASS (existing output reports 18 motion grammars; this task did not alter the registry).
 - `npm --prefix frontend run typecheck` -> exit 0.
@@ -40,6 +40,6 @@ No workflow run URL exists because no push or new CI run was requested. The prom
 
 ## Verdict and separate PR status
 
-`EXTERNAL_BRIEF_V2 = FAIL (9/10)` because E09 lacks a green native positive G4 run without FFmpeg. Implementation evidence for E01-E08/E10 is green.
+`EXTERNAL_BRIEF_V2 = PASS (10/10)`. E09 is now backed by executable native positive G4 evidence rather than a ledger-only promotion.
 
-Full PR #13 status: `NOT MERGE READY / NOT FULLY EVALUATED`. Its independent 12 global UI/Windows gates are not replaced by this ledger. External-model editorial quality, real historical source/rights acceptance, operator G1-G5 approvals, live providers, full render/QC, and CI remain unverified or blocked as labelled above.
+The current independent global policy is recorded in `reports/pr13-v3/PR13_FINAL_11_GATE_AUDIT.md`: G01-G11 only, with G12 retired and not scored. External-model editorial quality, real historical source/rights acceptance, live providers and real operator films remain unverified or blocked as labelled above; controlled synthetic approval fixtures are not real rights.

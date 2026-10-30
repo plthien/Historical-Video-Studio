@@ -97,6 +97,7 @@ pre{white-space:pre-wrap;max-width:100%;overflow-x:auto}
 .project-list{display:grid;gap:10px;max-height:410px;overflow-y:auto}
 .project-list-item{border:1px solid var(--border);background:var(--raised);border-radius:10px;padding:12px;display:flex;align-items:center;gap:12px;justify-content:space-between;min-width:0}
 .project-list-item>div{min-width:0;overflow-wrap:anywhere}
+.project-list-item>button{flex:0 0 auto;min-width:64px;white-space:nowrap}
 .project-list-item small,.project-list-item span{display:block;color:var(--muted);font-size:12px}
 .flow-steps{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 20px}
 .flow-steps button{flex:1 1 145px;text-align:left;background:var(--raised);color:var(--muted)}

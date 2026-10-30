@@ -1,4 +1,4 @@
-import {openExistingProject} from "./project-workflow-helper";
+import {apiBase,openExistingProject} from "./project-workflow-helper";
 import {test,expect} from '@playwright/test';
 import {mkdirSync,writeFileSync,readFileSync} from 'node:fs';
 import {bundle} from '../../../renderer/node_modules/@remotion/bundler/dist/index.js';
@@ -11,7 +11,7 @@ const sha=(buf:Buffer)=>createHash('sha256').update(buf).digest('hex');
 test('pr10 reviewed-asset-picker changes real Chromium T02 A/B and preserves long critical text',async({page,request})=>{
  test.skip(process.env.HVS_PR10_FIXTURE!=='mask','Uses an independently G3-approved synthetic T02 source project on native Windows');
  const project='proj_pr10_mask';
- const uri='http://127.0.0.1:8000/api/v1/projects/'+project;
+ const uri=apiBase+'/projects/'+project;
  const gateBefore=(await (await request.get(uri+'/gates')).json()) as {gate_id:string;state:string;dependency_fingerprint:string}[];
  await page.goto('/');
  await openExistingProject(page,project);

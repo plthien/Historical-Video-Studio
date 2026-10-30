@@ -1,6 +1,6 @@
 # Source checkout/frontend bundle identity gate. Designed for native Windows only.
 [CmdletBinding()]
-param([switch]$SkipBootstrap,[string]$RepoRoot="")
+param([switch]$SkipBootstrap,[switch]$Diagnostic,[string]$RepoRoot="")
 $ErrorActionPreference="Stop"
 if (-not $RepoRoot) { $RepoRoot=(Resolve-Path (Join-Path $PSScriptRoot "../..")).Path }
 $dist=Join-Path $RepoRoot "frontend/dist"
@@ -22,14 +22,19 @@ function Digest([string]$Path) {
 function Fingerprint([string[]]$Files) {
     # Windows PowerShell 5.1/.NET Framework: no Path.GetRelativePath / Convert.ToHexString.
     $prefix=[System.IO.Path]::GetFullPath($RepoRoot).TrimEnd([char[]]@('\','/')) + [System.IO.Path]::DirectorySeparatorChar
-    $rows=@($Files | Sort-Object -Unique | ForEach-Object {
+    $seen=New-Object 'System.Collections.Generic.HashSet[string]' ([System.StringComparer]::OrdinalIgnoreCase)
+    [string[]]$rows=@($Files | ForEach-Object {
         $absolute=[System.IO.Path]::GetFullPath($_)
         if (-not $absolute.StartsWith($prefix,[System.StringComparison]::OrdinalIgnoreCase)) {
             throw "Cannot fingerprint file outside repository: $absolute"
         }
         $relative=$absolute.Substring($prefix.Length)
-        $relative.Replace('\','/') + ":" + (Digest $absolute)
+        $normalized=$relative.Replace('\','/')
+        if ($seen.Add($normalized)) { $normalized + ":" + (Digest $absolute) }
     })
+    # Sort-Object is culture-sensitive and produced different source identities
+    # in Windows PowerShell 5.1 and PowerShell 7. Use one documented byte-order.
+    [Array]::Sort($rows,[System.StringComparer]::Ordinal)
     $sha=[System.Security.Cryptography.SHA256]::Create()
     try {
         $bytes=[System.Text.Encoding]::UTF8.GetBytes(($rows -join "`n"))
@@ -46,6 +51,19 @@ function BundleDigest {
     # Hash every published JS/CSS/media file, not just index.html.
     # Exclude only the manifest to prevent a circular SHA dependency.
     return (Fingerprint -Files $files)
+}
+function Read-BuildManifest([string]$Path) {
+    if (-not (Test-Path -LiteralPath $Path)) { return $null }
+    try {
+        [byte[]]$bytes=[System.IO.File]::ReadAllBytes($Path)
+        $strictUtf8=[System.Text.UTF8Encoding]::new($false,$true)
+        $json=$strictUtf8.GetString($bytes).TrimStart([char]0xFEFF)
+        $value=ConvertFrom-Json -InputObject $json -ErrorAction Stop
+        if ($null -eq $value -or $value -isnot [pscustomobject]) { throw "manifest root is not an object" }
+        return $value
+    } catch {
+        throw "FRONTEND_BUNDLE_STALE: MANIFEST_INVALID: build-info.json must be valid UTF-8 JSON: $($_.Exception.Message)"
+    }
 }
 # A packaged frontend has no TS sources, so its API-origin config must also
 # be checked against the compiled bundle manifest (not just the git SHA).
@@ -71,23 +89,57 @@ if (Test-Path (Join-Path $RepoRoot ".git")) {
     $manifest=Get-Content $packageManifest -Raw | ConvertFrom-Json
     $head=$manifest.source_commit
 }
-$stored=$null
-if (Test-Path $info) { try { $stored=Get-Content $info -Raw | ConvertFrom-Json } catch {} }
+$stored=Read-BuildManifest $info
 $ready=Test-Path (Join-Path $dist "index.html")
-$fresh=$ready -and $stored -and $stored.schema_version -eq "HVSFrontendBuild.v1" -and $stored.port_config_sha256 -eq $portsSha
-if ($fresh -and $sourceAvailable) {
-    $fresh=$stored.input_sha256 -eq $fingerprint -and $stored.source_commit -eq $head
-}
-if ($fresh -and -not $sourceAvailable) {
+$manifestValid=$null -ne $stored -and
+    $null -ne $stored.PSObject.Properties["schema_version"] -and
+    $null -ne $stored.PSObject.Properties["source_commit"] -and
+    $null -ne $stored.PSObject.Properties["input_sha256"] -and
+    $null -ne $stored.PSObject.Properties["port_config_sha256"] -and
+    $null -ne $stored.PSObject.Properties["bundle_sha256"] -and
+    $stored.schema_version -ceq "HVSFrontendBuild.v1" -and
+    [string]$stored.source_commit -cmatch '^[0-9a-f]{40}$' -and
+    [string]$stored.input_sha256 -cmatch '^[0-9a-f]{64}$' -and
+    [string]$stored.port_config_sha256 -cmatch '^[0-9a-f]{64}$' -and
+    [string]$stored.bundle_sha256 -cmatch '^[0-9a-f]{64}$'
+$portMatch=$manifestValid -and $stored.port_config_sha256 -ceq $portsSha
+$sourceMatch=$manifestValid -and (-not $sourceAvailable -or
+    ($stored.input_sha256 -ceq $fingerprint -and $stored.source_commit -ceq $head))
+if ($manifestValid -and -not $sourceAvailable) {
     if (-not $head) { throw "Packaged application requires a signed source identity in package-manifest.json." }
-    $fresh=$stored.source_commit -eq $head
+    $sourceMatch=$stored.source_commit -ceq $head
 }
-if ($fresh) {
-    $fresh=$stored.bundle_sha256 -eq (BundleDigest)
+$bundleDigest=$null
+$bundleMatch=$false
+if ($ready -and $manifestValid) {
+    $bundleDigest=BundleDigest
+    $bundleMatch=$stored.bundle_sha256 -ceq $bundleDigest
+}
+$fresh=$ready -and $manifestValid -and $portMatch -and $sourceMatch -and $bundleMatch
+if ($Diagnostic) {
+    $manifestBytes=if(Test-Path -LiteralPath $info){[System.IO.File]::ReadAllBytes($info)}else{[byte[]]@()}
+    $hasBom=$manifestBytes.Length -ge 3 -and $manifestBytes[0] -eq 239 -and $manifestBytes[1] -eq 187 -and $manifestBytes[2] -eq 191
+    [ordered]@{
+        shell_version=$PSVersionTable.PSVersion.ToString(); head=$head
+        source_available=$sourceAvailable; source_file_count=if($sourceAvailable){$files.Count}else{0}
+        normalized_source_manifest_sha256=$fingerprint; port_config_sha256=$portsSha
+        manifest_present=$null -ne $stored; manifest_utf8_bom=$hasBom
+        manifest_schema=if($stored){$stored.schema_version}else{$null}
+        manifest_source_commit=if($stored){$stored.source_commit}else{$null}
+        manifest_input_sha256=if($stored){$stored.input_sha256}else{$null}
+        manifest_port_config_sha256=if($stored){$stored.port_config_sha256}else{$null}
+        manifest_bundle_sha256=if($stored){$stored.bundle_sha256}else{$null}
+        compiled_bundle_digest=$bundleDigest; build_ready=$ready; manifest_valid=$manifestValid
+        port_match=$portMatch; source_match=$sourceMatch; bundle_match=$bundleMatch; fresh=$fresh
+    } | ConvertTo-Json -Compress | Write-Host
 }
 if (-not $fresh) {
-    if (-not $sourceAvailable) { throw "FRONTEND_BUNDLE_STALE: packaged build identity does not match source/package manifest. Re-package the exact checked-out version." }
-    if ($SkipBootstrap) { throw "FRONTEND_BUNDLE_STALE: -SkipBootstrap does not permit old/unknown frontend. Launch without -SkipBootstrap to rebuild." }
+    $reason=if(-not $ready){"BUILD_MISSING: frontend/dist/index.html and assets are required"}
+        elseif(-not $manifestValid){"MANIFEST_INVALID: build-info identity fields are missing or invalid"}
+        elseif(-not $portMatch -or -not $sourceMatch){"SOURCE_MISMATCH: source HEAD, inputs, or port config differ from build-info"}
+        else{"BUNDLE_MISMATCH: compiled frontend bytes differ from build-info"}
+    if (-not $sourceAvailable) { throw "FRONTEND_BUNDLE_STALE: $reason. Re-package the exact checked-out version." }
+    if ($SkipBootstrap) { throw "FRONTEND_BUNDLE_STALE: $reason. -SkipBootstrap never rebuilds." }
     Write-Host "FRONTEND_REBUILD_REQUIRED: source inputs or checkout HEAD differ from built UI."
     if (-not (Test-Path (Join-Path $RepoRoot "frontend/node_modules"))) {
         & npm.cmd ci --prefix frontend --no-audit --no-fund | Out-Host

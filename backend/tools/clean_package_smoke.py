@@ -69,6 +69,14 @@ def _manifest_inventory(extracted: Path, archive: Path, head: str) -> tuple[dict
     return manifest, len(actual)
 
 
+def _tree_identity(root: Path) -> dict[str, str]:
+    """Hash persisted operator data before a negative launch; never inspect contents."""
+    if not root.exists():
+        return {}
+    return {str(path.relative_to(root)).replace("\\", "/"): hashlib.sha256(path.read_bytes()).hexdigest()
+            for path in root.rglob("*") if path.is_file()}
+
+
 def _launcher(root: Path, data: Path, port: int, evidence: Path, *, skip: bool,
               project: str = "", env: dict | None = None, expected: int = 0) -> subprocess.CompletedProcess[str]:
     command = [str(POWERSHELL), "-NoProfile", "-ExecutionPolicy", "Bypass", "-File",
@@ -151,12 +159,19 @@ def run(output: Path) -> dict:
 
         index = extracted / "frontend/dist/index.html"
         saved = index.read_bytes(); index.unlink()
+        persisted_before = _tree_identity(data)
         try:
             corrupt = _launcher(extracted, data, _free_port(), temp / "corrupt.json", skip=True, expected=1)
         finally:
             index.write_bytes(saved)
-        if "Missing frontend build" not in corrupt.stdout + corrupt.stderr:
-            raise RuntimeError("PACKAGE_CORRUPT_RUNTIME_NEGATIVE_MISSING")
+        corrupt_text = corrupt.stdout + corrupt.stderr
+        corrupt_evidence_path = temp / "corrupt.json"
+        corrupt_evidence = (json.loads(corrupt_evidence_path.read_text("utf-8-sig"))
+                            if corrupt_evidence_path.exists() else {})
+        if ("FRONTEND_BUNDLE_STALE" not in corrupt_text or "BUILD_MISSING" not in corrupt_text
+                or "STUDIO_READY" in corrupt_text or corrupt_evidence.get("api_ready")
+                or corrupt_evidence.get("ui_status") == 200 or _tree_identity(data) != persisted_before):
+            raise RuntimeError("PACKAGE_CORRUPT_RUNTIME_NEGATIVE_MISSING:\n" + corrupt_text)
 
         report = {
             "schema_version": "B3CleanPackageLaunchEvidence.v1", "status": "PASS",
@@ -168,7 +183,7 @@ def run(output: Path) -> dict:
             "continuity": {"project_id": project, "revision_before": 0, "revision_after": reopened["revision"],
                            "media_sha256": created, "media_bytes_preserved": True},
             "negatives": {"occupied_port": "PASS", "missing_ffmpeg": "PASS",
-                          "missing_frontend_runtime": "PASS"},
+                          "missing_frontend_runtime": "PASS_BUILD_MISSING_NO_DATA_MUTATION"},
             "commands": {"first_skip_bootstrap": False, "second_skip_bootstrap": True},
         }
     output.parent.mkdir(parents=True, exist_ok=True)

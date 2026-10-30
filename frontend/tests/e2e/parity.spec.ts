@@ -1,4 +1,4 @@
-import {openExistingProject} from "./project-workflow-helper";
+import {apiBase,openExistingProject} from "./project-workflow-helper";
 import {test,expect} from '@playwright/test';
 import {createHash} from 'node:crypto';
 import {readFileSync,writeFileSync,mkdirSync} from 'node:fs';
@@ -18,7 +18,7 @@ const hash=(input:string|Buffer)=>createHash('sha256').update(input).digest('hex
 test('storyboard-editor real browser Player vs Node renderStill same immutable frame',async({page,request})=>{
  test.skip(process.env.HVS_B2_FIXTURE!=='1','Requires Windows SQLite controlled G4 approval fixture and both Chromium runtimes');
  test.setTimeout(180_000);
- const response=await request.get('http://127.0.0.1:8000/api/v1/projects/proj_001/storyboard/preview');
+ const response=await request.get(apiBase+'/projects/proj_001/storyboard/preview');
  expect(response.ok()).toBeTruthy();
  const approved=await response.json() as {status:string;draft_manifest_sha256:string;props:HistoryProps};
  expect(approved.status).toBe('G4_DRAFT_VIEW_ONLY');
