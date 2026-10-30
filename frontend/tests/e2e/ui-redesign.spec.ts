@@ -78,7 +78,7 @@ for(const size of widths){
       const a=await measure(page,"project-state-a");
       checkGeometry(a);
       await page.screenshot({path:path.join(output,`projects-A-${size.width}.png`),animations:"disabled"});
-      const title="V2 maritime history "+size.width;
+      const title="V3 maritime history "+size.width;
       await page.locator("#new-title").fill(title);
       const createdResponse=page.waitForResponse(response=>
         response.url()===apiBase+"/projects"&&response.request().method()==="POST");

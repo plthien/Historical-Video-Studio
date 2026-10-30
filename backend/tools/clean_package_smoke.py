@@ -141,7 +141,7 @@ def run(output: Path) -> dict:
                   "audience='Adult learners',runtime_minutes=7,editorial_goals='Synthetic package probe.'); "
                   f"print(json.dumps({{'artifact':s.put_artifact({artifact_bytes!r},'clean_package_probe'),"
                   "'brief_version':BRIEF_VERSION,'brief_sha256':hashlib.sha256(b.encode()).hexdigest(),"
-                  "'v3_header':b.startswith('# EXTERNAL CHATGPT')}}))")
+                  "'v3_header':b.startswith('# EXTERNAL CHATGPT')}))")
         runtime_env = os.environ.copy()
         runtime_env.update({"HVS_DB": str(data / "historical-studio.sqlite"),
                             "HVS_MEDIA": str(data / "media")})
