@@ -1,46 +1,39 @@
-# PR13 final 11-gate audit
+# PR13 final 11-gate audit — superseded by V4 execution
 
-This is the current policy ledger. Historical 12-gate reports remain unchanged.
+The earlier V3 `11/11` conclusion was a false positive: it did not prove that the precompiled production bundle called the backend process started by Playwright. The bundle targeted canonical API port 8010 while the old production-preview harness started its isolated backend on 8000 and incorrectly supplied `VITE_API_ORIGIN` only to `vite preview`. V4 supersedes that conclusion with a browser-observed production handshake.
 
-`G12_RETIRED_NOT_SCORED` — no CI result is included in the denominator.
+Policy remains `G12_RETIRED_NOT_SCORED`; the denominator is exactly G01–G11. Execution source for the V4 code and browser evidence is `8fe9050ba9e32eaaf27e380c4da7b55e13012fad`; the final evidence-only commit is reported in the handoff because a commit cannot contain its own SHA.
 
-## Repair closure
+## V4 repair closure
 
-| ID | Root cause and minimal repair | Direct evidence | Status |
-|---|---|---|---|
-| F01 | `Sort-Object` made source ordering culture/shell dependent. Use ordinal, case-insensitive de-duplication plus ordinal ordering; strict UTF-8 JSON read; diagnostic predicates and stable child reason codes. | Cross-shell first/subsequent runs and forged-head, JS/CSS, ports, missing build, invalid JSON, wrong SHA negatives all pass; real PS5.1 launcher HTTP smoke is repeated after the handoff commit. | PASS |
-| F02 | Runtime correctly rejected missing index earlier than the legacy expected string. Negative now requires `FRONTEND_BUNDLE_STALE` + `BUILD_MISSING`, non-ready/non-200 state and unchanged data-tree identity. | `backend.tools.clean_package_smoke` => `CLEAN_PACKAGE_PASS`; evidence `reports/acceptance/generated/clean-package-launch.json`. | PASS |
-| F03 | Stable accessible name was missing; exact-ID input was hidden; hydration could replace the transient landing form; several direct API URLs ignored isolated ports. | 8/10 owner cases passed in aggregate, the two database-path regressions passed 2/2 after repair; G4 Player/Node 2/2; PR10 source 1/1 and typography 1/1. | PASS |
-| F04 | FFmpeg existed but was not inherited by the exact test process. Explicit verified bin PATH closes real T01/T09 compilation without mocking or validator changes. | Required backend matrix: 12 passed; B3 native render/QC/export `LOCAL_PASS`. | PASS |
-| F05 | Populated screenshots were not gathered/reviewed. Added targeted capture synchronization and fixed the one visible 1366 button-wrap defect. | 14 images and `VISUAL_REVIEW_LEDGER.md`; ui-redesign 2/2, G2/G3 2/2, G4 2/2, G5 1/1. | PASS |
-| F06 | External creative output is an operator input, not a deterministic unit-test fixture. | `EXTERNAL_MODEL_QUALITY_CHECKLIST.md`; status remains honestly `NOT_RUN`. | PASS (handoff complete) |
-
-## G01-G11
-
-| Gate | Evidence | Verdict |
+| Finding | Repair and direct evidence | Status |
 |---|---|---|
-| G01 | Exact branch/remote head/base verified; same PR, bounded diff, no merge/new PR/workflow/schema edits. | PASS |
-| G02 | PS5.1/PS7 identical input+bundle identity; tamper negatives; real launcher health/UI/build-info/clean stop; clean ZIP negative. | PASS |
-| G03 | State A/B production bundle at both viewports; recents, settings, V2 copy/download/stale/rebuild/import geometry. | PASS |
-| G04 | Real imported sections/claims/G1 review plus persisted revisions and browser reopen flow. | PASS |
-| G05 | Playable selected-section audio, Final WAV owner flow, approval semantics and truthful missing-alignment credential UX. | PASS |
-| G06 | Original candidate SHA/context/rights, manual resolution, atomic batch/conflict, scope isolation and safe managed-job UI regressions. | PASS |
-| G07 | Positive compiled G4 plus real Remotion Player/Node immutable-frame parity, PR10 source edit and typography clipping checks. | PASS |
-| G08 | Native encoded MP4, full-stream QC, black/near-silent negatives, audible review, G5 approval and SHA-bound export/download. | PASS |
-| G09 | Deterministic V2 settings/reopen/copy/download/stale/import and unchanged Story correction/G1 handoff. | PASS |
-| G10 | Native positive map T01/non-map T09 and negative cue/source/map/typed-contract suites; exact Final WAV/word map/source heads. | PASS |
-| G11 | Fourteen populated Chromium captures, geometry assertions and direct per-screen inspection. | PASS |
+| Production preview origin | Production parity reads `config/ports.json`, starts the isolated backend on compiled port 8010, and refuses a conflicting override before browser execution. Actual Chromium observed health/projects 200 and create 201 on API 8010 while preview ran on 5174. | PASS |
+| Clean-package evidence contract | Producer and consumer use `B3CleanPackageLaunchEvidence.v2`; named negative values, non-ready/non-200 state, process cleanup, exact archive/media SHA and unchanged data-tree digest are asserted. Six false-positive mutations are rejected. | PASS |
+| Fresh evidence | Production journey passed at 1366x768 and 1920x1080, including copy/download/stale/rebuild/import/reopen. Four populated owner fixtures were recaptured; all 14 images were opened and reviewed. | PASS |
+
+## G01–G11
+
+| Gate | Final evidence | Verdict |
+|---|---|---|
+| G01 | Same PR13 branch and base; initial remote/local head `64ccc87efac9e60b2fd334ed51f102a92745f02f`; no merge, new PR, workflow or schema edit. | PASS |
+| G02 | PS5.1/PS7 identical fingerprints and tamper negatives; native launcher ready/HTTP/clean stop; clean extracted ZIP producer and consumer both pass. | PASS |
+| G03 | Production State A/B on both viewports uses backend 8010; projects GET 200, create POST 201, persisted IDs and revision reopen verified. | PASS |
+| G04 | G1/source/revision owner suites pass; imported candidate remains distinct from approval and critical synthetic claims stay blocked. | PASS |
+| G05 | Voice owner suite and populated Chromium show playable generated WAV, source-locked sections and truthful alignment dependency. | PASS |
+| G06 | Asset/Phase A suites and populated Chromium retain exact original SHA, explicit rights/context review and no automatic approval. | PASS |
+| G07 | Native compiler plus genuine Remotion Player/Node parity and real-frame repair evidence pass. | PASS |
+| G08 | Native H.264/AAC render, QC negatives, G5 authority and immutable export/download pass. | PASS |
+| G09 | External Brief V2 production preview completes preview/copy/download/stale/rebuild/import/reopen without runtime or network errors. | PASS |
+| G10 | Native positive map T01/non-map T09 and negative cue/source/map suites pass with exact G1–G3 and Final WAV/word-map dependencies. | PASS |
+| G11 | Fourteen current two-viewport captures, geometry assertions and direct image review show no horizontal clipping, text overlay or unreachable control. | PASS |
 
 `PR13_UI_CODE = PASS (11/11)`.
 
-## Actual command evidence
+## Truthful exclusions
 
-- Required backend matrix with explicit FFmpeg path: `12 passed, 1 PytestCacheWarning` (cache write permission only).
-- `scripts/check_design_contracts.py`: 12 schemas PASS.
-- `scripts/validate_visual_design.py`: 10 templates, 10 scenes, 30 variants, 18 motion grammars PASS.
-- `npm --prefix frontend run typecheck`: PASS.
-- Browser: project/voice/assets aggregate 8/10 plus corrected database-path cases 2/2; isolated G3 screenshot 1/1; ui-redesign 2/2; G4 Player+Node 2/2; PR10 source 1/1; PR10 typography 1/1; G5 1/1.
-- Renderer PR10 evidence: `LOCAL_PASS`; native B3 render/recovery/QC/export: `LOCAL_PASS`.
-- Clean extracted package: `CLEAN_PACKAGE_PASS`, archive SHA `f46c971072f6a3e3da1a90e67ddfb0302c7b32980c7c84f2f9bd8059e9fa8781`.
+- `EXTERNAL_MODEL_QUALITY=NOT_RUN`: no actual external ChatGPT-authored StoryPackage was supplied for editorial review.
+- `LIVE_RIGHTS_ACCEPTANCE=BLOCKED`: synthetic source fixtures are not historical rights approval.
+- `REAL_TWO_TOPIC_OPERATOR_FILMS=NOT_RUN` and live provider checks remain operator work, separate from the software verdict.
 
-Final exact commit SHA is necessarily recorded in the handoff response: a commit cannot contain its own SHA. Live providers, real rights and operator films remain separate from this software verdict.
+Detailed commands and preserved failures are in `../pr13-v4/T01_T13_EXECUTION.md`; visual hashes and findings are in `../pr13-v4/VISUAL_REVIEW_LEDGER.md`.
