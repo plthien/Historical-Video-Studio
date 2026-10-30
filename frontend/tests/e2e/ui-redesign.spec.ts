@@ -99,7 +99,7 @@ for(const size of widths){
       await expect(page.locator(".flow-steps button[aria-current=step]")).toContainText("ChatGPT Brief");
       await page.getByRole("button",{name:"Build versioned brief"}).click();
       await expect(page.locator("#brief-preview")).toHaveValue(/StoryPackage.v1/);
-      await expect(page.getByText(/HVS-EXTERNAL-STORY-BRIEF\.v2 · CURRENT/)).toBeVisible();
+      await expect(page.getByText(/HVS-EXTERNAL-STORY-BRIEF\.v3 · CURRENT/)).toBeVisible();
       const preview=await page.locator("#brief-preview").inputValue();
       await page.getByRole("button",{name:"Copy brief"}).click();
       // Windows clipboard transport canonicalizes LF to CRLF; the prompt text is otherwise exact.

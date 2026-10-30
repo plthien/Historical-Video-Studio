@@ -223,6 +223,12 @@ def _assert_clean_package_evidence(document: dict, expected_head: str) -> None:
     assert continuity["revision_before"] == continuity["revision_after"] == 0
     assert continuity["media_bytes_preserved"] is True
     assert len(continuity["media_sha256"]) == 64
+    authoring = document["authoring_v3"]
+    assert authoring["prompt_path"] == "backend/app/projects/prompts/external_story_brief_v3.md"
+    assert authoring["prompt_sha256"] == "e7234d15cc00a1f8b47196e7a7190296218ff9654bff4beb9818826c6848e494"
+    assert authoring["brief_version"] == "HVS-EXTERNAL-STORY-BRIEF.v3"
+    assert authoring["v3_header"] is True
+    assert len(authoring["brief_sha256"]) == 64
     assert document["negatives"] == {
         "occupied_port": "PASS",
         "missing_ffmpeg": "PASS",
@@ -259,6 +265,10 @@ def test_clean_package_evidence_rejects_false_positive_mutations():
         "second_launch": {"skip_bootstrap": True, "process_cleanup": True},
         "continuity": {"revision_before": 0, "revision_after": 0,
                        "media_sha256": digest, "media_bytes_preserved": True},
+        "authoring_v3": {"prompt_path": "backend/app/projects/prompts/external_story_brief_v3.md",
+                         "prompt_sha256": "e7234d15cc00a1f8b47196e7a7190296218ff9654bff4beb9818826c6848e494",
+                         "brief_version": "HVS-EXTERNAL-STORY-BRIEF.v3",
+                         "v3_header": True, "brief_sha256": digest, "artifact": digest},
         "negatives": {"occupied_port": "PASS", "missing_ffmpeg": "PASS",
                       "missing_frontend_runtime": "PASS_BUILD_MISSING_NO_DATA_MUTATION"},
         "negative_details": {"missing_frontend_runtime": {
