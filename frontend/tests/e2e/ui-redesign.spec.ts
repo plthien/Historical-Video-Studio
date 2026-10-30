@@ -181,3 +181,24 @@ for(const size of widths){
     }finally{await context.close();}
   });
 }
+
+test("project creation stays truthful when the canonical backend request is unavailable",async({page,request})=>{
+  const beforeResponse=await request.get(apiBase+"/projects");
+  expect(beforeResponse.status()).toBe(200);
+  const before=await beforeResponse.json() as unknown[];
+  await page.goto("/");
+  await expect(page.getByRole("region",{name:"new-project"})).toBeVisible();
+  await page.route(apiBase+"/projects",async route=>{
+    if(route.request().method()==="POST")await route.abort("connectionfailed");
+    else await route.continue();
+  });
+  await page.locator("#new-title").fill("Must not become a fake project");
+  await page.getByRole("button",{name:"Create project"}).click();
+  await expect(page.getByRole("alert")).toContainText("Failed to fetch");
+  await expect(page.getByRole("region",{name:"project-home"})).toBeVisible();
+  await expect(page.locator(".gateboard")).toHaveCount(0);
+  await page.unroute(apiBase+"/projects");
+  const afterResponse=await request.get(apiBase+"/projects");
+  expect(afterResponse.status()).toBe(200);
+  expect((await afterResponse.json() as unknown[]).length).toBe(before.length);
+});
