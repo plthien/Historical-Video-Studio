@@ -1,3 +1,4 @@
+import {apiBase,openExistingProject} from "./project-workflow-helper";
 import {test,expect} from '@playwright/test';
 import {PNG} from 'pngjs';
 import {existsSync,renameSync,mkdirSync,writeFileSync} from 'node:fs';
@@ -5,15 +6,14 @@ import {createHash} from 'node:crypto';
 import {resolve} from 'node:path';
 import type {Motion,ResolvedMedia,Scene} from '../../../renderer/remotion/schema';
 
-test('storyboard-editor uses real persisted G4 scenes and native read-only Player',async({page,request})=>{
+test('storyboard-editor uses real persisted G4 scenes and native read-only Player',async({page,request},testInfo)=>{
  test.skip(process.env.HVS_B2_FIXTURE!=='1','Requires native Windows controlled SQLite G4, never mocked HTTP fixtures');
  const fatalErrors:string[]=[];
  page.on('pageerror',e=>fatalErrors.push(e.message));
  page.on('console',m=>{if(m.type()==='error'&&/Invalid hook call|useContext|HistoryComposition|React/i.test(m.text()))fatalErrors.push(m.text());});
  await page.goto('/');
- await page.getByLabel('Project ID').fill('proj_001');
- await page.getByRole('button',{name:'Open existing project'}).click();
- await expect(page.getByText('proj_001',{exact:true}).first()).toBeVisible();
+ await openExistingProject(page,'proj_001');
+ await expect(page.locator(".topline strong").filter({hasText:"proj_001"}).first()).toBeVisible();
  await page.getByRole('button',{name:/Motion Storyboard/}).click();
  await expect(page.getByText(/Scenes \(2\)/)).toBeVisible({timeout:25000});
  await expect(page.getByRole('listbox',{name:'Storyboard scenes'}).getByRole('option')).toHaveCount(2);
@@ -25,6 +25,15 @@ test('storyboard-editor uses real persisted G4 scenes and native read-only Playe
  // A visible Player wrapper or updated seek input is NOT a rendered frame.
  const stage=page.getByTestId('player-stage');
  await expect(stage.locator('[data-global-frame="0"][data-scene-id]')).toBeVisible({timeout:30000});
+ const originalViewport=page.viewportSize()!;
+ for(const dimensions of [{width:1366,height:768},{width:1920,height:1080}]){
+   await page.setViewportSize(dimensions);
+   await expect(stage.locator('[data-global-frame="0"][data-scene-id]')).toBeVisible();
+   await page.screenshot({path:testInfo.outputPath(`pr13-g4-populated-real-player-${dimensions.width}.png`),animations:"disabled"});
+   const noOverflow=await page.evaluate(()=>document.documentElement.scrollWidth<=document.documentElement.clientWidth+2);
+   expect(noOverflow).toBe(true);
+ }
+ await page.setViewportSize(originalViewport);
  const first=PNG.sync.read(await stage.screenshot());
  // Native fixture contains real copied G3-authorized synthetic source bytes.
  // Temporarily hide exactly one original to exercise HTTP 424 through actual
@@ -166,7 +175,7 @@ test('storyboard-editor uses real persisted G4 scenes and native read-only Playe
  await page.getByLabel('Seek exact frame').fill(String(cameraFrame));
  await expect(stage.locator(`[data-global-frame="${cameraFrame}"][data-scene-id]`)).toBeVisible();
  const beforeCamera=PNG.sync.read(await stage.screenshot());
- const currentCamera=await request.get('http://127.0.0.1:8000/api/v1/projects/proj_001/storyboard/timeline');
+ const currentCamera=await request.get(apiBase+'/projects/proj_001/storyboard/timeline');
  expect(currentCamera.ok()).toBeTruthy();
  const currentCameraTrack=(await currentCamera.json()).timeline.scenes[0].camera.keyframes;
  await page.getByLabel('Authored motion event').selectOption(cameraEvent!.event_id);
@@ -178,7 +187,7 @@ test('storyboard-editor uses real persisted G4 scenes and native read-only Playe
  await page.getByRole('button',{name:/Save motion/}).click();
  await expect(page.getByRole('status').filter({hasText:'Save motion parameter completed'}))
   .toBeVisible({timeout:30000});
- const persistedCamera=await request.get('http://127.0.0.1:8000/api/v1/projects/proj_001/storyboard/timeline');
+ const persistedCamera=await request.get(apiBase+'/projects/proj_001/storyboard/timeline');
  expect(persistedCamera.ok()).toBeTruthy();
  const cameraRevision=(await persistedCamera.json() as {timeline:typeof initialPreview.props.timeline}).timeline.scenes[0];
  expect(cameraRevision.events.find((e:Motion)=>e.event_id===cameraEvent!.event_id)?.params.to_scale).toBeCloseTo(newScalar);
@@ -237,13 +246,13 @@ test('storyboard-editor uses real persisted G4 scenes and native read-only Playe
  });
  const oldPreview=page.getByRole('button',{name:'Load real read-only Remotion Player'}).click();
  await previewReady;
- const current=await request.get('http://127.0.0.1:8000/api/v1/projects/proj_001/storyboard/scenes?offset=0&limit=1');
+ const current=await request.get(apiBase+'/projects/proj_001/storyboard/scenes?offset=0&limit=1');
  expect(current.ok()).toBeTruthy();
  const body=await current.json();
  const concurrentScene=body.scenes[0];
  const concurrentVariant=concurrentScene.variant_id==='C'?'A':'C';
  const concurrent=await request.patch(
-  'http://127.0.0.1:8000/api/v1/projects/proj_001/storyboard/scenes/'+concurrentScene.scene_id,{
+  apiBase+'/projects/proj_001/storyboard/scenes/'+concurrentScene.scene_id,{
    headers:{'Idempotency-Key':'browser-preview-race-001'},
    data:{expected_revision:body.project_revision,scene_id:concurrentScene.scene_id,
     changes:{variant_id:concurrentVariant}}
@@ -255,14 +264,14 @@ test('storyboard-editor uses real persisted G4 scenes and native read-only Playe
  await expect(page.getByLabel('Read-only local Remotion Player')).toHaveCount(0);
  // Browser UI 409 must be caused by an actual already committed SQLite
  // revision, not a mocked conflict response. A stale G4 edit cannot commit.
- const afterConcurrent=await request.get('http://127.0.0.1:8000/api/v1/projects/proj_001/storyboard/scenes?offset=0&limit=1');
+ const afterConcurrent=await request.get(apiBase+'/projects/proj_001/storyboard/scenes?offset=0&limit=1');
  expect(afterConcurrent.ok()).toBeTruthy();
  const afterConcurrentRevision=(await afterConcurrent.json()).project_revision as number;
  const staleX=Number(await layerX.inputValue());
  await layerX.fill(String(staleX>2?staleX-1:staleX+1));
  await page.getByRole('button',{name:/Save position/}).click();
  await expect(page.getByRole('alert')).toContainText('409 REVISION_CONFLICT');
- const afterStale=await request.get('http://127.0.0.1:8000/api/v1/projects/proj_001/storyboard/scenes?offset=0&limit=1');
+ const afterStale=await request.get(apiBase+'/projects/proj_001/storyboard/scenes?offset=0&limit=1');
  expect((await afterStale.json()).project_revision).toBe(afterConcurrentRevision);
  // The refreshed editor must expose a real unsupported G4 operation as 422
  // without creating a new immutable draft revision.
@@ -271,7 +280,7 @@ test('storyboard-editor uses real persisted G4 scenes and native read-only Playe
  await page.getByLabel('Selected authored staging operation').selectOption(rejectedOperation);
  await page.getByRole('button',{name:/Save staging/}).click();
  await expect(page.getByRole('alert')).toContainText('422 STAGING_OPERATION_UNSUPPORTED');
- const afterInvalid=await request.get('http://127.0.0.1:8000/api/v1/projects/proj_001/storyboard/scenes?offset=0&limit=1');
+ const afterInvalid=await request.get(apiBase+'/projects/proj_001/storyboard/scenes?offset=0&limit=1');
  expect((await afterInvalid.json()).project_revision).toBe(afterConcurrentRevision);
  await page.getByLabel('Selected authored staging operation').selectOption(currentOperation);
  expect(fatalErrors,'no fatal browser errors during edit/reload').toEqual([]);

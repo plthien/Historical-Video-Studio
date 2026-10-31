@@ -31,7 +31,40 @@ export interface BrowserPreview {project_revision:number;draft_manifest_sha256:s
 export interface EditResult {timeline:HistoryProps['timeline'];recomputed_setup_ids:string[];
  retained_setup_ids:string[];project_revision:number;stale_gates:['G4','G5'];}
 const path=(id:string)=>'/projects/'+encodeURIComponent(id)+'/storyboard';
+export interface BlueprintSetup {
+ setup_id:string;template_id:string;section_refs:string[];claim_refs:string[];
+ requirement_refs:string[];direction:Record<string,unknown>;
+ schema:{required:string[];properties:Record<string,unknown>};
+ payload:Record<string,unknown>|null;
+}
+export interface BlueprintAuthoring {
+ project_revision:number;story_sha256:string;registry_version:string;
+ setups:BlueprintSetup[];ready:boolean;
+}
+export interface ReviewedMapInput {
+  expected_revision:number;story_sha256:string;year:number;map_record:Record<string,unknown>;
+  feature_ids:string[];route_feature_id:string|null;reviewed_tie_points:Record<string,unknown>[]|null;
+}
+export interface MapAuthoringView{
+  project_revision:number;story_sha256:string;g3_state:string;requirements:{
+    requirement_id:string;start_year:number;end_year:number;
+    map_reconstruction_policy:string;
+    approved_source:{source_asset_id:string;source_original_sha256:string;rights_review_record_id:string}|null;
+    request:Omit<ReviewedMapInput,"expected_revision"|"story_sha256">|null;
+  }[];
+}
 export const storyboardApi={
+  mapAuthoring:(id:string)=>request<MapAuthoringView>(path(id)+'/map-authoring'),
+  saveMap:(id:string,rid:string,body:ReviewedMapInput,key:string)=>
+    request<{project_revision:number;requirement_id:string;source_original_sha256:string}>(
+      path(id)+'/map-authoring/'+encodeURIComponent(rid),'PUT',body,key),
+ blueprint:(id:string)=>request<BlueprintAuthoring>(path(id)+'/blueprint-authoring'),
+ savePayload:(id:string,setup:string,revision:number,story_sha256:string,payload:Record<string,unknown>,key:string)=>
+  request<{project_revision:number}>(path(id)+'/blueprint-authoring/'+encodeURIComponent(setup),'PUT',
+    {expected_revision:revision,story_sha256,payload},key),
+ compile:(id:string,revision:number,story_sha256:string,key:string)=>
+  request<{project_revision:number;draft_manifest_sha256:string;state:string}>(
+    path(id)+'/compile','POST',{expected_revision:revision,story_sha256},key),
  scenes:(id:string,offset=0,limit=24)=>request<ScenePage>(path(id)+`/scenes?offset=${offset}&limit=${limit}`),
  timeline:(id:string)=>request<TimelineView>(path(id)+'/timeline'),
  preview:(id:string,signal?:AbortSignal)=>request<BrowserPreview>(path(id)+'/preview','GET',undefined,undefined,signal),

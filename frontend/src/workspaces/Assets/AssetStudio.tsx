@@ -194,7 +194,9 @@ export function AssetStudio({projectId,projectRevision,onRefresh}:{projectId:str
     <p>Candidates are unapproved until human source/rights review. Managed generation requires explicit authorization, and the resulting AI image requires a separate review.</p>
     {problem&&<p role="alert" className="notice error">{problem}</p>}
     {notice&&<p role="status" className="notice success">{notice}</p>}
-    <div className="panel">
+    <section className="panel asset-resolution-panel">
+      <small className="eyebrow">REQUIREMENTS · SOURCE RESOLUTION</small>
+      <h3>Select historical requirement</h3>
       <label htmlFor="asset-requirement">Asset requirement</label>
       <select id="asset-requirement" value={selected} disabled={!!pending} onChange={e=>{
         const rid=e.target.value;selectedRef.current=rid;setSelected(rid);
@@ -237,9 +239,10 @@ export function AssetStudio({projectId,projectRevision,onRefresh}:{projectId:str
         <button disabled={!!pending||!prompt.trim()} onClick={()=>void action("Queue generation",()=>assetApi.generate(projectId,revision,selected,"nano_banana_2",prompt))}>Queue candidate</button>
       </div>}
       </>}
-    </div>
-    <div className="panel">
-      <h4>Candidate review</h4>
+    </section>
+    <section className="panel asset-candidates-panel">
+      <small className="eyebrow">ORIGINAL MEDIA · RIGHTS EVIDENCE</small>
+      <h3>Candidate review</h3>
       {candidates.length===0?<p>No candidates yet.</p>:candidates.map(c=><article className="claim" key={c.candidate_id}>
         <strong>{c.title||c.candidate_id}</strong> · {c.provider} {c.asset_class||""}
         <p>Original SHA: {c.original_sha256||"NOT DOWNLOADED"} · Rights: {c.rights_status||"UNKNOWN"} · {c.current_source?"Current":"STALE"} {c.approved?"· G3 reviewed":"· Review needed"}</p>
@@ -292,13 +295,13 @@ export function AssetStudio({projectId,projectRevision,onRefresh}:{projectId:str
           {item.error_code&&<> · {item.error_code}</>} — {item.reason}
         </li>)}</ul>
       </div>}
-    </div>
-    <div className="panel">
+    </section>
+    <section className="panel asset-gate-panel">
       <h4>G3 gate — {gate?.state||"DRAFT"}</h4>
       <p>{gate?.blockers.join(", ")||"All required approved sources available"}</p>
       {gate?.state==="STALE"&&<p>G3 approval is stale. Re-review and reapprove the exact current original(s); previous approval is never restored automatically.</p>}
       <button disabled={!!pending||gate?.state!=="READY_FOR_REVIEW"} onClick={()=>void action("Approve G3",approveGate)}>Approve complete G3 snapshot</button>
-    </div>
+    </section>
     <ProviderSettings/>
   </div>;
 }

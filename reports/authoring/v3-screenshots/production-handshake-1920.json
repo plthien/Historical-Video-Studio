@@ -1,0 +1,13 @@
+{
+  "source_commit": "16070bd9e97a6b359c4877042a2ae0ab5c201637",
+  "bundle_sha256": "c51709fdcdb5a3334bd8b03bcb260f2eccb0257937f99ab29425446d1a373104",
+  "input_sha256": "903d7d5ea819f8eab42e8cc6692bb517d4c584b3146b201de07a90ac48184238",
+  "preview_url": "http://127.0.0.1:5174/#story",
+  "api_origin": "http://127.0.0.1:8010/api/v1",
+  "health_status": 200,
+  "projects_status": 200,
+  "create_status": 201,
+  "project_id": "proj_10df2ffb5865471bb9363535643b2c1d",
+  "created_revision": 0,
+  "reopened_revision_text": "proj_10df2ffb5865471bb9363535643b2c1d · Revision 3"
+}

@@ -10,6 +10,7 @@ export function VoiceStudio({project,story,onRefresh}:{
   project:ProjectInfo;story:StoryView|null;onRefresh:()=>Promise<void>;
 }){
   const [hist,setHist]=useState<Record<string,SectionHistory>>({});
+  const [activeSection,setActiveSection]=useState("");
   const [settings,setSettings]=useState<Record<string,Params>>({});
   const [status,setStatus]=useState<AlignmentStatus|null>(null);
   const [busy,setBusy]=useState<string|null>(null);
@@ -18,6 +19,7 @@ export function VoiceStudio({project,story,onRefresh}:{
   const [notice,setNotice]=useState<string|null>(null);
   const [error,setError]=useState<string|null>(null);
   const sections=story?.story.sections??[];
+  const chosenSection=sections.some(s=>s.section_id===activeSection)?activeSection:sections[0]?.section_id??"";
   const g1=project.gates.find(g=>g.gate_id==="G1");
   const g2=project.gates.find(g=>g.gate_id==="G2");
   const read=useCallback(async()=>{
@@ -125,7 +127,19 @@ export function VoiceStudio({project,story,onRefresh}:{
     {error&&<p className="notice error" role="alert">{error}</p>}
     {notice&&<p className="notice success" role="status">{notice}</p>}
     {!story&&<p>Import a StoryPackage first.</p>}
-    {sections.map(section=>{
+    <div className="voice-workbench">
+      <aside className="panel voice-section-rail" aria-label="Voice sections">
+        <h3>Sections · {sections.length}</h3>
+        <p className="provenance-line">Select one source-locked section to generate, correct or restore.</p>
+        {sections.map(section=><button type="button" key={section.section_id}
+          className={chosenSection===section.section_id?"primary":"quiet"}
+          aria-current={chosenSection===section.section_id?"true":undefined}
+          onClick={()=>setActiveSection(section.section_id)}>
+            {section.section_id} · {hist[section.section_id]?.attempts.length??0} attempts
+        </button>)}
+      </aside>
+      <div className="voice-section-main">
+    {sections.filter(s=>s.section_id===chosenSection).map(section=>{
       const p=settings[section.section_id]||defaultParams();
       const data=hist[section.section_id];
       const selected=data?.attempts.find(a=>a.selected);
@@ -164,7 +178,8 @@ export function VoiceStudio({project,story,onRefresh}:{
         </details>
       </article>;
     })}
-    {story&&<section className="panel" aria-label="G2 final voice approval">
+      </div>
+      {story&&<section className="panel voice-final-review" aria-label="G2 final voice approval">
       <h3>Final selection &amp; ElevenLabs forced alignment</h3>
       <p>G2: {g2?.state} · {g2?.blockers.join("; ")||"No blockers"}</p>
       <button disabled={!!busy||g2?.state!=="READY_FOR_REVIEW"} onClick={approve}>Approve G2</button>
@@ -177,5 +192,6 @@ export function VoiceStudio({project,story,onRefresh}:{
       {status?.final_audio&&status.alignment_job&&["FAILED_TERMINAL","FAILED_RETRYABLE","BLOCKED_REVIEW"].includes(status.alignment_job.state)&&
         <button disabled={!!busy} onClick={retry}>Retry forced alignment (technical only)</button>}
     </section>}
+    </div>
   </div>;
 }

@@ -223,6 +223,10 @@ def ingest_current_approved(store, project_id:str, requirement_id:str, map_recor
     from backend.app.assets.resolution import AssetResolution
     from backend.app.assets.provenance import AssetCandidates
     from backend.app.projects.gates import GateService
+    # Reject partial/untrusted browser records with a structured schema error
+    # before accessing any required fields, even when the G3 gate is blocked.
+    # This does not authorize an original, geometry or rights in any way.
+    validate_document("HistoricalMap.v1",map_record)
     story=store.get_story(project_id).data()
     requirement=next((x for x in story["asset_requirements"]
                       if x["requirement_id"]==requirement_id),None)

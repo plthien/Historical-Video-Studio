@@ -1,3 +1,4 @@
+import {apiBase,startNewProject,openExistingProject,importStoryFromEditor,selectImportStep} from "./project-workflow-helper";
 import {test,expect} from "@playwright/test";
 import {readFileSync} from "node:fs";
 import path from "node:path";
@@ -6,19 +7,17 @@ import {execFileSync} from "node:child_process";
 const here=path.dirname(fileURLToPath(import.meta.url));
 const fixture=JSON.parse(readFileSync(path.resolve(here,
   "../../../contracts/examples/longform/StoryPackage.longform.synthetic.json"),"utf8"));
+const isolatedFlow=process.env.HVS_FULL_FLOW_CONFIG
+  ?JSON.parse(readFileSync(path.resolve(here,"../..",process.env.HVS_FULL_FLOW_CONFIG),"utf8")) as {db:string,artifactRoot:string}
+  :null;
 
 test("asset-review: operator choice persists and never auto-approves G3",async({page},testInfo)=>{
   await page.goto("/");
-  await page.getByLabel("Project title").fill("Historical asset review");
-  await page.getByRole("button",{name:"Create project"}).click();
-  await expect(page.getByRole("status")).toContainText("Project creation completed");
-  const project=(await page.locator(".topline strong").innerText()).trim();
+  const project=await startNewProject(page,"Historical asset review");
   const story=structuredClone(fixture);
   story.project.project_id=project;
   story.claims.forEach((c:{critical:boolean})=>{c.critical=false;});
-  await page.getByLabel("StoryPackage JSON").fill(JSON.stringify(story));
-  await page.getByRole("button",{name:"Import and validate story"}).click();
-  await expect(page.getByRole("status")).toContainText("Story import completed");
+  await importStoryFromEditor(page,story);
   await page.getByRole("navigation").getByRole("button",{name:/Historical Assets/}).click();
   await expect(page.getByText("Historical sources · G3")).toBeVisible();
   await expect(page.locator(".asset-studio")).toContainText("ARCHIVE_ASSET_UNRESOLVED");
@@ -29,8 +28,7 @@ test("asset-review: operator choice persists and never auto-approves G3",async({
   await expect(page.getByRole("button",{name:"Approve complete G3 snapshot"})).toBeDisabled();
   await page.screenshot({path:testInfo.outputPath("g3-manual-choice.png")});
   await page.reload();
-  await page.getByLabel("Project ID").fill(project);
-  await page.getByRole("button",{name:"Open existing project"}).click();
+  await openExistingProject(page,project);
   await page.getByRole("navigation").getByRole("button",{name:/Historical Assets/}).click();
   await expect(page.getByText("Resolution:")).toContainText("MANUAL_UPLOAD");
   await expect(page.getByRole("button",{name:"Approve complete G3 snapshot"})).toBeDisabled();
@@ -47,6 +45,17 @@ test("asset-review: operator choice persists and never auto-approves G3",async({
   await expect(page.locator(".asset-studio .notice.success")).toContainText("Manual upload completed");
   await expect(page.locator(".asset-original-preview")).toBeVisible();
   await expect(page.locator(".asset-original-preview")).toHaveJSProperty("naturalWidth",1);
+  const article=page.locator(".asset-studio article.claim").filter({hasText:"Original media fixture"});
+  const originalViewport=page.viewportSize()!;
+  for(const viewport of [{width:1366,height:768},{width:1920,height:1080}]){
+    await page.setViewportSize(viewport);
+    await expect(page.locator(".asset-original-preview")).toBeVisible();
+    await article.scrollIntoViewIfNeeded();
+    await page.screenshot({path:testInfo.outputPath(`pr13-g3-populated-approved-original-candidate-${viewport.width}.png`),animations:"disabled"});
+    expect(await page.evaluate(()=>document.documentElement.scrollWidth<=document.documentElement.clientWidth+2)).toBe(true);
+  }
+  await page.setViewportSize(originalViewport);
+
   await expect(page.locator(".asset-studio")).toContainText("Synthetic context");
   await expect(page.locator(".asset-studio")).toContainText("Test fixture only");
   const requirementSelect=page.getByLabel("Asset requirement");
@@ -55,7 +64,6 @@ test("asset-review: operator choice persists and never auto-approves G3",async({
     nodes.map(n=>(n as HTMLOptionElement).value));
   expect(options.length).toBeGreaterThan(1);
   await page.locator(".asset-studio input[type=checkbox]").first().check();
-  const article=page.locator(".asset-studio article.claim").filter({hasText:"Original media fixture"});
   await article.locator("textarea").nth(0).fill("Reviewed rights");
   await article.locator("textarea").nth(1).fill("Reviewed period");
   await page.getByRole("button",{name:"Stage selected for batch"}).click();
@@ -134,10 +142,7 @@ test("asset-review: operator choice persists and never auto-approves G3",async({
 
 test("asset-review: zero requirements still needs an explicit G3 decision",async({page},testInfo)=>{
   await page.goto("/");
-  await page.getByLabel("Project title").fill("No media editorial");
-  await page.getByRole("button",{name:"Create project"}).click();
-  await expect(page.getByRole("status")).toContainText("Project creation completed");
-  const project=(await page.locator(".topline strong").innerText()).trim();
+  const project=await startNewProject(page,"No media editorial");
   const story=structuredClone(fixture);
   story.project.project_id=project;
   story.asset_requirements=[];
@@ -160,9 +165,7 @@ test("asset-review: zero requirements still needs an explicit G3 decision",async
   });
   direction.reveal_plan.forEach((beat:{target_role:string})=>{beat.target_role="headline";});
   story.claims.forEach((c:{critical:boolean})=>{c.critical=false;});
-  await page.getByLabel("StoryPackage JSON").fill(JSON.stringify(story));
-  await page.getByRole("button",{name:"Import and validate story"}).click();
-  await expect(page.getByRole("status")).toContainText("Story import completed");
+  await importStoryFromEditor(page,story);
   await page.getByRole("button",{name:"Approve G1"}).click();
   await expect(page.getByRole("status")).toContainText("G1 approved completed");
   await page.getByRole("navigation").getByRole("button",{name:/Historical Assets/}).click();
@@ -174,31 +177,25 @@ test("asset-review: zero requirements still needs an explicit G3 decision",async
   await expect(page.locator(".asset-studio .notice.success")).toContainText("Approve G3 completed");
   await expect(page.locator(".asset-studio")).toContainText("G3 gate — APPROVED");
   await page.reload();
-  await page.getByLabel("Project ID").fill(project);
-  await page.getByRole("button",{name:"Open existing project"}).click();
+  await openExistingProject(page,project);
   await page.getByRole("navigation").getByRole("button",{name:/Historical Assets/}).click();
   await expect(page.locator(".asset-studio")).toContainText("G3 gate — APPROVED");
 });
 
 
 // V4: small shared local-server fixture for independent scope/race/conflict evidence.
-const baseApi=`http://127.0.0.1:${process.env.HVS_B3_FIXTURE==="1"?8011:8000}/api/v1`;
+const baseApi=process.env.HVS_B3_FIXTURE==="1"?"http://127.0.0.1:8011/api/v1":apiBase;
 const tinyPng=Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAADElEQVR4nGMwSpkGAAH4AS3k7SvZAAAAAElFTkSuQmCC","base64");
 async function createAssetProject(page: import("@playwright/test").Page,title:string,initialVisit=true){
   if(initialVisit)await page.goto("/");
-  await page.getByRole("navigation").getByRole("button",{name:/Project & ChatGPT/}).click();
-  await page.getByLabel("Project title").fill(title);
-  const previousId=(await page.locator(".topline strong").innerText()).trim();
-  await page.getByRole("button",{name:"Create project"}).click();
-  await expect(page.locator(".topline strong")).not.toHaveText(previousId);
-  await expect(page.getByRole("status")).toContainText("Project creation completed");
-  const id=(await page.locator(".topline strong").innerText()).trim();
+  const previousId=(await page.locator(".topline strong").count())?
+    (await page.locator(".topline strong").innerText()).split(" · ")[0]:"";
+  const id=await startNewProject(page,title);
+  if(previousId)expect(id).not.toBe(previousId);
   const story=structuredClone(fixture);
   story.project.project_id=id;
   story.claims.forEach((c:{critical:boolean})=>{c.critical=false});
-  await page.getByLabel("StoryPackage JSON").fill(JSON.stringify(story));
-  await page.getByRole("button",{name:"Import and validate story"}).click();
-  await expect(page.getByRole("status")).toContainText("Story import completed");
+  await importStoryFromEditor(page,story);
   await page.getByRole("navigation").getByRole("button",{name:/Historical Assets/}).click();
   await expect(page.getByLabel("Asset requirement")).toBeVisible();
   await expect.poll(()=>page.getByLabel("Asset requirement").locator("option").count()).toBeGreaterThan(1);
@@ -245,7 +242,7 @@ async function incrementClaimRevision(page:import("@playwright/test").Page,id:st
 function approvalLedger(projectId:string) {
   const root=path.resolve(here,"../../..");
   const fixtureDb=path.join(root,"renderer",".artifacts","approved-player-test","g4.sqlite");
-  const database=process.env.HVS_B2_FIXTURE==="1"?fixtureDb:path.join(root,"frontend",".e2e-data","state.sqlite");
+  const database=isolatedFlow?.db??(process.env.HVS_B2_FIXTURE==="1"?fixtureDb:path.join(root,"frontend",".e2e-data","state.sqlite"));
   const script=[
     "import json,sqlite3,sys",
     "con=sqlite3.connect(sys.argv[2])",
@@ -388,8 +385,8 @@ function jobSql(action:"seed"|"read",projectId:string,state:string,errorCode:str
   const root=path.resolve(here,"../../..");
   const python=path.join(root,".venv","Scripts","python.exe"); // Windows-only repo test contract.
   const fixtureRoot=path.join(root,"renderer",".artifacts","approved-player-test");
-  const database=process.env.HVS_B2_FIXTURE==="1"?path.join(fixtureRoot,"g4.sqlite"):path.join(root,"frontend",".e2e-data","state.sqlite");
-  const media=process.env.HVS_B2_FIXTURE==="1"?path.join(fixtureRoot,"artifacts"):path.join(root,"frontend",".e2e-data","media");
+  const database=isolatedFlow?.db??(process.env.HVS_B2_FIXTURE==="1"?path.join(fixtureRoot,"g4.sqlite"):path.join(root,"frontend",".e2e-data","state.sqlite"));
+  const media=isolatedFlow?.artifactRoot??(process.env.HVS_B2_FIXTURE==="1"?path.join(fixtureRoot,"artifacts"):path.join(root,"frontend",".e2e-data","media"));
   const script=[
     "import json,sys,uuid",
     "from pathlib import Path",
@@ -415,10 +412,7 @@ function jobSql(action:"seed"|"read",projectId:string,state:string,errorCode:str
 
 test("asset-review V4 queue: jobs UI reflects persisted safe cancel versus uncertain review",async({page})=>{
   await page.goto("/");
-  await page.getByLabel("Project title").fill("V4 safe cancel UI");
-  await page.getByRole("button",{name:"Create project"}).click();
-  await expect(page.getByRole("status")).toContainText("Project creation completed");
-  const id=(await page.locator(".topline strong").innerText()).trim();
+  const id=await startNewProject(page,"V4 safe cancel UI");
   const other=await page.request.post(baseApi+"/projects",{
     data:{title:"V4 foreign job scope",language:"en",style_id:"HistoryEditorialPaper.v1"}});
   expect(other.status()).toBe(201);
@@ -436,8 +430,9 @@ test("asset-review V4 queue: jobs UI reflects persisted safe cancel versus uncer
   expect(resultSafe.status()).toBe(200);
   expect((await resultSafe.json()).map((x:{job_id:string})=>x.job_id))
     .toEqual(expect.arrayContaining([safe.job_id,unknown.job_id]));
+  await page.locator(".jobs-drawer summary").click();
   await page.getByRole("button",{name:"Refresh jobs"}).click();
-  const jobList=page.locator("section.content").filter({hasText:"Project jobs"});
+  const jobList=page.locator("details.jobs-drawer");
   const safeRow=jobList.locator("li").filter({hasText:safe.job_id});
   const unknownRow=jobList.locator("li").filter({hasText:unknown.job_id});
   await expect(safeRow).toContainText("FAILED_RETRYABLE");
@@ -468,11 +463,10 @@ test("asset-review V4 queue: jobs UI reflects persisted safe cancel versus uncer
     cancel_requested:1,error_code:"GLABS_UNCERTAIN_SUBMISSION"});
   await expect(jobList).not.toContainText("remote stop succeeded");
   await page.reload();
-  await page.getByLabel("Project ID").fill(id);
-  await page.getByRole("button",{name:"Open existing project"}).click();
-  await expect(page.locator("section.content").filter({hasText:"Project jobs"}))
+  await openExistingProject(page,id);
+  await expect(page.locator("details.jobs-drawer"))
     .toContainText(safe.job_id+" — glabs_image: CANCELLED");
-  await expect(page.locator("section.content").filter({hasText:"Project jobs"}))
+  await expect(page.locator("details.jobs-drawer"))
     .toContainText(unknown.job_id+" — glabs_image: BLOCKED_REVIEW");
   const fresh=await page.request.get(baseApi+"/projects/"+id+"/jobs");
   const jobs=await fresh.json() as {job_id:string;state:string;cancel_requested:number;provider_task_id:string|null}[];

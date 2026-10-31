@@ -32,7 +32,24 @@ Press Ctrl+C in the launcher window to stop the complete owned process tree. Exi
 - Immutable media: `data/media/`
 - Launcher logs: `data/logs/`
 
-Select another persistent location with `-DataRoot D:\HistoricalStudioData`. Use `-Port` if port 8000 is occupied. Automation uses `-Smoke -NoBrowser -SkipBootstrap`; smoke mode verifies the real API and UI and then terminates cleanly.
+Select another persistent location with `-DataRoot D:\HistoricalStudioData`. Default ports are configured in `config/ports.json` rather than by passing port flags. Automation uses `-Smoke -NoBrowser -SkipBootstrap`; smoke mode verifies the real API and UI and then terminates cleanly.
+
+## Configure backend and frontend ports
+
+The checked-in `config/ports.json` is the single place for local port defaults:
+
+```json
+{
+  "backend_port": 8010,
+  "frontend_port": 5180
+}
+```
+
+- **Normal Windows launcher:** Backend serves both the API (`http://127.0.0.1:8010/api/v1`) and the built frontend (`http://127.0.0.1:8010/`) from **one port**. The launcher reads `backend_port` automatically.
+- **Separate development servers:** Vite serves its frontend at `http://127.0.0.1:5180/` and calls the API at `http://127.0.0.1:8010/api/v1`. Vite and the API client both read the same JSON configuration; FastAPI permits that frontend origin in CORS.
+- **Native Windows CI:** Playwright deliberately overrides the development ports with isolated `8000/5173` or B3 `8011/5174` test ports. That does not change the defaults for local use.
+
+Editing `config/ports.json` and restarting the servers is sufficient. The launcher rebuilds a stale bundled frontend when the config changes; it never silently accepts an old API origin. Packaging includes `config/ports.json` and its build identity.
 
 The launcher never starts a new paid provider submission. Startup only follows the existing durable recovery rules: deterministic local assembly/render may resume, while uncertain external work remains resumable by its original provider task identity or blocked for review.
 

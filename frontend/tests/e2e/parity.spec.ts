@@ -1,3 +1,4 @@
+import {apiBase,openExistingProject} from "./project-workflow-helper";
 import {test,expect} from '@playwright/test';
 import {createHash} from 'node:crypto';
 import {readFileSync,writeFileSync,mkdirSync} from 'node:fs';
@@ -17,7 +18,7 @@ const hash=(input:string|Buffer)=>createHash('sha256').update(input).digest('hex
 test('storyboard-editor real browser Player vs Node renderStill same immutable frame',async({page,request})=>{
  test.skip(process.env.HVS_B2_FIXTURE!=='1','Requires Windows SQLite controlled G4 approval fixture and both Chromium runtimes');
  test.setTimeout(180_000);
- const response=await request.get('http://127.0.0.1:8000/api/v1/projects/proj_001/storyboard/preview');
+ const response=await request.get(apiBase+'/projects/proj_001/storyboard/preview');
  expect(response.ok()).toBeTruthy();
  const approved=await response.json() as {status:string;draft_manifest_sha256:string;props:HistoryProps};
  expect(approved.status).toBe('G4_DRAFT_VIEW_ONLY');
@@ -34,8 +35,7 @@ test('storyboard-editor real browser Player vs Node renderStill same immutable f
  mkdirSync(output,{recursive:true});
  await page.setViewportSize({width:2400,height:1450});
  await page.goto('/');
- await page.getByLabel('Project ID').fill('proj_001');
- await page.getByRole('button',{name:'Open existing project'}).click();
+ await openExistingProject(page,'proj_001');
  await page.getByRole('button',{name:/Motion Storyboard/}).click();
  await expect(page.getByText(/Scenes \(2\)/)).toBeVisible();
  await page.getByRole('button',{name:'Load real read-only Remotion Player'}).click();
@@ -93,11 +93,20 @@ test('storyboard-editor real browser Player vs Node renderStill same immutable f
    variation.add(browserPNG.data[i]);
   }
   const meanDiff=total/count,pixelMismatch=big/count;
+  // Retain genuine failed-frame evidence. Thresholds remain unchanged.
+  const browserFile=path.join(output,'browser-f'+frame+'.png');
+  writeFileSync(browserFile,PNG.sync.write(browserPNG));
+  const diagnostics={frame,sceneId:owningScene!.scene_id,meanDiff,pixelMismatch,
+    browserRgbaFirstPixel:[...browserPNG.data.subarray(0,4)],
+    nodeRgbaFirstPixel:[...nodePNG.data.subarray(0,4)],
+    browserVariation:variation.size,
+    stageBounds:bounds,
+    browserSha256:hash(readFileSync(browserFile)),nodeSha256:hash(readFileSync(file)),
+    screenshotBytes: screenshot.data.length};
+  writeFileSync(path.join(output,'diagnostic-f'+frame+'.json'),JSON.stringify(diagnostics,null,2));
   expect(variation.size).toBeGreaterThan(3);
   expect(meanDiff,'Mean browser vs Node RGB difference').toBeLessThan(20);
   expect(pixelMismatch,'Fraction >30 RGB error per channel').toBeLessThan(0.14);
-  const browserFile=path.join(output,'browser-f'+frame+'.png');
-  writeFileSync(browserFile,PNG.sync.write(browserPNG));
   evidence.push({frame,width:1920,height:1080,meanDiff,pixelMismatch,nodeFile:file,browserFile,
    sceneId:owningScene!.scene_id,
    nodeSha256:hash(readFileSync(file)),

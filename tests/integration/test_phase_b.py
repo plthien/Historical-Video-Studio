@@ -208,6 +208,42 @@ def test_launch_rejects_occupied_port_without_orphan(tmp_path):
     assert "already in use" in completed.stdout + completed.stderr
 
 
+def _assert_clean_package_evidence(document: dict, expected_head: str) -> None:
+    assert document["schema_version"] == "B3CleanPackageLaunchEvidence.v2"
+    assert document["status"] == "PASS"
+    assert document["scope"] == "SYNTHETIC_TEST_ONLY"
+    assert document["source_commit"] == expected_head
+    assert document["manifest_file_count"] == document["verified_sha_count"] > 0
+    assert document["archive_sha256"] and len(document["archive_sha256"]) == 64
+    assert document["first_launch"]["skip_bootstrap"] is False
+    assert document["second_launch"]["skip_bootstrap"] is True
+    assert document["first_launch"]["process_cleanup"] is True
+    assert document["second_launch"]["process_cleanup"] is True
+    continuity = document["continuity"]
+    assert continuity["revision_before"] == continuity["revision_after"] == 0
+    assert continuity["media_bytes_preserved"] is True
+    assert len(continuity["media_sha256"]) == 64
+    authoring = document["authoring_v3"]
+    assert authoring["prompt_path"] == "backend/app/projects/prompts/external_story_brief_v3.md"
+    assert authoring["prompt_sha256"] == "e7234d15cc00a1f8b47196e7a7190296218ff9654bff4beb9818826c6848e494"
+    assert authoring["brief_version"] == "HVS-EXTERNAL-STORY-BRIEF.v3"
+    assert authoring["v3_header"] is True
+    assert len(authoring["brief_sha256"]) == 64
+    assert document["negatives"] == {
+        "occupied_port": "PASS",
+        "missing_ffmpeg": "PASS",
+        "missing_frontend_runtime": "PASS_BUILD_MISSING_NO_DATA_MUTATION",
+    }
+    detail = document["negative_details"]["missing_frontend_runtime"]
+    assert detail["exit_code"] != 0
+    assert detail["studio_ready"] is False
+    assert detail["api_ready"] is False
+    assert detail["ui_status"] != 200
+    before, after = detail["data_tree_before_sha256"], detail["data_tree_after_sha256"]
+    assert len(before) == len(after) == 64
+    assert before == after
+
+
 @pytest.mark.skipif(os.name != "nt", reason="B3-05 is Windows-only")
 def test_clean_extracted_package_bootstrap_reopen_evidence():
     """The expensive native owner command runs before this evidence assertion."""
@@ -215,13 +251,51 @@ def test_clean_extracted_package_bootstrap_reopen_evidence():
     if not evidence.is_file():
         pytest.skip("Run backend.tools.clean_package_smoke before the evidence assertion")
     document = json.loads(evidence.read_text("utf-8-sig"))
-    assert document["status"] == "PASS"
-    assert document["source_commit"] == subprocess.check_output(
-        ["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip()
-    assert document["manifest_file_count"] == document["verified_sha_count"] > 0
-    assert document["first_launch"]["skip_bootstrap"] is False
-    assert document["second_launch"]["skip_bootstrap"] is True
-    assert document["first_launch"]["process_cleanup"] is True
-    assert document["second_launch"]["process_cleanup"] is True
-    assert document["continuity"]["media_bytes_preserved"] is True
-    assert set(document["negatives"].values()) == {"PASS"}
+    _assert_clean_package_evidence(document, subprocess.check_output(
+        ["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip())
+
+
+def test_clean_package_evidence_rejects_false_positive_mutations():
+    digest = "a" * 64
+    valid = {
+        "schema_version": "B3CleanPackageLaunchEvidence.v2", "status": "PASS",
+        "scope": "SYNTHETIC_TEST_ONLY", "source_commit": "head",
+        "archive_sha256": digest, "manifest_file_count": 3, "verified_sha_count": 3,
+        "first_launch": {"skip_bootstrap": False, "process_cleanup": True},
+        "second_launch": {"skip_bootstrap": True, "process_cleanup": True},
+        "continuity": {"revision_before": 0, "revision_after": 0,
+                       "media_sha256": digest, "media_bytes_preserved": True},
+        "authoring_v3": {"prompt_path": "backend/app/projects/prompts/external_story_brief_v3.md",
+                         "prompt_sha256": "e7234d15cc00a1f8b47196e7a7190296218ff9654bff4beb9818826c6848e494",
+                         "brief_version": "HVS-EXTERNAL-STORY-BRIEF.v3",
+                         "v3_header": True, "brief_sha256": digest, "artifact": digest},
+        "negatives": {"occupied_port": "PASS", "missing_ffmpeg": "PASS",
+                      "missing_frontend_runtime": "PASS_BUILD_MISSING_NO_DATA_MUTATION"},
+        "negative_details": {"missing_frontend_runtime": {
+            "exit_code": 1, "studio_ready": False, "api_ready": False, "ui_status": None,
+            "data_tree_before_sha256": digest, "data_tree_after_sha256": digest}},
+    }
+    mutations = []
+    unexpected_pass = copy.deepcopy(valid)
+    unexpected_pass["negatives"]["missing_frontend_runtime"] = "PASS"
+    mutations.append(unexpected_pass)
+    missing_key = copy.deepcopy(valid)
+    del missing_key["negatives"]["missing_frontend_runtime"]
+    mutations.append(missing_key)
+    cleanup_failed = copy.deepcopy(valid)
+    cleanup_failed["second_launch"]["process_cleanup"] = False
+    mutations.append(cleanup_failed)
+    media_changed = copy.deepcopy(valid)
+    media_changed["continuity"]["media_bytes_preserved"] = False
+    mutations.append(media_changed)
+    tree_changed = copy.deepcopy(valid)
+    tree_changed["negative_details"]["missing_frontend_runtime"]["data_tree_after_sha256"] = "b" * 64
+    mutations.append(tree_changed)
+    ui_served = copy.deepcopy(valid)
+    ui_served["negative_details"]["missing_frontend_runtime"]["ui_status"] = 200
+    mutations.append(ui_served)
+
+    _assert_clean_package_evidence(valid, "head")
+    for mutation in mutations:
+        with pytest.raises((AssertionError, KeyError)):
+            _assert_clean_package_evidence(mutation, "head")

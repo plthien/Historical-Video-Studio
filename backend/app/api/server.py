@@ -17,6 +17,7 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from backend.app.api.imports import import_story
 from backend.app.projects.models import StoryCandidate
+from backend.app.projects.authoring_brief import BRIEF_VERSION, build_brief
 from backend.app.contracts import ContractViolation
 from backend.app.jobs import JobQueue, recover_interrupted
 from backend.app.projects.gates import GateService
@@ -44,6 +45,26 @@ class ClaimReview(BaseModel):
     status: str
     evidence_note: str = Field(min_length=1)
     source_url: str | None = None
+
+
+class AuthoringBriefInput(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    topic: str = Field(min_length=1, max_length=300)
+    audience: str = Field(min_length=1, max_length=300)
+    runtime_minutes: int = Field(ge=5, le=10)
+    editorial_goals: str = Field(default="", max_length=4000)
+
+
+class ProjectBriefSettings(AuthoringBriefInput):
+    expected_revision: int = Field(ge=0)
+
+
+class ScriptEdit(BaseModel):
+    """One bounded change to an existing narration section; no G1 fact changes."""
+    model_config = ConfigDict(extra="forbid")
+    expected_revision: int = Field(ge=0)
+    narration: str = Field(min_length=1, max_length=100000)
+    reason: str = Field(min_length=1, max_length=2000)
 
 
 class NumericObservation(BaseModel):
@@ -167,8 +188,16 @@ def create_app(database: str | Path | None = None, media_root: str | Path | None
                     task.cancel()
 
     app = FastAPI(title="Historical Video Studio Local API", version="1.0.0", lifespan=lifespan)
-    app.add_middleware(CORSMiddleware, allow_origins=["http://127.0.0.1:5173", "http://localhost:5173",
-                                                       "http://127.0.0.1:5174", "http://localhost:5174"],
+    # Local frontend origins are sourced from the same checked-in ports.json
+    # as the Windows launcher and Vite. Retain isolated Playwright origins.
+    port_config = json.loads((Path(__file__).resolve().parents[3] / "config" / "ports.json").read_text(encoding="utf-8"))
+    frontend_port = port_config["frontend_port"]
+    if not isinstance(frontend_port, int) or isinstance(frontend_port, bool) or not 1 <= frontend_port <= 65535:
+        raise ValueError("Invalid frontend_port in config/ports.json")
+    cors_ports = {frontend_port, 5173, 5174}  # E2E's separately bound Vite servers.
+    cors_origins = [f"http://{host}:{port}" for port in sorted(cors_ports)
+                    for host in ("127.0.0.1", "localhost")]
+    app.add_middleware(CORSMiddleware, allow_origins=cors_origins,
                        allow_credentials=False, allow_methods=["GET", "POST", "PUT", "PATCH"],
                        allow_headers=["Content-Type", "Idempotency-Key"])
     app.state.store, app.state.gates, app.state.queue = store, gates, queue
@@ -248,6 +277,63 @@ def create_app(database: str | Path | None = None, media_root: str | Path | None
         return {"project_id": project_id, "project_revision": store.revision(project_id),
                 "gates": gates.board(project_id)}
 
+    @app.get("/api/v1/projects")
+    def list_projects():
+        with store._connection() as db:
+            return [{"project_id": row[0], "title": row[1], "project_revision": row[2]}
+                    for row in db.execute(
+                        "SELECT project_id,title,revision FROM projects ORDER BY rowid DESC,project_id DESC")]
+
+    @app.get("/api/v1/projects/{project_id}/authoring-settings")
+    def get_authoring_settings(project_id: str):
+        store.revision(project_id)
+        with store._connection() as db:
+            db.execute("CREATE TABLE IF NOT EXISTS project_authoring_settings "
+                       "(project_id TEXT PRIMARY KEY, metadata_json TEXT NOT NULL, FOREIGN KEY(project_id) REFERENCES projects(project_id))")
+            row = db.execute("SELECT metadata_json FROM project_authoring_settings WHERE project_id=?", (project_id,)).fetchone()
+        return {"settings": json.loads(row[0]) if row else None}
+
+    @app.put("/api/v1/projects/{project_id}/authoring-settings")
+    def save_authoring_settings(project_id: str, body: ProjectBriefSettings,
+                                idempotency_key: str = Header(alias="Idempotency-Key")):
+        payload = body.model_dump()
+        def apply():
+            with store._transaction() as db:
+                row = db.execute("SELECT revision FROM projects WHERE project_id=?", (project_id,)).fetchone()
+                if row is None:
+                    raise ContractViolation("PROJECT_NOT_FOUND", project_id, "Open a valid project.")
+                if row[0] != body.expected_revision:
+                    raise ContractViolation("REVISION_CONFLICT", project_id, "Refresh current project settings.")
+                db.execute("CREATE TABLE IF NOT EXISTS project_authoring_settings "
+                           "(project_id TEXT PRIMARY KEY, metadata_json TEXT NOT NULL, FOREIGN KEY(project_id) REFERENCES projects(project_id))")
+                db.execute("INSERT INTO project_authoring_settings VALUES(?,?) "
+                           "ON CONFLICT(project_id) DO UPDATE SET metadata_json=excluded.metadata_json",
+                           (project_id, json.dumps(body.model_dump(exclude={"expected_revision"}), ensure_ascii=False, sort_keys=True)))
+                # Authoring preferences do not alter approved Story/G1 source truth.
+                db.execute("UPDATE projects SET revision=revision+1 WHERE project_id=? AND revision=?",
+                           (project_id, body.expected_revision))
+                return {"project_revision": body.expected_revision + 1}
+        return idempotent(project_id, "authoring-settings", idempotency_key, payload, apply)
+
+    @app.post("/api/v1/projects/{project_id}/authoring-brief")
+    def create_authoring_brief(project_id: str, body: AuthoringBriefInput):
+        # Only the current operator-saved settings may produce a current brief.
+        # This prevents raw HTTP clients from presenting unsaved or cross-project
+        # choices as an authoritative project-bound prompt package.
+        store.revision(project_id)
+        with store._connection() as db:
+            db.execute("CREATE TABLE IF NOT EXISTS project_authoring_settings "
+                       "(project_id TEXT PRIMARY KEY, metadata_json TEXT NOT NULL, "
+                       "FOREIGN KEY(project_id) REFERENCES projects(project_id))")
+            row = db.execute("SELECT metadata_json FROM project_authoring_settings WHERE project_id=?",
+                             (project_id,)).fetchone()
+        if row is None or json.loads(row[0]) != body.model_dump():
+            raise ContractViolation("BRIEF_SETTINGS_UNSAVED", project_id,
+                                    "Save current authoring settings for this project, then rebuild the brief.")
+        brief = build_brief(store, project_id, **body.model_dump())
+        return {"brief_version": BRIEF_VERSION,
+                "content": brief, "file_name": f"{project_id}_story_authoring_brief.md"}
+
     @app.post("/api/v1/projects/{project_id}/story/import")
     async def story_import(project_id: str, request: Request, expected_revision: int,
                            idempotency_key: str = Header(alias="Idempotency-Key")):
@@ -265,6 +351,40 @@ def create_app(database: str | Path | None = None, media_root: str | Path | None
         return {"project_revision": store.revision(project_id),
                 "candidate_sha256": story.sha256, "story": story.data(),
                 "claim_reviews": gates.reviews(project_id)}
+
+    @app.patch("/api/v1/projects/{project_id}/story/sections/{section_id}")
+    def patch_story_section(project_id: str, section_id: str, body: ScriptEdit,
+                            idempotency_key: str = Header(alias="Idempotency-Key")):
+        # The current StoryPackage is the source of truth; only narration changes.
+        # ProjectStore.import_story performs canonical validation, CAS and
+        # selective G1/G2/G4/G5 staleness in its existing single transaction.
+        def apply():
+            source = store.get_story(project_id)
+            current = source.data()
+            section = next((item for item in current["sections"]
+                            if item["section_id"] == section_id), None)
+            if section is None:
+                raise ContractViolation("STORY_SECTION_NOT_FOUND", section_id,
+                                        "Select an existing section of the current StoryPackage.")
+            if not body.narration.strip():
+                raise ContractViolation("STORY_NARRATION_INVALID", section_id,
+                                        "Provide nonempty narration.")
+            previous = section["narration"]
+            section["narration"] = body.narration
+            updated = StoryCandidate.parse(current)
+            revision = store.import_story(
+                updated, body.expected_revision,
+                audit={"section_id": section_id, "reason": body.reason}
+                if previous != body.narration else None)
+            return {"project_id": project_id, "section_id": section_id,
+                    "previous_story_sha256": source.sha256,
+                    "candidate_sha256": updated.sha256,
+                    "project_revision": revision,
+                    "changed": previous != body.narration,
+                    "next_action": "REVIEW_G1" if previous != body.narration else "NONE"}
+
+        return idempotent(project_id, f"story-section:{section_id}",
+                          idempotency_key, body.model_dump(), apply)
 
     @app.post("/api/v1/projects/{project_id}/story/claims/{claim_id}/review")
     def review_claim(project_id: str, claim_id: str, body: ClaimReview,

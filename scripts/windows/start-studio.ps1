@@ -4,7 +4,7 @@ param(
     [switch]$Smoke,
     [switch]$NoBrowser,
     [switch]$SkipBootstrap,
-    [int]$Port = 8000,
+    [int]$Port = 0, # 0 reads backend_port from config/ports.json
     [string]$DataRoot = "",
     [string]$EvidencePath = "",
     [string]$VerifyProjectId = ""
@@ -12,6 +12,15 @@ param(
 $ErrorActionPreference = "Stop"
 Set-StrictMode -Version Latest
 $repo = (Resolve-Path (Join-Path $PSScriptRoot "../..")).Path
+# Normal launches do not require a -Port argument. The built UI is served
+# by this same FastAPI process; standalone Vite dev uses frontend_port.
+if ($Port -eq 0) {
+    $portsPath = Join-Path $repo "config/ports.json"
+    if (-not (Test-Path -LiteralPath $portsPath)) { throw "Missing config/ports.json" }
+    $ports = Get-Content -LiteralPath $portsPath -Raw | ConvertFrom-Json
+    $Port = [int]$ports.backend_port
+}
+if ($Port -lt 1 -or $Port -gt 65535) { throw "Backend port must be between 1 and 65535." }
 if (-not $DataRoot) { $DataRoot = Join-Path $repo "data" }
 $data = [System.IO.Path]::GetFullPath($DataRoot)
 $frontend = Join-Path $repo "frontend\dist"
@@ -80,11 +89,18 @@ try {
         }
         Run-Checked "Install pinned backend" $venvPython @("-m", "pip", "install", "--disable-pip-version-check", "-r", "backend/requirements.lock")
         if (-not (Test-Path (Join-Path $repo "renderer\node_modules"))) { Run-Checked "Install pinned renderer" "npm.cmd" @("ci", "--prefix", "renderer") }
-        if (-not (Test-Path (Join-Path $frontend "index.html"))) {
-            Run-Checked "Install pinned frontend" "npm.cmd" @("ci", "--prefix", "frontend")
-            Run-Checked "Build frontend" "npm.cmd" @("run", "build", "--prefix", "frontend")
-        }
     }
+    # Dist/index.html existing does not prove the bundle matches this checkout.
+    # Verification writes an identity manifest. Read it from disk rather than
+    # depending on PowerShell 5.1 pipeline output/enumeration semantics.
+    & (Join-Path $PSScriptRoot "verify-frontend-build.ps1") -RepoRoot $repo -SkipBootstrap:$SkipBootstrap | Out-Host
+    if ($LASTEXITCODE -and $LASTEXITCODE -ne 0) { throw "Frontend bundle identity verification failed." }
+    $buildPath = Join-Path $frontend "build-info.json"
+    if (-not (Test-Path -LiteralPath $buildPath)) { throw "FRONTEND_BUNDLE_STALE: verified manifest absent." }
+    $build = Get-Content -LiteralPath $buildPath -Raw | ConvertFrom-Json
+    if (-not $build.source_commit -or -not $build.bundle_sha256) { throw "FRONTEND_BUNDLE_STALE: manifest identity incomplete." }
+    $evidence.frontend_source_commit = $build.source_commit
+    $evidence.frontend_bundle_sha256 = $build.bundle_sha256
     if (-not (Test-Path $venvPython)) { throw "Missing .venv. Run without -SkipBootstrap first." }
     if (-not (Test-Path (Join-Path $frontend "index.html"))) { throw "Missing frontend build. Run without -SkipBootstrap first." }
     $probe = [System.Net.Sockets.TcpListener]::new([System.Net.IPAddress]::Loopback, $Port)
@@ -121,7 +137,17 @@ try {
         $project = Invoke-RestMethod -Uri "http://127.0.0.1:$Port/api/v1/projects/$VerifyProjectId" -TimeoutSec 5
         $evidence.project_read = [ordered]@{project_id=$project.project_id; project_revision=$project.project_revision}
     }
-    Write-Host "STUDIO_READY http://127.0.0.1:$Port/ DB=$env:HVS_DB PID=$($backend.Id)"
+    # Windows PowerShell 5.1 decodes Invoke-WebRequest.Content using legacy
+    # response encoding. Read actual network bytes as strict UTF-8 instead.
+    . (Join-Path $PSScriptRoot "read-frontend-manifest.ps1")
+    $uiBuildUrl = "http://127.0.0.1:$Port/build-info.json"
+    $uiBuild = Get-HvsFrontendManifestHttp -Url $uiBuildUrl
+    if ($uiBuild.bundle_sha256 -cne $build.bundle_sha256 -or
+        $uiBuild.source_commit -cne $build.source_commit) {
+        throw "FRONTEND_BUNDLE_STALE: served UI build-info disagrees with verified checkout."
+    }
+    Write-Host "STUDIO_READY http://127.0.0.1:$Port/ DB=$env:HVS_DB PID=$($backend.Id) UI=$($build.source_commit)"
+
     if ($Smoke) { Write-Host "STUDIO_SMOKE_PASS"; return }
     if (-not $NoBrowser) { Start-Process "http://127.0.0.1:$Port/" }
     Write-Host "Press Ctrl+C to stop the local studio."

@@ -1,3 +1,4 @@
+import {openExistingProject} from "./project-workflow-helper";
 import {test,expect} from '@playwright/test';
 import {mkdirSync,writeFileSync} from 'node:fs';
 import path from 'node:path';
@@ -20,9 +21,8 @@ test('longform-storyboard 61 scene real SQLite pagination preview edit and reope
  }
  await measure('open',25000,async()=>{
   await page.goto('/');
-  await page.getByLabel('Project ID').fill('proj_001');
-  await page.getByRole('button',{name:'Open existing project'}).click();
-  await expect(page.getByText('proj_001',{exact:true}).first()).toBeVisible();
+  await openExistingProject(page,'proj_001');
+  await expect(page.locator(".topline strong").filter({hasText:"proj_001"}).first()).toBeVisible();
   await page.getByRole('button',{name:/Motion Storyboard/}).click();
   await expect(page.getByText(/Scenes \(61\)/)).toBeVisible({timeout:20000});
  });

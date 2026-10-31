@@ -27,7 +27,7 @@ function Get-Sha256([string]$Path) {
 Push-Location $repo
 try {
     Run-Checked "Verify pinned Windows environment" "powershell.exe" @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "scripts/windows/verify-environment.ps1")
-    Run-Checked "Build six-workspace frontend" "npm.cmd" @("run", "build", "--prefix", "frontend")
+    Run-Checked "Verify or rebuild exact source-bound frontend" "powershell.exe" @("-NoProfile","-ExecutionPolicy","Bypass","-File","scripts/windows/verify-frontend-build.ps1")
     Run-Checked "Typecheck shared renderer" "npm.cmd" @("run", "typecheck", "--prefix", "renderer")
     $head = (& git rev-parse HEAD).Trim()
     if ($LASTEXITCODE -ne 0) { throw "Cannot determine package source commit." }
@@ -43,7 +43,7 @@ try {
         }
     }
     New-Item -ItemType Directory -Path $stage | Out-Null
-    foreach ($directory in @("backend", "contracts", "renderer", "scripts")) {
+    foreach ($directory in @("backend", "contracts", "renderer", "scripts", "config")) {
         $sourceDir = Join-Path $repo $directory
         $targetDir = Join-Path $stage $directory
         & robocopy $sourceDir $targetDir /E /NFL /NDL /NJH /NJS /XD node_modules .artifacts __pycache__ .pytest_cache /XF *.pyc *.sqlite *.sqlite-wal *.sqlite-shm *.log .env .env.* | Out-Null

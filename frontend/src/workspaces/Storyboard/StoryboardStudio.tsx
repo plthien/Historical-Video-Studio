@@ -3,6 +3,7 @@ import {ApiError} from '../../api/client';
 import {storyboardApi,type ScenePage,type BrowserPreview,type StoryboardScene,type AssetOptions} from '../../api/storyboard';
 import {RemotionPreview} from '../../components/RemotionPreview';
 import {deliveryApi} from '../../api/delivery';
+import {BlueprintAuthoring} from './BlueprintAuthoring';
 
 function describe(error:unknown){
  if(error instanceof ApiError)return `${error.status} ${error.problem.code}: ${error.problem.message} — ${error.problem.remediation}`;
@@ -120,11 +121,14 @@ export function StoryboardStudio({projectId,onRefresh}:{projectId:string;onRefre
  const currentSource=page?.draft_manifest_sha256;
  return <div className="stack" aria-label="storyboard-editor">
   <p>Real G4 storyboard draft · source and voice locked. G4/G5 revisions require explicit operator edits; preview does not approve or export a video.</p>
+  {!page&&<div className="panel"><p>No compiled storyboard exists yet. Complete the G1-directed setups below and compile against current G1/G2/G3, alignment and map sources.</p>
+  <BlueprintAuthoring projectId={projectId} onBuilt={async()=>{setError("");await load(0);await onRefresh();}}/></div>}
   {error&&<p role="alert" className="notice error">{error}</p>}
   {success&&<p role="status" className="notice success">{success}</p>}
-  {!page&&<div className="panel" role="status">Loading current immutable G4 draft. G1/G2/G3 approval, G2 word map and G4 compilation are required.</div>}
+  {!page&&<p role="status">No verified storyboard draft yet, or the source is blocked. G1/G2/G3 and G2 word map are required before live Player access.</p>}
   {page&&<>
-   <div className="panel">
+   <div className="storyboard-workbench">
+   <aside className="panel scene-rail" aria-label="Scene navigator">
     <h3>Scenes ({page.total})</h3>
     <small>Revision {page.project_revision} · G4 {page.g4_gate.state} · manifest {currentSource?.slice(0,16)}</small>
     <p>Preview is view-only. Production render authority requires this exact candidate and an explicit operator decision.</p>
@@ -153,8 +157,36 @@ export function StoryboardStudio({projectId,onRefresh}:{projectId:string;onRefre
        <strong>{s.scene_id}</strong> · {s.template_id}/{s.variant_id} · frame {s.start_frame}–{s.start_frame+s.duration_frames-1}
      </button>)}
     </div>
-   </div>
-   {scene&&<section className="panel" aria-label="Scene inspector">
+   </aside>
+   <section className="panel stage-panel" aria-label="Real Remotion Player stage">
+     <small className="eyebrow">PERSISTED COMPILED SCENE · REAL PLAYER</small>
+     <h3>{scene?.scene_id??"Select a scene"}</h3>
+     <p className="provenance-line">Manifest {page.draft_manifest_sha256.slice(0,20)} · frame {scene?.start_frame??0}</p>
+     <div className="media-stage">
+       {snapshot?<RemotionPreview props={snapshot.props} frame={scene?.start_frame??0}/>:
+         <div className="stage-empty">No simulated frame. Load verified source-bound Remotion Player below.</div>}
+     </div>
+        <button type="button" disabled={!!pending} onClick={()=>void operation('Load verified browser preview',async()=>{
+     previewRequest.current?.controller.abort();
+     const request={id:++previewSequence.current,controller:new AbortController()};
+     previewRequest.current=request;
+     const expectedManifest=page.draft_manifest_sha256;
+     const expectedRevision=page.project_revision;
+     const result=await storyboardApi.preview(projectId,request.controller.signal);
+     if(previewRequest.current?.id!==request.id)return;
+     const latest=await storyboardApi.scenes(projectId,offset,1);
+     if(previewRequest.current?.id!==request.id)return;
+     if(result.draft_manifest_sha256!==expectedManifest||result.project_revision!==expectedRevision||
+        latest.draft_manifest_sha256!==result.draft_manifest_sha256||
+        latest.project_revision!==result.project_revision)
+       throw new Error('G4_DRAFT_STALE: reload current G4 after another edit.');
+     setSnapshot(result);
+     previewRequest.current=null;
+   })}>{pending==='Load verified browser preview'?'Verifying host…':'Load real read-only Remotion Player'}</button>
+
+
+   </section>
+   {scene&&<section className="panel scene-inspector" aria-label="Scene inspector">
     <h3>Scene inspector — {scene.scene_id}</h3>
     <p>Setup {scene.setup_id} · {scene.layers.length} frozen layers · {scene.events.length} motion events</p>
     <label htmlFor="sb-variant">Registered presentation variant</label>
@@ -314,24 +346,10 @@ export function StoryboardStudio({projectId,onRefresh}:{projectId:string;onRefre
     <ul>{scene.events.map(e=><li key={e.event_id}>{e.preset_id} · {e.event_id} · frames {e.start_frame}–{e.start_frame+e.duration_frames}</li>)}</ul>
     <p><small>Source claim/cue identities and G3 asset IDs cannot be overwritten by direct browser props. Unsupported direct layout/motion replacement is rejected by the API.</small></p>
    </section>}
-   <button type="button" disabled={!!pending} onClick={()=>void operation('Load verified browser preview',async()=>{
-     previewRequest.current?.controller.abort();
-     const request={id:++previewSequence.current,controller:new AbortController()};
-     previewRequest.current=request;
-     const expectedManifest=page.draft_manifest_sha256;
-     const expectedRevision=page.project_revision;
-     const result=await storyboardApi.preview(projectId,request.controller.signal);
-     if(previewRequest.current?.id!==request.id)return;
-     const latest=await storyboardApi.scenes(projectId,offset,1);
-     if(previewRequest.current?.id!==request.id)return;
-     if(result.draft_manifest_sha256!==expectedManifest||result.project_revision!==expectedRevision||
-        latest.draft_manifest_sha256!==result.draft_manifest_sha256||
-        latest.project_revision!==result.project_revision)
-       throw new Error('G4_DRAFT_STALE: reload current G4 after another edit.');
-     setSnapshot(result);
-     previewRequest.current=null;
-   })}>{pending==='Load verified browser preview'?'Verifying host…':'Load real read-only Remotion Player'}</button>
-   {snapshot&&<RemotionPreview props={snapshot.props} frame={scene?.start_frame??0}/>}
+   </div>
+   <details className="panel setup-drawer"><summary>G4 initial authoring / reviewed map requests (edit and rebuild)</summary>
+      <BlueprintAuthoring projectId={projectId} onBuilt={async()=>{setError("");await load(0);await onRefresh();}}/>
+   </details>
   </>}
  </div>;
 }
