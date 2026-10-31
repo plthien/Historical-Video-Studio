@@ -120,9 +120,11 @@ export function App() {
     if (!project) return;
     await execute(`Claim ${claimId} review`, async () => {
       const saved = storyView?.claim_reviews.find(r => r.claim_id === claimId);
+      const rawSourceUrl = urls[claimId] ?? saved?.source_url ?? "";
+      const sourceUrl = rawSourceUrl.trim() || null;
       await api.reviewClaim(project.project_id, claimId, project.project_revision, status,
                             notes[claimId] ?? saved?.evidence_note ?? "", idKey(),
-                            urls[claimId] ?? saved?.source_url ?? null);
+                            sourceUrl);
       await refresh(project.project_id);
     });
   }

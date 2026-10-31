@@ -79,3 +79,86 @@ test("project-shell: malformed JSON and stale revision are visible", async ({pag
   await expect(page.getByRole("alert")).toContainText("APPROVAL_REVISION_CONFLICT");
   await expect(page.locator(".topline strong")).toContainText("Revision 2");
 });
+
+test("project-shell: optional G1 source URLs normalize at the submission boundary", async ({page}) => {
+  await page.goto("/");
+  const id = await startNewProject(page,"Source URL normalization");
+  const story = structuredClone(fixture);
+  story.project.project_id = id;
+  story.claims.forEach((c: {critical: boolean}) => {c.critical = false;});
+  await importStoryFromEditor(page,story);
+
+  const claim = page.locator(".claim").first();
+  const note = "Evidence note must survive every source URL edit";
+  await claim.getByLabel("Human evidence review note").fill(note);
+
+  async function submit(button: "Record reviewed" | "Record verified", expectedSource: string | null) {
+    const requestPromise = page.waitForRequest(request =>
+      request.method() === "POST" && request.url().includes(`/projects/${id}/story/claims/claim_001/review`));
+    const responsePromise = page.waitForResponse(response =>
+      response.request().method() === "POST" && response.url().includes(`/projects/${id}/story/claims/claim_001/review`));
+    await claim.getByRole("button", {name: button}).click();
+    const [request,response] = await Promise.all([requestPromise,responsePromise]);
+    const body = request.postDataJSON() as {source_url: string | null; expected_revision: number};
+    expect(body.source_url).toBe(expectedSource);
+    expect(response.status()).toBe(200);
+    const result = await response.json() as {project_revision: number};
+    expect(result.project_revision).toBeGreaterThanOrEqual(body.expected_revision);
+    await expect(page.getByRole("status")).toContainText("Claim claim_001 review completed");
+    await page.reload();
+    await openExistingProject(page,id);
+    await page.getByRole("navigation").getByRole("button", {name: /Story review/i}).click();
+    await expect(page.locator(".claim").first()).toBeVisible();
+    await expect(claim.getByLabel("Human evidence review note")).toHaveValue(note);
+    await expect(claim.getByLabel("Additional source URL (optional)")).toHaveValue(expectedSource ?? "");
+    return result.project_revision;
+  }
+
+  // T01: untouched optional input; T02: type then explicitly clear it.
+  await submit("Record reviewed", null);
+  await claim.getByLabel("Additional source URL (optional)").fill("https://example.org/temporary");
+  await claim.getByLabel("Additional source URL (optional)").fill("");
+  await submit("Record reviewed", null);
+
+  // T03: whitespace-only; T04: trimmed HTTPS; T05: trimmed HTTP; T06: whitespace around URL.
+  await claim.getByLabel("Additional source URL (optional)").fill(" \t ");
+  await submit("Record reviewed", null);
+  await claim.getByLabel("Additional source URL (optional)").fill("  https://www.loc.gov/item/001  ");
+  await submit("Record verified", "https://www.loc.gov/item/001");
+  await claim.getByLabel("Additional source URL (optional)").fill("  http://example.org/source  ");
+  await submit("Record reviewed", "http://example.org/source");
+  await claim.getByLabel("Additional source URL (optional)").fill("\thttps://example.org/trim\n");
+  await submit("Record verified", "https://example.org/trim");
+
+  // T07: clear an existing persisted URL; T08/T09 exercise both buttons.
+  await claim.getByLabel("Additional source URL (optional)").fill("");
+  const clearedRevision = await submit("Record reviewed", null);
+  await claim.getByLabel("Additional source URL (optional)").fill(" https://example.org/reviewed ");
+  await submit("Record reviewed", "https://example.org/reviewed");
+  const verifiedRevision = await submit("Record verified", "https://example.org/reviewed");
+  expect(verifiedRevision).toBeGreaterThanOrEqual(clearedRevision);
+
+  // T10: malformed nonempty input is still rejected by the backend and cannot commit.
+  await claim.getByLabel("Additional source URL (optional)").fill("not-a-url");
+  const invalidRequestPromise = page.waitForRequest(request =>
+    request.method() === "POST" && request.url().includes(`/projects/${id}/story/claims/claim_001/review`));
+  const invalidResponsePromise = page.waitForResponse(response =>
+    response.request().method() === "POST" && response.url().includes(`/projects/${id}/story/claims/claim_001/review`));
+  await claim.getByRole("button", {name: "Record reviewed"}).click();
+  const [invalidRequest,invalidResponse] = await Promise.all([invalidRequestPromise,invalidResponsePromise]);
+  expect((invalidRequest.postDataJSON() as {source_url: string}).source_url).toBe("not-a-url");
+  expect(invalidResponse.status()).toBe(422);
+  expect((await invalidResponse.json()).code).toBe("CLAIM_SOURCE_INVALID");
+  await expect(page.getByRole("alert")).toContainText("CLAIM_SOURCE_INVALID");
+
+  await page.reload();
+  await openExistingProject(page,id);
+  await page.getByRole("navigation").getByRole("button", {name: /Story review/i}).click();
+  await expect(page.locator(".claim").first()).toBeVisible();
+  const persistedClaim = page.locator(".claim").first();
+  await expect(persistedClaim.getByLabel("Human evidence review note")).toHaveValue(note);
+  await expect(persistedClaim.getByLabel("Additional source URL (optional)")).toHaveValue("https://example.org/reviewed");
+  const projectResponse = await page.request.get(`${apiBase}/projects/${id}`);
+  expect(projectResponse.status()).toBe(200);
+  expect((await projectResponse.json() as {project_revision: number}).project_revision).toBe(verifiedRevision);
+});
